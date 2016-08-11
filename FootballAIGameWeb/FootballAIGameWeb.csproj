@@ -222,6 +222,10 @@
     <Compile Include="Migrations\201608102214172_AddAiNamesToMatch.Designer.cs">
       <DependentUpon>201608102214172_AddAiNamesToMatch.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201608112326479_RenamePlayerProperty.cs" />
+    <Compile Include="Migrations\201608112326479_RenamePlayerProperty.Designer.cs">
+      <DependentUpon>201608112326479_RenamePlayerProperty.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\ApplicationDbContext.cs" />
     <Compile Include="Models\Match.cs" />
@@ -402,6 +406,8 @@
     <Content Include="Content\DataTables\images\sort_desc.png" />
     <Content Include="Content\DataTables\images\sort_desc_disabled.png" />
     <Content Include="Content\DataTables\swf\flashExport.swf" />
+    <Content Include="Content\toastr.css" />
+    <Content Include="Content\toastr.min.css" />
     <Content Include="favicon.ico" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
@@ -412,6 +418,8 @@
     <Content Include="Content\DataTables\css\semanticui.scss" />
     <Content Include="Content\DataTables\css\mixins.scss" />
     <Content Include="Content\DataTables\css\common.scss" />
+    <Content Include="Content\toastr.scss" />
+    <Content Include="Content\toastr.less" />
     <None Include="Properties\PublishProfiles\footballaigame - Web Deploy.pubxml" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\CustomScripts\clickable-row.js" />
@@ -500,6 +508,8 @@
     <Content Include="Scripts\modernizr-2.6.2.js" />
     <Content Include="Scripts\respond.js" />
     <Content Include="Scripts\respond.min.js" />
+    <Content Include="Scripts\toastr.js" />
+    <Content Include="Scripts\toastr.min.js" />
     <Content Include="Scripts\_references.js" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
@@ -540,12 +550,14 @@
     <Content Include="Sensitive\ConnectionProduction.config" />
     <Content Include="Views\Shared\_NavBar.cshtml" />
     <Content Include="Views\Home\PlayerHome.cshtml" />
+    <Content Include="Views\Home\SimulatingMatch.cshtml" />
     <None Include="Web.Production.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Views\Game\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff" />
@@ -588,6 +600,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201608102214172_AddAiNamesToMatch.resx">
       <DependentUpon>201608102214172_AddAiNamesToMatch.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201608112326479_RenamePlayerProperty.resx">
+      <DependentUpon>201608112326479_RenamePlayerProperty.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

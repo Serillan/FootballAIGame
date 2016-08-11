@@ -5,72 +5,148 @@
 
 <div class="container col-md-3 text-center table-responsive" style="margin-top: 2em">
     <h3>Active AIs</h3>
-    <table class="table table-hover">
+    <table id="ai-table" class="table table-hover" style="border: 2px solid white">
         <thead><tr><th class="text-center">Select AI to play with.</th></tr></thead>
         <tbody>
-        @foreach (var ai in Model.ActiveAIs)
-        {
-            if (ai == Model.Player.ActiveAi)
+            @foreach (var ai in Model.ActiveAIs)
             {
-                <tr class="selectable-row" data-selected><td>@ai</td></tr>
+                if (ai == Model.Player.SelectedAi)
+                {
+                    <tr class="selectable-row" data-selected><td>@ai</td></tr>
+                }
+                else
+                {
+                    <tr class="selectable-row"><td>@ai</td></tr>
+                }
             }
-            else
-            {
-                <tr class="selectable-row"><td>@ai</td></tr>
-            }
-        }
         </tbody>
     </table>
 </div>
 
-<div class="container col-md-2 col-md-offset-1" style="margin-top: 8em; text-align: center">
-    <button class="btn btn-default" style="white-space: normal">Match against random opponent</button>
-    <button class="btn btn-default" style="white-space: normal">Challenge Player</button>
-</div>
+@*<form id="game-form" action="/Home/StartRandomMatch" method="post">*@
+@using (Html.BeginForm("StartRandomMatch", "Home", FormMethod.Post, new { id = "game-form" }))
+{
 
-<div class="container col-md-5 col-md-offset-1 text-center table-responsive" style="margin-top: 2em"> <!-- old offset = 4 -->
+    @Html.TextBoxFor(m => m.SelectedAi, new { style = "visibility: hidden; position: absolute" }) // display: none or hidden field wouldnt be validated
+
+    <div class="container col-md-4 col-md-offset-0" style="margin-top: 8em; text-align: center">
+
+        <button id="random" type="submit" class="btn btn-default" style="white-space: normal; margin: 1em">Match against random opponent</button>
+        <button id="challenge" type="submit" class="btn btn-default" style="white-space: normal; margin: 1em">Challenge Player</button>
+
+        <div class="form-group">
+            @Html.LabelFor(m => m.OpponentPlayerName, new {@class = "col-md-3 control-label"})
+            <div class="col-md-7 col-md-offset-0">
+                @Html.TextBoxFor(m => m.OpponentPlayerName, new {@class = "form-control"})
+                @Html.ValidationMessageFor(m => m.OpponentPlayerName, "", new {@class = "text-danger"})
+            </div>
+        </div>
+
+    </div>
+
+        @Html.AntiForgeryToken()
+}
+
+
+<div class="container col-md-5 col-md-offset-0 text-center table-responsive" style="margin-top: 2em">
+    <!-- old offset = 4 -->
     <h3>Last Matches</h3>
     <table class="table table-hover">
         <thead>
-        <tr>
-            <th>Result</th>
-            <th class="text-center">AI</th>
-            <th>Opponent</th>
-        </tr>
+            <tr>
+                <th>Result</th>
+                <th class="text-center">AI</th>
+                <th>Opponent</th>
+            </tr>
         </thead>
         <tbody>
-        @foreach (var match in Model.LastMatches)
-        {
-            var playerNumber = match.Player1 == Model.Player ? 1 : 2;
-            var playerAi = playerNumber == 1 ? match.Player1Ai : match.Player2Ai;
-            var otherPlayer = playerNumber == 1 ? match.Player2 : match.Player1;
+            @foreach (var match in Model.LastMatches)
+            {
+                var playerNumber = match.Player1 == Model.Player ? 1 : 2;
+                var playerAi = playerNumber == 1 ? match.Player1Ai : match.Player2Ai;
+                var otherPlayer = playerNumber == 1 ? match.Player2 : match.Player1;
 
-            if (match.Winner == 0) // draw
-            {
-                <tr class="clickable-row" data-href="/Matches/@match.Id">
-                    <td>Draw</td>
-                    <td>@playerAi</td>
-                    <td>@otherPlayer.Name</td>
-                </tr>
+                if (match.Winner == 0) // draw
+                {
+                    <tr class="clickable-row" data-href="/Matches/@match.Id">
+                        <td>Draw</td>
+                        <td>@playerAi</td>
+                        <td>@otherPlayer.Name</td>
+                    </tr>
 
+                }
+                else if (match.Winner == playerNumber)
+                {
+                    <tr class="success clickable-row" data-href="/Matches/@match.Id">
+                        <td>Win</td>
+                        <td>@playerAi</td>
+                        <td>@otherPlayer.Name</td>
+                    </tr>
+                }
+                else
+                {
+                    <tr class="danger clickable-row" data-href="/Matches/@match.Id">
+                        <td>Loose</td>
+                        <td>@playerAi</td>
+                        <td>@otherPlayer.Name</td>
+                    </tr>
+                }
             }
-            else if (match.Winner == playerNumber)
-            {
-                <tr class="success clickable-row" data-href="/Matches/@match.Id">
-                    <td>Win</td>
-                    <td>@playerAi</td>
-                    <td>@otherPlayer.Name</td>
-                </tr>
-            }
-            else
-            {
-                <tr class="danger clickable-row" data-href="/Matches/@match.Id">
-                    <td>Loose</td>
-                    <td>@playerAi</td>
-                    <td>@otherPlayer.Name</td>
-                </tr>
-            }
-        }
         </tbody>
     </table>
 </div>
+
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+
+    <script>
+        $(document)
+            .ready(function () {
+
+                $("#random, #challenge")
+                    .on("click",
+                    (function () {
+                        if ($("table#ai-table tr.selectable-row[data-selected]").length === 0) {
+                            $("table#ai-table").css("border", "2px solid red");
+                            toastr.error("AI must be selected.");
+                        } else {
+                            // OK
+                        }
+                    }));
+
+                $("table#ai-table tr.selectable-row")
+                    .on("click",
+                    (function () {
+                        $("table#ai-table").css("border", "2px solid white");
+                        var currentValue = $("#SelectedAi").attr("value");
+                        var nextValue = $(this).find("td").first().text();
+                        /*
+                        if ($("#SelectedAi").attr("value") !== "")
+                            $("#SelectedAi").attr("value", $(this).find("td").first().text());
+                        else
+                            $("#SelectedAi").attr("value", "");
+                         */
+                        if (currentValue === nextValue)
+                            $("#SelectedAi").attr("value", "");
+                        else
+                            $("#SelectedAi").attr("value", nextValue);
+                    }));
+
+                $("#random")
+                    .on("click",
+                    (function () {
+                        $("#game-form").attr("action", "/Home/StartRandomMatch");
+                        $("#OpponentPlayerName").removeAttr("required");
+                        $("span[for='OpponentPlayerName']").text("");
+                    }));
+                $("#challenge")
+                    .on("click",
+                    (function () {
+                        $("#game-form").attr("action", "/Home/ChallengePlayer");
+                        $("#OpponentPlayerName").attr("required", "");
+                    }));
+
+            });
+    </script>
+}

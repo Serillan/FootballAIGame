@@ -5,6 +5,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using FootballAIGameWeb.Models;
+using FootballAIGameWeb.ViewModels.Home;
 using FootballAIGameWeb.ViewModels.Manage;
 using Microsoft.AspNet.Identity;
 
@@ -74,6 +75,15 @@ namespace FootballAIGameWeb.Controllers
             };
 
             return View("PlayerHome", viewModel);
+        }
+
+        [HttpPost]
+        public ActionResult StartRandomMatch(PlayerHomeViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return RedirectToAction("Index");
+            // game server TODO
+            return View("SimulatingMatch");
         }
 
         public ActionResult About()

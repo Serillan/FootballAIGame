@@ -1,6 +1,12 @@
 ﻿$(document).ready(function () {
     $("tr.selectable-row").click(function () {
-        $(this).addClass("success data-selected");
-        $(this).siblings("tr").removeClass("success data-selected");
+        $(this).toggleClass("success");
+        if ($(this).is("[data-selected]")) {
+            $(this).removeAttr("data-selected");
+        } else {
+            $(this).attr("data-selected", "");
+        }
+        $(this).siblings("tr").removeAttr("data-selected");
+        $(this).siblings("tr").removeClass("success");
     });
 });

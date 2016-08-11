@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Web;
 using FootballAIGameWeb.Models;
@@ -16,5 +17,10 @@ namespace FootballAIGameWeb.ViewModels.Home
 
         public List<Match> LastMatches { get; set; }
 
+        [Display(Name = "Opponent Name")]
+        public string OpponentPlayerName { get; set; }
+
+        [Required(ErrorMessage = "AI must be selected.")]
+        public string SelectedAi { get; set; }
     }
 }

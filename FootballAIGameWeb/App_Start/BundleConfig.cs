@@ -13,7 +13,8 @@ namespace FootballAIGameWeb
                         "~/Scripts/datatables/jquery.datatables.js",
                         "~/Scripts/bootstrap.js",
                         "~/Scripts/respond.js",
-                        "~/Scripts/datatables/datatables.bootstrap.js"));
+                        "~/Scripts/datatables/datatables.bootstrap.js",
+                        "~/Scripts/toastr.js"));
 
             bundles.Add(new ScriptBundle("~/bundles/custom").Include(
                         "~/Scripts/CustomScripts/clickable-row.js",
@@ -30,6 +31,7 @@ namespace FootballAIGameWeb
             bundles.Add(new StyleBundle("~/Content/css").Include(
                       "~/Content/datatables/css/datatables.bootstrap.css",
                       "~/Content/bootstrap-cerulean.css",
+                      "~/Content/toastr.css",
                       "~/Content/site.css"));
         }
     }

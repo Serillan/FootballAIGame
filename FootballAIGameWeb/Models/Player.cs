@@ -16,6 +16,6 @@ namespace FootballAIGameWeb.Models
 
         public ICollection<Tournament> Tournaments { get; set; }
 
-        public string ActiveAi { get; set; }
+        public string SelectedAi { get; set; }
     }
 }
