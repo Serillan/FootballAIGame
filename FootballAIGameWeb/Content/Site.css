@@ -22,3 +22,10 @@ select,
 textarea {
     max-width: 280px;
 }
+
+/* Pointer while hovering over clickable-row and selectable row */
+tr.clickable-row,
+tr.selectable-row {
+    cursor: pointer
+}
+

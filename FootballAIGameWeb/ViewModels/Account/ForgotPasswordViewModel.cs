@@ -12,5 +12,6 @@ namespace FootballAIGameWeb.ViewModels.Account
         [EmailAddress]
         [Display(Name = "Email")]
         public string Email { get; set; }
+
     }
 }
