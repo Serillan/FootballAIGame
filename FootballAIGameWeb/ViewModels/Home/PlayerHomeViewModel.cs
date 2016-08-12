@@ -17,7 +17,7 @@ namespace FootballAIGameWeb.ViewModels.Home
 
         public List<Match> LastMatches { get; set; }
 
-        [Display(Name = "Opponent Name")]
+        [Display(Name = "Name")]
         public string OpponentPlayerName { get; set; }
 
         [Required(ErrorMessage = "AI must be selected.")]

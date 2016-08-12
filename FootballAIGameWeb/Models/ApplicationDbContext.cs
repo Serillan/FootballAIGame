@@ -16,6 +16,8 @@ namespace FootballAIGameWeb.Models
 
         public DbSet<Tournament> Tournaments { get; set; }
 
+        public DbSet<Challenge> Challenges { get; set; }
+
         public ApplicationDbContext()
             : base("DefaultConnection", throwIfV1Schema: false)
         {

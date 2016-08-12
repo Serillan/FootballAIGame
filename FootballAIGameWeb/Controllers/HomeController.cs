@@ -71,7 +71,8 @@ namespace FootballAIGameWeb.Controllers
                 {
                     _context.Players.Single(p => p.Name == "Portain")
                 },
-                Player = player
+                Player = player,
+                SelectedAi = player.SelectedAi
             };
 
             return View("PlayerHome", viewModel);
