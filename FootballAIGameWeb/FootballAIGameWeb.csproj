@@ -248,6 +248,10 @@
     <Compile Include="Migrations\201608122119343_UpdateChallenges.Designer.cs">
       <DependentUpon>201608122119343_UpdateChallenges.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201608122238188_AddPlayerState.cs" />
+    <Compile Include="Migrations\201608122238188_AddPlayerState.Designer.cs">
+      <DependentUpon>201608122238188_AddPlayerState.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\ApplicationDbContext.cs" />
     <Compile Include="Models\Challenge.cs" />
@@ -573,14 +577,15 @@
     <Content Include="Sensitive\ConnectionProduction.config" />
     <Content Include="Views\Shared\_NavBar.cshtml" />
     <Content Include="Views\Home\PlayerHome.cshtml" />
-    <Content Include="Views\Home\SimulatingMatch.cshtml" />
+    <Content Include="Views\Home\LookingForOpponent.cshtml" />
+    <Content Include="Views\Home\WaitingForOpponentToAcceptChallenge.cshtml" />
+    <Content Include="Views\Home\PlayingMatch.cshtml" />
     <None Include="Web.Production.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Views\Game\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff" />
@@ -632,6 +637,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201608122119343_UpdateChallenges.resx">
       <DependentUpon>201608122119343_UpdateChallenges.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201608122238188_AddPlayerState.resx">
+      <DependentUpon>201608122238188_AddPlayerState.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

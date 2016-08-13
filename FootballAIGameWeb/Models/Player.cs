@@ -17,5 +17,16 @@ namespace FootballAIGameWeb.Models
         public ICollection<Tournament> Tournaments { get; set; }
 
         public string SelectedAi { get; set; }
+
+        public PlayerState PlayerState { get; set; }
+
+    }
+
+    public enum PlayerState
+    {
+        PlayingMatch,
+        WaitingForOpponentToAcceptChallenge,
+        LookingForOpponent,
+        Idle
     }
 }

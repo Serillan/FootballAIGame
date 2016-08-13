@@ -24,6 +24,7 @@ namespace FootballAIGameWeb.Controllers.Api
 
                 if (challenge != null)
                 {
+                    challenge.ChallengingPlayer.PlayerState = PlayerState.Idle;
                     context.Challenges.Remove(challenge);
                     context.SaveChanges();
                 }
@@ -39,11 +40,9 @@ namespace FootballAIGameWeb.Controllers.Api
             {
 
                 var userId = User.Identity.GetUserId();
-
                 var user = context.Users
                     .Include(u => u.Player)
                     .Single(u => u.Id == userId);
-
                 var player = user.Player;
 
                 player.SelectedAi = id;
