@@ -1,6 +1,56 @@
-﻿
+﻿@using FootballAIGameWeb.Models
+
 @{
-    ViewBag.Title = "Home Page";
+    ViewBag.Title = "Looking For Opponent";
 }
 
-<h3>Waiting for opponent to accept challenge ...</h3>
+<div class="container text-center" style="margin-top: 4em;">
+    <h2 style="margin-bottom: 0em">Waiting for opponent to accept the challenge.</h2>
+    <h2 id="dots">&nbsp;</h2>
+    <button id="cancel" style="margin-top: 2em" class="btn btn-danger">Cancel</button>
+</div>
+
+@section scripts
+{
+    <script>
+        $(document)
+            .ready(function() {
+
+                setInterval(ajaxCall, 1000);
+                setInterval(animation, 1000);
+                var counter = 0;
+
+                function animation() {
+                    counter ++;
+                    var dots = String.fromCharCode(160); //&nbsp;
+                    if (counter > 3)
+                        counter = 0;
+                    for (var i = 0; i < counter; i++)
+                        dots = dots + ".";
+                    $("#dots").text(dots);
+                }
+
+                function ajaxCall() {
+                    $.ajax({
+                        url: "../api/game/getplayerstate",
+                        success: function(response) {
+                            if (@((int) PlayerState.WaitingForOpponentToAcceptChallenge) === response) {
+                                // still waiting
+                            } else
+                                location.replace("../Home");
+                        }
+                    });
+                }
+
+                $("#cancel").click(function() {
+                    $.ajax({
+                        url: "../api/game/cancelchallenge",
+                        method: "delete",
+                        success: function() {
+                            location.replace("../Home");
+                        }
+                    });
+                });
+            });
+    </script>
+}

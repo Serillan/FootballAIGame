@@ -88,14 +88,14 @@
         <div class="container col-sm-3 text-center table-responsive">
             <h3>Challenges</h3>
             <table style="margin: 0 auto" class="table-hover">
-                <tbody>
+                <tbody id="challengesTableBody">
                     @foreach (var player in Model.Challenges)
-                {
-                    <tr>
-                        <td id="name">@player.Name</td>
-                        <td><button class="btn btn-link accept-challenge" data-value="@player.Name">Accept</button></td>
-                        <td><button type="button" class="btn btn-link decline-challenge" data-value="@player.Name">Decline</button></td>
-                    </tr>
+                    {
+                        <tr>
+                            <td id="name">@player.Name</td>
+                            <td><button class="btn btn-link accept-challenge" data-value="@player.Name">Accept</button></td>
+                            <td><button type="button" class="btn btn-link decline-challenge" data-value="@player.Name">Decline</button></td>
+                        </tr>
                     }
                 </tbody>
             </table>
@@ -103,7 +103,7 @@
 
         <div class="container col-sm-5" style="text-align: center">
 
-            <button id="challenge" type="submit" class="btn btn-default" style="margin: 1em auto">Challenge Player</button>
+            <button autofocus id="challenge" type="submit" class="btn btn-default" style="margin: 1em auto">Challenge Player</button>
 
             <div class="form-group text-center col-sm-12" style="margin: 0 auto">
                 @Html.LabelFor(m => m.OpponentPlayerName, new { @class = "col-sm-1 col-sm-offset-2 control-label", style = "margin-right: 1em" })
@@ -135,19 +135,19 @@
                     </text>
                 }
 
-                $("#random, #challenge, .accept-challenge")
-                    .on("click",
-                    (function () {
-                        if ($("table#ai-table tr.selectable-row[data-selected]").length === 0) {
-                            $("table#ai-table").css("border", "2px solid red");
-                            if ($("table#ai-table tr.selectable-row").length === 0)
-                                toastr.error("You need to have an active AI.");
-                            else
-                                toastr.error("AI must be selected.");
-                        } else {
-                            // OK
-                        }
-                    }));
+                var aiMustBeSelected = function () {
+                    if ($("table#ai-table tr.selectable-row[data-selected]").length === 0) {
+                        $("table#ai-table").css("border", "2px solid red");
+                        if ($("table#ai-table tr.selectable-row").length === 0)
+                            toastr.error("You need to have an active AI.");
+                        else
+                            toastr.error("AI must be selected.");
+                    } else {
+                        // OK
+                    }
+                };
+
+                $("#random, #challenge, .accept-challenge").on("click", aiMustBeSelected);
 
                 $("table#ai-table tr.selectable-row")
                     .on("click",
@@ -182,25 +182,53 @@
                         $("#OpponentPlayerName").attr("required", "");
                     }));
 
-                $(".accept-challenge")
-                    .on("click",
-                    (function () {
-                        $("#game-form").attr("action", "/Home/ChallengePlayer");
-                        $("#OpponentPlayerName").val($(this).attr("data-value"));
-                    }));
+                var acceptChallenge = function () {
+                    $("#game-form").attr("action", "/Home/ChallengePlayer");
+                    $("#OpponentPlayerName").val($(this).attr("data-value"));
+                };
 
-                $(".decline-challenge")
-                    .on("click",
-                        function () {
-                            var button = $(this);
-                            toastr.success("Challenge declined.");
-                            button.closest("tr").remove();
+                var declineChallenge = function () {
+                    var button = $(this);
+                    toastr.success("Challenge declined.");
+                    button.closest("tr").remove();
 
-                            $.ajax({
-                                url: "/api/game/decline/" + $(this).attr("data-value"),
-                                type: "DELETE"
-                            });
-                        });
+                    $.ajax({
+                        url: "/api/game/decline/" + $(this).attr("data-value"),
+                        type: "DELETE"
+                    });
+                };
+
+                $(".accept-challenge").on("click", acceptChallenge);
+                $(".decline-challenge").on("click", declineChallenge);
+
+                $("#OpponentPlayerName")
+                    .keypress(function (event) {
+                        if (event.keyCode === 13) {
+                            $("#challenge").click();
+                            return false; // stops handling other events on enter! (otherwise primary submit button would be handled)
+                        }
+                    });
+
+                // challenges polling
+                var ajaxCall = function () {
+                    $.ajax({
+                        url: "api/game/getchallengersnames",
+                        success: function (response) {
+                            var newTableBody = "";
+                            for (var i = 0; i < response.length; i++) {
+                                newTableBody = newTableBody +
+                            '<tr><td id="name">' + response[i] + '</td>' +
+                            '<td><button class="btn btn-link accept-challenge" data-value="' + response[i] + '">Accept</button></td>' +
+                            '<td><button type="button" class="btn btn-link decline-challenge" data-value="' + response[i] + '">Decline</button></td></tr>';
+                            }
+                            $("#challengesTableBody").html(newTableBody);
+                            $(".accept-challenge").on("click", acceptChallenge);
+                            $(".accept-challenge").on("click", aiMustBeSelected);
+                            $(".decline-challenge").on("click", declineChallenge);
+                        }
+                    });
+                };
+                setInterval(ajaxCall, 1000);
             });
     </script>
 }
