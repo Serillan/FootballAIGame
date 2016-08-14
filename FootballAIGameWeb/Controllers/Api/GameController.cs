@@ -8,6 +8,18 @@ namespace FootballAIGameWeb.Controllers.Api
 {
     public class GameController : ApiController
     {
+
+        private Player GetCurrentPlayer(ApplicationDbContext context)
+        {
+            var userId = User.Identity.GetUserId();
+            var user = context.Users
+                .Include(u => u.Player)
+                .Single(u => u.Id == userId);
+            var player = user.Player;
+
+            return player;
+        }
+
         [HttpDelete]
         public IHttpActionResult Decline(string id)
         {
@@ -33,11 +45,7 @@ namespace FootballAIGameWeb.Controllers.Api
         {
             using (var context = new ApplicationDbContext())
             {
-                var userId = User.Identity.GetUserId();
-                var user = context.Users
-                    .Include(u => u.Player)
-                    .Single(u => u.Id == userId);
-                var player = user.Player;
+                var player = GetCurrentPlayer(context);
 
                 // TODO tell game server that player wants to cancel challenge
                 // and wait for server response
@@ -58,11 +66,7 @@ namespace FootballAIGameWeb.Controllers.Api
         {
             using (var context = new ApplicationDbContext())
             {
-                var userId = User.Identity.GetUserId();
-                var user = context.Users
-                    .Include(u => u.Player)
-                    .Single(u => u.Id == userId);
-                var player = user.Player;
+                var player = GetCurrentPlayer(context);
 
                 player.SelectedAi = id;
 
@@ -77,11 +81,7 @@ namespace FootballAIGameWeb.Controllers.Api
         {
             using (var context = new ApplicationDbContext())
             {
-                var userId = User.Identity.GetUserId();
-                var user = context.Users
-                    .Include(u => u.Player)
-                    .Single(u => u.Id == userId);
-                var player = user.Player;
+                var player = GetCurrentPlayer(context);
 
                 var challengeInDb = context.Challenges
                     .Include(c => c.ChallengingPlayer)
@@ -141,17 +141,28 @@ namespace FootballAIGameWeb.Controllers.Api
             }
         }
 
+        [HttpPost]
+        public IHttpActionResult StartRandomMatch()
+        {
+            using (var context = new ApplicationDbContext())
+            {
+                var player = GetCurrentPlayer(context);
+
+                if (player.PlayerState != PlayerState.Idle)
+                    return BadRequest("Invalid player state.");
+                
+                player.PlayerState = PlayerState.LookingForOpponent;
+                context.SaveChanges();
+                return Ok();
+            }
+        }
+
         [HttpGet]
         public IHttpActionResult GetPlayerState()
         {
             using (var context = new ApplicationDbContext())
             {
-                var userId = User.Identity.GetUserId();
-                var user = context.Users
-                    .Include(u => u.Player)
-                    .Single(u => u.Id == userId);
-                var player = user.Player;
-
+                var player = GetCurrentPlayer(context);
                 return Ok(player.PlayerState);
             }
         }
@@ -161,11 +172,7 @@ namespace FootballAIGameWeb.Controllers.Api
         {
             using (var context = new ApplicationDbContext())
             {
-                var userId = User.Identity.GetUserId();
-                var user = context.Users
-                    .Include(u => u.Player)
-                    .Single(u => u.Id == userId);
-                var player = user.Player;
+                var player = GetCurrentPlayer(context);
 
                 var match = context.Matches
                     .Include(m => m.Player1)
@@ -190,11 +197,7 @@ namespace FootballAIGameWeb.Controllers.Api
         {
             using (var context = new ApplicationDbContext())
             {
-                var userId = User.Identity.GetUserId();
-                var user = context.Users
-                    .Include(u => u.Player)
-                    .Single(u => u.Id == userId);
-                var player = user.Player;
+                var player = GetCurrentPlayer(context);
 
                 var challengersNames = context.Challenges
                     .Include(c => c.ChallengingPlayer)
@@ -213,11 +216,7 @@ namespace FootballAIGameWeb.Controllers.Api
         {
             using (var context = new ApplicationDbContext())
             {
-                var userId = User.Identity.GetUserId();
-                var user = context.Users
-                    .Include(u => u.Player)
-                    .Single(u => u.Id == userId);
-                var player = user.Player;
+                var player = GetCurrentPlayer(context);
 
                 // TODO tell game server that player doesn't want to fight
                 // and wait for server response
@@ -232,11 +231,7 @@ namespace FootballAIGameWeb.Controllers.Api
         {
             using (var context = new ApplicationDbContext())
             {
-                var userId = User.Identity.GetUserId();
-                var user = context.Users
-                    .Include(u => u.Player)
-                    .Single(u => u.Id == userId);
-                var player = user.Player;
+                var player = GetCurrentPlayer(context);
 
                 // TODO tell game server that player wants to cancel match
                 // server will change the player states! 

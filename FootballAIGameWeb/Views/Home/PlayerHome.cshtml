@@ -5,8 +5,7 @@
 
 
 
-@using (Html.BeginForm("StartRandomMatch", "Home", FormMethod.Post, new { id = "game-form", @class = "form-horizontal", role = "form" }))
-{
+<div class="form-horizontal"> @* for correct vertical alignment of Name label *@
     <div class="container col-sm-3 text-center table-responsive" style="margin-top: 2em">
         <h3>Active AIs</h3>
         <table id="ai-table" class="table table-hover" style="border: 2px solid white">
@@ -27,10 +26,8 @@
         </table>
     </div>
 
-    @Html.TextBoxFor(m => m.SelectedAi, new { style = "visibility: hidden; position: absolute" }) // display: none or hidden field wouldnt be validated
-
     <div class="container col-sm-5 text-center" style="margin-top: 2em; text-align: center">
-        <h3>Score: 28</h3>
+        <h3>Score: @Model.Player.Score</h3>
         <button id="random" type="submit" class="btn btn-primary" style="white-space: normal; margin: 1em; margin-top: 4em">Match against random opponent</button>
     </div>
 
@@ -82,8 +79,6 @@
         </table>
     </div>
 
-    @Html.AntiForgeryToken()
-
     <div class="container col-sm-12" style="margin-top: 2em">
         <div class="container col-sm-3 text-center table-responsive">
             <h3>Challenges</h3>
@@ -109,7 +104,7 @@
                 @Html.LabelFor(m => m.OpponentPlayerName, new { @class = "col-sm-1 col-sm-offset-2 control-label", style = "margin-right: 1em" })
                 <div class="col-sm-7">
                     @Html.TextBoxFor(m => m.OpponentPlayerName, new { @class = "form-control", style = "margin: 0 auto; max-width: 15em" })
-                    @Html.ValidationMessageFor(m => m.OpponentPlayerName, "", new { @class = "text-danger" })
+                    <span class="field-validation-valid text-danger" data-valmsg-for="OpponentPlayerName"></span>
                 </div>
             </div>
 
@@ -119,7 +114,7 @@
 
         </div>
     </div>
-}
+</div>
 
 @section scripts
 {
@@ -136,19 +131,26 @@
                 </text>
                 }
 
+                $("#game-form").submit(function (e) {
+                    e.preventDefault();
+                });
+
                 var aiMustBeSelected = function () {
                     if ($("table#ai-table tr.selectable-row[data-selected]").length === 0) {
                         $("table#ai-table").css("border", "2px solid red");
-                        if ($("table#ai-table tr.selectable-row").length === 0)
+                        if ($("table#ai-table tr.selectable-row").length === 0) {
                             toastr.error("You need to have an active AI.");
-                        else
+                            return false;
+                        } else {
                             toastr.error("AI must be selected.");
+                            return false;
+                        }
                     } else {
-                        // OK
+                        return true;
                     }
                 };
 
-                $("#random, #challenge, .accept-challenge").on("click", aiMustBeSelected);
+                //$("#random, #challenge, .accept-challenge").on("click", aiMustBeSelected);
 
                 $("table#ai-table tr.selectable-row")
                     .on("click",
@@ -168,25 +170,50 @@
 
                     }));
 
-                $("#random")
-                    .on("click",
-                    (function () {
-                        $("#game-form").attr("action", "/home/startrandommatch");
-                        $("#OpponentPlayerName").removeAttr("required");
-                        $("span[for='OpponentPlayerName']").text("");
-                    }));
+                $("#random").on("click", function () {
+                    $("span[data-valmsg-for='OpponentPlayerName']").text("");
 
-                $("#challenge")
-                    .on("click",
-                    (function () {
-                        $("#game-form").attr("action", "/home/challengeplayer");
-                        $("#OpponentPlayerName").attr("required", "");
-                    }));
+                    if (aiMustBeSelected()) {
+                        $.ajax({
+                            url: "/api/game/startrandommatch",
+                            method: "post",
+                            success: function () {
+                                location.replace("/");
+                            },
+                            error: function (xhr, status, error) {
+                                var json = JSON.parse(xhr.responseText);
+                                toastr.error(json.message);
+                            }
+                        });
+                    }
+                });
 
-                var acceptChallenge = function () {
-                    $("#game-form").attr("action", "/home/challengeplayer");
-                    $("#OpponentPlayerName").val($(this).attr("data-value"));
-                };
+                var processChallenge = function () {
+                    var opponentName;
+                    if ($(this).is("#challenge"))
+                        opponentName = $("#OpponentPlayerName").val();
+                    else
+                        opponentName = $(this).attr("data-value");
+
+                    if (opponentName === undefined || opponentName === "") {
+                        $("span[data-valmsg-for='OpponentPlayerName']").text("This field is required.");
+                        return;
+                    }
+
+                    if (aiMustBeSelected()) {
+                        $.ajax({
+                            url: "/api/game/challengeplayer/" + opponentName,
+                            method: "post",
+                            success: function () {
+                                location.replace("/");
+                            },
+                            error: function (xhr, status, error) {
+                                var json = JSON.parse(xhr.responseText);
+                                toastr.error(json.message);
+                            }
+                        });
+                    }
+                }
 
                 var declineChallenge = function () {
                     var button = $(this);
@@ -199,16 +226,23 @@
                     });
                 };
 
-                $(".accept-challenge").on("click", acceptChallenge);
+                $("#challenge, .accept-challenge").on("click", processChallenge);
                 $(".decline-challenge").on("click", declineChallenge);
 
                 $("#OpponentPlayerName")
                     .keypress(function (event) {
                         if (event.keyCode === 13) {
                             $("#challenge").click();
-                            return false; // stops handling other events on enter! (otherwise primary submit button would be handled)
+                            return false;
+                            // stops handling other events on enter! (otherwise primary submit button would be handled)
                         }
                     });
+
+                $("#OpponentPlayerName")
+                    .on("input", function () {
+                        $("span[data-valmsg-for='OpponentPlayerName']").text("");
+                    });
+
 
                 // challenges polling
                 var ajaxCall = function () {
@@ -218,20 +252,25 @@
                             var newTableBody = "";
                             for (var i = 0; i < response.length; i++) {
                                 newTableBody = newTableBody +
-                                    '<tr><td id="name">' + response[i] + '</td>' +
-                                    '<td><button class="btn btn-link accept-challenge" data-value="' + response[i] + '">Accept</button></td>' +
-                                    '<td><button type="button" class="btn btn-link decline-challenge" data-value="' + response[i] + '">Decline</button></td></tr>';
+                                    '<tr><td id="name">' +
+                                    response[i] +
+                                    '</td>' +
+                                    '<td><button class="btn btn-link accept-challenge" data-value="' +
+                                    response[i] +
+                                    '">Accept</button></td>' +
+                                    '<td><button type="button" class="btn btn-link decline-challenge" data-value="' +
+                                    response[i] +
+                                    '">Decline</button></td></tr>';
                             }
+
                             $("#challengesTableBody").html(newTableBody);
-                            $(".accept-challenge").on("click", acceptChallenge);
-                            $(".accept-challenge").on("click", aiMustBeSelected);
+                            $(".accept-challenge").on("click", processChallenge);
                             $(".decline-challenge").on("click", declineChallenge);
                         }
                     });
                 };
                 setInterval(ajaxCall, 1000);
             });
-
 
     </script>
 }
