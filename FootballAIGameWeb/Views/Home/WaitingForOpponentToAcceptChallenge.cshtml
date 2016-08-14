@@ -5,7 +5,7 @@
 }
 
 <div class="container text-center" style="margin-top: 4em;">
-    <h2 style="margin-bottom: 0em">Waiting for opponent to accept the challenge.</h2>
+    <h2 id="textField" style="margin-bottom: 0em">Waiting for opponent to accept the challenge.</h2>
     <h2 id="dots">&nbsp;</h2>
     <button id="cancel" style="margin-top: 2em" class="btn btn-danger">Cancel</button>
 </div>
@@ -16,8 +16,8 @@
         $(document)
             .ready(function() {
 
-                setInterval(ajaxCall, 1000);
-                setInterval(animation, 1000);
+                var ajaxCalls = setInterval(ajaxCall, 1000);
+                var anim = setInterval(animation, 1000);
                 var counter = 0;
 
                 function animation() {
@@ -36,21 +36,32 @@
                         success: function(response) {
                             if (@((int) PlayerState.WaitingForOpponentToAcceptChallenge) === response) {
                                 // still waiting
-                            } else
-                                location.replace("/");
+                            } else {
+                                clearInterval(ajaxCalls);
+                                clearInterval(anim);
+                                $("#dots").text(String.fromCharCode(160));
+
+                                $("#textField").text("Opponent has declined the challenge.");
+                                $("#cancel").text("Home");
+                                $("#cancel").off("click");
+                                $("#cancel").on("click", function() {
+                                    location.replace("/");
+                                });
+                            }
                         }
                     });
                 }
 
-                $("#cancel").click(function() {
-                    $.ajax({
-                        url: "/api/game/cancelchallenge",
-                        method: "delete",
-                        success: function() {
-                            location.replace("/");
-                        }
+                $("#cancel")
+                    .click(function() {
+                        $.ajax({
+                            url: "/api/game/cancelchallenge",
+                            method: "delete",
+                            success: function() {
+                                location.replace("/");
+                            }
+                        });
                     });
-                });
             });
     </script>
 }
