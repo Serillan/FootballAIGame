@@ -16,11 +16,11 @@
                 {
                     if (ai == Model.Player.SelectedAi)
                     {
-                <tr class="selectable-row success" data-selected><td>@ai</td></tr>
+                        <tr class="selectable-row success" data-selected><td>@ai</td></tr>
                     }
                     else
                     {
-                <tr class="selectable-row"><td>@ai</td></tr>
+                        <tr class="selectable-row"><td>@ai</td></tr>
                     }
                 }
             </tbody>
@@ -40,44 +40,44 @@
         <table class="table table-hover">
             <thead>
                 <tr>
-                    <th>Result</th>
+                    <th class="text-center">Result</th>
                     <th class="text-center">AI</th>
-                    <th>Opponent</th>
+                    <th class="text-center">Opponent</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var match in Model.LastMatches)
-            {
-                var playerNumber = match.Player1 == Model.Player ? 1 : 2;
-                var playerAi = playerNumber == 1 ? match.Player1Ai : match.Player2Ai;
-                var otherPlayer = playerNumber == 1 ? match.Player2 : match.Player1;
+                {
+                    var playerNumber = match.Player1 == Model.Player ? 1 : 2;
+                    var playerAi = playerNumber == 1 ? match.Player1Ai : match.Player2Ai;
+                    var otherPlayer = playerNumber == 1 ? match.Player2 : match.Player1;
 
-                if (match.Winner == 0) // draw
-                {
-                <tr class="clickable-row" data-href="/matches/details/@match.Id">
-                    <td>Draw</td>
-                    <td>@playerAi</td>
-                    <td>@otherPlayer.Name</td>
-                </tr>
+                    if (match.Winner == 0) // draw
+                    {
+                        <tr class="clickable-row" data-href="/matches/details/@match.Id">
+                            <td>Draw</td>
+                            <td>@playerAi</td>
+                            <td>@otherPlayer.Name</td>
+                        </tr>
 
+                    }
+                    else if (match.Winner == playerNumber)
+                    {
+                        <tr class="success clickable-row" data-href="/matches/details/@match.Id">
+                            <td>Win</td>
+                            <td>@playerAi</td>
+                            <td>@otherPlayer.Name</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        <tr class="danger clickable-row" data-href="/matches/details/@match.Id">
+                            <td>Loose</td>
+                            <td>@playerAi</td>
+                            <td>@otherPlayer.Name</td>
+                        </tr>
+                    }
                 }
-                else if (match.Winner == playerNumber)
-                {
-                <tr class="success clickable-row" data-href="/matches/details/@match.Id">
-                    <td>Win</td>
-                    <td>@playerAi</td>
-                    <td>@otherPlayer.Name</td>
-                </tr>
-                }
-                else
-                {
-                <tr class="danger clickable-row" data-href="/matches/details/@match.Id">
-                    <td>Loose</td>
-                    <td>@playerAi</td>
-                    <td>@otherPlayer.Name</td>
-                </tr>
-                }
-            }
             </tbody>
         </table>
     </div>
@@ -126,13 +126,14 @@
     @Scripts.Render("~/bundles/jqueryval")
 
     <script>
+
         $(document)
             .ready(function () {
                 @if (Model.ErrorFromTheServer != null)
                 {
                     <text>
-                        toastr.error("@Model.ErrorFromTheServer");
-                    </text>
+                toastr.error("@Model.ErrorFromTheServer");
+                </text>
                 }
 
                 var aiMustBeSelected = function () {
@@ -170,7 +171,7 @@
                 $("#random")
                     .on("click",
                     (function () {
-                        $("#game-form").attr("action", "/Home/StartRandomMatch");
+                        $("#game-form").attr("action", "/home/startrandommatch");
                         $("#OpponentPlayerName").removeAttr("required");
                         $("span[for='OpponentPlayerName']").text("");
                     }));
@@ -178,12 +179,12 @@
                 $("#challenge")
                     .on("click",
                     (function () {
-                        $("#game-form").attr("action", "/Home/ChallengePlayer");
+                        $("#game-form").attr("action", "/home/challengeplayer");
                         $("#OpponentPlayerName").attr("required", "");
                     }));
 
                 var acceptChallenge = function () {
-                    $("#game-form").attr("action", "/Home/ChallengePlayer");
+                    $("#game-form").attr("action", "/home/challengeplayer");
                     $("#OpponentPlayerName").val($(this).attr("data-value"));
                 };
 
@@ -212,14 +213,14 @@
                 // challenges polling
                 var ajaxCall = function () {
                     $.ajax({
-                        url: "api/game/getchallengersnames",
+                        url: "/api/game/getchallengersnames",
                         success: function (response) {
                             var newTableBody = "";
                             for (var i = 0; i < response.length; i++) {
                                 newTableBody = newTableBody +
-                            '<tr><td id="name">' + response[i] + '</td>' +
-                            '<td><button class="btn btn-link accept-challenge" data-value="' + response[i] + '">Accept</button></td>' +
-                            '<td><button type="button" class="btn btn-link decline-challenge" data-value="' + response[i] + '">Decline</button></td></tr>';
+                                    '<tr><td id="name">' + response[i] + '</td>' +
+                                    '<td><button class="btn btn-link accept-challenge" data-value="' + response[i] + '">Accept</button></td>' +
+                                    '<td><button type="button" class="btn btn-link decline-challenge" data-value="' + response[i] + '">Decline</button></td></tr>';
                             }
                             $("#challengesTableBody").html(newTableBody);
                             $(".accept-challenge").on("click", acceptChallenge);
@@ -230,5 +231,7 @@
                 };
                 setInterval(ajaxCall, 1000);
             });
+
+
     </script>
 }

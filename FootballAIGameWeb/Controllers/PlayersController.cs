@@ -6,12 +6,25 @@ using System.Web;
 using System.Web.Mvc;
 using FootballAIGameWeb.Models;
 using FootballAIGameWeb.ViewModels.Players;
+using Microsoft.AspNet.Identity;
 
 namespace FootballAIGameWeb.Controllers
 {
     public class PlayersController : Controller
     {
         private ApplicationDbContext _context;
+
+        private Player CurrentPlayer
+        {
+            get
+            {
+                var userId = User.Identity.GetUserId();
+                var user = _context.Users
+                    .Include(u => u.Player)
+                    .Single(u => u.Id == userId);
+                return user.Player;
+            }
+        }
 
         public PlayersController()
         {
@@ -34,7 +47,8 @@ namespace FootballAIGameWeb.Controllers
         // GET: players/details/id
         public ActionResult Details(string id)
         {
-            var player = _context.Players.SingleOrDefault(p => p.UserId == id);
+            var player = _context.Players.SingleOrDefault(p => p.Name == id);
+            var currentPlayer = CurrentPlayer;
 
             if (player == null)
                 return HttpNotFound();
@@ -53,7 +67,8 @@ namespace FootballAIGameWeb.Controllers
                 Player = player,
                 LastMatches = lastMatches,
                 LastTournaments = lastTournaments,
-                ActiveAIs = new List<string>() { "MyBestAI1", "MyStupidAI" } // from server TODO
+                ActiveAIs = new List<string>() { "MyBestAI1", "MyStupidAI" }, // from server TODO
+                SelectedAi = currentPlayer.SelectedAi
             };
 
             return View("Details", viewModel);

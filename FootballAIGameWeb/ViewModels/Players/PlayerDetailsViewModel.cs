@@ -14,6 +14,8 @@ namespace FootballAIGameWeb.ViewModels.Players
 
         public List<string> ActiveAIs { get; set; }
 
+        public string SelectedAi { get; set; }
+
         public Player Player { get; set; }
 
         public int Rank { get; set; }

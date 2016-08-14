@@ -263,6 +263,10 @@
     <Compile Include="Migrations\201608141208281_AddPlayerStatisticsProperties.Designer.cs">
       <DependentUpon>201608141208281_AddPlayerStatisticsProperties.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201608141850558_AddMatchStatisticsProperties.cs" />
+    <Compile Include="Migrations\201608141850558_AddMatchStatisticsProperties.Designer.cs">
+      <DependentUpon>201608141850558_AddMatchStatisticsProperties.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\ApplicationDbContext.cs" />
     <Compile Include="Models\Challenge.cs" />
@@ -462,6 +466,7 @@
     <None Include="Properties\PublishProfiles\footballaigame - Web Deploy.pubxml" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\CustomScripts\clickable-row.js" />
+    <Content Include="Scripts\CustomScripts\initialization.js" />
     <Content Include="Scripts\CustomScripts\selectable-row.js" />
     <Content Include="Scripts\DataTables\autoFill.bootstrap.js" />
     <Content Include="Scripts\DataTables\autoFill.bootstrap.min.js" />
@@ -668,6 +673,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201608141208281_AddPlayerStatisticsProperties.resx">
       <DependentUpon>201608141208281_AddPlayerStatisticsProperties.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201608141850558_AddMatchStatisticsProperties.resx">
+      <DependentUpon>201608141850558_AddMatchStatisticsProperties.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

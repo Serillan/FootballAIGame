@@ -1,19 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.Entity;
+﻿using System.Data.Entity;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Web.Http;
 using FootballAIGameWeb.Models;
-using Microsoft.Ajax.Utilities;
 using Microsoft.AspNet.Identity;
 
 namespace FootballAIGameWeb.Controllers.Api
 {
     public class GameController : ApiController
     {
-
         [HttpDelete]
         public IHttpActionResult Decline(string id)
         {
@@ -64,7 +58,6 @@ namespace FootballAIGameWeb.Controllers.Api
         {
             using (var context = new ApplicationDbContext())
             {
-
                 var userId = User.Identity.GetUserId();
                 var user = context.Users
                     .Include(u => u.Player)
@@ -77,6 +70,75 @@ namespace FootballAIGameWeb.Controllers.Api
             }
 
             return Ok();
+        }
+
+        [HttpPost]
+        public IHttpActionResult ChallengePlayer(string id)
+        {
+            using (var context = new ApplicationDbContext())
+            {
+                var userId = User.Identity.GetUserId();
+                var user = context.Users
+                    .Include(u => u.Player)
+                    .Single(u => u.Id == userId);
+                var player = user.Player;
+
+                var challengeInDb = context.Challenges
+                    .Include(c => c.ChallengingPlayer)
+                    .Include(c => c.ChallengedPlayer)
+                    .SingleOrDefault(c =>
+                        (c.ChallengingPlayer.Name == id
+                         && c.ChallengedPlayer.UserId == player.UserId)
+                        || c.ChallengingPlayer.UserId == player.UserId);
+
+                if (player.PlayerState != PlayerState.Idle)
+                    return BadRequest("Player is not idle!");
+
+                // new challenge
+                if (challengeInDb == null)
+                {
+                    var opponent = context.Players.SingleOrDefault(p => p.Name == id);
+                    if (opponent == null)
+                    {
+                        return BadRequest("Opponent with the given name was not found.");
+                    }
+                    if (opponent.UserId == player.UserId)
+                    {
+                        return BadRequest("Cannot challenge yourself!");
+                    }
+
+                    var challenge = new Challenge
+                    {
+                        ChallengingPlayer = player,
+                        ChallengedPlayer = opponent
+                    };
+                    context.Challenges.Add(challenge);
+                    player.PlayerState = PlayerState.WaitingForOpponentToAcceptChallenge;
+                    context.SaveChanges();
+                    return Ok();
+                }
+
+                    // only one concurrent challenge allowed
+                if (challengeInDb.ChallengingPlayer == player)
+                {
+                    return BadRequest("Only one concurrent challenge is allowed.");
+                }
+
+                    // accept challenge
+                if (challengeInDb.ChallengingPlayer.Name == id &&
+                    challengeInDb.ChallengedPlayer == player &&
+                    challengeInDb.ChallengingPlayer.PlayerState == PlayerState.WaitingForOpponentToAcceptChallenge)
+                {
+                    // Game Server TODO Challenge(player1Name, ai1Name , player2Name, ai2Name)
+                    challengeInDb.ChallengingPlayer.PlayerState = PlayerState.PlayingMatch;
+                    challengeInDb.ChallengedPlayer.PlayerState = PlayerState.PlayingMatch;
+                    context.Challenges.Remove(challengeInDb);
+                    context.SaveChanges();
+                    return Ok();
+                }
+
+                return BadRequest();
+            }
         }
 
         [HttpGet]
@@ -119,7 +181,7 @@ namespace FootballAIGameWeb.Controllers.Api
                                match.Winner == 2 && match.Player2.UserId == player.UserId;
                 var result = match.Winner == 0 ? "draw" : isWinner ? "win" : "loose";
 
-                return Ok(new { result = result, matchId = match.Id });
+                return Ok(new {result, matchId = match.Id});
             }
         }
 
@@ -185,6 +247,5 @@ namespace FootballAIGameWeb.Controllers.Api
                 return Ok();
             }
         }
-
     }
 }

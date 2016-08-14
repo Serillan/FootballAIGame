@@ -22,7 +22,7 @@ namespace FootballAIGameWeb.Controllers
             _context.Dispose();
         }
 
-        // GET: players
+        // GET: matches
         public ActionResult Index()
         {
             var viewModel = _context.Matches
@@ -33,25 +33,31 @@ namespace FootballAIGameWeb.Controllers
             return View(viewModel);
         }
 
-        // GET: players/details/id
+        // GET: matches/details/id
         public ActionResult Details(int id)
         {
-            var matches = _context.Matches.SingleOrDefault(m => m.Id == id);
+            var match = _context.Matches
+                .Include(m => m.Player1)
+                .Include(m => m.Player2)
+                .SingleOrDefault(m => m.Id == id);
 
-            if (matches == null)
+            if (match == null)
                 return HttpNotFound();
 
-            return View("Details", matches);
+            return View("Details", match);
         }
 
         public ActionResult Watch(int id)
         {
-            var matches = _context.Matches.SingleOrDefault(m => m.Id == id);
+            var match = _context.Matches
+                .Include(m => m.Player1)
+                .Include(m => m.Player2)
+                .SingleOrDefault(m => m.Id == id);
 
-            if (matches == null)
+            if (match == null)
                 return HttpNotFound();
 
-            return View("Watch", matches);
+            return View("Watch", match);
         }
 
     }

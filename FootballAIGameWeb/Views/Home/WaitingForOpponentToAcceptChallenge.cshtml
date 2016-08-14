@@ -32,22 +32,22 @@
 
                 function ajaxCall() {
                     $.ajax({
-                        url: "../api/game/getplayerstate",
+                        url: "/api/game/getplayerstate",
                         success: function(response) {
                             if (@((int) PlayerState.WaitingForOpponentToAcceptChallenge) === response) {
                                 // still waiting
                             } else
-                                location.replace("../Home");
+                                location.replace("/");
                         }
                     });
                 }
 
                 $("#cancel").click(function() {
                     $.ajax({
-                        url: "../api/game/cancelchallenge",
+                        url: "/api/game/cancelchallenge",
                         method: "delete",
                         success: function() {
-                            location.replace("../Home");
+                            location.replace("/");
                         }
                     });
                 });

@@ -22,6 +22,17 @@ namespace FootballAIGameWeb.Models
 
         public string Score { get; set; }
 
+        public string Goals { get; set; }
+
+        public int Shots1 { get; set; }
+
+        public int Shots2 { get; set; }
+
+        public int ShotsOnTarget1 { get; set; }
+
+        public int ShotsOnTarget2 { get; set; }
+
+
         /// <summary>
         /// Returns 1 if Player1 won, otherwise returns false.
         /// </summary>

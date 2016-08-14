@@ -32,22 +32,22 @@
 
                 function ajaxCall() {
                     $.ajax({
-                        url: "../api/game/getplayerstate",
+                        url: "/api/game/getplayerstate",
                         success: function(response) {
                             if (@((int) PlayerState.LookingForOpponent) === response) {
                                 // still looking
                             } else
-                                location.replace("../Home");
+                                location.replace("/");
                         }
                     });
                 }
 
                 $("#cancel").click(function() {
                     $.ajax({
-                        url: "../api/game/cancellooking",
+                        url: "/api/game/cancellooking",
                         method: "put",
                         success: function() {
-                            location.replace("../Home");
+                            location.replace("/");
                         }
                     });
                 });

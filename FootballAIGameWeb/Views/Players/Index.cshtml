@@ -24,7 +24,7 @@
             <td>@player.Score</td>
             <td>@player.WonGames</td>
             <td>@player.WonTournaments</td>
-            <td><a href="Details/@(player.UserId)">Details</a></td>
+            <td><a href="Details/@(player.Name)">Details</a></td>
         </tr>
     }
 
@@ -36,6 +36,7 @@
             $("#match-table").DataTable({
                 "order": [[1, "desc"]]
             });
+
         });
     </script>
 }

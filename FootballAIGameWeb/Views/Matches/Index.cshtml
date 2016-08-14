@@ -21,10 +21,10 @@
     {
         <tr>
             <td>@match.Time</td>
-            <td><a href="../Players/Details/@match.Player1.UserId">@match.Player1.Name</a></td>
-            <td><a href="../Players/Details/@match.Player2.UserId">@match.Player2.Name</a></td>
+            <td><a href="/players/details/@match.Player1.Name">@match.Player1.Name</a></td>
+            <td><a href="/players/details/@match.Player2.Name">@match.Player2.Name</a></td>
             <td>@match.Score</td>
-            <td><a href="Details/@(match.Id)">Details</a></td>
+            <td><a href="details/@(match.Id)">Details</a></td>
         </tr>
     }
 </table>
