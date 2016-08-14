@@ -55,6 +55,8 @@ namespace FootballAIGameWeb.Controllers
                 LastMatches = _context.Matches
                     .Include(m => m.Player1)
                     .Include(m => m.Player2)
+                    .OrderByDescending(m => m.Time)
+                    .Take(5)
                     .ToList()
             };
             return View(viewModel);
@@ -66,13 +68,13 @@ namespace FootballAIGameWeb.Controllers
             var lastMatches = _context.Matches
                 .Include(m => m.Player1)
                 .Include(m => m.Player2)
-                .OrderBy(m => m.Time)
+                .OrderByDescending(m => m.Time)
                 .Take(5) // only last 5 matches
                 .ToList();
 
             var viewModel = new ViewModels.Home.PlayerHomeViewModel()
             {
-                ActiveAIs = new List<string>() { "MyBestAI1", "MyStupidAI" },
+                ActiveAIs = new List<string>() { "MyBestAI1", "MyStupidAI" }, // from server TODO
                 LastMatches = lastMatches,
                 Challenges = _context.Challenges
                     .Where(c => c.ChallengedPlayer.UserId == player.UserId)
@@ -180,5 +182,14 @@ namespace FootballAIGameWeb.Controllers
             return View();
         }
 
+        public ActionResult HowToPlay()
+        {
+            return View();
+        }
+
+        public ActionResult Statistics()
+        {
+            return View();
+        }
     }
 }

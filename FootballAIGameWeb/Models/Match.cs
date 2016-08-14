@@ -20,6 +20,8 @@ namespace FootballAIGameWeb.Models
 
         public string Player2Ai { get; set; }
 
+        public string Score { get; set; }
+
         /// <summary>
         /// Returns 1 if Player1 won, otherwise returns false.
         /// </summary>

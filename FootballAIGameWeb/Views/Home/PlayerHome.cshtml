@@ -16,11 +16,11 @@
                 {
                     if (ai == Model.Player.SelectedAi)
                     {
-                        <tr class="selectable-row success" data-selected><td>@ai</td></tr>
+                <tr class="selectable-row success" data-selected><td>@ai</td></tr>
                     }
                     else
                     {
-                        <tr class="selectable-row"><td>@ai</td></tr>
+                <tr class="selectable-row"><td>@ai</td></tr>
                     }
                 }
             </tbody>
@@ -54,7 +54,7 @@
 
                 if (match.Winner == 0) // draw
                 {
-                <tr class="clickable-row" data-href="/Matches/@match.Id">
+                <tr class="clickable-row" data-href="/matches/details/@match.Id">
                     <td>Draw</td>
                     <td>@playerAi</td>
                     <td>@otherPlayer.Name</td>
@@ -63,7 +63,7 @@
                 }
                 else if (match.Winner == playerNumber)
                 {
-                <tr class="success clickable-row" data-href="/Matches/@match.Id">
+                <tr class="success clickable-row" data-href="/matches/details/@match.Id">
                     <td>Win</td>
                     <td>@playerAi</td>
                     <td>@otherPlayer.Name</td>
@@ -71,7 +71,7 @@
                 }
                 else
                 {
-                <tr class="danger clickable-row" data-href="/Matches/@match.Id">
+                <tr class="danger clickable-row" data-href="/matches/details/@match.Id">
                     <td>Loose</td>
                     <td>@playerAi</td>
                     <td>@otherPlayer.Name</td>
@@ -114,7 +114,7 @@
             </div>
 
             <div class="container text-center col-sm-12" style="margin-top: 4em">
-                <button class="btn btn-default">Tournaments</button>
+                <a href="/tournaments/" class="btn btn-default">Tournaments</a>
             </div>
 
         </div>

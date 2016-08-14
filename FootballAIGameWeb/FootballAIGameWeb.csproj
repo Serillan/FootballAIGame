@@ -189,6 +189,9 @@
     <Compile Include="Controllers\Api\GameController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
+    <Compile Include="Controllers\MatchesController.cs" />
+    <Compile Include="Controllers\PlayersController.cs" />
+    <Compile Include="Controllers\TournamentsController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -252,6 +255,14 @@
     <Compile Include="Migrations\201608122238188_AddPlayerState.Designer.cs">
       <DependentUpon>201608122238188_AddPlayerState.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201608141149124_AddMatchScore.cs" />
+    <Compile Include="Migrations\201608141149124_AddMatchScore.Designer.cs">
+      <DependentUpon>201608141149124_AddMatchScore.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201608141208281_AddPlayerStatisticsProperties.cs" />
+    <Compile Include="Migrations\201608141208281_AddPlayerStatisticsProperties.Designer.cs">
+      <DependentUpon>201608141208281_AddPlayerStatisticsProperties.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\ApplicationDbContext.cs" />
     <Compile Include="Models\Challenge.cs" />
@@ -280,6 +291,7 @@
     <Compile Include="ViewModels\Manage\ManageLoginsViewModel.cs" />
     <Compile Include="ViewModels\Manage\SetPasswordViewModel.cs" />
     <Compile Include="ViewModels\Manage\VerifyPhoneNumberViewModel.cs" />
+    <Compile Include="ViewModels\Players\PlayerDetailsViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap-cerulean.css" />
@@ -580,6 +592,15 @@
     <Content Include="Views\Home\LookingForOpponent.cshtml" />
     <Content Include="Views\Home\WaitingForOpponentToAcceptChallenge.cshtml" />
     <Content Include="Views\Home\PlayingMatch.cshtml" />
+    <Content Include="Views\Tournaments\Index.cshtml" />
+    <Content Include="Views\Tournaments\Details.cshtml" />
+    <Content Include="Views\Home\HowToPlay.cshtml" />
+    <Content Include="Views\Home\Statistics.cshtml" />
+    <Content Include="Views\Matches\Index.cshtml" />
+    <Content Include="Views\Players\Index.cshtml" />
+    <Content Include="Views\Players\Details.cshtml" />
+    <Content Include="Views\Matches\Details.cshtml" />
+    <Content Include="Views\Matches\Watch.cshtml" />
     <None Include="Web.Production.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -641,6 +662,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201608122238188_AddPlayerState.resx">
       <DependentUpon>201608122238188_AddPlayerState.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201608141149124_AddMatchScore.resx">
+      <DependentUpon>201608141149124_AddMatchScore.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201608141208281_AddPlayerStatisticsProperties.resx">
+      <DependentUpon>201608141208281_AddPlayerStatisticsProperties.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

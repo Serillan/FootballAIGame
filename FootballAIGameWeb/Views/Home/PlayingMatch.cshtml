@@ -55,9 +55,8 @@
                                     $("#btn").text("Details");
                                     $("#btn").off("click"); // remove old handler
                                     $("#btn").on("click", function() {
-                                        //  id of the match TODO
                                         toastr.success("ok");
-                                        window.location.href = "../Matches/1";
+                                        window.location.href = "../matches/details/" + response2.matchId;
                                     });
                                 }
                             });

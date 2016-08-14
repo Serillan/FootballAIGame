@@ -20,6 +20,12 @@ namespace FootballAIGameWeb.Models
 
         public PlayerState PlayerState { get; set; }
 
+        public int Score { get; set; }
+
+        public int WonGames { get; set; }
+
+        public int WonTournaments { get; set; }
+
     }
 
     public enum PlayerState
