@@ -10,6 +10,8 @@ namespace FootballAIGameServer.Models
         [Key, ForeignKey("User")]
         public string UserId { get; set; }
 
+        public User User { get; set; }
+
         public string Name { get; set; }
 
         public ICollection<Tournament> Tournaments { get; set; }
