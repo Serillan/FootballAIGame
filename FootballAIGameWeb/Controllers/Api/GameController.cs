@@ -127,7 +127,7 @@ namespace FootballAIGameWeb.Controllers.Api
                     challengeInDb.ChallengedPlayer == player &&
                     challengeInDb.ChallengingPlayer.PlayerState == PlayerState.WaitingForOpponentToAcceptChallenge)
                 {
-                    using (var gameServer = new GameService.GameServerServiceClient())
+                    using (var gameServer = new GameServerService.GameServerServiceClient())
                     {
                         gameServer.StartGame(player.UserId, challengeInDb.ChallengingPlayer.UserId);
                     }
@@ -150,7 +150,7 @@ namespace FootballAIGameWeb.Controllers.Api
             {
                 var player = GetCurrentPlayer(context);
 
-                using (var gameServer = new GameService.GameServerServiceClient())
+                using (var gameServer = new GameServerService.GameServerServiceClient())
                 {
                     gameServer.WantsToPlay(player.UserId, player.SelectedAi);
                 }

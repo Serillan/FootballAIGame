@@ -8,11 +8,11 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace FootballAIGameWeb.GameService {
+namespace FootballAIGameWeb.GameServerService {
     
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    [System.ServiceModel.ServiceContractAttribute(ConfigurationName="GameService.IGameServerService")]
+    [System.ServiceModel.ServiceContractAttribute(ConfigurationName="GameServerService.IGameServerService")]
     public interface IGameServerService {
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameServerService/WantsToPlay", ReplyAction="http://tempuri.org/IGameServerService/WantsToPlayResponse")]
@@ -29,12 +29,12 @@ namespace FootballAIGameWeb.GameService {
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public interface IGameServerServiceChannel : FootballAIGameWeb.GameService.IGameServerService, System.ServiceModel.IClientChannel {
+    public interface IGameServerServiceChannel : FootballAIGameWeb.GameServerService.IGameServerService, System.ServiceModel.IClientChannel {
     }
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class GameServerServiceClient : System.ServiceModel.ClientBase<FootballAIGameWeb.GameService.IGameServerService>, FootballAIGameWeb.GameService.IGameServerService {
+    public partial class GameServerServiceClient : System.ServiceModel.ClientBase<FootballAIGameWeb.GameServerService.IGameServerService>, FootballAIGameWeb.GameServerService.IGameServerService {
         
         public GameServerServiceClient() {
         }

@@ -281,7 +281,7 @@
     <Compile Include="Models\Tournament.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Service References\GameService\Reference.cs">
+    <Compile Include="Service References\GameServerService\Reference.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Reference.svcmap</DependentUpon>
@@ -566,13 +566,13 @@
     <Content Include="Scripts\toastr.js" />
     <Content Include="Scripts\toastr.min.js" />
     <Content Include="Scripts\_references.js" />
-    <None Include="Service References\GameService\item.disco" />
-    <None Include="Service References\GameService\configuration91.svcinfo" />
-    <None Include="Service References\GameService\configuration.svcinfo" />
-    <None Include="Service References\GameService\item1.xsd">
+    <None Include="Service References\GameServerService\item.disco" />
+    <None Include="Service References\GameServerService\configuration91.svcinfo" />
+    <None Include="Service References\GameServerService\configuration.svcinfo" />
+    <None Include="Service References\GameServerService\item1.xsd">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Service References\GameService\Reference.svcmap">
+    <None Include="Service References\GameServerService\Reference.svcmap">
       <Generator>WCF Proxy Generator</Generator>
       <LastGenOutput>Reference.cs</LastGenOutput>
     </None>
@@ -627,8 +627,8 @@
     <Content Include="Views\Players\Details.cshtml" />
     <Content Include="Views\Matches\Details.cshtml" />
     <Content Include="Views\Matches\Watch.cshtml" />
-    <None Include="Service References\GameService\GameService.wsdl" />
-    <None Include="Service References\GameService\item.xsd">
+    <None Include="Service References\GameServerService\GameService.wsdl" />
+    <None Include="Service References\GameServerService\item.xsd">
       <SubType>Designer</SubType>
     </None>
     <None Include="Web.Production.config">
@@ -710,7 +710,7 @@
     <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <ItemGroup>
-    <WCFMetadataStorage Include="Service References\GameService\" />
+    <WCFMetadataStorage Include="Service References\GameServerService\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
