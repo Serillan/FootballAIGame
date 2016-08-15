@@ -53,7 +53,7 @@ namespace FootballAIGameWeb.Controllers
             if (player == null)
                 return HttpNotFound();
 
-            var activeAIs = currentPlayer.ActiveAis.Split(';').ToList();
+            var activeAIs = CurrentPlayer.ActiveAis?.Split(';').ToList() ?? new List<string>();
 
             var orderedPlayers = _context.Players.OrderByDescending(p => p.Score).ToList();
             var rank = 1;

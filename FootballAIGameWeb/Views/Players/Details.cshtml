@@ -90,7 +90,8 @@
 
                 @if (Model.SelectedAi != null)
                 {
-                    <text>$("select").val("@Model.SelectedAi");</text>
+                    <text>
+                $("select").val("@Model.SelectedAi");</text>
                 }
                 else if (Model.ActiveAIs.Count != 0)
                 {
@@ -102,6 +103,10 @@
                         function() {
 
                             var selectedAi = $("option:selected").text();
+                            if (selectedAi === undefined || selectedAi === "") {
+                                toastr.error("You need to have an active AI!");
+                                return;
+                            }
 
                             $.ajax({
                                 url: "/api/game/selectai/" + selectedAi,
@@ -111,9 +116,9 @@
                                         url: "/api/game/challengeplayer/@Model.Player.Name",
                                         method: "post",
                                         success: function() {
-                                            location.replace("../../Home");
+                                            location.replace("/");
                                         },
-                                        error: function (xhr, status, error) {
+                                        error: function(xhr, status, error) {
                                             var json = JSON.parse(xhr.responseText);
                                             toastr.error(json.message);
                                         }

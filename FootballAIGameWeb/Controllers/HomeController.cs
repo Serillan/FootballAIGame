@@ -74,7 +74,7 @@ namespace FootballAIGameWeb.Controllers
                 .Take(5) // only last 5 matches
                 .ToList();
 
-            var activeAIs = player.ActiveAis.Split(';').ToList();
+            var activeAIs = player.ActiveAis?.Split(';').ToList() ?? new List<string>();
 
             var viewModel = new ViewModels.Home.PlayerHomeViewModel()
             {

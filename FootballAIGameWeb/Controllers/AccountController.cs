@@ -171,12 +171,10 @@ namespace FootballAIGameWeb.Controllers
                         {
                             UserId = user.Id,
                             Name = user.UserName,
-                            ActiveAis = "",
                             PlayerState = PlayerState.Idle,
                             Score = 0,
                             WonGames = 0,
                             WonTournaments = 0,
-                            SelectedAi = ""
                         });
                         context.SaveChanges();
                     }

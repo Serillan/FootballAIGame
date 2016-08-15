@@ -47,8 +47,6 @@ namespace FootballAIGameWeb.Controllers.Api
             {
                 var player = GetCurrentPlayer(context);
 
-                // TODO tell game server that player wants to cancel challenge
-                // and wait for server response
                 var challenge = context.Challenges
                     .Include(c => c.ChallengingPlayer)
                     .SingleOrDefault(c => c.ChallengingPlayer.UserId == player.UserId);
@@ -129,7 +127,11 @@ namespace FootballAIGameWeb.Controllers.Api
                     challengeInDb.ChallengedPlayer == player &&
                     challengeInDb.ChallengingPlayer.PlayerState == PlayerState.WaitingForOpponentToAcceptChallenge)
                 {
-                    // Game Server TODO Challenge(player1Name, ai1Name , player2Name, ai2Name)
+                    using (var gameServer = new GameService.GameServerServiceClient())
+                    {
+                        gameServer.StartGame(player.UserId, challengeInDb.ChallengingPlayer.UserId);
+                    }
+
                     challengeInDb.ChallengingPlayer.PlayerState = PlayerState.PlayingMatch;
                     challengeInDb.ChallengedPlayer.PlayerState = PlayerState.PlayingMatch;
                     context.Challenges.Remove(challengeInDb);
@@ -148,8 +150,13 @@ namespace FootballAIGameWeb.Controllers.Api
             {
                 var player = GetCurrentPlayer(context);
 
-                if (player.PlayerState != PlayerState.Idle)
-                    return BadRequest("Invalid player state.");
+                using (var gameServer = new GameService.GameServerServiceClient())
+                {
+                    gameServer.WantsToPlay(player.UserId, player.SelectedAi);
+                }
+
+                    if (player.PlayerState != PlayerState.Idle)
+                        return BadRequest("Invalid player state.");
                 
                 player.PlayerState = PlayerState.LookingForOpponent;
                 context.SaveChanges();
@@ -219,7 +226,6 @@ namespace FootballAIGameWeb.Controllers.Api
                 var player = GetCurrentPlayer(context);
 
                 // TODO check that game server is checking state!
-                // and wait for server response
                 player.PlayerState = PlayerState.Idle;
                 context.SaveChanges();
                 return Ok();
