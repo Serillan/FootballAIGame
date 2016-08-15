@@ -40,7 +40,6 @@
                             clearInterval(anim);
                             $("#dots").text(String.fromCharCode(160)); 
 
-                            // from response you will get result and id of the match TODO
                             $.ajax({
                                 url: "/api/game/getlastmatchresult",
                                 success: function(response2) {

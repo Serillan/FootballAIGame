@@ -218,7 +218,7 @@ namespace FootballAIGameWeb.Controllers.Api
             {
                 var player = GetCurrentPlayer(context);
 
-                // TODO tell game server that player doesn't want to fight
+                // TODO check that game server is checking state!
                 // and wait for server response
                 player.PlayerState = PlayerState.Idle;
                 context.SaveChanges();
@@ -233,11 +233,10 @@ namespace FootballAIGameWeb.Controllers.Api
             {
                 var player = GetCurrentPlayer(context);
 
-                // TODO tell game server that player wants to cancel match
-                // server will change the player states! 
+                // TODO check that game server looks on state
 
-                player.PlayerState = PlayerState.Idle; // for now, -> TODO server will change it
-                context.SaveChanges(); // TODO will be removed ^^
+                player.PlayerState = PlayerState.Idle; 
+                context.SaveChanges();
 
                 return Ok();
             }

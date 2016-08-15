@@ -124,12 +124,6 @@
 
         $(document)
             .ready(function () {
-                @if (Model.ErrorFromTheServer != null)
-                {
-                    <text>
-                toastr.error("@Model.ErrorFromTheServer");
-                </text>
-                }
 
                 $("#game-form").submit(function (e) {
                     e.preventDefault();

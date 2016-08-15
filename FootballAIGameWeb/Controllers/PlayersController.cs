@@ -53,6 +53,17 @@ namespace FootballAIGameWeb.Controllers
             if (player == null)
                 return HttpNotFound();
 
+            var activeAIs = currentPlayer.ActiveAis.Split(';').ToList();
+
+            var orderedPlayers = _context.Players.OrderByDescending(p => p.Score).ToList();
+            var rank = 1;
+            foreach (var orderedPlayer in orderedPlayers)
+            {
+                if (orderedPlayer.UserId == player.UserId)
+                    break;
+                rank++;
+            }
+
             var lastMatches = _context.Matches
                 .Include(m => m.Player1)
                 .Include(m => m.Player2)
@@ -67,8 +78,9 @@ namespace FootballAIGameWeb.Controllers
                 Player = player,
                 LastMatches = lastMatches,
                 LastTournaments = lastTournaments,
-                ActiveAIs = new List<string>() { "MyBestAI1", "MyStupidAI" }, // from server TODO
-                SelectedAi = currentPlayer.SelectedAi
+                ActiveAIs = activeAIs,
+                SelectedAi = currentPlayer.SelectedAi,
+                Rank = rank
             };
 
             return View("Details", viewModel);

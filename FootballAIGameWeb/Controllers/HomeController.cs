@@ -74,9 +74,11 @@ namespace FootballAIGameWeb.Controllers
                 .Take(5) // only last 5 matches
                 .ToList();
 
+            var activeAIs = player.ActiveAis.Split(';').ToList();
+
             var viewModel = new ViewModels.Home.PlayerHomeViewModel()
             {
-                ActiveAIs = new List<string>() { "MyBestAI1", "MyStupidAI" }, // from server TODO
+                ActiveAIs = activeAIs,
                 LastMatches = lastMatches,
                 Challenges = _context.Challenges
                     .Where(c => c.ChallengedPlayer.UserId == player.UserId)

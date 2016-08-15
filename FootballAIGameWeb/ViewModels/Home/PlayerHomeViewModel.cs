@@ -20,9 +20,6 @@ namespace FootballAIGameWeb.ViewModels.Home
         [Display(Name = "Name")]
         public string OpponentPlayerName { get; set; }
 
-        [Required(ErrorMessage = "AI must be selected.")]
         public string SelectedAi { get; set; }
-
-        public string ErrorFromTheServer { get; set; }
     }
 }
