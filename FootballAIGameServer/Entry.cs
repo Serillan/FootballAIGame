@@ -16,8 +16,9 @@ namespace FootballAIGameServer
         {
             ServiceHost host = new ServiceHost(typeof(GameServerService));
             host.Open(); // start service
+            Console.WriteLine("Services have started.");
             ConnectionManager manager = new ConnectionManager();
-            manager.StartListening(); // start listening
+            manager.StartListening().Wait(); // start listening
         }
     }
 }

@@ -92,8 +92,12 @@
     <Compile Include="ApiForWeb\GameServerService.cs" />
     <Compile Include="ApiForWeb\IGameServerService.cs" />
     <Compile Include="ClientConnection.cs" />
+    <Compile Include="Messages\ActionMessage.cs" />
+    <Compile Include="Messages\ClientMessage.cs" />
     <Compile Include="ConnectionManager.cs" />
     <Compile Include="MatchSimulator.cs" />
+    <Compile Include="Messages\ConnectMessage.cs" />
+    <Compile Include="Messages\ParametersMessage.cs" />
     <Compile Include="Models\ApplicationDbContext.cs" />
     <Compile Include="Models\Challenge.cs" />
     <Compile Include="Models\Match.cs" />
