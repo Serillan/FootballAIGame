@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace FootballAIGameServer.Messages
 {
-    class ActionMessage : ClientMessage
+    public class ActionMessage : ClientMessage
     {
         public PlayerAction[] PlayerActions { get; set; }
 

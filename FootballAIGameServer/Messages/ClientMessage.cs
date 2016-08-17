@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace FootballAIGameServer.Messages
 {
-    abstract class ClientMessage
+    public abstract class ClientMessage
     {
     }
 

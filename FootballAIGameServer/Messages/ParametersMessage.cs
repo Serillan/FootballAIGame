@@ -7,7 +7,7 @@ using FootballAIGameServer.SimulationEntities;
 
 namespace FootballAIGameServer.Messages
 {
-    class ParametersMessage : ClientMessage
+    public class ParametersMessage : ClientMessage
     {
         public FootballPlayer[] Players { get; set; }
 

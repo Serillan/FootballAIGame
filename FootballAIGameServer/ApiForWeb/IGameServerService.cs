@@ -12,9 +12,9 @@ namespace FootballAIGameServer.ApiForWeb
     public interface IGameServerService
     {
         [OperationContract]
-        void WantsToPlay(string userId, string ai);
+        string WantsToPlay(string userName, string ai);
 
         [OperationContract]
-        void StartGame(string userId1, string userId2);
+        string StartGame(string userName1, string ai1, string userName2, string ai2);
     }
 }

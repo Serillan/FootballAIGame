@@ -5,21 +5,26 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using FootballAIGameServer.Messages;
 using FootballAIGameServer.Models;
 
 namespace FootballAIGameServer
 {
-    class ClientConnection
+    public class ClientConnection
     {
         private TcpClient TcpClient { get; set; }
         private NetworkStream NetworkStream { get; set; }
         private StreamReader NetworkReader { get; set; }
         private StreamWriter NetworkWriter { get; set; }
+        private CancellationTokenSource CancellationTokenSource { get; set; }
+
         public bool IsActive { get; set; }
         public string PlayerName { get; set; }
         public string AiName { get; set; }
+
+        private Task<ClientMessage> CurrentReceivetask { get; set; }
 
         public ClientConnection(TcpClient tcpClient)
         {
@@ -28,6 +33,7 @@ namespace FootballAIGameServer
             this.NetworkStream = tcpClient.GetStream();
             this.NetworkReader = new StreamReader(NetworkStream);
             this.NetworkWriter = new StreamWriter(NetworkStream) {AutoFlush = true};
+            this.CancellationTokenSource = new CancellationTokenSource();
             IsActive = false;
         }
 
@@ -38,6 +44,15 @@ namespace FootballAIGameServer
 
         public async Task<ClientMessage> ReceiveClientMessageAsync()
         {
+            if (CurrentReceivetask == null || CurrentReceivetask.IsCanceled || CurrentReceivetask.IsCompleted ||
+                CurrentReceivetask.IsFaulted)
+                CurrentReceivetask = ReceiveClientMessageAsyncTask();
+
+            return await CurrentReceivetask;
+        }
+
+        private async Task<ClientMessage> ReceiveClientMessageAsyncTask()
+        {
             ClientMessage message;
 
             while (true) // while correct message is not received
@@ -47,21 +62,21 @@ namespace FootballAIGameServer
                 if (firstLine == "ACTION")
                 {
                     var data = new byte[176];
-                    await NetworkStream.ReadAsync(data, 0, data.Length);
+                    await NetworkStream.ReadAsync(data, 0, data.Length, CancellationTokenSource.Token);
                     message = ActionMessage.ParseMessage(data);
                     break;
                 }
                 else if (firstLine == "PARAMETERS")
                 {
                     var data = new byte[176];
-                    await NetworkStream.ReadAsync(data, 0, data.Length);
+                    await NetworkStream.ReadAsync(data, 0, data.Length, CancellationTokenSource.Token);
                     message = ParametersMessage.ParseMessage(data);
                     break;
                 }
                 else // CONNECT expected
                 {
                     var tokens = firstLine.Split();
-                    if (tokens.Length != 4 || tokens[0] != "LOGIN")
+                    if (tokens.Length != 3 || tokens[0] != "LOGIN")
                     {
                         // todo send client error message
                         SendAsync("FAIL invalid message format.");
@@ -71,8 +86,7 @@ namespace FootballAIGameServer
                     message = new LoginMessage()
                     {
                         PlayerName = tokens[1],
-                        PlayerPassword = tokens[2],
-                        AiName = tokens[3]
+                        AiName = tokens[2]
 
                     };
                     break;
@@ -80,6 +94,11 @@ namespace FootballAIGameServer
             }
 
             return message;
+        }
+
+        public void CancelCurrentReceiving()
+        {
+            CancellationTokenSource.Cancel();
         }
 
         public bool IsConnected

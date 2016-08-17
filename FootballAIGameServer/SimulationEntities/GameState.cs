@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace FootballAIGameServer.SimulationEntities
 {
-    class GameState
+    public class GameState
     {
         public FootballPlayer[] FootballPlayers { get; set; }
 

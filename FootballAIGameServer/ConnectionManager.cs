@@ -12,20 +12,36 @@ using FootballAIGameServer.Models;
 
 namespace FootballAIGameServer
 {
-    class ConnectionManager
+    public class ConnectionManager
     {
-        private List<ClientConnection> Connections { get; set; }
-        private List<ClientConnection> ActiveConnections { get; set; }
-
+        public List<ClientConnection> Connections { get; set; }
+        public List<ClientConnection> ActiveConnections { get; set; }
         public const int GameServerPort = 50030;
+
+        public List<ClientConnection> WantsToPlayConnections { get; set; }
+
+        private static ConnectionManager _Instance; // singleton instance
+
+        public static ConnectionManager Instance
+        {
+            get
+            {
+                if (_Instance == null)
+                {
+                    _Instance = new ConnectionManager();
+                }
+                return _Instance;
+            }
+        }
 
         private TcpListener Listener { get; set; }
 
-        public ConnectionManager()
+        private ConnectionManager()
         {
             Listener = new TcpListener(IPAddress.Any, GameServerPort);
             Connections = new List<ClientConnection>();
             ActiveConnections = new List<ClientConnection>();
+            WantsToPlayConnections = new List<ClientConnection>();
         }
 
         public async Task StartCheckingConnections()
@@ -42,6 +58,8 @@ namespace FootballAIGameServer
                         {
                             clientConnection.IsActive = false;
                             toBeRemovedConnections.Add(clientConnection);
+                            Console.WriteLine($"Player {clientConnection.PlayerName} with AI " +
+                                              $"{clientConnection.AiName} has disconnected.");
                         }
                     }
 
@@ -52,7 +70,6 @@ namespace FootballAIGameServer
                         {
                             var player =
                                 context.Players.SingleOrDefault(p => p.Name == toBeRemovedConnection.PlayerName);
-                            Console.WriteLine(player.ActiveAis);
                             var newAis = player.ActiveAis.Split(';').Where(s => s != toBeRemovedConnection.AiName);
                             player.ActiveAis = String.Join(";", newAis);
                             if (player.SelectedAi == toBeRemovedConnection.AiName)
@@ -99,13 +116,12 @@ namespace FootballAIGameServer
                 }
                 else
                 {
-                    Console.WriteLine("Player is trying to login.");
                     if (await ProcessLoginMessageAsync((LoginMessage) clientMessage, connection))
                     {
                         connection.IsActive = true;
                         ActiveConnections.Add(connection);
                         connection.SendAsync("CONNECTED");
-                        Console.WriteLine("New Active AI.");
+                        Console.WriteLine($"Player {connection.PlayerName} with ai {connection.AiName} has log on.");
                         break;
                     }
                 }

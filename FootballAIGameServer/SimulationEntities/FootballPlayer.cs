@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace FootballAIGameServer.SimulationEntities
 {
-    class FootballPlayer
+    public class FootballPlayer
     {
         public float Speed { get; set; }
 
