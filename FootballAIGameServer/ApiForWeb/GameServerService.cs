@@ -25,7 +25,7 @@ namespace FootballAIGameServer.ApiForWeb
                 {
                     manager.WantsToPlayConnections.Add(connection);
                 }
-                else // start  match
+                else // start match
                 {
                     var otherPlayerConnection = manager.WantsToPlayConnections[0];
                     manager.WantsToPlayConnections.Remove(otherPlayerConnection);
@@ -66,6 +66,22 @@ namespace FootballAIGameServer.ApiForWeb
 
                 return "ok";
             }
+        }
+
+        public void CancelMatch(string playerName)
+        {
+            foreach (var runningSimulation in MatchSimulator.RunningSimulations)
+            {
+                if (runningSimulation.Player1Connection.PlayerName == playerName)
+                    runningSimulation.Player1CancelRequested = true;
+                if (runningSimulation.Player2Connection.PlayerName == playerName)
+                    runningSimulation.Player2CancelRequested = true;
+            }
+        }
+
+        public void CancelLooking(string playerName)
+        {
+            ConnectionManager.Instance.WantsToPlayConnections.RemoveAll(p => p.PlayerName == playerName);
         }
     }
 }

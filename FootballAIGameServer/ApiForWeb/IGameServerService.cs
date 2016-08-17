@@ -16,5 +16,11 @@ namespace FootballAIGameServer.ApiForWeb
 
         [OperationContract]
         string StartGame(string userName1, string ai1, string userName2, string ai2);
+
+        [OperationContract]
+        void CancelMatch(string playerName);
+
+        [OperationContract]
+        void CancelLooking(string playername);
     }
 }

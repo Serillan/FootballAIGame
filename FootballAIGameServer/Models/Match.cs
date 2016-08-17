@@ -32,6 +32,12 @@ namespace FootballAIGameServer.Models
 
         public int ShotsOnTarget2 { get; set; }
 
+        public string Player1ErrorLog { get; set; }
+
+        public string Player2ErrorLog { get; set; }
+
+        public byte[] MatchData { get; set; }
+
 
         /// <summary>
         /// Returns 1 if Player1 won, otherwise returns false.

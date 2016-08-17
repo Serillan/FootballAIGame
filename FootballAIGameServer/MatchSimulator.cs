@@ -12,13 +12,18 @@ namespace FootballAIGameServer
 {
     public class MatchSimulator
     {
-        private ClientConnection Player1Connection { get; set; }
-        private ClientConnection Player2Connection { get; set; }
+        public ClientConnection Player1Connection { get; set; }
+        public ClientConnection Player2Connection { get; set; }
         private GameState GameState { get; set; }
         private Match Match { get; set; }
 
+        public bool Player1CancelRequested { get; set; }
+        public bool Player2CancelRequested { get; set; }
+
         public const int NumberOfSimulationSteps = 150;
         public const int PlayerStepTime = 100; // ms
+
+        public static List<MatchSimulator> RunningSimulations { get; set; }
 
         public MatchSimulator(ClientConnection player1Connection, ClientConnection player2Connection)
         {
@@ -28,6 +33,10 @@ namespace FootballAIGameServer
 
         public async Task SimulateMatch()
         {
+            if (RunningSimulations == null)
+                RunningSimulations = new List<MatchSimulator>();
+            RunningSimulations.Add(this);
+
             Console.WriteLine($"Start simulation between {Player1Connection.PlayerName}:{Player1Connection.AiName} " +
                               $"and {Player2Connection.PlayerName}:{Player2Connection.AiName}");
 
@@ -53,6 +62,9 @@ namespace FootballAIGameServer
             {
                 Console.WriteLine(step);
 
+                if (Player1CancelRequested || Player2CancelRequested)
+                    break;
+
                 var getMessage1Task = Task.WhenAny(message1, Task.Delay(ping1 + PlayerStepTime));
                 var getMessage2Task = Task.WhenAny(message2, Task.Delay(ping2 + PlayerStepTime));
 
@@ -65,13 +77,23 @@ namespace FootballAIGameServer
 
                 if (getMessage1Result == message1)
                 {
+                    if (message1.IsFaulted)
+                    {
+                        break;
+                    }
+
                     actionMessage1 = message1.Result as ActionMessage;
                     if (step < NumberOfSimulationSteps - 1)
                         message1 = Player1Connection.ReceiveClientMessageAsync();
                 }
 
-                if (getMessage2Result == message2)
+                if (getMessage2Result == message2 && !message2.IsFaulted)
                 {
+                    if (message2.IsFaulted)
+                    {
+                        break;
+                    }
+
                     actionMessage2 = message2.Result as ActionMessage;
                     if (step < NumberOfSimulationSteps - 1)
                         message2 = Player2Connection.ReceiveClientMessageAsync();
@@ -96,20 +118,37 @@ namespace FootballAIGameServer
                 match.Score = "0:0";
                 match.Goals = "";
 
+                if (message1.IsFaulted)
+                {
+                    match.Winner = 2;
+                    match.Player2ErrorLog += $"{Player1Connection.PlayerName} has disconnected.";
+                    match.Player1ErrorLog += $"Your AI has disconnected.";
+                }
+                if (message2.IsFaulted)
+                {
+                    match.Winner = 1;
+                    match.Player1ErrorLog += $"{Player2Connection.PlayerName} has disconnected.";
+                    match.Player2ErrorLog += $"Your AI has disconnected.";
+                }
+
+                if (Player1CancelRequested)
+                {
+                    match.Winner = 2;
+                    match.Player2ErrorLog += $"{Player1Connection.PlayerName} has cancelled the match.";
+                    match.Player1ErrorLog += $"Your have cancelled the match.";
+                }
+                if (Player2CancelRequested)
+                {
+                    match.Winner = 1;
+                    match.Player1ErrorLog += $"{Player2Connection.PlayerName} has cancelled the match.";
+                    match.Player2ErrorLog += $"Your have cancelled the match.";
+                }
+
                 context.Matches.Add(match);
 
-                try
-                {
-                    context.SaveChanges();
-                }
-                catch (EntityException ex)
-                {
-                    Console.WriteLine();
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine();
-                }
+                context.SaveChanges();
+
+                RunningSimulations.Remove(this);
             }
         }
 
