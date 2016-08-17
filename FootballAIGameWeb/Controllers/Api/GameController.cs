@@ -232,7 +232,12 @@ namespace FootballAIGameWeb.Controllers.Api
                 var player = GetCurrentPlayer(context);
 
                 // TODO check that game server is checking state!
-                player.PlayerState = PlayerState.Idle;
+                using (var gameServer = new GameServerService.GameServerServiceClient())
+                {
+                    gameServer.CancelLooking(player.Name);
+                }
+                if (player.PlayerState == PlayerState.LookingForOpponent)
+                    player.PlayerState = PlayerState.Idle;
                 context.SaveChanges();
                 return Ok();
             }
@@ -246,6 +251,10 @@ namespace FootballAIGameWeb.Controllers.Api
                 var player = GetCurrentPlayer(context);
 
                 // TODO check that game server looks on state
+                using (var gameServer = new GameServerService.GameServerServiceClient())
+                {
+                    gameServer.CancelMatch(player.Name);
+                }
 
                 player.PlayerState = PlayerState.Idle;
                 context.SaveChanges();

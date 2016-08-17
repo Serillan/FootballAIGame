@@ -273,6 +273,10 @@
     <Compile Include="Migrations\201608151028534_AddActiveAisPropertyToPlayer.Designer.cs">
       <DependentUpon>201608151028534_AddActiveAisPropertyToPlayer.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201608172118151_AddMatchProperties.cs" />
+    <Compile Include="Migrations\201608172118151_AddMatchProperties.Designer.cs">
+      <DependentUpon>201608172118151_AddMatchProperties.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\ApplicationDbContext.cs" />
     <Compile Include="Models\Challenge.cs" />
@@ -704,6 +708,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201608151028534_AddActiveAisPropertyToPlayer.resx">
       <DependentUpon>201608151028534_AddActiveAisPropertyToPlayer.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201608172118151_AddMatchProperties.resx">
+      <DependentUpon>201608172118151_AddMatchProperties.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

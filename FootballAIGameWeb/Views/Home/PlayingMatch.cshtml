@@ -51,6 +51,7 @@
                                     else if (response2.result === "draw")
                                         $("#heading").text("Draw!");
 
+                                    $("#btn").removeProp("disabled");
                                     $("#btn").text("Details");
                                     $("#btn").off("click"); // remove old handler
                                     $("#btn").on("click", function() {
@@ -68,6 +69,8 @@
                         url: "/api/game/cancelmatch",
                         method: "put"
                     });
+                    clearInterval(anim);
+                    $("#btn").prop("disabled", true);
                 });
             }
         });

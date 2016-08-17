@@ -26,6 +26,18 @@ namespace FootballAIGameWeb.GameServerService {
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameServerService/StartGame", ReplyAction="http://tempuri.org/IGameServerService/StartGameResponse")]
         System.Threading.Tasks.Task<string> StartGameAsync(string userName1, string ai1, string userName2, string ai2);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameServerService/CancelMatch", ReplyAction="http://tempuri.org/IGameServerService/CancelMatchResponse")]
+        void CancelMatch(string playerName);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameServerService/CancelMatch", ReplyAction="http://tempuri.org/IGameServerService/CancelMatchResponse")]
+        System.Threading.Tasks.Task CancelMatchAsync(string playerName);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameServerService/CancelLooking", ReplyAction="http://tempuri.org/IGameServerService/CancelLookingResponse")]
+        void CancelLooking(string playername);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameServerService/CancelLooking", ReplyAction="http://tempuri.org/IGameServerService/CancelLookingResponse")]
+        System.Threading.Tasks.Task CancelLookingAsync(string playername);
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
@@ -69,6 +81,22 @@ namespace FootballAIGameWeb.GameServerService {
         
         public System.Threading.Tasks.Task<string> StartGameAsync(string userName1, string ai1, string userName2, string ai2) {
             return base.Channel.StartGameAsync(userName1, ai1, userName2, ai2);
+        }
+        
+        public void CancelMatch(string playerName) {
+            base.Channel.CancelMatch(playerName);
+        }
+        
+        public System.Threading.Tasks.Task CancelMatchAsync(string playerName) {
+            return base.Channel.CancelMatchAsync(playerName);
+        }
+        
+        public void CancelLooking(string playername) {
+            base.Channel.CancelLooking(playername);
+        }
+        
+        public System.Threading.Tasks.Task CancelLookingAsync(string playername) {
+            return base.Channel.CancelLookingAsync(playername);
         }
     }
 }
