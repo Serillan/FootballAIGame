@@ -18,7 +18,7 @@ namespace FootballAIGameServer
         private StreamReader NetworkReader { get; set; }
         private StreamWriter NetworkWriter { get; set; }
         public bool IsActive { get; set; }
-        public Player Player { get; set; }
+        public string PlayerName { get; set; }
         public string AiName { get; set; }
 
         public ClientConnection(TcpClient tcpClient)
@@ -27,15 +27,13 @@ namespace FootballAIGameServer
             this.TcpClient.NoDelay = true;
             this.NetworkStream = tcpClient.GetStream();
             this.NetworkReader = new StreamReader(NetworkStream);
-            this.NetworkWriter = new StreamWriter(NetworkStream);
-            this.NetworkWriter.AutoFlush = true;
+            this.NetworkWriter = new StreamWriter(NetworkStream) {AutoFlush = true};
             IsActive = false;
         }
 
         public async Task SendAsync(string message)
         {
             await NetworkWriter.WriteLineAsync(message);
-            NetworkWriter.Flush();
         }
 
         public async Task<ClientMessage> ReceiveClientMessageAsync()
@@ -48,14 +46,16 @@ namespace FootballAIGameServer
 
                 if (firstLine == "ACTION")
                 {
-                    message = new ActionMessage();
-
+                    var data = new byte[176];
+                    await NetworkStream.ReadAsync(data, 0, data.Length);
+                    message = ActionMessage.ParseMessage(data);
                     break;
                 }
                 else if (firstLine == "PARAMETERS")
                 {
-                    message = new ParametersMessage();
-
+                    var data = new byte[176];
+                    await NetworkStream.ReadAsync(data, 0, data.Length);
+                    message = ParametersMessage.ParseMessage(data);
                     break;
                 }
                 else // CONNECT expected
@@ -64,11 +64,17 @@ namespace FootballAIGameServer
                     if (tokens.Length != 4 || tokens[0] != "LOGIN")
                     {
                         // todo send client error message
+                        SendAsync("FAIL invalid message format.");
                         continue;
                     }
 
-                    message = new LoginMessage();
+                    message = new LoginMessage()
+                    {
+                        PlayerName = tokens[1],
+                        PlayerPassword = tokens[2],
+                        AiName = tokens[3]
 
+                    };
                     break;
                 }
             }
@@ -76,5 +82,41 @@ namespace FootballAIGameServer
             return message;
         }
 
+        public bool IsConnected
+        {
+            get
+            {
+                try
+                {
+                    if (TcpClient != null && TcpClient.Client != null && TcpClient.Client.Connected)
+                    {
+                        // Detect if client disconnected
+                        if (TcpClient.Client.Poll(0, SelectMode.SelectRead))
+                        {
+                            byte[] buff = new byte[1];
+                            if (TcpClient.Client.Receive(buff, SocketFlags.Peek) == 0)
+                            {
+                                // Client disconnected
+                                return false;
+                            }
+                            else
+                            {
+                                return true;
+                            }
+                        }
+
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+        }
     }
 }

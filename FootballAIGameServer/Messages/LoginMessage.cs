@@ -8,5 +8,10 @@ namespace FootballAIGameServer.Messages
 {
     class LoginMessage : ClientMessage
     {
+        public string PlayerName { get; set; }
+
+        public string PlayerPassword { get; set; }
+
+        public string AiName { get; set; }
     }
 }

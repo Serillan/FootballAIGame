@@ -8,5 +8,8 @@ namespace FootballAIGameServer.SimulationEntities
 {
     class GameState
     {
+        public FootballPlayer[] FootballPlayers { get; set; }
+
+        public Ball Ball { get; set; }
     }
 }
