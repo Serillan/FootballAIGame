@@ -25,6 +25,10 @@
                 foreach (var goal in goals)
                 {
                     var tokens = goal.Split(';');
+                    if (tokens.Length < 3)
+                    {
+                        continue;
+                    }
                     <tr>
                         <td>@tokens[0]</td>
                         <td>@tokens[1]</td>

@@ -49,12 +49,11 @@
                                     else if (response2.result === "loose")
                                         $("#heading").text("You have lost!");
                                     else if (response2.result === "draw")
-                                        $("heading").text("Draw!");
+                                        $("#heading").text("Draw!");
 
                                     $("#btn").text("Details");
                                     $("#btn").off("click"); // remove old handler
                                     $("#btn").on("click", function() {
-                                        toastr.success("ok");
                                         window.location.href = "/matches/details/" + response2.matchId;
                                     });
                                 }

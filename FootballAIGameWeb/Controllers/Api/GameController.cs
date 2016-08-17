@@ -1,5 +1,6 @@
 ﻿using System.Data.Entity;
 using System.Linq;
+using System.Threading;
 using System.Web.Http;
 using FootballAIGameWeb.Models;
 using Microsoft.AspNet.Identity;
@@ -116,20 +117,21 @@ namespace FootballAIGameWeb.Controllers.Api
                     return Ok();
                 }
 
-                    // only one concurrent challenge allowed
+                // only one concurrent challenge allowed
                 if (challengeInDb.ChallengingPlayer == player)
                 {
                     return BadRequest("Only one concurrent challenge is allowed.");
                 }
 
-                    // accept challenge
+                // accept challenge
                 if (challengeInDb.ChallengingPlayer.Name == id &&
                     challengeInDb.ChallengedPlayer == player &&
                     challengeInDb.ChallengingPlayer.PlayerState == PlayerState.WaitingForOpponentToAcceptChallenge)
                 {
                     using (var gameServer = new GameServerService.GameServerServiceClient())
                     {
-                        gameServer.StartGame(player.UserId, challengeInDb.ChallengingPlayer.UserId);
+                        gameServer.StartGame(player.Name, player.SelectedAi,
+                            challengeInDb.ChallengingPlayer.Name, challengeInDb.ChallengingPlayer.SelectedAi);
                     }
 
                     challengeInDb.ChallengingPlayer.PlayerState = PlayerState.PlayingMatch;
@@ -146,22 +148,26 @@ namespace FootballAIGameWeb.Controllers.Api
         [HttpPost]
         public IHttpActionResult StartRandomMatch()
         {
+            Player player;
+
             using (var context = new ApplicationDbContext())
             {
-                var player = GetCurrentPlayer(context);
+                player = GetCurrentPlayer(context);
 
-                using (var gameServer = new GameServerService.GameServerServiceClient())
-                {
-                    gameServer.WantsToPlay(player.UserId, player.SelectedAi);
-                }
+                if (player.PlayerState != PlayerState.Idle)
+                    return BadRequest("Invalid player state.");
 
-                    if (player.PlayerState != PlayerState.Idle)
-                        return BadRequest("Invalid player state.");
-                
                 player.PlayerState = PlayerState.LookingForOpponent;
-                context.SaveChanges();
-                return Ok();
+                context.SaveChanges(); // must be done before calling service! 
             }
+
+            using (var gameServer = new GameServerService.GameServerServiceClient())
+            {
+                gameServer.WantsToPlay(player.Name, player.SelectedAi);
+            }
+
+            return Ok();
+
         }
 
         [HttpGet]
@@ -185,7 +191,7 @@ namespace FootballAIGameWeb.Controllers.Api
                     .Include(m => m.Player1)
                     .Include(m => m.Player2)
                     .Where(m => m.Player1.UserId == player.UserId || m.Player2.UserId == player.UserId)
-                    .OrderBy(m => m.Time)
+                    .OrderByDescending(m => m.Time)
                     .FirstOrDefault();
 
                 if (match == null)
@@ -195,7 +201,7 @@ namespace FootballAIGameWeb.Controllers.Api
                                match.Winner == 2 && match.Player2.UserId == player.UserId;
                 var result = match.Winner == 0 ? "draw" : isWinner ? "win" : "loose";
 
-                return Ok(new {result, matchId = match.Id});
+                return Ok(new { result, matchId = match.Id });
             }
         }
 
@@ -241,7 +247,7 @@ namespace FootballAIGameWeb.Controllers.Api
 
                 // TODO check that game server looks on state
 
-                player.PlayerState = PlayerState.Idle; 
+                player.PlayerState = PlayerState.Idle;
                 context.SaveChanges();
 
                 return Ok();

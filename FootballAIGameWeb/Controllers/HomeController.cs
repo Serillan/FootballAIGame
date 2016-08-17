@@ -70,6 +70,7 @@ namespace FootballAIGameWeb.Controllers
             var lastMatches = _context.Matches
                 .Include(m => m.Player1)
                 .Include(m => m.Player2)
+                .Where(m => m.Player1.UserId == player.UserId || m.Player2.UserId == player.UserId)
                 .OrderByDescending(m => m.Time)
                 .Take(5) // only last 5 matches
                 .ToList();

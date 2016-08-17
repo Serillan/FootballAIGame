@@ -16,16 +16,16 @@ namespace FootballAIGameWeb.GameServerService {
     public interface IGameServerService {
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameServerService/WantsToPlay", ReplyAction="http://tempuri.org/IGameServerService/WantsToPlayResponse")]
-        void WantsToPlay(string userId, string ai);
+        string WantsToPlay(string userName, string ai);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameServerService/WantsToPlay", ReplyAction="http://tempuri.org/IGameServerService/WantsToPlayResponse")]
-        System.Threading.Tasks.Task WantsToPlayAsync(string userId, string ai);
+        System.Threading.Tasks.Task<string> WantsToPlayAsync(string userName, string ai);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameServerService/StartGame", ReplyAction="http://tempuri.org/IGameServerService/StartGameResponse")]
-        void StartGame(string userId1, string userId2);
+        string StartGame(string userName1, string ai1, string userName2, string ai2);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameServerService/StartGame", ReplyAction="http://tempuri.org/IGameServerService/StartGameResponse")]
-        System.Threading.Tasks.Task StartGameAsync(string userId1, string userId2);
+        System.Threading.Tasks.Task<string> StartGameAsync(string userName1, string ai1, string userName2, string ai2);
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
@@ -55,20 +55,20 @@ namespace FootballAIGameWeb.GameServerService {
                 base(binding, remoteAddress) {
         }
         
-        public void WantsToPlay(string userId, string ai) {
-            base.Channel.WantsToPlay(userId, ai);
+        public string WantsToPlay(string userName, string ai) {
+            return base.Channel.WantsToPlay(userName, ai);
         }
         
-        public System.Threading.Tasks.Task WantsToPlayAsync(string userId, string ai) {
-            return base.Channel.WantsToPlayAsync(userId, ai);
+        public System.Threading.Tasks.Task<string> WantsToPlayAsync(string userName, string ai) {
+            return base.Channel.WantsToPlayAsync(userName, ai);
         }
         
-        public void StartGame(string userId1, string userId2) {
-            base.Channel.StartGame(userId1, userId2);
+        public string StartGame(string userName1, string ai1, string userName2, string ai2) {
+            return base.Channel.StartGame(userName1, ai1, userName2, ai2);
         }
         
-        public System.Threading.Tasks.Task StartGameAsync(string userId1, string userId2) {
-            return base.Channel.StartGameAsync(userId1, userId2);
+        public System.Threading.Tasks.Task<string> StartGameAsync(string userName1, string ai1, string userName2, string ai2) {
+            return base.Channel.StartGameAsync(userName1, ai1, userName2, ai2);
         }
     }
 }
