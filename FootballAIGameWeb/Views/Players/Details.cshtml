@@ -58,15 +58,18 @@
 
 <div class="container col-sm-4 text-center">
     <h4>Score: @Model.Player.Score (Rank @Model.Rank)</h4>
-    <div style="margin-top: 3em">
-        <button class="btn btn-default" id="challenge">Challenge Player</button>
-    </div>
-    <select class="form-control" id="ai-selection" style="margin: auto; margin-top: 2em; max-width: 60%;">
-        @foreach (var ai in Model.ActiveAIs)
-        {
+    @if (Model.CurrentPlayer != null)
+    {
+        <div style="margin-top: 3em">
+            <button class="btn btn-default" id="challenge">Challenge Player</button>
+        </div>
+        <select class="form-control" id="ai-selection" style="margin: auto; margin-top: 2em; max-width: 60%;">
+            @foreach (var ai in Model.ActiveAIs)
+            {
                 <option>@ai</option>
-        }
-    </select>
+            }
+        </select>
+    }
 </div>
 
 <div class="container col-sm-4 text-center">

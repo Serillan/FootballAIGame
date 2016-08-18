@@ -1,4 +1,5 @@
-﻿using System.Data.Entity;
+﻿using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Threading;
 using System.Web.Http;
@@ -68,6 +69,20 @@ namespace FootballAIGameWeb.Controllers.Api
                 var player = GetCurrentPlayer(context);
 
                 player.SelectedAi = id;
+
+                context.SaveChanges();
+            }
+
+            return Ok();
+        }
+
+        [HttpPut]
+        public IHttpActionResult ToggleAi(string id)
+        {
+            using (var context = new ApplicationDbContext())
+            {
+                var player = GetCurrentPlayer(context);
+                player.SelectedAi = player.SelectedAi == id ? null : id;
 
                 context.SaveChanges();
             }
@@ -221,6 +236,17 @@ namespace FootballAIGameWeb.Controllers.Api
 
 
                 return Ok(challengersNames);
+            }
+        }
+
+        [HttpGet]
+        public IHttpActionResult GetActiveAis()
+        {
+            using (var context = new ApplicationDbContext())
+            {
+                var player = GetCurrentPlayer(context);
+                var activeAIs = player.ActiveAis?.Split(';').ToList() ?? new List<string>();
+                return Ok(activeAIs);
             }
         }
 

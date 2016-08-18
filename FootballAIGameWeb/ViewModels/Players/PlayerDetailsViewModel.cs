@@ -18,6 +18,8 @@ namespace FootballAIGameWeb.ViewModels.Players
 
         public Player Player { get; set; }
 
+        public Player CurrentPlayer { get; set; }
+
         public int Rank { get; set; }
     }
 }

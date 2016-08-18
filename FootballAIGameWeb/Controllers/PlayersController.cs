@@ -21,8 +21,8 @@ namespace FootballAIGameWeb.Controllers
                 var userId = User.Identity.GetUserId();
                 var user = _context.Users
                     .Include(u => u.Player)
-                    .Single(u => u.Id == userId);
-                return user.Player;
+                    .SingleOrDefault(u => u.Id == userId);
+                return user?.Player;
             }
         }
 
@@ -53,7 +53,7 @@ namespace FootballAIGameWeb.Controllers
             if (player == null)
                 return HttpNotFound();
 
-            var activeAIs = CurrentPlayer.ActiveAis?.Split(';').ToList() ?? new List<string>();
+            var activeAIs = CurrentPlayer?.ActiveAis?.Split(';').ToList() ?? new List<string>();
 
             var orderedPlayers = _context.Players.OrderByDescending(p => p.Score).ToList();
             var rank = 1;
@@ -76,10 +76,11 @@ namespace FootballAIGameWeb.Controllers
             var viewModel = new PlayerDetailsViewModel()
             {
                 Player = player,
+                CurrentPlayer = currentPlayer,
                 LastMatches = lastMatches,
                 LastTournaments = lastTournaments,
                 ActiveAIs = activeAIs,
-                SelectedAi = currentPlayer.SelectedAi,
+                SelectedAi = currentPlayer?.SelectedAi,
                 Rank = rank
             };
 

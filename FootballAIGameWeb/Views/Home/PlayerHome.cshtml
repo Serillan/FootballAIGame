@@ -10,7 +10,7 @@
         <h3>Active AIs</h3>
         <table id="ai-table" class="table table-hover" style="border: 2px solid white">
             <thead><tr><th class="text-center">Select AI to play with.</th></tr></thead>
-            <tbody>
+            <tbody id="aiTableBody">
                 @foreach (var ai in Model.ActiveAIs)
                 {
                     if (ai == Model.Player.SelectedAi)
@@ -125,9 +125,10 @@
         $(document)
             .ready(function () {
 
-                $("#game-form").submit(function (e) {
-                    e.preventDefault();
-                });
+                $("#game-form")
+                    .submit(function (e) {
+                        e.preventDefault();
+                    });
 
                 var aiMustBeSelected = function () {
                     if ($("table#ai-table tr.selectable-row[data-selected]").length === 0) {
@@ -144,43 +145,38 @@
                     }
                 };
 
-                //$("#random, #challenge, .accept-challenge").on("click", aiMustBeSelected);
+                var aiTableClickHandler = function () {
+                    $("table#ai-table").css("border", "2px solid white");
+                    var nextValue = $(this).find("td").first().text();
 
-                $("table#ai-table tr.selectable-row")
+                    $("#SelectedAi").attr("value", nextValue);
+
+                    $.ajax({
+                        url: "/api/game/toggleai/" + nextValue,
+                        method: "put"
+                    });
+
+                };
+
+                $("#random")
                     .on("click",
-                    (function () {
-                        $("table#ai-table").css("border", "2px solid white");
-                        var currentValue = $("#SelectedAi").attr("value");
-                        var nextValue = $(this).find("td").first().text();
-                        if (currentValue === nextValue)
-                            nextValue = "";
+                        function () {
+                            $("span[data-valmsg-for='OpponentPlayerName']").text("");
 
-                        $("#SelectedAi").attr("value", nextValue);
-
-                        $.ajax({
-                            url: "/api/game/selectai/" + nextValue,
-                            method: "put"
-                        });
-
-                    }));
-
-                $("#random").on("click", function () {
-                    $("span[data-valmsg-for='OpponentPlayerName']").text("");
-
-                    if (aiMustBeSelected()) {
-                        $.ajax({
-                            url: "/api/game/startrandommatch",
-                            method: "post",
-                            success: function () {
-                                location.replace("/");
-                            },
-                            error: function (xhr, status, error) {
-                                var json = JSON.parse(xhr.responseText);
-                                toastr.error(json.message);
+                            if (aiMustBeSelected()) {
+                                $.ajax({
+                                    url: "/api/game/startrandommatch",
+                                    method: "post",
+                                    success: function () {
+                                        location.replace("/");
+                                    },
+                                    error: function (xhr, status, error) {
+                                        var json = JSON.parse(xhr.responseText);
+                                        toastr.error(json.message);
+                                    }
+                                });
                             }
                         });
-                    }
-                });
 
                 var processChallenge = function () {
                     var opponentName;
@@ -220,26 +216,31 @@
                     });
                 };
 
-                $("#challenge, .accept-challenge").on("click", processChallenge);
-                $(".decline-challenge").on("click", declineChallenge);
 
                 $("#OpponentPlayerName")
                     .keypress(function (event) {
                         if (event.keyCode === 13) {
                             $("#challenge").click();
-                            return false;
                             // stops handling other events on enter! (otherwise primary submit button would be handled)
                         }
                     });
 
                 $("#OpponentPlayerName")
-                    .on("input", function () {
-                        $("span[data-valmsg-for='OpponentPlayerName']").text("");
-                    });
+                    .on("input",
+                        function () {
+                            $("span[data-valmsg-for='OpponentPlayerName']").text("");
+                        });
 
+                @* works for dynamically created elements as well *@
+                @* mousedown instread of click, because while mouse is *@
+                @* being pressed, the control might change and the event won't fire *@
+                $(document).on("click", "#challenge", processChallenge);
+                $(document).on("mousedown", ".accept-challenge", processChallenge);
+                $(document).on("mousedown", ".decline-challenge", declineChallenge);
+                $(document).on("mousedown", "table#ai-table tr.selectable-row", aiTableClickHandler);
 
                 // challenges polling
-                var ajaxCall = function () {
+                var ajaxCallx = function () {
                     $.ajax({
                         url: "/api/game/getchallengersnames",
                         success: function (response) {
@@ -258,12 +259,37 @@
                             }
 
                             $("#challengesTableBody").html(newTableBody);
-                            $(".accept-challenge").on("click", processChallenge);
-                            $(".decline-challenge").on("click", declineChallenge);
+                            //$(".accept-challenge").on("click", processChallenge);
+                            //$(".decline-challenge").on("click", declineChallenge);
+                        }
+                    });
+                    $.ajax({
+                        url: "/api/game/getactiveais",
+                        success: function (response) {
+                            var newTableBody = "";
+                            var selectedAi = $("tr[data-selected]>td").text();
+                            for (var i = 0; i < response.length; i++) {
+                                if (response[i] === selectedAi) {
+                                    newTableBody = newTableBody +
+                                        '<tr class="selectable-row" data-selected><td>' +
+                                        response[i] +
+                                        '</td></tr>';
+                                } else {
+                                    newTableBody = newTableBody +
+                                        '<tr class="selectable-row"><td>' +
+                                        response[i] +
+                                        '</td></tr>';
+                                }
+                            }
+
+                            $("#aiTableBody").html(newTableBody);
+                            $(".selectable-row[data-selected]").addClass("success");
+                            // add click handle
+                            //$(".selectable-row").click(selectableRowClickHandle);
                         }
                     });
                 };
-                setInterval(ajaxCall, 1000);
+                setInterval(ajaxCallx, 3000);
             });
 
     </script>
