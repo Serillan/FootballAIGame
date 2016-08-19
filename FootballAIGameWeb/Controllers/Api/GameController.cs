@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading;
 using System.Web.Http;
 using FootballAIGameWeb.Models;
@@ -247,6 +250,26 @@ namespace FootballAIGameWeb.Controllers.Api
                 var player = GetCurrentPlayer(context);
                 var activeAIs = player.ActiveAis?.Split(';').ToList() ?? new List<string>();
                 return Ok(activeAIs);
+            }
+        }
+
+        [HttpGet]
+        public IHttpActionResult GetMatchData(int id)
+        {
+            using (var context = new ApplicationDbContext())
+            {
+                var match = context.Matches.SingleOrDefault(m => m.Id == id);
+                if (match == null)
+                    return NotFound();
+
+                var data = match.MatchData;
+
+                HttpResponseMessage result = new HttpResponseMessage(HttpStatusCode.OK);
+                result.Content = new ByteArrayContent(data);
+                result.Content.Headers.ContentType =
+                    new MediaTypeHeaderValue("application/octet-stream");
+
+                return ResponseMessage(result);
             }
         }
 

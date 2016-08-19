@@ -482,6 +482,7 @@
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\CustomScripts\clickable-row.js" />
     <Content Include="Scripts\CustomScripts\initialization.js" />
+    <Content Include="Scripts\CustomScripts\jquery.binarytransport.js" />
     <Content Include="Scripts\CustomScripts\selectable-row.js" />
     <Content Include="Scripts\DataTables\autoFill.bootstrap.js" />
     <Content Include="Scripts\DataTables\autoFill.bootstrap.min.js" />

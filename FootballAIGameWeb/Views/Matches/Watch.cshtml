@@ -8,3 +8,25 @@
     <a href="/players/details/@Model.Player1.Name">@Model.Player1.Name</a> vs
     <a href="/players/details/@Model.Player2.Name">@Model.Player2.Name</a>
 </h2>
+
+@section scripts{
+    <script>
+        $(document).ready(function() {
+            $.ajax({
+                url: "/api/game/getmatchdata/@Model.Id",
+                method: "get",
+                dataType: "binary",
+                responseType: "arraybuffer",
+                success: function(response) {
+                    toastr.success("data loaded");
+                    var floatView = new Float32Array(response);
+                    for (var i = 0; i < floatView.length; i++)
+                        console.log(floatView[i]);
+                },
+                error: function() {
+                    toastr.error("Error happened while loading match data.");
+                }
+        });
+        });
+    </script>
+}
