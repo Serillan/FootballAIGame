@@ -19,14 +19,17 @@ namespace FootballAIGameServer.Messages
             Buffer.BlockCopy(data, 0, floatData, 0, data.Length);
 
             var players = new FootballPlayer[11];
-            for (int i = 0; i < 11; i++)
+            for (var i = 0; i < 11; i++)
             {
-                players[i].Speed = floatData[4 * i + 0];
-                players[i].Precision = floatData[4 * i + 1];
-                players[i].Possesion = floatData[4 * i + 2];
-                players[i].KickPower = floatData[4 * i + 3];
+                players[i] = new FootballPlayer
+                {
+                    Speed = floatData[4*i + 0],
+                    Precision = floatData[4*i + 1],
+                    Possesion = floatData[4*i + 2],
+                    KickPower = floatData[4*i + 3]
+                };
             }
-
+            parametersMessage.Players = players;
             return parametersMessage;
         }
     }

@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using FootballAIGameServer.Messages;
 using FootballAIGameServer.Models;
+using FootballAIGameServer.SimulationEntities;
 
 namespace FootballAIGameServer
 {
@@ -40,6 +41,35 @@ namespace FootballAIGameServer
         public async Task SendAsync(string message)
         {
             await NetworkWriter.WriteLineAsync(message);
+        }
+
+        public async Task SendAsync(GameState gameState)
+        {
+            var data = new float[92];
+
+            data[0] = gameState.Ball.X;
+            data[1] = gameState.Ball.Y;
+            data[2] = gameState.Ball.VectorX;
+            data[3] = gameState.Ball.VectorY;
+
+            for (var i = 0; i < 22; i++)
+            {
+                data[4 + 4*i + 0] = gameState.FootballPlayers[i].X;
+                data[4 + 4*i + 1] = gameState.FootballPlayers[i].Y;
+                data[4 + 4*i + 2] = gameState.FootballPlayers[i].VectorX;
+                data[4 + 4*i + 3] = gameState.FootballPlayers[i].VectorY;
+
+            }
+
+            var byteArray = new byte[data.Length * 4];
+            Buffer.BlockCopy(data, 0, byteArray, 0, byteArray.Length);
+
+            await Send(byteArray);
+        }
+
+        public async Task Send(byte[] data)
+        {
+            await NetworkStream.WriteAsync(data, 0, data.Length);
         }
 
         public async Task<ClientMessage> ReceiveClientMessageAsync()

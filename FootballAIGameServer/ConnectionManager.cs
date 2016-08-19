@@ -20,17 +20,17 @@ namespace FootballAIGameServer
 
         public List<ClientConnection> WantsToPlayConnections { get; set; }
 
-        private static ConnectionManager _Instance; // singleton instance
+        private static ConnectionManager _instance; // singleton instance
 
         public static ConnectionManager Instance
         {
             get
             {
-                if (_Instance == null)
+                if (_instance == null)
                 {
-                    _Instance = new ConnectionManager();
+                    _instance = new ConnectionManager();
                 }
-                return _Instance;
+                return _instance;
             }
         }
 
@@ -72,6 +72,10 @@ namespace FootballAIGameServer
                                 context.Players.SingleOrDefault(p => p.Name == toBeRemovedConnection.PlayerName);
                             var newAis = player.ActiveAis.Split(';').Where(s => s != toBeRemovedConnection.AiName);
                             player.ActiveAis = String.Join(";", newAis);
+
+                            player.PlayerState = PlayerState.Idle; // todo error message
+                            ConnectionManager.Instance.WantsToPlayConnections.Remove(toBeRemovedConnection);
+
                             if (player.SelectedAi == toBeRemovedConnection.AiName)
                                 player.SelectedAi = "";
 

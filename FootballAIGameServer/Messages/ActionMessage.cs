@@ -18,12 +18,15 @@ namespace FootballAIGameServer.Messages
             Buffer.BlockCopy(data, 0, floatData, 0, data.Length);
 
             var playerActions = new PlayerAction[11];
-            for (int i = 0; i < 11; i++)
+            for (var i = 0; i < 11; i++)
             {
-                playerActions[i].VectorX = floatData[4*i + 0];
-                playerActions[i].VectorY = floatData[4 * i + 1];
-                playerActions[i].KickX = floatData[4 * i + 2];
-                playerActions[i].KickX = floatData[4 * i + 3];
+                playerActions[i] = new PlayerAction
+                {
+                    VectorX = floatData[4*i + 0],
+                    VectorY = floatData[4*i + 1],
+                    KickX = floatData[4*i + 2],
+                    KickY = floatData[4*i + 3]
+                };
             }
             actionMessage.PlayerActions = playerActions;
             return actionMessage;
