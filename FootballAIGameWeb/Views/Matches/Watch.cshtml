@@ -9,24 +9,196 @@
     <a href="/players/details/@Model.Player2.Name">@Model.Player2.Name</a>
 </h2>
 
+
+<div class="text-center col-sm-12" style="margin-top: 1em; text-align: center">
+    <button class="btn btn-default">Start / Pause</button>
+    <button class="btn btn-default">Restart</button>
+</div>
+<div class="text-center col-sm-12" style="margin-top: 1em; margin-left: 0; margin-right: 0; padding: 0">
+    <input type="range" id="matchSlider" min="0" max="1500" style="display: block; max-width: 624px; margin: 0 auto" value="0">
+    <canvas id="match-canvas" width="624" height="442" style="border: 1px solid black; margin-top: 2em"></canvas>
+</div>
+
+<div class="text-center col-sm-12" style="margin-top: 1em; text-align: center">
+    <a href="/matches/details/@Model.Id" class="btn btn-default">Details</a>
+</div>
+
 @section scripts{
     <script>
-        $(document).ready(function() {
-            $.ajax({
-                url: "/api/game/getmatchdata/@Model.Id",
-                method: "get",
-                dataType: "binary",
-                responseType: "arraybuffer",
-                success: function(response) {
-                    toastr.success("data loaded");
-                    var floatView = new Float32Array(response);
-                    for (var i = 0; i < floatView.length; i++)
-                        console.log(floatView[i]);
-                },
-                error: function() {
-                    toastr.error("Error happened while loading match data.");
-                }
+        var gameData;
+        var animationInterval = 200;
+        var animation;
+
+        var canvas = document.getElementById("match-canvas");
+        var ctx = canvas.getContext("2d");
+        ctx.imageSmoothingEnabled = true;
+        ctx.scale(canvas.width / 120, canvas.height / 85);
+        ctx.translate(5, 5);
+        ctx.lineWidth = 0.25;
+
+        var counter;
+
+        var drawFrame = function() {
+            if (counter > gameData.length / 46) {
+                clearInterval(animation);
+                return;
+            }
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawField();
+            drawState(counter);
+            $("#matchSlider").val(counter);
+            counter++;
+        }
+
+        var drawField = function() {
+            ctx.fillStyle = "rgb(1, 166, 17)";
+            ctx.fillRect(-5, -5, canvas.width, canvas.height);
+
+            ctx.strokeStyle = ctx.fillStyle = "white";
+
+            // touch and goal lines
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(110, 0);
+            ctx.lineTo(110, 75);
+            ctx.lineTo(0, 75);
+            ctx.lineTo(0, 0);
+            ctx.stroke();
+
+            // mid line
+            ctx.beginPath();
+            ctx.moveTo(55, 0);
+            ctx.lineTo(55, 75);
+            ctx.stroke();
+
+            // mid circle
+            ctx.beginPath();
+            ctx.arc(110 / 2, 75 / 2, 9.15, 0, 2 * Math.PI);
+            ctx.stroke();
+            
+            //central mark
+            ctx.beginPath();
+            ctx.arc(110 / 2, 75 / 2, 0.12, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // penalty marks
+            ctx.beginPath();
+            ctx.arc(11, 75 / 2, 0.12, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(99, 75 / 2, 0.12, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // penalty arcs
+            ctx.beginPath();
+            ctx.arc(11, 75 / 2, 9.15, 2 * Math.PI - 0.9259, 0.9259); // acos(5.5/9.15) ~ 0.9259
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(99, 75 / 2, 9.15, Math.PI - 0.9259, Math.PI + 0.9259);
+            ctx.stroke();
+
+            // goalposts
+            ctx.beginPath();
+            ctx.moveTo(0, 75 / 2 - 7.32 / 2);
+            ctx.lineTo(-1.2, 75 / 2 - 7.32 / 2);
+            ctx.lineTo(-1.2, 75 / 2 + 7.32 / 2);
+            ctx.lineTo(0, 75 / 2 + 7.32 / 2);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(110, 75 / 2 - 7.32 / 2);
+            ctx.lineTo(111.2, 75 / 2 - 7.32 / 2);
+            ctx.lineTo(111.2, 75 / 2 + 7.32 / 2);
+            ctx.lineTo(110, 75 / 2 + 7.32 / 2);
+            ctx.stroke();
+
+            // goal areas
+            ctx.beginPath();
+            ctx.moveTo(0, 75 / 2 - 9.16);
+            ctx.lineTo(5.5, 75 / 2 - 9.16);
+            ctx.lineTo(5.5, 75 / 2 + 9.16);
+            ctx.lineTo(0, 75 / 2 + 9.16);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(110, 75 / 2 - 9.16);
+            ctx.lineTo(104.5, 75 / 2 - 9.16);
+            ctx.lineTo(104.5, 75 / 2 + 9.16);
+            ctx.lineTo(110, 75 / 2 + 9.16);
+            ctx.stroke();
+
+            // penalty areas
+            ctx.beginPath();
+            ctx.moveTo(0, 75 / 2 - 20.16);
+            ctx.lineTo(16.5, 75 / 2 - 20.16);
+            ctx.lineTo(16.5, 75 / 2 + 20.16);
+            ctx.lineTo(0, 75 / 2 + 20.16);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(110, 75 / 2 - 20.16);
+            ctx.lineTo(93.5, 75 / 2 - 20.16);
+            ctx.lineTo(93.5, 75 / 2 + 20.16);
+            ctx.lineTo(110, 75 / 2 + 20.16);
+            ctx.stroke();
+
+
+
+        }
+
+        var drawState = function(stateNumber) {
+            drawBall(gameData[46 * stateNumber], gameData[46 * stateNumber + 1]);
+
+            for (var i = 0; i < 1; i++) {
+                drawPlayer(gameData[46 * stateNumber + 2 + 2 * i],
+                    gameData[46 * stateNumber + 2 + 2 * i + 1],
+                    "#FF0000");
+            }
+
+            for (var j = 0; j < 0; j++) {
+                drawPlayer(gameData[46 * stateNumber + 24 + 2 * j],
+                    gameData[46 * stateNumber + 24 + 2 * j + 1],
+                    "#0000FF");
+            }
+        }
+
+        var drawPlayer = function(x, y, color) {
+            ctx.beginPath();
+            ctx.arc(x, y, 0.5, 0, 2 * Math.PI);
+            ctx.fillStyle = color;
+            ctx.fill();
+        }
+
+        var drawBall = function(x, y) {
+            ctx.beginPath();
+            ctx.arc(x, y, 0.22, 0, 2 * Math.PI);
+            ctx.fillStyle = 'black';
+            ctx.fill();
+        }
+
+        $("#matchSlider").on("mousedown", function() {
+            clearInterval(animation);
         });
+
+        $("#matchSlider").on("mouseup", function () {
+            counter = $(this).val();
+            animation = setInterval(drawFrame, animationInterval);
         });
+
+        $(document)
+            .ready(function() {
+                $.ajax({
+                    url: "/api/game/getmatchdata/@Model.Id",
+                    method: "get",
+                    dataType: "binary",
+                    responseType: "arraybuffer",
+                    success: function(response) {
+                        gameData = new Float32Array(response);
+                        $("#matchSlider").attr("max", gameData / 46);
+                        counter = 0;
+                        animation = setInterval(drawFrame, animationInterval);
+                    },
+                    error: function() {
+                        toastr.error("Error happened while loading match data.");
+                    }
+                });
+            });
     </script>
 }
