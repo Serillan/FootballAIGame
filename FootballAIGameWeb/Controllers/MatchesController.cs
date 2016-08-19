@@ -47,6 +47,19 @@ namespace FootballAIGameWeb.Controllers
             return View("Details", match);
         }
 
+        public ActionResult Errors(int id)
+        {
+            var match = _context.Matches
+                .Include(m => m.Player1)
+                .Include(m => m.Player2)
+                .SingleOrDefault(m => m.Id == id);
+
+            if (match == null)
+                return HttpNotFound();
+
+            return View("Errors", match);
+        }
+
         public ActionResult Watch(int id)
         {
             var match = _context.Matches

@@ -636,6 +636,7 @@
     <None Include="Service References\GameServerService\item.xsd">
       <SubType>Designer</SubType>
     </None>
+    <Content Include="Views\Matches\Errors.cshtml" />
     <None Include="Web.Production.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
