@@ -264,7 +264,7 @@ namespace FootballAIGameWeb.Controllers.Api
 
                 var data = match.MatchData;
 
-                HttpResponseMessage result = new HttpResponseMessage(HttpStatusCode.OK);
+                var result = new HttpResponseMessage(HttpStatusCode.OK);
                 result.Content = new ByteArrayContent(data);
                 result.Content.Headers.ContentType =
                     new MediaTypeHeaderValue("application/octet-stream");
@@ -305,9 +305,7 @@ namespace FootballAIGameWeb.Controllers.Api
                     gameServer.CancelMatch(player.Name);
                 }
 
-                player.PlayerState = PlayerState.Idle;
                 context.SaveChanges();
-
                 return Ok();
             }
         }

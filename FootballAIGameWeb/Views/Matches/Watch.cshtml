@@ -57,7 +57,7 @@
                 ctx.imageSmoothingEnabled = true;
                 ctx.scale(canvas.width / 120, canvas.height / 85);
                 ctx.translate(5, 5);
-                ctx.lineWidth = 0.25;
+                ctx.lineWidth = 1 / (canvas.width / 120);
 
                 var counter = 0;
 
@@ -159,7 +159,6 @@
                     ctx.beginPath();
                     ctx.arc(110, 0, 1, Math.PI/2, -Math.PI);
                     ctx.stroke();
-                   
 
                     // goalposts
                     ctx.beginPath();
@@ -209,13 +208,13 @@
                 var drawState = function(stateNumber) {
                     drawBall(gameData[46 * stateNumber], gameData[46 * stateNumber + 1]);
 
-                    for (var i = 0; i < 1; i++) {
+                    for (var i = 0; i < 11; i++) {
                         drawPlayer(gameData[46 * stateNumber + 2 + 2 * i],
                             gameData[46 * stateNumber + 2 + 2 * i + 1],
                             "#FF0000");
                     }
 
-                    for (var j = 0; j < 0; j++) {
+                    for (var j = 0; j < 11; j++) {
                         drawPlayer(gameData[46 * stateNumber + 24 + 2 * j],
                             gameData[46 * stateNumber + 24 + 2 * j + 1],
                             "#0000FF");
