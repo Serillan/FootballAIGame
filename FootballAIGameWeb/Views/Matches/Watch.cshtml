@@ -11,8 +11,14 @@
 
 
 <div class="text-center col-sm-12" style="margin-top: 1em; text-align: center">
-    <button class="btn btn-default">Start / Pause</button>
-    <button class="btn btn-default">Restart</button>
+    <button id="start" class="btn btn-default">Start / Pause</button>
+    <button id="restart" class="btn btn-default">Restart</button>
+    <select id="speed" class="form-control" data-toggle="tooltip" title="Speed" style="max-width: 5em; display: inline">
+        <option>1x</option>
+        <option>2x</option>
+        <option>3x</option>
+        <option>4x</option>
+    </select>
 </div>
 <div class="text-center col-sm-12" style="margin-top: 1em; margin-left: 0; margin-right: 0; padding: 0">
     <input type="range" id="matchSlider" min="0" max="1500" style="display: block; max-width: 624px; margin: 0 auto" value="0">
@@ -25,180 +31,229 @@
 
 @section scripts{
     <script>
-        var gameData;
-        var animationInterval = 200;
-        var animation;
-
-        var canvas = document.getElementById("match-canvas");
-        var ctx = canvas.getContext("2d");
-        ctx.imageSmoothingEnabled = true;
-        ctx.scale(canvas.width / 120, canvas.height / 85);
-        ctx.translate(5, 5);
-        ctx.lineWidth = 0.25;
-
-        var counter;
-
-        var drawFrame = function() {
-            if (counter > gameData.length / 46) {
-                clearInterval(animation);
-                return;
-            }
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawField();
-            drawState(counter);
-            $("#matchSlider").val(counter);
-            counter++;
-        }
-
-        var drawField = function() {
-            ctx.fillStyle = "rgb(1, 166, 17)";
-            ctx.fillRect(-5, -5, canvas.width, canvas.height);
-
-            ctx.strokeStyle = ctx.fillStyle = "white";
-
-            // touch and goal lines
-            ctx.beginPath();
-            ctx.moveTo(0, 0);
-            ctx.lineTo(110, 0);
-            ctx.lineTo(110, 75);
-            ctx.lineTo(0, 75);
-            ctx.lineTo(0, 0);
-            ctx.stroke();
-
-            // mid line
-            ctx.beginPath();
-            ctx.moveTo(55, 0);
-            ctx.lineTo(55, 75);
-            ctx.stroke();
-
-            // mid circle
-            ctx.beginPath();
-            ctx.arc(110 / 2, 75 / 2, 9.15, 0, 2 * Math.PI);
-            ctx.stroke();
-            
-            //central mark
-            ctx.beginPath();
-            ctx.arc(110 / 2, 75 / 2, 0.12, 0, 2 * Math.PI);
-            ctx.fill();
-
-            // penalty marks
-            ctx.beginPath();
-            ctx.arc(11, 75 / 2, 0.12, 0, 2 * Math.PI);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(99, 75 / 2, 0.12, 0, 2 * Math.PI);
-            ctx.fill();
-
-            // penalty arcs
-            ctx.beginPath();
-            ctx.arc(11, 75 / 2, 9.15, 2 * Math.PI - 0.9259, 0.9259); // acos(5.5/9.15) ~ 0.9259
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.arc(99, 75 / 2, 9.15, Math.PI - 0.9259, Math.PI + 0.9259);
-            ctx.stroke();
-
-            // goalposts
-            ctx.beginPath();
-            ctx.moveTo(0, 75 / 2 - 7.32 / 2);
-            ctx.lineTo(-1.2, 75 / 2 - 7.32 / 2);
-            ctx.lineTo(-1.2, 75 / 2 + 7.32 / 2);
-            ctx.lineTo(0, 75 / 2 + 7.32 / 2);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(110, 75 / 2 - 7.32 / 2);
-            ctx.lineTo(111.2, 75 / 2 - 7.32 / 2);
-            ctx.lineTo(111.2, 75 / 2 + 7.32 / 2);
-            ctx.lineTo(110, 75 / 2 + 7.32 / 2);
-            ctx.stroke();
-
-            // goal areas
-            ctx.beginPath();
-            ctx.moveTo(0, 75 / 2 - 9.16);
-            ctx.lineTo(5.5, 75 / 2 - 9.16);
-            ctx.lineTo(5.5, 75 / 2 + 9.16);
-            ctx.lineTo(0, 75 / 2 + 9.16);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(110, 75 / 2 - 9.16);
-            ctx.lineTo(104.5, 75 / 2 - 9.16);
-            ctx.lineTo(104.5, 75 / 2 + 9.16);
-            ctx.lineTo(110, 75 / 2 + 9.16);
-            ctx.stroke();
-
-            // penalty areas
-            ctx.beginPath();
-            ctx.moveTo(0, 75 / 2 - 20.16);
-            ctx.lineTo(16.5, 75 / 2 - 20.16);
-            ctx.lineTo(16.5, 75 / 2 + 20.16);
-            ctx.lineTo(0, 75 / 2 + 20.16);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(110, 75 / 2 - 20.16);
-            ctx.lineTo(93.5, 75 / 2 - 20.16);
-            ctx.lineTo(93.5, 75 / 2 + 20.16);
-            ctx.lineTo(110, 75 / 2 + 20.16);
-            ctx.stroke();
-
-
-
-        }
-
-        var drawState = function(stateNumber) {
-            drawBall(gameData[46 * stateNumber], gameData[46 * stateNumber + 1]);
-
-            for (var i = 0; i < 1; i++) {
-                drawPlayer(gameData[46 * stateNumber + 2 + 2 * i],
-                    gameData[46 * stateNumber + 2 + 2 * i + 1],
-                    "#FF0000");
-            }
-
-            for (var j = 0; j < 0; j++) {
-                drawPlayer(gameData[46 * stateNumber + 24 + 2 * j],
-                    gameData[46 * stateNumber + 24 + 2 * j + 1],
-                    "#0000FF");
-            }
-        }
-
-        var drawPlayer = function(x, y, color) {
-            ctx.beginPath();
-            ctx.arc(x, y, 0.5, 0, 2 * Math.PI);
-            ctx.fillStyle = color;
-            ctx.fill();
-        }
-
-        var drawBall = function(x, y) {
-            ctx.beginPath();
-            ctx.arc(x, y, 0.22, 0, 2 * Math.PI);
-            ctx.fillStyle = 'black';
-            ctx.fill();
-        }
-
-        $("#matchSlider").on("mousedown", function() {
-            clearInterval(animation);
-        });
-
-        $("#matchSlider").on("mouseup", function () {
-            counter = $(this).val();
-            animation = setInterval(drawFrame, animationInterval);
-        });
-
         $(document)
-            .ready(function() {
+            .ready(function () {
+                var gameData;
+                var defaultAnimationInterval = 200;
+                var animationInterval = defaultAnimationInterval; // speed selection changes it
+                var isRunning = false;
+                var isLoaded = false;
+                var animation;
+
+                var canvas = document.getElementById("match-canvas");
+                var ctx = canvas.getContext("2d");
+                ctx.imageSmoothingEnabled = true;
+                ctx.scale(canvas.width / 120, canvas.height / 85);
+                ctx.translate(5, 5);
+                ctx.lineWidth = 0.25;
+
+                var counter = 0;
+
+                var drawFrame = function () {
+                    if (counter > gameData.length / 46) {
+                        clearInterval(animation);
+                        return;
+                    }
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    drawField();
+                    drawState(counter);
+                    $("#matchSlider").val(counter);
+                    counter++;
+                }
+
+                var drawField = function () {
+                    ctx.fillStyle = "rgb(1, 166, 17)";
+                    ctx.fillRect(-5, -5, 120, 85);
+
+                    ctx.strokeStyle = ctx.fillStyle = "white";
+
+                    // touch and goal lines
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.lineTo(110, 0);
+                    ctx.lineTo(110, 75);
+                    ctx.lineTo(0, 75);
+                    ctx.lineTo(0, 0);
+                    ctx.stroke();
+
+                    // mid line
+                    ctx.beginPath();
+                    ctx.moveTo(55, 0);
+                    ctx.lineTo(55, 75);
+                    ctx.stroke();
+
+                    // mid circle
+                    ctx.beginPath();
+                    ctx.arc(110 / 2, 75 / 2, 9.15, 0, 2 * Math.PI);
+                    ctx.stroke();
+
+                    //central mark
+                    ctx.beginPath();
+                    ctx.arc(110 / 2, 75 / 2, 0.12, 0, 2 * Math.PI);
+                    ctx.fill();
+
+                    // penalty marks
+                    ctx.beginPath();
+                    ctx.arc(11, 75 / 2, 0.12, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(99, 75 / 2, 0.12, 0, 2 * Math.PI);
+                    ctx.fill();
+
+                    // penalty arcs
+                    ctx.beginPath();
+                    ctx.arc(11, 75 / 2, 9.15, 2 * Math.PI - 0.9259, 0.9259); // acos(5.5/9.15) ~ 0.9259
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(99, 75 / 2, 9.15, Math.PI - 0.9259, Math.PI + 0.9259);
+                    ctx.stroke();
+
+                    // goalposts
+                    ctx.beginPath();
+                    ctx.moveTo(0, 75 / 2 - 7.32 / 2);
+                    ctx.lineTo(-1.2, 75 / 2 - 7.32 / 2);
+                    ctx.lineTo(-1.2, 75 / 2 + 7.32 / 2);
+                    ctx.lineTo(0, 75 / 2 + 7.32 / 2);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(110, 75 / 2 - 7.32 / 2);
+                    ctx.lineTo(111.2, 75 / 2 - 7.32 / 2);
+                    ctx.lineTo(111.2, 75 / 2 + 7.32 / 2);
+                    ctx.lineTo(110, 75 / 2 + 7.32 / 2);
+                    ctx.stroke();
+
+                    // goal areas
+                    ctx.beginPath();
+                    ctx.moveTo(0, 75 / 2 - 9.16);
+                    ctx.lineTo(5.5, 75 / 2 - 9.16);
+                    ctx.lineTo(5.5, 75 / 2 + 9.16);
+                    ctx.lineTo(0, 75 / 2 + 9.16);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(110, 75 / 2 - 9.16);
+                    ctx.lineTo(104.5, 75 / 2 - 9.16);
+                    ctx.lineTo(104.5, 75 / 2 + 9.16);
+                    ctx.lineTo(110, 75 / 2 + 9.16);
+                    ctx.stroke();
+
+                    // penalty areas
+                    ctx.beginPath();
+                    ctx.moveTo(0, 75 / 2 - 20.16);
+                    ctx.lineTo(16.5, 75 / 2 - 20.16);
+                    ctx.lineTo(16.5, 75 / 2 + 20.16);
+                    ctx.lineTo(0, 75 / 2 + 20.16);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(110, 75 / 2 - 20.16);
+                    ctx.lineTo(93.5, 75 / 2 - 20.16);
+                    ctx.lineTo(93.5, 75 / 2 + 20.16);
+                    ctx.lineTo(110, 75 / 2 + 20.16);
+                    ctx.stroke();
+
+
+
+                }
+
+                var drawState = function (stateNumber) {
+                    drawBall(gameData[46 * stateNumber], gameData[46 * stateNumber + 1]);
+
+                    for (var i = 0; i < 1; i++) {
+                        drawPlayer(gameData[46 * stateNumber + 2 + 2 * i],
+                            gameData[46 * stateNumber + 2 + 2 * i + 1],
+                            "#FF0000");
+                    }
+
+                    for (var j = 0; j < 0; j++) {
+                        drawPlayer(gameData[46 * stateNumber + 24 + 2 * j],
+                            gameData[46 * stateNumber + 24 + 2 * j + 1],
+                            "#0000FF");
+                    }
+                }
+
+                var drawPlayer = function (x, y, color) {
+                    ctx.beginPath();
+                    ctx.arc(x, y, 0.5, 0, 2 * Math.PI);
+                    ctx.fillStyle = color;
+                    ctx.fill();
+                }
+
+                var drawBall = function (x, y) {
+                    ctx.beginPath();
+                    ctx.arc(x, y, 0.22, 0, 2 * Math.PI);
+                    ctx.fillStyle = 'black';
+                    ctx.fill();
+                }
+
+                $("#start").on("click", function () {
+                    if (!isLoaded) {
+                        toastr.error("Game match is not loaded yet.");
+                    }
+                    else if (!isRunning) {
+                        isRunning = true;
+                        animation = setInterval(drawFrame, animationInterval);
+                    } else {
+                        isRunning = false;
+                        clearInterval(animation);
+                    }
+                });
+
+                $("#restart").on("click", function() {
+                    if (isRunning)
+                        clearInterval(animation);
+                    counter = 0;
+                    isRunning = true;
+                    animation = setInterval(drawFrame, animationInterval);
+                });
+
+                $("#speed").change(function () {
+                    var optionSelected = $(this).find("option:selected");
+                    switch (optionSelected.text()) {
+                        case "1x":
+                            animationInterval = defaultAnimationInterval;
+                            break;
+                        case "2x":
+                            animationInterval = 1/2 * defaultAnimationInterval;
+                            break;
+                        case "3x":
+                            animationInterval = 1/3 * defaultAnimationInterval;
+                            break;
+                        case "4x":
+                            animationInterval = 1/4 * defaultAnimationInterval;
+                            break;
+                    }
+                    if (isRunning) {
+                        clearInterval(animation);
+                        animation = setInterval(drawFrame, animationInterval);
+                    }
+                });
+
+                $("#matchSlider").on("mousedown", function () {
+                    clearInterval(animation);
+                });
+
+                $("#matchSlider").on("mouseup", function () {
+                    counter = $(this).val();
+                    animation = setInterval(drawFrame, animationInterval);
+                });
+
                 $.ajax({
                     url: "/api/game/getmatchdata/@Model.Id",
                     method: "get",
                     dataType: "binary",
                     responseType: "arraybuffer",
-                    success: function(response) {
+                    success: function (response) {
                         gameData = new Float32Array(response);
-                        $("#matchSlider").attr("max", gameData / 46);
-                        counter = 0;
-                        animation = setInterval(drawFrame, animationInterval);
+                        $("#matchSlider").attr("max", gameData.length / 46);
+                        isLoaded = true;
+                        drawFrame();
                     },
-                    error: function() {
+                    error: function () {
                         toastr.error("Error happened while loading match data.");
                     }
                 });
+
+                // field is drawn before start
+                drawField();
             });
     </script>
 }
