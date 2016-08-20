@@ -146,6 +146,21 @@
                     ctx.arc(99, 75 / 2, 9.15, Math.PI - 0.9259, Math.PI + 0.9259);
                     ctx.stroke();
 
+                    // corner arcs
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 1, 0, Math.PI/2);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(0, 75, 1, - Math.PI / 2, 0);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(110, 75, 1, -Math.PI, -Math.PI / 2);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(110, 0, 1, Math.PI/2, -Math.PI);
+                    ctx.stroke();
+                   
+
                     // goalposts
                     ctx.beginPath();
                     ctx.moveTo(0, 75 / 2 - 7.32 / 2);
@@ -278,7 +293,10 @@
                     .on("mouseup",
                         function() {
                             counter = $(this).val();
-                            animation = setInterval(drawFrame, animationInterval);
+                            if (isRunning)
+                                animation = setInterval(drawFrame, animationInterval);
+                            else
+                                drawFrame(); // too see the difference
                         });
 
                 $.ajax({
