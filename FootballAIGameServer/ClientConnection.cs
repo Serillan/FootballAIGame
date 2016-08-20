@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
@@ -33,9 +35,25 @@ namespace FootballAIGameServer
             this.TcpClient.NoDelay = true;
             this.NetworkStream = tcpClient.GetStream();
             this.NetworkReader = new StreamReader(NetworkStream);
-            this.NetworkWriter = new StreamWriter(NetworkStream) {AutoFlush = true};
+            this.NetworkWriter = new StreamWriter(NetworkStream) { AutoFlush = true };
             this.CancellationTokenSource = new CancellationTokenSource();
             IsActive = false;
+        }
+
+        public int PingTimeAverage()
+        {
+            long totalTime = 0;
+            var timeout = 330;
+            var echoNum = 3;
+            var pingSender = new Ping();
+
+            for (int i = 0; i < echoNum; i++)
+            {
+                var reply = pingSender.Send(((IPEndPoint)TcpClient.Client.RemoteEndPoint).Address, timeout);
+                if (reply.Status != IPStatus.BadDestination)
+                    totalTime += reply.RoundtripTime;
+            }
+            return (int)(totalTime / echoNum);
         }
 
         public async Task SendAsync(string message)
@@ -54,10 +72,10 @@ namespace FootballAIGameServer
 
             for (var i = 0; i < 22; i++)
             {
-                data[4 + 4*i + 0] = gameState.FootballPlayers[i].X;
-                data[4 + 4*i + 1] = gameState.FootballPlayers[i].Y;
-                data[4 + 4*i + 2] = gameState.FootballPlayers[i].VectorX;
-                data[4 + 4*i + 3] = gameState.FootballPlayers[i].VectorY;
+                data[4 + 4 * i + 0] = gameState.FootballPlayers[i].X;
+                data[4 + 4 * i + 1] = gameState.FootballPlayers[i].Y;
+                data[4 + 4 * i + 2] = gameState.FootballPlayers[i].VectorX;
+                data[4 + 4 * i + 3] = gameState.FootballPlayers[i].VectorY;
 
             }
 
