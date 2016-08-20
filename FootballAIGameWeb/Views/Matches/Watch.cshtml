@@ -5,8 +5,8 @@
 }
 
 <h2 class="text-center">
-    <a href="/players/details/@Model.Player1.Name">@Model.Player1.Name</a> vs
-    <a href="/players/details/@Model.Player2.Name">@Model.Player2.Name</a>
+    <a id="player1Name" href="/players/details/@Model.Player1.Name">@Model.Player1.Name</a> vs
+    <a id="player2Name" href="/players/details/@Model.Player2.Name">@Model.Player2.Name</a>
 </h2>
 
 
@@ -22,7 +22,11 @@
 </div>
 <div class="text-center col-sm-12" style="margin-top: 1em; margin-left: 0; margin-right: 0; padding: 0">
     <input type="range" id="matchSlider" min="0" max="1500" style="display: block; max-width: 624px; margin: 0 auto" value="0">
-    <canvas id="match-canvas" width="624" height="442" style="border: 1px solid black; margin-top: 2em"></canvas>
+    <div style="margin: 1em">
+        <h3 id="time" style="display: inline; margin-right: 2em">Time: 0:0</h3>
+        <h3 id="score" style="display: inline; margin-left: 2em">Score: 0 - 0</h3>
+    </div>
+    <canvas id="match-canvas" width="624" height="442" style="border: 1px solid black; margin-top: 0em"></canvas>
 </div>
 
 <div class="text-center col-sm-12" style="margin-top: 1em; text-align: center">
@@ -32,13 +36,21 @@
 @section scripts{
     <script>
         $(document)
-            .ready(function () {
+            .ready(function() {
                 var gameData;
-                var defaultAnimationInterval = 200;
+                var defaultAnimationInterval = 200; // length of 1 simulation step
                 var animationInterval = defaultAnimationInterval; // speed selection changes it
                 var isRunning = false;
                 var isLoaded = false;
                 var animation;
+                var goals = [];
+
+                @{
+                    foreach (var goal in @Model.Goals.Split('|'))
+                    {
+                        <text>goals.push("@goal");</text>
+                    }
+                }
 
                 var canvas = document.getElementById("match-canvas");
                 var ctx = canvas.getContext("2d");
@@ -49,19 +61,45 @@
 
                 var counter = 0;
 
-                var drawFrame = function () {
+                var drawFrame = function() {
                     if (counter > gameData.length / 46) {
                         clearInterval(animation);
                         return;
                     }
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
                     drawField();
+                    drawStatus();
                     drawState(counter);
                     $("#matchSlider").val(counter);
                     counter++;
                 }
 
-                var drawField = function () {
+                var drawStatus = function() {
+
+                    // time
+                    var totalSeconds = Math.floor((counter * defaultAnimationInterval) / 1000);
+                    var minutes = Math.floor(totalSeconds / 60);
+                    var seconds = totalSeconds - minutes * 60;
+                    $("#time").text("Time: " + minutes + ":" + seconds);
+
+                    // score
+                    var player1Goals = 0;
+                    var player2Goals = 0;
+                    for (var i = 0; i < goals.length; i++) {
+                        var tokens = goals[i].split(";");
+                        var goalMinutes = parseInt(tokens[0].split(":")[0]);
+                        var goalSeconds = parseInt(tokens[0].split(":")[1]);
+                        if (goalMinutes < minutes || (goalMinutes === minutes && goalSeconds <= seconds)) {
+                            if ($("#player1Name").text() === tokens[1])
+                                player1Goals++;
+                            else
+                                player2Goals++;
+                        }
+                    }
+                    $("#score").text("Score: " + player1Goals + " - " + player2Goals);
+                };
+
+                var drawField = function() {
                     ctx.fillStyle = "rgb(1, 166, 17)";
                     ctx.fillRect(-5, -5, 120, 85);
 
@@ -151,10 +189,9 @@
                     ctx.stroke();
 
 
-
                 }
 
-                var drawState = function (stateNumber) {
+                var drawState = function(stateNumber) {
                     drawBall(gameData[46 * stateNumber], gameData[46 * stateNumber + 1]);
 
                     for (var i = 0; i < 1; i++) {
@@ -170,84 +207,92 @@
                     }
                 }
 
-                var drawPlayer = function (x, y, color) {
+                var drawPlayer = function(x, y, color) {
                     ctx.beginPath();
                     ctx.arc(x, y, 0.5, 0, 2 * Math.PI);
                     ctx.fillStyle = color;
                     ctx.fill();
                 }
 
-                var drawBall = function (x, y) {
+                var drawBall = function(x, y) {
                     ctx.beginPath();
                     ctx.arc(x, y, 0.22, 0, 2 * Math.PI);
                     ctx.fillStyle = 'black';
                     ctx.fill();
                 }
 
-                $("#start").on("click", function () {
-                    if (!isLoaded) {
-                        toastr.error("Game match is not loaded yet.");
-                    }
-                    else if (!isRunning) {
-                        isRunning = true;
-                        animation = setInterval(drawFrame, animationInterval);
-                    } else {
-                        isRunning = false;
-                        clearInterval(animation);
-                    }
-                });
+                $("#start")
+                    .on("click",
+                        function() {
+                            if (!isLoaded) {
+                                toastr.error("Game match is not loaded yet.");
+                            } else if (!isRunning) {
+                                isRunning = true;
+                                animation = setInterval(drawFrame, animationInterval);
+                            } else {
+                                isRunning = false;
+                                clearInterval(animation);
+                            }
+                        });
 
-                $("#restart").on("click", function() {
-                    if (isRunning)
-                        clearInterval(animation);
-                    counter = 0;
-                    isRunning = true;
-                    animation = setInterval(drawFrame, animationInterval);
-                });
+                $("#restart")
+                    .on("click",
+                        function() {
+                            if (isRunning)
+                                clearInterval(animation);
+                            counter = 0;
+                            isRunning = true;
+                            animation = setInterval(drawFrame, animationInterval);
+                        });
 
-                $("#speed").change(function () {
-                    var optionSelected = $(this).find("option:selected");
-                    switch (optionSelected.text()) {
+                $("#speed")
+                    .change(function() {
+                        var optionSelected = $(this).find("option:selected");
+                        switch (optionSelected.text()) {
                         case "1x":
                             animationInterval = defaultAnimationInterval;
                             break;
                         case "2x":
-                            animationInterval = 1/2 * defaultAnimationInterval;
+                            animationInterval = 1 / 2 * defaultAnimationInterval;
                             break;
                         case "3x":
-                            animationInterval = 1/3 * defaultAnimationInterval;
+                            animationInterval = 1 / 3 * defaultAnimationInterval;
                             break;
                         case "4x":
-                            animationInterval = 1/4 * defaultAnimationInterval;
+                            animationInterval = 1 / 4 * defaultAnimationInterval;
                             break;
-                    }
-                    if (isRunning) {
-                        clearInterval(animation);
-                        animation = setInterval(drawFrame, animationInterval);
-                    }
-                });
+                        }
+                        if (isRunning) {
+                            clearInterval(animation);
+                            animation = setInterval(drawFrame, animationInterval);
+                        }
+                    });
 
-                $("#matchSlider").on("mousedown", function () {
-                    clearInterval(animation);
-                });
+                $("#matchSlider")
+                    .on("mousedown",
+                        function() {
+                            clearInterval(animation);
+                        });
 
-                $("#matchSlider").on("mouseup", function () {
-                    counter = $(this).val();
-                    animation = setInterval(drawFrame, animationInterval);
-                });
+                $("#matchSlider")
+                    .on("mouseup",
+                        function() {
+                            counter = $(this).val();
+                            animation = setInterval(drawFrame, animationInterval);
+                        });
 
                 $.ajax({
                     url: "/api/game/getmatchdata/@Model.Id",
                     method: "get",
                     dataType: "binary",
                     responseType: "arraybuffer",
-                    success: function (response) {
+                    success: function(response) {
                         gameData = new Float32Array(response);
                         $("#matchSlider").attr("max", gameData.length / 46);
                         isLoaded = true;
                         drawFrame();
                     },
-                    error: function () {
+                    error: function() {
                         toastr.error("Error happened while loading match data.");
                     }
                 });
