@@ -13,39 +13,47 @@ namespace FootballAIGameServer.ApiForWeb
 
         public string WantsToPlay(string userName, string ai)
         {
-            var manager = ConnectionManager.Instance;
-            lock (manager.ActiveConnections)
+            try
             {
-                var connection = manager.ActiveConnections
-                    .FirstOrDefault(c => c.PlayerName == userName && c.AiName == ai);
-                if (connection == null)
-                    return "Ai is no longer active.";
-
-                if (manager.WantsToPlayConnections.Count == 0)
+                var manager = ConnectionManager.Instance;
+                lock (manager.ActiveConnections)
                 {
-                    manager.WantsToPlayConnections.Add(connection);
-                }
-                else // start match
-                {
-                    var otherPlayerConnection = manager.WantsToPlayConnections[0];
-                    manager.WantsToPlayConnections.Remove(otherPlayerConnection);
+                    var connection = manager.ActiveConnections
+                        .FirstOrDefault(c => c.PlayerName == userName && c.AiName == ai);
+                    if (connection == null)
+                        return "Ai is no longer active.";
 
-                    using (var context = new ApplicationDbContext())
+                    if (manager.WantsToPlayConnections.Count == 0)
                     {
-                        var player1 = context.Players.FirstOrDefault(p => p.Name == connection.PlayerName);
-                        var player2 = context.Players.FirstOrDefault(p => p.Name == otherPlayerConnection.PlayerName);
-                        player1.PlayerState = PlayerState.PlayingMatch;
-                        player2.PlayerState = PlayerState.PlayingMatch;
+                        manager.WantsToPlayConnections.Add(connection);
+                    }
+                    else // start match
+                    {
+                        var otherPlayerConnection = manager.WantsToPlayConnections[0];
+                        manager.WantsToPlayConnections.Remove(otherPlayerConnection);
 
-                        context.SaveChanges();
+                        using (var context = new ApplicationDbContext())
+                        {
+                            var player1 = context.Players.FirstOrDefault(p => p.Name == connection.PlayerName);
+                            var player2 = context.Players.FirstOrDefault(p => p.Name == otherPlayerConnection.PlayerName);
+                            player1.PlayerState = PlayerState.PlayingMatch;
+                            player2.PlayerState = PlayerState.PlayingMatch;
+
+                            context.SaveChanges();
+                        }
+
+                        StartGame(connection.PlayerName, connection.AiName,
+                            otherPlayerConnection.PlayerName, otherPlayerConnection.AiName);
                     }
 
-                     StartGame(connection.PlayerName, connection.AiName,
-                          otherPlayerConnection.PlayerName, otherPlayerConnection.AiName);
+                    
                 }
-
-                return "ok";
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return "ok";
         }
 
         public string StartGame(string userName1, string ai1, string userName2, string ai2)
