@@ -19,13 +19,12 @@
     <ServiceContractMappings />
   </ClientOptions>
   <MetadataSources>
-    <MetadataSource Address="http://localhost:50029" Protocol="http" SourceId="1" />
+    <MetadataSource Address="http://13.69.197.216:50029/mex" Protocol="mex" SourceId="1" />
   </MetadataSources>
   <Metadata>
-    <MetadataFile FileName="item1.xsd" MetadataType="Schema" ID="6d90485a-dd2e-4368-aa4a-f270c1ba3142" SourceId="1" SourceUrl="http://localhost:50029/?xsd=xsd1" />
-    <MetadataFile FileName="item.xsd" MetadataType="Schema" ID="c7f9c837-6e30-40c7-b5d8-feb2a0c0c32b" SourceId="1" SourceUrl="http://localhost:50029/?xsd=xsd0" />
-    <MetadataFile FileName="GameService.wsdl" MetadataType="Wsdl" ID="22a567cc-20ee-41c0-b159-bc1ff9069d41" SourceId="1" SourceUrl="http://localhost:50029/?wsdl" />
-    <MetadataFile FileName="item.disco" MetadataType="Disco" ID="14ef099c-4b89-4563-a5ff-f26b86746f2d" SourceId="1" SourceUrl="http://localhost:50029/?disco" />
+    <MetadataFile FileName="service.wsdl" MetadataType="Wsdl" ID="fe28779b-ee84-43f0-85c5-387ab9ddf2fe" SourceId="1" SourceUrl="http://13.69.197.216:50029/mex" />
+    <MetadataFile FileName="service.xsd" MetadataType="Schema" ID="3417620f-9818-4378-bac7-7dfcbb2bf61b" SourceId="1" SourceUrl="http://13.69.197.216:50029/mex" />
+    <MetadataFile FileName="service1.xsd" MetadataType="Schema" ID="55873fc8-46b1-49ce-beee-425aef77a4df" SourceId="1" SourceUrl="http://13.69.197.216:50029/mex" />
   </Metadata>
   <Extensions>
     <ExtensionFile FileName="configuration91.svcinfo" Name="configuration91.svcinfo" />

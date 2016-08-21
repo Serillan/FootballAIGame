@@ -571,12 +571,8 @@
     <Content Include="Scripts\toastr.js" />
     <Content Include="Scripts\toastr.min.js" />
     <Content Include="Scripts\_references.js" />
-    <None Include="Service References\GameServerService\item.disco" />
     <None Include="Service References\GameServerService\configuration91.svcinfo" />
     <None Include="Service References\GameServerService\configuration.svcinfo" />
-    <None Include="Service References\GameServerService\item1.xsd">
-      <SubType>Designer</SubType>
-    </None>
     <None Include="Service References\GameServerService\Reference.svcmap">
       <Generator>WCF Proxy Generator</Generator>
       <LastGenOutput>Reference.cs</LastGenOutput>
@@ -632,11 +628,14 @@
     <Content Include="Views\Players\Details.cshtml" />
     <Content Include="Views\Matches\Details.cshtml" />
     <Content Include="Views\Matches\Watch.cshtml" />
-    <None Include="Service References\GameServerService\GameService.wsdl" />
-    <None Include="Service References\GameServerService\item.xsd">
+    <Content Include="Views\Matches\Errors.cshtml" />
+    <None Include="Service References\GameServerService\service.wsdl" />
+    <None Include="Service References\GameServerService\service.xsd">
       <SubType>Designer</SubType>
     </None>
-    <Content Include="Views\Matches\Errors.cshtml" />
+    <None Include="Service References\GameServerService\service1.xsd">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Web.Production.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

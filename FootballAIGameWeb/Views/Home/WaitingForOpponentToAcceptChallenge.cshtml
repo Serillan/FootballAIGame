@@ -56,7 +56,7 @@
                     .click(function() {
                         $.ajax({
                             url: "/api/game/cancelchallenge",
-                            method: "delete",
+                            method: "put",
                             success: function() {
                                 location.replace("/");
                             }
