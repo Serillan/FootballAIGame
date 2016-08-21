@@ -577,6 +577,13 @@
       <Generator>WCF Proxy Generator</Generator>
       <LastGenOutput>Reference.cs</LastGenOutput>
     </None>
+    <None Include="Service References\GameServerService\service1.wsdl" />
+    <None Include="Service References\GameServerService\service2.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\GameServerService\service21.xsd">
+      <SubType>Designer</SubType>
+    </None>
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
@@ -629,13 +636,6 @@
     <Content Include="Views\Matches\Details.cshtml" />
     <Content Include="Views\Matches\Watch.cshtml" />
     <Content Include="Views\Matches\Errors.cshtml" />
-    <None Include="Service References\GameServerService\service.wsdl" />
-    <None Include="Service References\GameServerService\service.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\GameServerService\service1.xsd">
-      <SubType>Designer</SubType>
-    </None>
     <None Include="Web.Production.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

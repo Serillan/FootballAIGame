@@ -31,8 +31,8 @@
   </wsp:Policy>
   <wsdl:types>
     <xsd:schema targetNamespace="http://tempuri.org/Imports">
-      <xsd:import namespace="http://tempuri.org/" />
-      <xsd:import namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
+      <xsd:import schemaLocation="" namespace="http://tempuri.org/" />
+      <xsd:import schemaLocation="" namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
     </xsd:schema>
   </wsdl:types>
   <wsdl:message name="IGameServerService_WantsToPlay_InputMessage">
@@ -119,9 +119,9 @@
   </wsdl:binding>
   <wsdl:service name="GameServerService">
     <wsdl:port name="NetTcpBinding_IGameServerService" binding="tns:NetTcpBinding_IGameServerService">
-      <soap12:address location="net.tcp://localhost:50028/GameService" />
+      <soap12:address location="net.tcp://gameserver:50028/GameService" />
       <wsa10:EndpointReference>
-        <wsa10:Address>net.tcp://localhost:50028/GameService</wsa10:Address>
+        <wsa10:Address>net.tcp://gameserver:50028/GameService</wsa10:Address>
         <Identity xmlns="http://schemas.xmlsoap.org/ws/2006/02/addressingidentity">
           <Upn>GAMESERVER\Serillan</Upn>
         </Identity>

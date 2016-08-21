@@ -1,11 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.ServiceModel;
 using System.Threading;
 using System.Web.Http;
+using FootballAIGameWeb.GameServerService;
 using FootballAIGameWeb.Models;
 using Microsoft.AspNet.Identity;
 
@@ -164,6 +167,7 @@ namespace FootballAIGameWeb.Controllers.Api
         }
 
         [HttpPost]
+        [HttpGet]
         public IHttpActionResult StartRandomMatch()
         {
             Player player;
