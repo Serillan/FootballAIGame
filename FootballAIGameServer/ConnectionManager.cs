@@ -48,7 +48,7 @@ namespace FootballAIGameServer
         {
             while (true)
             {
-                await Task.Delay(3000);
+                await Task.Delay(5000);
                 lock (Connections)
                 {
                     var toBeRemovedConnections = new List<ClientConnection>();

@@ -44,7 +44,7 @@ namespace FootballAIGameServer
         {
             long totalTime = 0;
             var timeout = 330;
-            var echoNum = 3;
+            var echoNum = 5;
             var pingSender = new Ping();
 
             for (int i = 0; i < echoNum; i++)
@@ -105,16 +105,19 @@ namespace FootballAIGameServer
 
             while (true) // while correct message is not received
             {
+                Console.WriteLine($"{PlayerName} - recieving line");
                 var firstLine = await NetworkReader.ReadLineAsync();
+                Console.WriteLine($"{PlayerName} - received line: {firstLine}");
 
-                if (firstLine == "ACTION")
+                if (firstLine.Length >= 6 && firstLine.Substring(firstLine.Length - 6) == "ACTION")
                 {
+                    Console.WriteLine($"{PlayerName} - recieving action");
                     var data = new byte[176];
                     await NetworkStream.ReadAsync(data, 0, data.Length, CancellationTokenSource.Token);
                     message = ActionMessage.ParseMessage(data);
                     break;
                 }
-                else if (firstLine == "PARAMETERS")
+                else if (firstLine.Length >= 10 && firstLine.Substring(firstLine.Length - 10) == "PARAMETERS")
                 {
                     var data = new byte[176];
                     await NetworkStream.ReadAsync(data, 0, data.Length, CancellationTokenSource.Token);

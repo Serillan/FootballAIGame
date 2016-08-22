@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Entity.Core;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -51,7 +52,7 @@ namespace FootballAIGameServer
                 for (var i = 0; i < 11; i++)
                 {
                     var par = getParameters1.Result[i];
-                    if (par.Speed <= 0.4001 && par.KickPower <= 0.4001 && 
+                    if (par.Speed <= 0.4001 && par.KickPower <= 0.4001 &&
                         par.Possesion <= 0.4001 && par.Precision <= 0.4001 &&
                         par.Speed + par.KickPower + par.Possesion + par.Precision - 1 <= 0.01)
                     {
@@ -137,6 +138,8 @@ namespace FootballAIGameServer
             // 1. check pings -todo timeout check
             Ping1 = Player1Connection.PingTimeAverage();
             Ping2 = Player2Connection.PingTimeAverage();
+            Console.WriteLine($"{Player1Connection.PlayerName} ping = {Ping1}\n" +
+                              $"{Player2Connection.PlayerName} ping = {Ping2}");
 
             Data = new List<float>();
 
@@ -157,19 +160,19 @@ namespace FootballAIGameServer
         public void SetStartingPositions(int whoHasBall)
         {
             var players = GameState.FootballPlayers;
-            
+
             /* TEAM 1 */
             // goalie
             players[0].X = 11;
-            players[0].Y = 75f/2;
+            players[0].Y = 75f / 2;
 
             // defenders positions
             players[1].X = 16.5f;
             players[1].Y = 15;
             players[2].X = 16.5f;
-            players[2].Y = 75/2f - 12;
+            players[2].Y = 75 / 2f - 12;
             players[3].X = 16.5f;
-            players[3].Y = 75/2f + 12;
+            players[3].Y = 75 / 2f + 12;
             players[4].X = 16.5f;
             players[4].Y = 50;
 
@@ -185,11 +188,11 @@ namespace FootballAIGameServer
 
             // forwards
             players[9].X = 45;
-            players[9].Y = 75/2f - 6;
+            players[9].Y = 75 / 2f - 6;
             players[10].X = 45;
-            players[10].Y = 75/2f + 6;
+            players[10].Y = 75 / 2f + 6;
 
-            /* TEAM 2 (symmetrical) */ 
+            /* TEAM 2 (symmetrical) */
             for (var i = 0; i < 11; i++)
             {
                 players[i + 11].X = 110 - players[i].X;
@@ -202,7 +205,7 @@ namespace FootballAIGameServer
 
             // ball
             GameState.Ball.X = 55;
-            GameState.Ball.Y = 75/2f;
+            GameState.Ball.Y = 75 / 2f;
             GameState.Ball.VectorX = 0f;
             GameState.Ball.VectorY = 0f;
 
@@ -210,7 +213,7 @@ namespace FootballAIGameServer
             if (whoHasBall == 1)
             {
                 players[10].X = 54;
-                players[10].Y = 75/2f;
+                players[10].Y = 75 / 2f;
             }
             else
             {
@@ -223,43 +226,58 @@ namespace FootballAIGameServer
         {
             Console.WriteLine(step);
 
-            if (Player1CancelRequested || Player2CancelRequested)
-                return;
-
-            await Player1Connection.SendAsync("GET ACTION");
-            await Player1Connection.SendAsync(GameState);
-
-            await Player2Connection.SendAsync("GET ACTION");
-            await Player2Connection.SendAsync(GameState);
-
-
-            var getMessage1Task = Task.WhenAny(Message1, Task.Delay(Ping1 + PlayerTimeForOneStep));
-            var getMessage2Task = Task.WhenAny(Message2, Task.Delay(Ping2 + PlayerTimeForOneStep));
-
-            var getMessage1Result = await getMessage1Task;
-            var getMessage2Result = await getMessage2Task;
-
             ActionMessage actionMessage1 = null;
             ActionMessage actionMessage2 = null;
 
-            if (Message1.IsFaulted || !Player1Connection.IsActive || Message2.IsFaulted || !Player2Connection.IsActive)
+            if (Player1CancelRequested || Player2CancelRequested || !Player1Connection.IsActive || !Player2Connection.IsActive)
+                return;
+            try
+            {
+                await Player1Connection.SendAsync("GET ACTION");
+                await Player1Connection.SendAsync(GameState);
+
+                await Player2Connection.SendAsync("GET ACTION");
+                await Player2Connection.SendAsync(GameState);
+
+
+                var getMessage1Task = Task.WhenAny(Message1, Task.Delay(Ping1 + PlayerTimeForOneStep));
+                var getMessage2Task = Task.WhenAny(Message2, Task.Delay(Ping2 + PlayerTimeForOneStep));
+
+                var getMessage1Result = await getMessage1Task;
+                var getMessage2Result = await getMessage2Task;
+
+
+
+
+                if (Message1.IsFaulted || !Player1Connection.IsActive || Message2.IsFaulted ||
+                    !Player2Connection.IsActive)
+                {
+                    return;
+                }
+
+                if (getMessage1Result == Message1)
+                {
+                    actionMessage1 = Message1.Result as ActionMessage;
+                    if (step < NumberOfSimulationSteps - 1)
+                    {
+                        Message1 = Player1Connection.ReceiveClientMessageAsync();
+                    }
+                }
+
+                if (getMessage2Result == Message2 && !Message2.IsFaulted)
+                {
+                    actionMessage2 = Message2.Result as ActionMessage;
+                    if (step < NumberOfSimulationSteps - 1)
+                    {
+                        Message2 = Player2Connection.ReceiveClientMessageAsync();
+                    }
+                }
+            }
+            catch (IOException) // if player1 or player2 has disconnected
             {
                 return;
             }
 
-            if (getMessage1Result == Message1)
-            {
-                actionMessage1 = Message1.Result as ActionMessage;
-                if (step < NumberOfSimulationSteps - 1)
-                    Message1 = Player1Connection.ReceiveClientMessageAsync();
-            }
-
-            if (getMessage2Result == Message2 && !Message2.IsFaulted)
-            {
-                actionMessage2 = Message2.Result as ActionMessage;
-                if (step < NumberOfSimulationSteps - 1)
-                    Message2 = Player2Connection.ReceiveClientMessageAsync();
-            }
 
             UpdateMatch(actionMessage1, actionMessage2);
             SaveState();
@@ -272,20 +290,27 @@ namespace FootballAIGameServer
             var firstBall = Random.Next(1, 2);
 
             // first half
-            SetStartingPositions(firstBall);
-            for (var step = 0; step < NumberOfSimulationSteps / 2; step++) 
+            try
             {
-                await ProcessSimulationStep(step);
-            }
+                SetStartingPositions(firstBall);
+                for (var step = 0; step < NumberOfSimulationSteps / 2; step++)
+                {
+                    await ProcessSimulationStep(step);
+                }
 
-            // second half
-            SetStartingPositions(firstBall == 1 ? 2 : 1);
-            for (var step = NumberOfSimulationSteps / 2; step < NumberOfSimulationSteps; step++)
+                // second half
+                SetStartingPositions(firstBall == 1 ? 2 : 1);
+                for (var step = NumberOfSimulationSteps / 2; step < NumberOfSimulationSteps; step++)
+                {
+                    await ProcessSimulationStep(step);
+                }
+
+                ProcessEnding();
+            }
+            catch (Exception ex)
             {
-                await ProcessSimulationStep(step);
+                Console.WriteLine(ex.Message);
             }
-
-            ProcessEnding();
         }
 
         private void ProcessEnding()
@@ -345,8 +370,8 @@ namespace FootballAIGameServer
 
             for (var i = 0; i < 22; i++)
             {
-                currentStateData[2 + 2*i] = GameState.FootballPlayers[i].X;
-                currentStateData[2 + 2*i + 1] = GameState.FootballPlayers[i].Y;
+                currentStateData[2 + 2 * i] = GameState.FootballPlayers[i].X;
+                currentStateData[2 + 2 * i + 1] = GameState.FootballPlayers[i].Y;
             }
 
             foreach (var num in currentStateData)
@@ -362,15 +387,31 @@ namespace FootballAIGameServer
 
         public void UpdateMatch(ActionMessage player1Action, ActionMessage player2Action)
         {
-            for (var i = 0; i < 11; i++)
+            if (player1Action != null)
             {
-                GameState.FootballPlayers[i].X += player1Action.PlayerActions[i].VectorX;
-                GameState.FootballPlayers[i].Y += player1Action.PlayerActions[i].VectorY;
+                for (var i = 0; i < 11; i++)
+                {
+                    GameState.FootballPlayers[i].X += player1Action.PlayerActions[i].VectorX;
+                    GameState.FootballPlayers[i].Y += player1Action.PlayerActions[i].VectorY;
+                }
             }
-            for (var i = 0; i < 11; i++)
+            else
             {
-                GameState.FootballPlayers[i + 11].X += player2Action.PlayerActions[i].VectorX;
-                GameState.FootballPlayers[i + 11].Y += player2Action.PlayerActions[i].VectorY;
+                // default (nothing for now)
+                Console.WriteLine(Player1Connection.PlayerName + " timeout.");
+            }
+            if (player2Action != null)
+            {
+                for (var i = 0; i < 11; i++)
+                {
+                    GameState.FootballPlayers[i + 11].X += player2Action.PlayerActions[i].VectorX;
+                    GameState.FootballPlayers[i + 11].Y += player2Action.PlayerActions[i].VectorY;
+                }
+            }
+            else
+            {
+                // default (nothing for now)
+                Console.WriteLine(Player2Connection.PlayerName + " timeout.");
             }
         }
 
