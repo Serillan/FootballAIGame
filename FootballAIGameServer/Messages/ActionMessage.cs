@@ -42,5 +42,11 @@ namespace FootballAIGameServer.Messages
         public float KickX { get; set; }
 
         public float KickY { get; set; }
+
+        public double VectorLength =>
+            Math.Sqrt(VectorX * VectorX + VectorY * VectorY);
+
+        public double KickVectorLength =>
+            Math.Sqrt(KickX * KickX + KickY * KickY);
     }
 }

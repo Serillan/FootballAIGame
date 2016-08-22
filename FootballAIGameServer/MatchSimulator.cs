@@ -20,6 +20,9 @@ namespace FootballAIGameServer
 
         public const int NumberOfSimulationSteps = 1500;
         public const int PlayerTimeForOneStep = 100; // ms
+        public const int StepInterval = 200;
+
+        public const double MaxAcceleration = 3;
 
         private GameState GameState { get; set; }
         private Match Match { get; set; }
@@ -234,10 +237,10 @@ namespace FootballAIGameServer
             try
             {
                 await Player1Connection.SendAsync("GET ACTION");
-                await Player1Connection.SendAsync(GameState);
+                await Player1Connection.SendAsync(GameState, 1);
 
                 await Player2Connection.SendAsync("GET ACTION");
-                await Player2Connection.SendAsync(GameState);
+                await Player2Connection.SendAsync(GameState, 2);
 
 
                 var getMessage1Task = Task.WhenAny(Message1, Task.Delay(Ping1 + PlayerTimeForOneStep));
@@ -389,10 +392,50 @@ namespace FootballAIGameServer
         {
             if (player1Action != null)
             {
+                // movement
                 for (var i = 0; i < 11; i++)
                 {
-                    GameState.FootballPlayers[i].X += player1Action.PlayerActions[i].VectorX;
-                    GameState.FootballPlayers[i].Y += player1Action.PlayerActions[i].VectorY;
+                    var player = GameState.FootballPlayers[i];
+                    var action = player1Action.PlayerActions[i];
+
+                    var oldSpeed = player.CurrentSpeed;
+
+                    var accelerationX = action.VectorX - player.VectorX;
+                    var accelerationY = action.VectorY - player.VectorY;
+
+                    var accelerationVectorLength =
+                        Math.Sqrt(Math.Pow(accelerationX, 2)*
+                                  Math.Pow(accelerationY, 2));
+
+
+                    if (accelerationVectorLength > MaxAcceleration)
+                    {
+                        var q = MaxAcceleration/accelerationVectorLength;
+                        var fixedAccelerationX = accelerationX*q;
+                        var fixedAccelerationY = accelerationY*q;
+
+                        //Match.Player1ErrorLog += "Player acceleration correction.;";
+                        action.VectorX = (float)(player.VectorX + fixedAccelerationX);
+                        action.VectorY = (float)(player.VectorY + fixedAccelerationY);
+                    }
+
+
+                    player.VectorX = action.VectorX;
+                    player.VectorY = action.VectorY;
+                    var newSpeed = player.CurrentSpeed;
+
+                    if (newSpeed > player.MaxSpeed)
+                    {
+                        // too high speed
+                        //Match.Player1ErrorLog += "Player speed correction.";
+                        player.VectorX *= (float)(player.MaxSpeed/newSpeed);
+                        player.VectorY *= (float)(player.MaxSpeed/newSpeed);
+                    }
+
+                    // apply
+                    player.X += player.VectorX;
+                    player.Y += player.VectorY;
+
                 }
             }
             else
@@ -400,12 +443,55 @@ namespace FootballAIGameServer
                 // default (nothing for now)
                 Console.WriteLine(Player1Connection.PlayerName + " timeout.");
             }
+
+
+
             if (player2Action != null)
             {
+                // movement
                 for (var i = 0; i < 11; i++)
                 {
-                    GameState.FootballPlayers[i + 11].X += player2Action.PlayerActions[i].VectorX;
-                    GameState.FootballPlayers[i + 11].Y += player2Action.PlayerActions[i].VectorY;
+                    var player = GameState.FootballPlayers[i + 11];
+                    var action = player2Action.PlayerActions[i];
+
+                    var oldSpeed = player.CurrentSpeed;
+
+                    var accelerationX = action.VectorX - player.VectorX;
+                    var accelerationY = action.VectorY - player.VectorY;
+
+                    var accelerationVectorLength =
+                        Math.Sqrt(Math.Pow(accelerationX, 2) *
+                                  Math.Pow(accelerationY, 2));
+
+
+                    if (accelerationVectorLength > MaxAcceleration)
+                    {
+                        var q = MaxAcceleration / accelerationVectorLength;
+                        var fixedAccelerationX = accelerationX * q;
+                        var fixedAccelerationY = accelerationY * q;
+
+                        //Match.Player2ErrorLog += "Player acceleration correction.;";
+                        action.VectorX = (float)(player.VectorX + fixedAccelerationX);
+                        action.VectorY = (float)(player.VectorY + fixedAccelerationY);
+                    }
+
+
+                    player.VectorX = action.VectorX;
+                    player.VectorY = action.VectorY;
+                    var newSpeed = player.CurrentSpeed;
+
+                    if (newSpeed > player.MaxSpeed)
+                    {
+                        // too high speed
+                        //Match.Player2ErrorLog += "Player speed correction.";
+                        player.VectorX *= (float)(player.MaxSpeed / newSpeed);
+                        player.VectorY *= (float)(player.MaxSpeed / newSpeed);
+                    }
+
+                    // apply
+                    player.X += player.VectorX;
+                    player.Y += player.VectorY;
+
                 }
             }
             else

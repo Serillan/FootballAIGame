@@ -23,5 +23,17 @@ namespace FootballAIGameServer.SimulationEntities
         public float VectorX { get; set; }
 
         public float VectorY { get; set; }
+
+        /// <summary>
+        /// Returns player current speed in metres per second.
+        /// </summary>
+        public double CurrentSpeed =>
+            VectorLength * 1000 / MatchSimulator.StepInterval;
+
+        public double VectorLength =>
+            Math.Sqrt(VectorX * VectorX + VectorY * VectorY);
+
+        public double MaxSpeed =>
+             5 + Speed * 2.5 / 0.4;
     }
 }
