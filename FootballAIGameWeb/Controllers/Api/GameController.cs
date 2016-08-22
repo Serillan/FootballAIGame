@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -149,17 +150,24 @@ namespace FootballAIGameWeb.Controllers.Api
                     challengeInDb.ChallengedPlayer == player &&
                     challengeInDb.ChallengingPlayer.PlayerState == PlayerState.WaitingForOpponentToAcceptChallenge)
                 {
-                    using (var gameServer = new GameServerService.GameServerServiceClient())
+                    try
                     {
-                        gameServer.StartGame(player.Name, player.SelectedAi,
-                            challengeInDb.ChallengingPlayer.Name, challengeInDb.ChallengingPlayer.SelectedAi);
-                    }
+                        using (var gameServer = new GameServerService.GameServerServiceClient())
+                        {
+                            gameServer.StartGame(player.Name, player.SelectedAi,
+                                challengeInDb.ChallengingPlayer.Name, challengeInDb.ChallengingPlayer.SelectedAi);
+                        }
 
-                    challengeInDb.ChallengingPlayer.PlayerState = PlayerState.PlayingMatch;
-                    challengeInDb.ChallengedPlayer.PlayerState = PlayerState.PlayingMatch;
-                    context.Challenges.Remove(challengeInDb);
-                    context.SaveChanges();
-                    return Ok();
+                        challengeInDb.ChallengingPlayer.PlayerState = PlayerState.PlayingMatch;
+                        challengeInDb.ChallengedPlayer.PlayerState = PlayerState.PlayingMatch;
+                        context.Challenges.Remove(challengeInDb);
+                        context.SaveChanges();
+                        return Ok();
+                    }
+                    catch (CommunicationObjectFaultedException) // server if offline 
+                    {
+                        return BadRequest("Game Server is offline.");
+                    }
                 }
 
                 return BadRequest();
@@ -167,25 +175,33 @@ namespace FootballAIGameWeb.Controllers.Api
         }
 
         [HttpPost]
-        [HttpGet]
         public IHttpActionResult StartRandomMatch()
         {
-            Player player;
-
+            Player player = null;
             using (var context = new ApplicationDbContext())
             {
-                player = GetCurrentPlayer(context);
+                try
+                {
+                    using (var gameServer = new GameServerService.GameServerServiceClient())
+                    {
 
-                if (player.PlayerState != PlayerState.Idle)
-                    return BadRequest("Invalid player state.");
+                        player = GetCurrentPlayer(context);
 
-                player.PlayerState = PlayerState.LookingForOpponent;
-                context.SaveChanges(); // must be done before calling service! 
-            }
+                        if (player.PlayerState != PlayerState.Idle)
+                            return BadRequest("Invalid player state.");
 
-            using (var gameServer = new GameServerService.GameServerServiceClient())
-            {
-                gameServer.WantsToPlay(player.Name, player.SelectedAi);
+                        player.PlayerState = PlayerState.LookingForOpponent;
+                        context.SaveChanges(); // must be done before calling service!
+                        gameServer.WantsToPlay(player.Name, player.SelectedAi);
+                    }
+                }
+                catch (CommunicationObjectFaultedException)
+                {
+                    player.PlayerState = PlayerState.Idle;
+                    context.SaveChanges();
+
+                    return BadRequest("Game Server is offline.");
+                }
             }
 
             return Ok();
@@ -284,11 +300,14 @@ namespace FootballAIGameWeb.Controllers.Api
             {
                 var player = GetCurrentPlayer(context);
 
-                // TODO check that game server is checking state!
-                using (var gameServer = new GameServerService.GameServerServiceClient())
+                try
                 {
-                    gameServer.CancelLooking(player.Name);
-                }
+                    using (var gameServer = new GameServerService.GameServerServiceClient())
+                    {
+                        gameServer.CancelLooking(player.Name);
+                    }
+                } catch (CommunicationObjectFaultedException) { }
+
                 if (player.PlayerState == PlayerState.LookingForOpponent)
                     player.PlayerState = PlayerState.Idle;
                 context.SaveChanges();
@@ -304,9 +323,16 @@ namespace FootballAIGameWeb.Controllers.Api
                 var player = GetCurrentPlayer(context);
 
                 // TODO check that game server looks on state
-                using (var gameServer = new GameServerService.GameServerServiceClient())
+                try
                 {
-                    gameServer.CancelMatch(player.Name);
+                    using (var gameServer = new GameServerService.GameServerServiceClient())
+                    {
+                        gameServer.CancelMatch(player.Name);
+                    }
+                }
+                catch (CommunicationObjectFaultedException)
+                {
+                    player.PlayerState = PlayerState.Idle;
                 }
 
                 context.SaveChanges();
