@@ -24,6 +24,10 @@ namespace FootballAIGameServer.SimulationEntities
 
         public float VectorY { get; set; }
 
+        public float KickX { get; set; }
+
+        public float KickY { get; set; }
+
         /// <summary>
         /// Returns player current speed in metres per second.
         /// </summary>

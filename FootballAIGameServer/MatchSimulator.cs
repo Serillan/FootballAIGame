@@ -22,7 +22,9 @@ namespace FootballAIGameServer
         public const int PlayerTimeForOneStep = 100; // ms
         public const int StepInterval = 200;
 
-        public const double MaxAcceleration = 3;
+        public const double MaxAcceleration = 3; // m/s/s
+        public const double MaxBallSpeed = 15; // m/s
+        public const double BallDecerelation = 1.5; // m/s/s
 
         private GameState GameState { get; set; }
         private Match Match { get; set; }
@@ -177,7 +179,7 @@ namespace FootballAIGameServer
             players[3].X = 16.5f;
             players[3].Y = 75 / 2f + 12;
             players[4].X = 16.5f;
-            players[4].Y = 50;
+            players[4].Y = 60;
 
             // midfielders
             players[5].X = 33;
@@ -296,6 +298,8 @@ namespace FootballAIGameServer
             try
             {
                 SetStartingPositions(firstBall);
+                SaveState(); // save starting state
+
                 for (var step = 0; step < NumberOfSimulationSteps / 2; step++)
                 {
                     await ProcessSimulationStep(step);
@@ -388,7 +392,78 @@ namespace FootballAIGameServer
             return ((ParametersMessage)parametersMessage).Players;
         }
 
-        public void UpdateMatch(ActionMessage player1Action, ActionMessage player2Action)
+        private void UpdateMatch(ActionMessage player1Action, ActionMessage player2Action)
+        {
+            UpdatePlayersMovement(player1Action, player2Action);
+            UpdateBall(player1Action, player2Action);
+        }
+
+        private void UpdateBall(ActionMessage player1Action, ActionMessage player2Action)
+        {
+            // add kick actions to players
+            for (var i = 0; i < 11; i++)
+            {
+                GameState.FootballPlayers[i].KickX = player1Action?.PlayerActions[i].KickX ?? 0;
+                GameState.FootballPlayers[i].KickY = player1Action?.PlayerActions[i].KickY ?? 0;
+            }
+            for (var i = 0; i < 11; i++)
+            {
+                GameState.FootballPlayers[i+11].KickX = player2Action?.PlayerActions[i].KickX ?? 0;
+                GameState.FootballPlayers[i+11].KickY = player2Action?.PlayerActions[i].KickY ?? 0;
+            }
+
+            var playersNearBallKicking = GameState.FootballPlayers.Where(
+                p => DistanceBetween(GameState.Ball, p) <= 1 && (p.KickX != 0 || p.KickY != 0));
+
+            var kickWinner = GetKickWinner(playersNearBallKicking.ToArray());
+
+            // apply kick
+            if (kickWinner != null)
+            {
+                GameState.Ball.VectorX = kickWinner.KickX;
+                GameState.Ball.VectorY = kickWinner.KickY;
+                var newSpeed = GameState.Ball.CurrentSpeed;
+                if (newSpeed > 15)
+                {
+                    GameState.Ball.VectorX *= (float)(15 / newSpeed);
+                    GameState.Ball.VectorY *= (float)(15 / newSpeed);
+                }
+            }
+
+            // ball deceralation
+            var ratio = (GameState.Ball.CurrentSpeed - (BallDecerelation * StepInterval/1000)) /
+                GameState.Ball.CurrentSpeed;
+            if (ratio < 0)
+                ratio = 0;
+            GameState.Ball.VectorX *= (float)ratio;
+            GameState.Ball.VectorY *= (float)ratio;
+
+            // update ball position
+            GameState.Ball.X += GameState.Ball.VectorX;
+            GameState.Ball.Y += GameState.Ball.VectorY;
+        }
+
+        private FootballPlayer GetKickWinner(FootballPlayer[] kickers)
+        {
+            if (kickers.Length == 0)
+                return null;
+            else
+            {
+                return kickers[0];
+            }
+        }
+
+        private double DistanceBetween(Ball ball, FootballPlayer player)
+        {
+            return Math.Sqrt(Math.Pow(ball.X - player.X, 2) + Math.Pow(ball.Y - player.Y, 2));
+        }
+
+        private double DistanceBetween(FootballPlayer player1, FootballPlayer player2)
+        {
+            return Math.Sqrt(Math.Pow(player1.X - player2.X, 2) + Math.Pow(player1.Y - player2.Y, 2));
+        }
+
+        public void UpdatePlayersMovement(ActionMessage player1Action, ActionMessage player2Action)
         {
             if (player1Action != null)
             {
@@ -404,15 +479,15 @@ namespace FootballAIGameServer
                     var accelerationY = action.VectorY - player.VectorY;
 
                     var accelerationVectorLength =
-                        Math.Sqrt(Math.Pow(accelerationX, 2)*
+                        Math.Sqrt(Math.Pow(accelerationX, 2) *
                                   Math.Pow(accelerationY, 2));
 
 
                     if (accelerationVectorLength > MaxAcceleration)
                     {
-                        var q = MaxAcceleration/accelerationVectorLength;
-                        var fixedAccelerationX = accelerationX*q;
-                        var fixedAccelerationY = accelerationY*q;
+                        var q = MaxAcceleration / accelerationVectorLength;
+                        var fixedAccelerationX = accelerationX * q;
+                        var fixedAccelerationY = accelerationY * q;
 
                         //Match.Player1ErrorLog += "Player acceleration correction.;";
                         action.VectorX = (float)(player.VectorX + fixedAccelerationX);
@@ -428,8 +503,8 @@ namespace FootballAIGameServer
                     {
                         // too high speed
                         //Match.Player1ErrorLog += "Player speed correction.";
-                        player.VectorX *= (float)(player.MaxSpeed/newSpeed);
-                        player.VectorY *= (float)(player.MaxSpeed/newSpeed);
+                        player.VectorX *= (float)(player.MaxSpeed / newSpeed);
+                        player.VectorY *= (float)(player.MaxSpeed / newSpeed);
                     }
 
                     // apply
@@ -500,8 +575,6 @@ namespace FootballAIGameServer
                 Console.WriteLine(Player2Connection.PlayerName + " timeout.");
             }
         }
-
-
 
     }
 }
