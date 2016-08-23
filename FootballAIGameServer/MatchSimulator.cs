@@ -33,15 +33,17 @@ namespace FootballAIGameServer
         private List<float> Data { get; set; }
         private Task<ClientMessage> Message1 { get; set; }
         private Task<ClientMessage> Message2 { get; set; }
-        private Random Random { get; set; }
+        private FootballPlayer LastKicker { get; set; }
+        private FootballPlayer LastBallTouch { get; set; }
+        private int WhoIsOnLeft { get; set; }
 
         public static List<MatchSimulator> RunningSimulations { get; set; }
+        public static Random Random { get; set; }
 
         public MatchSimulator(ClientConnection player1Connection, ClientConnection player2Connection)
         {
             this.Player1Connection = player1Connection;
             this.Player2Connection = player2Connection;
-            Random = new Random();
         }
 
         public async Task ProcessGettingParameters()
@@ -215,7 +217,7 @@ namespace FootballAIGameServer
             GameState.Ball.VectorY = 0f;
 
             /* ball winner */
-            if (whoHasBall == 1)
+            if ((whoHasBall == 1 && WhoIsOnLeft == 1) || (whoHasBall == 2 && WhoIsOnLeft == 2))
             {
                 players[10].X = 54;
                 players[10].Y = 75 / 2f;
@@ -225,12 +227,24 @@ namespace FootballAIGameServer
                 players[21].X = 56;
                 players[21].Y = 75 / 2f;
             }
+
+            if (WhoIsOnLeft == 2)
+            {
+                // switch
+                for (var i = 0; i < 11; i++)
+                {
+                    var tempX = players[i].X;
+                    var tempY = players[i].Y;
+                    players[i].X = players[i + 11].X;
+                    players[i].Y = players[i + 11].Y;
+                    players[i + 11].X = tempX;
+                    players[i + 11].Y = tempY;
+                }
+            }
         }
 
         public async Task ProcessSimulationStep(int step)
         {
-            Console.WriteLine(step);
-
             ActionMessage actionMessage1 = null;
             ActionMessage actionMessage2 = null;
 
@@ -292,24 +306,30 @@ namespace FootballAIGameServer
         {
             await ProcessSimulationStart();
 
-            var firstBall = Random.Next(1, 2);
+            var firstBall = Random.Next(1, 3); // max is excluded
 
             // first half
             try
             {
+                WhoIsOnLeft = 1;
                 SetStartingPositions(firstBall);
                 SaveState(); // save starting state
 
                 for (var step = 0; step < NumberOfSimulationSteps / 2; step++)
                 {
                     await ProcessSimulationStep(step);
+                    if (step % 100 == 0)
+                        Console.WriteLine(step);
                 }
 
                 // second half
+                WhoIsOnLeft = 2;
                 SetStartingPositions(firstBall == 1 ? 2 : 1);
                 for (var step = NumberOfSimulationSteps / 2; step < NumberOfSimulationSteps; step++)
                 {
                     await ProcessSimulationStep(step);
+                    if (step % 100 == 0)
+                        Console.WriteLine(step);
                 }
 
                 ProcessEnding();
@@ -371,7 +391,7 @@ namespace FootballAIGameServer
 
         private void SaveState()
         {
-            float[] currentStateData = new float[46];
+            var currentStateData = new float[46];
             currentStateData[0] = GameState.Ball.X;
             currentStateData[1] = GameState.Ball.Y;
 
@@ -396,6 +416,21 @@ namespace FootballAIGameServer
         {
             UpdatePlayersMovement(player1Action, player2Action);
             UpdateBall(player1Action, player2Action);
+            HandleOut();
+        }
+
+        private void HandleOut()
+        {
+            var lastTeam = 0;
+            for (var i = 0; i < 22; i++)
+                if (LastBallTouch == GameState.FootballPlayers[i])
+                    lastTeam = i < 11 ? 1 : 2;
+
+            // corner kicks
+            if (GameState.Ball.X > 110)
+            {
+                
+            }
         }
 
         private void UpdateBall(ActionMessage player1Action, ActionMessage player2Action)
@@ -408,20 +443,33 @@ namespace FootballAIGameServer
             }
             for (var i = 0; i < 11; i++)
             {
-                GameState.FootballPlayers[i+11].KickX = player2Action?.PlayerActions[i].KickX ?? 0;
-                GameState.FootballPlayers[i+11].KickY = player2Action?.PlayerActions[i].KickY ?? 0;
+                GameState.FootballPlayers[i + 11].KickX = player2Action?.PlayerActions[i].KickX ?? 0;
+                GameState.FootballPlayers[i + 11].KickY = player2Action?.PlayerActions[i].KickY ?? 0;
             }
 
             var playersNearBallKicking = GameState.FootballPlayers.Where(
-                p => DistanceBetween(GameState.Ball, p) <= 1 && (p.KickX != 0 || p.KickY != 0));
+                p => DistanceBetween(GameState.Ball, p) <= 2 && (p.KickX != 0 || p.KickY != 0));
 
             var kickWinner = GetKickWinner(playersNearBallKicking.ToArray());
+            LastKicker = kickWinner;
 
             // apply kick
             if (kickWinner != null)
             {
+                LastBallTouch = LastKicker;
+
                 GameState.Ball.VectorX = kickWinner.KickX;
                 GameState.Ball.VectorY = kickWinner.KickY;
+
+                // deviation of the kick
+                var angleDevation = (0.4 - kickWinner.Precision) * (Random.NextDouble() * 2 - 1);
+
+                // rotation applied (deviation)
+                GameState.Ball.VectorX = (float)(Math.Cos(angleDevation) * GameState.Ball.VectorX -
+                                                Math.Sin(angleDevation) * GameState.Ball.VectorY);
+                GameState.Ball.VectorY = (float)(Math.Sin(angleDevation) * GameState.Ball.VectorX +
+                                                Math.Cos(angleDevation) * GameState.Ball.VectorY);
+
                 var newSpeed = GameState.Ball.CurrentSpeed;
                 if (newSpeed > 15)
                 {
@@ -431,7 +479,7 @@ namespace FootballAIGameServer
             }
 
             // ball deceralation
-            var ratio = (GameState.Ball.CurrentSpeed - (BallDecerelation * StepInterval/1000)) /
+            var ratio = (GameState.Ball.CurrentSpeed - (BallDecerelation * StepInterval / 1000)) /
                 GameState.Ball.CurrentSpeed;
             if (ratio < 0)
                 ratio = 0;
@@ -447,20 +495,27 @@ namespace FootballAIGameServer
         {
             if (kickers.Length == 0)
                 return null;
+            if (LastKicker != null && kickers.Contains(LastKicker))
+            {
+                kickers = kickers.Where(k => k != LastKicker).ToArray();
+                var lastKickerWeight = 1.5 + LastKicker.Possesion;
+                var winNumber = Random.NextDouble() * (kickers.Length + lastKickerWeight);
+                winNumber -= lastKickerWeight;
+                if (winNumber < 0)
+                    return LastKicker;
+                var intWinner = (int)Math.Floor(winNumber);
+                return kickers[intWinner];
+            }
             else
             {
-                return kickers[0];
+                var winNumber = Random.Next(0, kickers.Length);
+                return kickers[winNumber];
             }
         }
 
         private double DistanceBetween(Ball ball, FootballPlayer player)
         {
             return Math.Sqrt(Math.Pow(ball.X - player.X, 2) + Math.Pow(ball.Y - player.Y, 2));
-        }
-
-        private double DistanceBetween(FootballPlayer player1, FootballPlayer player2)
-        {
-            return Math.Sqrt(Math.Pow(player1.X - player2.X, 2) + Math.Pow(player1.Y - player2.Y, 2));
         }
 
         public void UpdatePlayersMovement(ActionMessage player1Action, ActionMessage player2Action)

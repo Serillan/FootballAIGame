@@ -37,8 +37,11 @@ namespace FootballAIGameServer
             Handler = ConsoleEventCallback;
             SetConsoleCtrlHandler(Handler, true);
 
+            // initialize random
+            MatchSimulator.Random = new Random();
+
             // start listening
-            var manager = ConnectionManager.Instance; ;
+            var manager = ConnectionManager.Instance;
             manager.StartListening().Wait(); 
         }
 
