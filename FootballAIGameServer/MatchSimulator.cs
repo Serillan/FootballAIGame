@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Data.Entity.Core;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Security.Cryptography.X509Certificates;
+using System.ServiceModel.Channels;
 using System.Text;
 using System.Threading.Tasks;
 using FootballAIGameServer.Messages;
@@ -34,8 +37,21 @@ namespace FootballAIGameServer
         private Task<ClientMessage> Message1 { get; set; }
         private Task<ClientMessage> Message2 { get; set; }
         private FootballPlayer LastKicker { get; set; }
-        private FootballPlayer LastBallTouch { get; set; }
         private int WhoIsOnLeft { get; set; }
+        private int CurrentStep { get; set; }
+        private int CurrentScore1 { get; set; }
+        private int CurrentScore2 { get; set; }
+
+        private string CurrentTime
+        {
+            get
+            {
+                var totalSeconds = CurrentStep * StepInterval / 1000;
+                var minutes = totalSeconds/60;
+                var seconds = totalSeconds - minutes*60;
+                return $"{minutes}:{seconds}";
+            }
+        }
 
         public static List<MatchSimulator> RunningSimulations { get; set; }
         public static Random Random { get; set; }
@@ -139,7 +155,8 @@ namespace FootballAIGameServer
             {
                 Time = DateTime.Now,
                 Player1Ai = Player1Connection.AiName,
-                Player2Ai = Player2Connection.AiName
+                Player2Ai = Player2Connection.AiName,
+                Goals = ""
             };
 
             // 1. check pings -todo timeout check
@@ -317,6 +334,7 @@ namespace FootballAIGameServer
 
                 for (var step = 0; step < NumberOfSimulationSteps / 2; step++)
                 {
+                    CurrentStep = step;
                     await ProcessSimulationStep(step);
                     if (step % 100 == 0)
                         Console.WriteLine(step);
@@ -327,6 +345,7 @@ namespace FootballAIGameServer
                 SetStartingPositions(firstBall == 1 ? 2 : 1);
                 for (var step = NumberOfSimulationSteps / 2; step < NumberOfSimulationSteps; step++)
                 {
+                    CurrentStep = step;
                     await ProcessSimulationStep(step);
                     if (step % 100 == 0)
                         Console.WriteLine(step);
@@ -350,10 +369,11 @@ namespace FootballAIGameServer
                 var player2 = context.Players.SingleOrDefault(p => p.Name == Player2Connection.PlayerName);
                 player1.PlayerState = PlayerState.Idle;
                 player2.PlayerState = PlayerState.Idle;
+
                 Match.Player1 = player1;
                 Match.Player2 = player2;
-                Match.Score = "0:0";
-                Match.Goals = "";
+                Match.Score = $"{CurrentScore1}:{CurrentScore2}";
+                Match.Winner = CurrentScore1 > CurrentScore2 ? 1 : CurrentScore1 < CurrentScore2 ? 2 : 0;
 
                 if (Message1.IsFaulted || !Player1Connection.IsActive)
                 {
@@ -417,20 +437,162 @@ namespace FootballAIGameServer
             UpdatePlayersMovement(player1Action, player2Action);
             UpdateBall(player1Action, player2Action);
             HandleOut();
+            HandleGoals();
         }
 
         private void HandleOut()
         {
             var lastTeam = 0;
+            var players = GameState.FootballPlayers;
+            var ball = GameState.Ball;
+
             for (var i = 0; i < 22; i++)
-                if (LastBallTouch == GameState.FootballPlayers[i])
+                if (LastKicker == GameState.FootballPlayers[i])
                     lastTeam = i < 11 ? 1 : 2;
 
-            // corner kicks
-            if (GameState.Ball.X > 110)
+            // corner kicks or goal kicks (goal line crossed)
+            if (ball.Y > 75f / 2 + 7.32 / 2 || ball.Y < 75f / 2 - 7.32 / 2) // not goals
             {
-                
+                if (GameState.Ball.X > 110)
+                {
+                    if (WhoIsOnLeft == lastTeam)
+                    {
+                        var goalKeeper = lastTeam == 1 ? players[0] : players[11];
+                        // goal kick
+                        goalKeeper.X = 110 - 16.5f;
+                        goalKeeper.Y = 75/2f;
+                        ball.X = goalKeeper.X;
+                        ball.Y = goalKeeper.Y;
+                        // todo kick enemy players from penalty area
+                    }
+                    else
+                    {
+                        // corner kick
+                        ball.X = 110;
+                        ball.Y = ball.Y >= 75f / 2 + 7.32 / 2 ? 75 : 0;
+
+                        var nearestPlayerFromOppositeTeam =
+                            GetNearestPlayerToBall(lastTeam == 1 ? 2 : 1);
+
+                        nearestPlayerFromOppositeTeam.X = 111;
+                        nearestPlayerFromOppositeTeam.Y = ball.Y == 0 ? -1 : 76;
+                    }
+                }
+
+                if (GameState.Ball.X < 0)
+                {
+                    if (WhoIsOnLeft != lastTeam)
+                    {
+                        var goalKeeper = lastTeam == 1 ? players[0] : players[11];
+                        // goal kick
+                        goalKeeper.X = 16.5f;
+                        goalKeeper.Y = 75/2f;
+                        ball.X = goalKeeper.X;
+                        ball.Y = goalKeeper.Y;
+                        // todo kick enemy players from penalty area
+                    }
+                    else
+                    {
+                        // corner kick
+                        ball.X = 0;
+                        ball.Y = ball.Y >= 75f / 2 + 7.32 / 2 ? 75 : 0;
+
+                        var nearestPlayerFromOppositeTeam =
+                           GetNearestPlayerToBall(lastTeam == 1 ? 2 : 1);
+
+                        nearestPlayerFromOppositeTeam.X = -1;
+                        nearestPlayerFromOppositeTeam.Y = ball.Y == 0 ? -1 : 76;
+                    }
+                }
             }
+
+            // touch lines
+            if (ball.Y < 0)
+            {
+                ball.Y = 0;
+
+                var nearestPlayerFromOppositeTeam =
+                          GetNearestPlayerToBall(lastTeam == 1 ? 2 : 1);
+
+                nearestPlayerFromOppositeTeam.X = ball.X;
+                nearestPlayerFromOppositeTeam.Y = -1;
+            }
+            if (ball.Y > 75)
+            {
+                ball.Y = 75;
+
+                var nearestPlayerFromOppositeTeam =
+                    GetNearestPlayerToBall(lastTeam == 1 ? 2 : 1);
+
+                nearestPlayerFromOppositeTeam.X = ball.X;
+                nearestPlayerFromOppositeTeam.Y = 76;
+            }
+
+        }
+
+        private void HandleGoals()
+        {
+            var players = GameState.FootballPlayers;
+            var ball = GameState.Ball;
+
+            if (ball.X < 0 && ball.Y < 75f/2 + 7.32/2 && ball.Y > 75f/2 - 7.32/2)
+            {
+                var teamNameThatScored = 
+                    WhoIsOnLeft == 1 ? Player2Connection.PlayerName : Player1Connection.PlayerName;
+
+                if (WhoIsOnLeft == 1)
+                    CurrentScore2++;
+                if (WhoIsOnLeft == 2)
+                    CurrentScore1++;
+
+                var scoringPlayerNumber = 0;
+                for (var i = 0; i < 22; i++)
+                    if (GameState.FootballPlayers[i] == LastKicker)
+                        scoringPlayerNumber = i < 11 ? i : i - 11;
+                Match.Goals += $"{CurrentTime};{teamNameThatScored};Player{scoringPlayerNumber}|";
+                SetStartingPositions(WhoIsOnLeft);
+            }
+            else if (ball.X > 110 && ball.Y < 75f / 2 + 7.32 / 2 && ball.Y > 75f / 2 - 7.32 / 2)
+            {
+                var teamNameThatScored =
+                    WhoIsOnLeft == 2 ? Player2Connection.PlayerName : Player1Connection.PlayerName;
+
+                if (WhoIsOnLeft == 1)
+                    CurrentScore1++;
+                if (WhoIsOnLeft == 2)
+                    CurrentScore2++;
+
+                var scoringPlayerNumber = 0;
+                for (var i = 0; i < 22; i++)
+                    if (GameState.FootballPlayers[i] == LastKicker)
+                        scoringPlayerNumber = i < 11 ? i : i - 11;
+                Match.Goals += $"{CurrentTime};{teamNameThatScored};Player{scoringPlayerNumber}|";
+                SetStartingPositions(WhoIsOnLeft == 1 ? 2 : 1);
+            }
+        }
+
+        private FootballPlayer GetNearestPlayerToBall(int fromWhichTeam)
+        {
+            FootballPlayer nearestPlayer = null;
+            FootballPlayer[] players = GameState.FootballPlayers;
+            Ball ball = GameState.Ball;
+
+            if (fromWhichTeam == 1)
+            {
+                nearestPlayer = players[1];
+                for (int i = 2; i < 11; i++)
+                    if (DistanceBetween(ball, players[i]) < DistanceBetween(ball, nearestPlayer))
+                        nearestPlayer = players[i];
+            }
+            if (fromWhichTeam == 2)
+            {
+                nearestPlayer = players[12];
+                for (int i = 13; i < 22; i++)
+                    if (DistanceBetween(ball, players[i]) < DistanceBetween(ball, nearestPlayer))
+                        nearestPlayer = players[i];
+            }
+
+            return nearestPlayer;
         }
 
         private void UpdateBall(ActionMessage player1Action, ActionMessage player2Action)
@@ -451,12 +613,11 @@ namespace FootballAIGameServer
                 p => DistanceBetween(GameState.Ball, p) <= 2 && (p.KickX != 0 || p.KickY != 0));
 
             var kickWinner = GetKickWinner(playersNearBallKicking.ToArray());
-            LastKicker = kickWinner;
 
             // apply kick
             if (kickWinner != null)
             {
-                LastBallTouch = LastKicker;
+                LastKicker = kickWinner;
 
                 GameState.Ball.VectorX = kickWinner.KickX;
                 GameState.Ball.VectorY = kickWinner.KickY;
