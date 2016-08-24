@@ -58,7 +58,8 @@ namespace FootballAIGameServer
 
         public async Task SendAsync(string message)
         {
-            await NetworkWriter.WriteLineAsync(message);
+            var bytes = Encoding.UTF8.GetBytes(message + "\n");
+            Send(bytes);
         }
 
         public async Task SendAsync(GameState gameState, int playerNumber)
@@ -107,7 +108,8 @@ namespace FootballAIGameServer
 
         public async Task Send(byte[] data)
         {
-            await NetworkStream.WriteAsync(data, 0, data.Length);
+            NetworkStream.Write(data, 0, data.Length);
+            NetworkStream.Flush();
         }
 
         public async Task<ClientMessage> ReceiveClientMessageAsync()
@@ -131,9 +133,12 @@ namespace FootballAIGameServer
 
                 if (firstLine.Length >= 6 && firstLine.Substring(firstLine.Length - 6) == "ACTION")
                 {
-                    //Console.WriteLine($"{PlayerName} - recieving action");
+                    if (firstLine != "ACTION")
+                        Console.WriteLine("line ending with action");
+
                     var data = new byte[176];
                     await NetworkStream.ReadAsync(data, 0, data.Length, CancellationTokenSource.Token);
+                    //Console.WriteLine($"{PlayerName} - recieved action");
                     message = ActionMessage.ParseMessage(data);
                     break;
                 }
@@ -147,9 +152,9 @@ namespace FootballAIGameServer
                 else // CONNECT expected
                 {
                     var tokens = firstLine.Split();
-                    if (tokens.Length != 3 || tokens[0] != "LOGIN")
+                    if (tokens.Length != 3 || (tokens.Length > 0 && tokens[0] != "LOGIN"))
                     {
-                        // todo send client error message
+                        Console.WriteLine($"{PlayerName} - received line: {firstLine}");
                         SendAsync("FAIL invalid message format.");
                         continue;
                     }
@@ -204,6 +209,7 @@ namespace FootballAIGameServer
                 }
                 catch
                 {
+                    Console.WriteLine("connection exc");
                     return false;
                 }
             }

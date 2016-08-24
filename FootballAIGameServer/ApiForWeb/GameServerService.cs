@@ -51,6 +51,7 @@ namespace FootballAIGameServer.ApiForWeb
             }
             catch (Exception ex)
             {
+                Console.WriteLine("wants to play exc");
                 Console.WriteLine(ex.Message);
             }
             return "ok";

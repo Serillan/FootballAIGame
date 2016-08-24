@@ -21,7 +21,7 @@ namespace FootballAIGameServer
         public bool Player1CancelRequested { get; set; }
         public bool Player2CancelRequested { get; set; }
 
-        public const int NumberOfSimulationSteps = 1500;
+        public const int NumberOfSimulationSteps = 15000;
         public const int PlayerTimeForOneStep = 100; // ms
         public const int StepInterval = 200;
 
@@ -311,6 +311,7 @@ namespace FootballAIGameServer
             }
             catch (IOException) // if player1 or player2 has disconnected
             {
+                Console.WriteLine("step exception");
                 return;
             }
 
@@ -355,6 +356,7 @@ namespace FootballAIGameServer
             }
             catch (Exception ex)
             {
+                Console.WriteLine("simulation exception");
                 Console.WriteLine(ex.Message);
             }
         }
@@ -457,7 +459,7 @@ namespace FootballAIGameServer
                 {
                     if (WhoIsOnLeft == lastTeam)
                     {
-                        var goalKeeper = lastTeam == 1 ? players[0] : players[11];
+                        var goalKeeper = lastTeam == 1 ? players[11] : players[0];
                         // goal kick
                         goalKeeper.X = 110 - 16.5f;
                         goalKeeper.Y = 75 / 2f;
@@ -473,14 +475,14 @@ namespace FootballAIGameServer
                     else
                     {
                         // corner kick
-                        ball.X = 110;
-                        ball.Y = ball.Y >= 75f / 2 + 7.32 / 2 ? 75 : 0;
+                        ball.X = 109;
+                        ball.Y = ball.Y >= 75f / 2 + 7.32 / 2 ? 74 : 1;
 
                         var nearestPlayerFromOppositeTeam =
                             GetNearestPlayerToBall(lastTeam == 1 ? 2 : 1);
 
-                        nearestPlayerFromOppositeTeam.X = 111;
-                        nearestPlayerFromOppositeTeam.Y = ball.Y == 0 ? -1 : 76;
+                        nearestPlayerFromOppositeTeam.X = 110;
+                        nearestPlayerFromOppositeTeam.Y = ball.Y == 0 ? 0 : 75;
                     }
                 }
 
@@ -488,7 +490,7 @@ namespace FootballAIGameServer
                 {
                     if (WhoIsOnLeft != lastTeam)
                     {
-                        var goalKeeper = lastTeam == 1 ? players[0] : players[11];
+                        var goalKeeper = lastTeam == 1 ? players[11] : players[0];
                         // goal kick
                         goalKeeper.X = 16.5f;
                         goalKeeper.Y = 75 / 2f;
@@ -504,14 +506,14 @@ namespace FootballAIGameServer
                     else
                     {
                         // corner kick
-                        ball.X = 0;
-                        ball.Y = ball.Y >= 75f / 2 + 7.32 / 2 ? 75 : 0;
+                        ball.X = 1;
+                        ball.Y = ball.Y >= 75f / 2 + 7.32 / 2 ? 74 : 1;
 
                         var nearestPlayerFromOppositeTeam =
                            GetNearestPlayerToBall(lastTeam == 1 ? 2 : 1);
 
-                        nearestPlayerFromOppositeTeam.X = -1;
-                        nearestPlayerFromOppositeTeam.Y = ball.Y == 0 ? -1 : 76;
+                        nearestPlayerFromOppositeTeam.X = 0;
+                        nearestPlayerFromOppositeTeam.Y = ball.Y == 0 ? 0 : 75;
                     }
                 }
             }
@@ -715,46 +717,18 @@ namespace FootballAIGameServer
             if (lastWinnerTeam == currentWinnerTeam)
                 return;
 
-            var wasBallGoingToGoalLine1 = false;
-            var wasBallGoingToGoalLine2 = false;
-            var wasBallGoingToGoalPost2 = false;
-            var wasBallGoingToGoalPost1 = false;
+            var intersectionWithGoalLine1 = GetIntersectionWithGoalLine(GameState.Ball, 1);
+            var intersectionWithGoalLine2 = GetIntersectionWithGoalLine(GameState.Ball, 2);
 
-            #region calculations
+            var wasBallGoingToGoalLine1 = intersectionWithGoalLine1 != null;
+            var wasBallGoingToGoalLine2 = intersectionWithGoalLine2 != null;
+            var wasBallGoingToGoalPost1 = intersectionWithGoalLine1 != null
+                                          && intersectionWithGoalLine1.Y > 75f/2 - 7.32 &&
+                                          intersectionWithGoalLine1.Y < 75f/2 + 7.32;
+            var wasBallGoingToGoalPost2 = intersectionWithGoalLine2 != null
+                                          && intersectionWithGoalLine2.Y > 75f / 2 - 7.32 &&
+                                          intersectionWithGoalLine2.Y < 75f / 2 + 7.32;
 
-            var vectorToLowerEdgeX = 0 - ball.X;
-            var vectorToHigherEdgeX = 0 - ball.X;
-            var vectorToHigherEdgeY = 0.0;
-            var vectorToLowerEdgeY = 0.0;
-
-            Func<bool> condition = () =>
-                    ball.VectorX*vectorToHigherEdgeX + ball.VectorY*vectorToHigherEdgeY < 0 &&
-                   ball.VectorX*vectorToLowerEdgeX + ball.VectorY*vectorToLowerEdgeY > 0;
-
-
-            if (condition())
-                wasBallGoingToGoalLine1 = true;
-
-            vectorToLowerEdgeY = 75 / 2f + 7.32 / 2 - ball.Y;
-            vectorToHigherEdgeY = 75 / 2f - 7.32 / 2 - ball.Y;
-
-            if (condition())
-                wasBallGoingToGoalPost1 = true;
-
-            vectorToLowerEdgeX = 110 - ball.X;
-            vectorToHigherEdgeX = 110 - ball.X;
-            vectorToHigherEdgeY = 0.0;
-            vectorToLowerEdgeY = 0.0;
-
-            if (condition())
-                wasBallGoingToGoalLine2 = true;
-
-            vectorToLowerEdgeY = 75 / 2f + 7.32 / 2 - ball.Y;
-            vectorToHigherEdgeY = 75 / 2f - 7.32 / 2 - ball.Y;
-
-            if (condition())
-                wasBallGoingToGoalPost2 = true;
-#endregion
 
             // process result
             if (wasBallGoingToGoalLine1 && lastWinnerTeam != WhoIsOnLeft)
@@ -794,18 +768,43 @@ namespace FootballAIGameServer
         private Point GetIntersectionWithGoalLine(Ball ball, int whichGoalLine)
         {
             double t = 0;
+            if (ball.VectorX == 0)
+                return null;
 
             if (whichGoalLine == 1)
                 t = -ball.X / ball.VectorX;
             else
                 t = (110 - ball.X) / ball.VectorX;
 
-            return new Point
+            if (t < 0)
+                return null;
+
+            var intersection = new Point
             {
                 X = ball.X + t * ball.VectorX,
                 Y = ball.Y + t * ball.VectorY
             };
 
+            // calculate speed at intersection
+            var distanceFromIntersection =
+                Math.Sqrt(Math.Pow(intersection.X - ball.X, 2) - Math.Pow(intersection.Y - ball.Y, 2));
+            
+            // at^2 + 2(v_0)t -s = 0, where v_0 = start ball speed, a = acceleration, s = distance, t = time
+            // from that equation we calculate t
+            var discriminant = 4*Math.Pow(ball.CurrentSpeed, 2) - 8*BallDecerelation*distanceFromIntersection;
+            if (discriminant < 0)
+                return null; // ball will stop -> no intersection reached
+
+            var time = (ball.CurrentSpeed - Math.Sqrt(discriminant))/BallDecerelation;
+
+            // final speed = v + a * t
+            var speedAtIntersection = ball.CurrentSpeed + BallDecerelation*time;
+
+            // is speed higher than minimal shot speed (0 for now)
+            if (speedAtIntersection <= 4)
+                return null;
+
+            return intersection;
         }
 
         private FootballPlayer GetKickWinner(FootballPlayer[] kickers)
@@ -847,23 +846,21 @@ namespace FootballAIGameServer
 
                     var oldSpeed = player.CurrentSpeed;
 
-                    var accelerationX = action.VectorX - player.VectorX;
-                    var accelerationY = action.VectorY - player.VectorY;
+                    var acceleration = new Point(action.VectorX - player.VectorX, action.VectorY - player.VectorY);
 
                     var accelerationVectorLength =
-                        Math.Sqrt(Math.Pow(accelerationX, 2) *
-                                  Math.Pow(accelerationY, 2));
+                        Math.Sqrt(Math.Pow(acceleration.X, 2) +
+                                  Math.Pow(acceleration.Y, 2));
 
 
                     if (accelerationVectorLength > MaxAcceleration)
                     {
                         var q = MaxAcceleration / accelerationVectorLength;
-                        var fixedAccelerationX = accelerationX * q;
-                        var fixedAccelerationY = accelerationY * q;
+                        var fixedAcceleration = new Point(acceleration.X * q, acceleration.Y * q);
 
-                        //Match.Player1ErrorLog += "Player acceleration correction.;";
-                        action.VectorX = (float)(player.VectorX + fixedAccelerationX);
-                        action.VectorY = (float)(player.VectorY + fixedAccelerationY);
+                        Match.Player1ErrorLog += "Player acceleration correction.;";
+                        action.VectorX = (float)(player.VectorX + fixedAcceleration.X);
+                        action.VectorY = (float)(player.VectorY + fixedAcceleration.Y);
                     }
 
 
@@ -874,7 +871,7 @@ namespace FootballAIGameServer
                     if (newSpeed > player.MaxSpeed)
                     {
                         // too high speed
-                        //Match.Player1ErrorLog += "Player speed correction.";
+                        Match.Player1ErrorLog += "Player speed correction.";
                         player.VectorX *= (float)(player.MaxSpeed / newSpeed);
                         player.VectorY *= (float)(player.MaxSpeed / newSpeed);
                     }
@@ -950,10 +947,12 @@ namespace FootballAIGameServer
 
     }
 
-    struct Point
+    class Point
     {
         public double X { get; set; }
         public double Y { get; set; }
+
+        public Point() { }
 
         public Point(double x, double y)
         {
