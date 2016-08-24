@@ -34,8 +34,8 @@ namespace FootballAIGameServer.SimulationEntities
         public double CurrentSpeed =>
             VectorLength * 1000 / MatchSimulator.StepInterval;
 
-        public double VectorLength =>
-            Math.Sqrt(VectorX * VectorX + VectorY * VectorY);
+        public double VectorLength => Math.Sqrt(VectorX * VectorX + VectorY * VectorY);
+
 
         public double MaxSpeed =>
              5 + Speed * 2.5 / 0.4;

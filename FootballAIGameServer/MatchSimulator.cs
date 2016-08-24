@@ -47,8 +47,8 @@ namespace FootballAIGameServer
             get
             {
                 var totalSeconds = CurrentStep * StepInterval / 1000;
-                var minutes = totalSeconds/60;
-                var seconds = totalSeconds - minutes*60;
+                var minutes = totalSeconds / 60;
+                var seconds = totalSeconds - minutes * 60;
                 return $"{minutes}:{seconds}";
             }
         }
@@ -460,9 +460,14 @@ namespace FootballAIGameServer
                         var goalKeeper = lastTeam == 1 ? players[0] : players[11];
                         // goal kick
                         goalKeeper.X = 110 - 16.5f;
-                        goalKeeper.Y = 75/2f;
+                        goalKeeper.Y = 75 / 2f;
                         ball.X = goalKeeper.X;
                         ball.Y = goalKeeper.Y;
+
+                        if (lastTeam == 1)
+                            Match.Shots1++;
+                        else
+                            Match.Shots2++;
                         // todo kick enemy players from penalty area
                     }
                     else
@@ -486,10 +491,15 @@ namespace FootballAIGameServer
                         var goalKeeper = lastTeam == 1 ? players[0] : players[11];
                         // goal kick
                         goalKeeper.X = 16.5f;
-                        goalKeeper.Y = 75/2f;
+                        goalKeeper.Y = 75 / 2f;
                         ball.X = goalKeeper.X;
                         ball.Y = goalKeeper.Y;
                         // todo kick enemy players from penalty area
+
+                        if (lastTeam == 1)
+                            Match.Shots1++;
+                        else
+                            Match.Shots2++;
                     }
                     else
                     {
@@ -532,18 +542,37 @@ namespace FootballAIGameServer
 
         private void HandleGoals()
         {
+            var lastTeam = 0;
             var players = GameState.FootballPlayers;
             var ball = GameState.Ball;
 
-            if (ball.X < 0 && ball.Y < 75f/2 + 7.32/2 && ball.Y > 75f/2 - 7.32/2)
+            for (var i = 0; i < 22; i++)
+                if (LastKicker == GameState.FootballPlayers[i])
+                    lastTeam = i < 11 ? 1 : 2;
+
+            if (ball.X < 0 && ball.Y < 75f / 2 + 7.32 / 2 && ball.Y > 75f / 2 - 7.32 / 2)
             {
-                var teamNameThatScored = 
+                var teamNameThatScored =
                     WhoIsOnLeft == 1 ? Player2Connection.PlayerName : Player1Connection.PlayerName;
 
                 if (WhoIsOnLeft == 1)
+                {
                     CurrentScore2++;
+                    if (lastTeam == 2)
+                    {
+                        Match.ShotsOnTarget2++;
+                        Match.Shots2++;
+                    }
+                }
                 if (WhoIsOnLeft == 2)
+                {
                     CurrentScore1++;
+                    if (lastTeam == 1)
+                    {
+                        Match.ShotsOnTarget2++;
+                        Match.Shots2++;
+                    }
+                }
 
                 var scoringPlayerNumber = 0;
                 for (var i = 0; i < 22; i++)
@@ -558,9 +587,23 @@ namespace FootballAIGameServer
                     WhoIsOnLeft == 2 ? Player2Connection.PlayerName : Player1Connection.PlayerName;
 
                 if (WhoIsOnLeft == 1)
+                {
                     CurrentScore1++;
+                    if (lastTeam == 1)
+                    {
+                        Match.ShotsOnTarget1++;
+                        Match.Shots1++;
+                    }
+                }
                 if (WhoIsOnLeft == 2)
+                {
                     CurrentScore2++;
+                    if (lastTeam == 2)
+                    {
+                        Match.ShotsOnTarget2++;
+                        Match.Shots2++;
+                    }
+                }
 
                 var scoringPlayerNumber = 0;
                 for (var i = 0; i < 22; i++)
@@ -617,8 +660,11 @@ namespace FootballAIGameServer
             // apply kick
             if (kickWinner != null)
             {
-                LastKicker = kickWinner;
 
+                // check whether the ball was shot or shot on target
+                UpdateStoppedShots(kickWinner);
+
+                LastKicker = kickWinner;
                 GameState.Ball.VectorX = kickWinner.KickX;
                 GameState.Ball.VectorY = kickWinner.KickY;
 
@@ -632,10 +678,11 @@ namespace FootballAIGameServer
                                                 Math.Cos(angleDevation) * GameState.Ball.VectorY);
 
                 var newSpeed = GameState.Ball.CurrentSpeed;
-                if (newSpeed > 15)
+                var maxAllowedSpeed = 15 + LastKicker.KickPower * 10;
+                if (newSpeed > maxAllowedSpeed)
                 {
-                    GameState.Ball.VectorX *= (float)(15 / newSpeed);
-                    GameState.Ball.VectorY *= (float)(15 / newSpeed);
+                    GameState.Ball.VectorX *= (float)(maxAllowedSpeed / newSpeed);
+                    GameState.Ball.VectorY *= (float)(maxAllowedSpeed / newSpeed);
                 }
             }
 
@@ -650,6 +697,115 @@ namespace FootballAIGameServer
             // update ball position
             GameState.Ball.X += GameState.Ball.VectorX;
             GameState.Ball.Y += GameState.Ball.VectorY;
+        }
+
+        private void UpdateStoppedShots(FootballPlayer currentWinner)
+        {
+            var ball = GameState.Ball;
+            var currentWinnerTeam = 0;
+            var lastWinnerTeam = 0;
+            for (var i = 0; i < 11; i++)
+            {
+                if (GameState.FootballPlayers[i] == currentWinner)
+                    currentWinnerTeam = i < 11 ? 1 : 2;
+                if (GameState.FootballPlayers[i] == LastKicker)
+                    lastWinnerTeam = i < 11 ? 1 : 2;
+            }
+
+            if (lastWinnerTeam == currentWinnerTeam)
+                return;
+
+            var wasBallGoingToGoalLine1 = false;
+            var wasBallGoingToGoalLine2 = false;
+            var wasBallGoingToGoalPost2 = false;
+            var wasBallGoingToGoalPost1 = false;
+
+            #region calculations
+
+            var vectorToLowerEdgeX = 0 - ball.X;
+            var vectorToHigherEdgeX = 0 - ball.X;
+            var vectorToHigherEdgeY = 0.0;
+            var vectorToLowerEdgeY = 0.0;
+
+            Func<bool> condition = () =>
+                    ball.VectorX*vectorToHigherEdgeX + ball.VectorY*vectorToHigherEdgeY < 0 &&
+                   ball.VectorX*vectorToLowerEdgeX + ball.VectorY*vectorToLowerEdgeY > 0;
+
+
+            if (condition())
+                wasBallGoingToGoalLine1 = true;
+
+            vectorToLowerEdgeY = 75 / 2f + 7.32 / 2 - ball.Y;
+            vectorToHigherEdgeY = 75 / 2f - 7.32 / 2 - ball.Y;
+
+            if (condition())
+                wasBallGoingToGoalPost1 = true;
+
+            vectorToLowerEdgeX = 110 - ball.X;
+            vectorToHigherEdgeX = 110 - ball.X;
+            vectorToHigherEdgeY = 0.0;
+            vectorToLowerEdgeY = 0.0;
+
+            if (condition())
+                wasBallGoingToGoalLine2 = true;
+
+            vectorToLowerEdgeY = 75 / 2f + 7.32 / 2 - ball.Y;
+            vectorToHigherEdgeY = 75 / 2f - 7.32 / 2 - ball.Y;
+
+            if (condition())
+                wasBallGoingToGoalPost2 = true;
+#endregion
+
+            // process result
+            if (wasBallGoingToGoalLine1 && lastWinnerTeam != WhoIsOnLeft)
+            {
+                if (lastWinnerTeam == 1)
+                    Match.Shots1++;
+                else
+                    Match.Shots2++;
+                if (wasBallGoingToGoalPost1)
+                {
+                    if (lastWinnerTeam == 1)
+                        Match.ShotsOnTarget1++;
+                    else
+                        Match.ShotsOnTarget2++;
+                }
+            }
+
+            if (wasBallGoingToGoalLine2 && lastWinnerTeam == WhoIsOnLeft)
+            {
+                if (lastWinnerTeam == 1)
+                    Match.Shots1++;
+                else
+                    Match.Shots2++;
+
+                if (wasBallGoingToGoalPost1)
+                {
+                    if (lastWinnerTeam == 1)
+                        Match.ShotsOnTarget1++;
+                    else
+                        Match.ShotsOnTarget2++;
+                }
+            }
+
+
+        }
+
+        private Point GetIntersectionWithGoalLine(Ball ball, int whichGoalLine)
+        {
+            double t = 0;
+
+            if (whichGoalLine == 1)
+                t = -ball.X / ball.VectorX;
+            else
+                t = (110 - ball.X) / ball.VectorX;
+
+            return new Point
+            {
+                X = ball.X + t * ball.VectorX,
+                Y = ball.Y + t * ball.VectorY
+            };
+
         }
 
         private FootballPlayer GetKickWinner(FootballPlayer[] kickers)
@@ -792,5 +948,17 @@ namespace FootballAIGameServer
             }
         }
 
+    }
+
+    struct Point
+    {
+        public double X { get; set; }
+        public double Y { get; set; }
+
+        public Point(double x, double y)
+        {
+            this.X = x;
+            this.Y = y;
+        }
     }
 }

@@ -22,17 +22,7 @@ namespace FootballAIGameServer
 
         private static ConnectionManager _instance; // singleton instance
 
-        public static ConnectionManager Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new ConnectionManager();
-                }
-                return _instance;
-            }
-        }
+        public static ConnectionManager Instance => _instance ?? (_instance = new ConnectionManager());
 
         private TcpListener Listener { get; set; }
 
@@ -117,6 +107,8 @@ namespace FootballAIGameServer
                 {
                     Console.WriteLine("Client has sent invalid message for connecting.");
                     connection.SendAsync("FAIL invalid message format.");
+
+                    
                 }
                 else
                 {
