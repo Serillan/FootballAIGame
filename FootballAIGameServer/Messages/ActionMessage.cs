@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FootballAIGameServer.CustomDataTypes;
+using FootballAIGameServer.SimulationEntities;
 
 namespace FootballAIGameServer.Messages
 {
@@ -22,31 +24,12 @@ namespace FootballAIGameServer.Messages
             {
                 playerActions[i] = new PlayerAction
                 {
-                    VectorX = floatData[4*i + 0],
-                    VectorY = floatData[4*i + 1],
-                    KickX = floatData[4*i + 2],
-                    KickY = floatData[4*i + 3]
+                    Movement = new Vector(floatData[4*i + 0], floatData[4 * i + 1]),
+                    Kick = new Vector(floatData[4*i + 2], floatData[4*i + 3])
                 };
             }
             actionMessage.PlayerActions = playerActions;
             return actionMessage;
         }
-    }
-
-    public class PlayerAction
-    {
-        public float VectorX { get; set; }
-
-        public float VectorY { get; set; }
-
-        public float KickX { get; set; }
-
-        public float KickY { get; set; }
-
-        public double VectorLength =>
-            Math.Sqrt(VectorX * VectorX + VectorY * VectorY);
-
-        public double KickVectorLength =>
-            Math.Sqrt(KickX * KickX + KickY * KickY);
     }
 }

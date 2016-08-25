@@ -3,20 +3,25 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FootballAIGameServer.CustomDataTypes;
 
 namespace FootballAIGameServer.SimulationEntities
 {
     public class Ball
     {
-        public float X { get; set; }
-        public float Y { get; set; }
-        public float VectorX { get; set; }
-        public float VectorY { get; set; }
+        public Vector Position { get; set; }
+        public Vector Movement { get; set; }
 
         /// <summary>
         /// Returns ball current speed in metres per second.
         /// </summary>
         public double CurrentSpeed =>
-            Math.Sqrt(VectorX * VectorX + VectorY * VectorY) * 1000 / MatchSimulator.StepInterval;
+            Movement.Length * 1000 / MatchSimulator.StepInterval;
+
+        public Ball()
+        {
+            Position = new Vector();
+            Movement = new Vector();
+        }
     }
 }

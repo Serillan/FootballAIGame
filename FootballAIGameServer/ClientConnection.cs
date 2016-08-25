@@ -66,19 +66,19 @@ namespace FootballAIGameServer
         {
             var data = new float[92];
 
-            data[0] = gameState.Ball.X;
-            data[1] = gameState.Ball.Y;
-            data[2] = gameState.Ball.VectorX;
-            data[3] = gameState.Ball.VectorY;
+            data[0] = (float)gameState.Ball.Position.X;
+            data[1] = (float)gameState.Ball.Position.Y;
+            data[2] = (float)gameState.Ball.Movement.X;
+            data[3] = (float)gameState.Ball.Movement.Y;
 
             if (playerNumber == 1)
             {
                 for (var i = 0; i < 22; i++)
                 {
-                    data[4 + 4*i + 0] = gameState.FootballPlayers[i].X;
-                    data[4 + 4*i + 1] = gameState.FootballPlayers[i].Y;
-                    data[4 + 4*i + 2] = gameState.FootballPlayers[i].VectorX;
-                    data[4 + 4*i + 3] = gameState.FootballPlayers[i].VectorY;
+                    data[4 + 4*i + 0] = (float)gameState.FootballPlayers[i].Position.X;
+                    data[4 + 4*i + 1] = (float)gameState.FootballPlayers[i].Position.Y;
+                    data[4 + 4*i + 2] = (float)gameState.FootballPlayers[i].Movement.X;
+                    data[4 + 4*i + 3] = (float)gameState.FootballPlayers[i].Movement.Y;
 
                 }
             }
@@ -86,17 +86,17 @@ namespace FootballAIGameServer
             {
                 for (var i = 11; i < 22; i++)
                 {
-                    data[4 + 4 * i + 0] = gameState.FootballPlayers[i].X;
-                    data[4 + 4 * i + 1] = gameState.FootballPlayers[i].Y;
-                    data[4 + 4 * i + 2] = gameState.FootballPlayers[i].VectorX;
-                    data[4 + 4 * i + 3] = gameState.FootballPlayers[i].VectorY;
+                    data[4 + 4 * i + 0] = (float)gameState.FootballPlayers[i].Position.X;
+                    data[4 + 4 * i + 1] = (float)gameState.FootballPlayers[i].Position.Y;
+                    data[4 + 4 * i + 2] = (float)gameState.FootballPlayers[i].Movement.X;
+                    data[4 + 4 * i + 3] = (float)gameState.FootballPlayers[i].Movement.Y;
                 }
                 for (var i = 0; i < 11; i++)
                 {
-                    data[4 + 4 * i + 0] = gameState.FootballPlayers[i].X;
-                    data[4 + 4 * i + 1] = gameState.FootballPlayers[i].Y;
-                    data[4 + 4 * i + 2] = gameState.FootballPlayers[i].VectorX;
-                    data[4 + 4 * i + 3] = gameState.FootballPlayers[i].VectorY;
+                    data[4 + 4*i + 0] = (float)gameState.FootballPlayers[i].Position.X;
+                    data[4 + 4*i + 1] = (float)gameState.FootballPlayers[i].Position.Y;
+                    data[4 + 4*i + 2] = (float)gameState.FootballPlayers[i].Movement.X;
+                    data[4 + 4*i + 3] = (float)gameState.FootballPlayers[i].Movement.Y;
                 }
             }
 

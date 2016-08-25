@@ -8,6 +8,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.ServiceModel.Channels;
 using System.Text;
 using System.Threading.Tasks;
+using FootballAIGameServer.CustomDataTypes;
 using FootballAIGameServer.Messages;
 using FootballAIGameServer.Models;
 using FootballAIGameServer.SimulationEntities;
@@ -21,13 +22,14 @@ namespace FootballAIGameServer
         public bool Player1CancelRequested { get; set; }
         public bool Player2CancelRequested { get; set; }
 
-        public const int NumberOfSimulationSteps = 15000;
-        public const int PlayerTimeForOneStep = 100; // ms
+        public const int NumberOfSimulationSteps = 1500;
+        public const int PlayerTimeForOneStep = 100; // [ms]
         public const int StepInterval = 200;
 
-        public const double MaxAcceleration = 3; // m/s/s
-        public const double MaxBallSpeed = 15; // m/s
-        public const double BallDecerelation = 1.5; // m/s/s
+        public const double MaxAcceleration = 3; // [m/s/s]
+        public const double MaxBallSpeed = 15; // [m/s]
+        public const double BallDecerelation = 1.5; // [m/s/s]
+        public const double MinimalOpponentLengthFromCornerKick = 6; // [m]
 
         private GameState GameState { get; set; }
         private Match Match { get; set; }
@@ -187,62 +189,62 @@ namespace FootballAIGameServer
 
             /* TEAM 1 */
             // goalie
-            players[0].X = 11;
-            players[0].Y = 75f / 2;
+            players[0].Position.X = 11;
+            players[0].Position.Y = 75f / 2;
 
             // defenders positions
-            players[1].X = 16.5f;
-            players[1].Y = 15;
-            players[2].X = 16.5f;
-            players[2].Y = 75 / 2f - 12;
-            players[3].X = 16.5f;
-            players[3].Y = 75 / 2f + 12;
-            players[4].X = 16.5f;
-            players[4].Y = 60;
+            players[1].Position.X = 16.5f;
+            players[1].Position.Y = 15;
+            players[2].Position.X = 16.5f;
+            players[2].Position.Y = 75 / 2f - 12;
+            players[3].Position.X = 16.5f;
+            players[3].Position.Y = 75 / 2f + 12;
+            players[4].Position.X = 16.5f;
+            players[4].Position.Y = 60;
 
             // midfielders
-            players[5].X = 33;
-            players[5].Y = 75 / 2f - 12;
-            players[6].X = 33;
-            players[6].Y = 75 / 2f;
-            players[7].X = 33;
-            players[7].Y = 75 / 2f + 12;
-            players[8].X = 33;
-            players[8].Y = 15;
+            players[5].Position.X = 33;
+            players[5].Position.Y = 75 / 2f - 12;
+            players[6].Position.X = 33;
+            players[6].Position.Y = 75 / 2f;
+            players[7].Position.X = 33;
+            players[7].Position.Y = 75 / 2f + 12;
+            players[8].Position.X = 33;
+            players[8].Position.Y = 15;
 
             // forwards
-            players[9].X = 45;
-            players[9].Y = 75 / 2f - 6;
-            players[10].X = 45;
-            players[10].Y = 75 / 2f + 6;
+            players[9].Position.X = 45;
+            players[9].Position.Y = 75 / 2f - 6;
+            players[10].Position.X = 45;
+            players[10].Position.Y = 75 / 2f + 6;
 
             /* TEAM 2 (symmetrical) */
             for (var i = 0; i < 11; i++)
             {
-                players[i + 11].X = 110 - players[i].X;
-                players[i + 11].Y = players[i].Y;
+                players[i + 11].Position.X = 110 - players[i].Position.X;
+                players[i + 11].Position.Y = players[i].Position.Y;
             }
 
             // noone is moving
             foreach (var player in players)
-                player.VectorX = player.VectorY = 0;
+                player.Movement.X = player.Movement.Y = 0;
 
             // ball
-            GameState.Ball.X = 55;
-            GameState.Ball.Y = 75 / 2f;
-            GameState.Ball.VectorX = 0f;
-            GameState.Ball.VectorY = 0f;
+            GameState.Ball.Position.X = 55;
+            GameState.Ball.Position.Y = 75 / 2f;
+            GameState.Ball.Movement.X = 0f;
+            GameState.Ball.Movement.Y = 0f;
 
             /* ball winner */
             if ((whoHasBall == 1 && WhoIsOnLeft == 1) || (whoHasBall == 2 && WhoIsOnLeft == 2))
             {
-                players[10].X = 54;
-                players[10].Y = 75 / 2f;
+                players[10].Position.X = 54;
+                players[10].Position.Y = 75 / 2f;
             }
             else
             {
-                players[21].X = 56;
-                players[21].Y = 75 / 2f;
+                players[21].Position.X = 56;
+                players[21].Position.Y = 75 / 2f;
             }
 
             if (WhoIsOnLeft == 2)
@@ -250,12 +252,12 @@ namespace FootballAIGameServer
                 // switch
                 for (var i = 0; i < 11; i++)
                 {
-                    var tempX = players[i].X;
-                    var tempY = players[i].Y;
-                    players[i].X = players[i + 11].X;
-                    players[i].Y = players[i + 11].Y;
-                    players[i + 11].X = tempX;
-                    players[i + 11].Y = tempY;
+                    var tempX = players[i].Position.X;
+                    var tempY = players[i].Position.Y;
+                    players[i].Position.X = players[i + 11].Position.X;
+                    players[i].Position.Y = players[i + 11].Position.Y;
+                    players[i + 11].Position.X = tempX;
+                    players[i + 11].Position.Y = tempY;
                 }
             }
         }
@@ -414,13 +416,13 @@ namespace FootballAIGameServer
         private void SaveState()
         {
             var currentStateData = new float[46];
-            currentStateData[0] = GameState.Ball.X;
-            currentStateData[1] = GameState.Ball.Y;
+            currentStateData[0] = (float)GameState.Ball.Position.X;
+            currentStateData[1] = (float)GameState.Ball.Position.Y;
 
             for (var i = 0; i < 22; i++)
             {
-                currentStateData[2 + 2 * i] = GameState.FootballPlayers[i].X;
-                currentStateData[2 + 2 * i + 1] = GameState.FootballPlayers[i].Y;
+                currentStateData[2 + 2 * i] = (float)GameState.FootballPlayers[i].Position.X;
+                currentStateData[2 + 2 * i + 1] = (float)GameState.FootballPlayers[i].Position.Y;
             }
 
             foreach (var num in currentStateData)
@@ -453,50 +455,49 @@ namespace FootballAIGameServer
                     lastTeam = i < 11 ? 1 : 2;
 
             // corner kicks or goal kicks (goal line crossed)
-            if (ball.Y > 75f / 2 + 7.32 / 2 || ball.Y < 75f / 2 - 7.32 / 2) // not goals
+            if (ball.Position.Y > 75f / 2 + 7.32 / 2 || ball.Position.Y < 75f / 2 - 7.32 / 2) // not goals
             {
-                if (GameState.Ball.X > 110)
+                if (GameState.Ball.Position.X > 110)
                 {
                     if (WhoIsOnLeft == lastTeam)
                     {
                         var goalKeeper = lastTeam == 1 ? players[11] : players[0];
                         // goal kick
-                        goalKeeper.X = 110 - 16.5f;
-                        goalKeeper.Y = 75 / 2f;
-                        ball.X = goalKeeper.X;
-                        ball.Y = goalKeeper.Y;
+                        goalKeeper.Position.X = 110 - 16.5f;
+                        goalKeeper.Position.Y = 75 / 2f;
+                        ball.Position.X = goalKeeper.Position.X;
+                        ball.Position.Y = goalKeeper.Position.Y;
 
                         if (lastTeam == 1)
                             Match.Shots1++;
                         else
                             Match.Shots2++;
-                        // todo kick enemy players from penalty area
                     }
                     else
                     {
                         // corner kick
-                        ball.X = 109;
-                        ball.Y = ball.Y >= 75f / 2 + 7.32 / 2 ? 74 : 1;
+                        ball.Position.X = 109;
+                        ball.Position.Y = ball.Position.Y >= 75f / 2 + 7.32 / 2 ? 74 : 1;
 
                         var nearestPlayerFromOppositeTeam =
                             GetNearestPlayerToBall(lastTeam == 1 ? 2 : 1);
 
-                        nearestPlayerFromOppositeTeam.X = 110;
-                        nearestPlayerFromOppositeTeam.Y = ball.Y == 0 ? 0 : 75;
+                        nearestPlayerFromOppositeTeam.Position.X = 110;
+                        nearestPlayerFromOppositeTeam.Position.Y = ball.Position.Y < 75/2f ? 0 : 75;
+
                     }
                 }
 
-                if (GameState.Ball.X < 0)
+                if (GameState.Ball.Position.X < 0)
                 {
                     if (WhoIsOnLeft != lastTeam)
                     {
                         var goalKeeper = lastTeam == 1 ? players[11] : players[0];
                         // goal kick
-                        goalKeeper.X = 16.5f;
-                        goalKeeper.Y = 75 / 2f;
-                        ball.X = goalKeeper.X;
-                        ball.Y = goalKeeper.Y;
-                        // todo kick enemy players from penalty area
+                        goalKeeper.Position.X = 16.5f;
+                        goalKeeper.Position.Y = 75 / 2f;
+                        ball.Position.X = goalKeeper.Position.X;
+                        ball.Position.Y = goalKeeper.Position.Y;
 
                         if (lastTeam == 1)
                             Match.Shots1++;
@@ -506,38 +507,50 @@ namespace FootballAIGameServer
                     else
                     {
                         // corner kick
-                        ball.X = 1;
-                        ball.Y = ball.Y >= 75f / 2 + 7.32 / 2 ? 74 : 1;
+                        ball.Position.X = 1;
+                        ball.Position.Y = ball.Position.Y >= 75f / 2 + 7.32 / 2 ? 74 : 1;
 
                         var nearestPlayerFromOppositeTeam =
                            GetNearestPlayerToBall(lastTeam == 1 ? 2 : 1);
 
-                        nearestPlayerFromOppositeTeam.X = 0;
-                        nearestPlayerFromOppositeTeam.Y = ball.Y == 0 ? 0 : 75;
+                        nearestPlayerFromOppositeTeam.Position.X = 0;
+                        nearestPlayerFromOppositeTeam.Position.Y = ball.Position.Y < 75/2f ? 0 : 75;
+                        
+                        
                     }
                 }
+
+                // push all opponent players aways from the kickoff position
+                PushPlayersFromPosition(lastTeam, ball.Position);
             }
 
             // touch lines
-            if (ball.Y < 0)
+            if (ball.Position.Y < 0)
             {
-                ball.Y = 0;
+                ball.Position.Y = 1;
 
                 var nearestPlayerFromOppositeTeam =
                           GetNearestPlayerToBall(lastTeam == 1 ? 2 : 1);
 
-                nearestPlayerFromOppositeTeam.X = ball.X;
-                nearestPlayerFromOppositeTeam.Y = -1;
+                nearestPlayerFromOppositeTeam.Position.X = ball.Position.X;
+                nearestPlayerFromOppositeTeam.Position.Y = 0;
+
+                // push all opponent players aways from the kickoff position
+                PushPlayersFromPosition(lastTeam, ball.Position);
+
             }
-            if (ball.Y > 75)
+            if (ball.Position.Y > 75)
             {
-                ball.Y = 75;
+                ball.Position.Y = 74;
 
                 var nearestPlayerFromOppositeTeam =
                     GetNearestPlayerToBall(lastTeam == 1 ? 2 : 1);
 
-                nearestPlayerFromOppositeTeam.X = ball.X;
-                nearestPlayerFromOppositeTeam.Y = 76;
+                nearestPlayerFromOppositeTeam.Position.X = ball.Position.X;
+                nearestPlayerFromOppositeTeam.Position.Y = 75;
+
+                // push all opponent players aways from the kickoff position
+                PushPlayersFromPosition(lastTeam, ball.Position);
             }
 
         }
@@ -552,7 +565,7 @@ namespace FootballAIGameServer
                 if (LastKicker == GameState.FootballPlayers[i])
                     lastTeam = i < 11 ? 1 : 2;
 
-            if (ball.X < 0 && ball.Y < 75f / 2 + 7.32 / 2 && ball.Y > 75f / 2 - 7.32 / 2)
+            if (ball.Position.X < 0 && ball.Position.Y < 75f / 2 + 7.32 / 2 && ball.Position.Y > 75f / 2 - 7.32 / 2)
             {
                 var teamNameThatScored =
                     WhoIsOnLeft == 1 ? Player2Connection.PlayerName : Player1Connection.PlayerName;
@@ -583,7 +596,7 @@ namespace FootballAIGameServer
                 Match.Goals += $"{CurrentTime};{teamNameThatScored};Player{scoringPlayerNumber}|";
                 SetStartingPositions(WhoIsOnLeft);
             }
-            else if (ball.X > 110 && ball.Y < 75f / 2 + 7.32 / 2 && ball.Y > 75f / 2 - 7.32 / 2)
+            else if (ball.Position.X > 110 && ball.Position.Y < 75f / 2 + 7.32 / 2 && ball.Position.Y > 75f / 2 - 7.32 / 2)
             {
                 var teamNameThatScored =
                     WhoIsOnLeft == 2 ? Player2Connection.PlayerName : Player1Connection.PlayerName;
@@ -616,24 +629,52 @@ namespace FootballAIGameServer
             }
         }
 
+        private void PushPlayersFromPosition(int teamToBePushedNumber, Vector position)
+        {
+            var toBePushedPlayers = new List<FootballPlayer>();
+
+            for (var i = 0; i < 11; i++)
+            {
+                var player = GameState.FootballPlayers[teamToBePushedNumber == 1 ? i : i + 11];
+                if (Vector.DistanceBetween(player.Position, position) < MinimalOpponentLengthFromCornerKick)
+                    toBePushedPlayers.Add(player);
+            }
+
+            foreach (var player in toBePushedPlayers)
+            {
+                var vectorToPlayer = new Vector(player.Position.X - position.X, player.Position.Y - position.Y);
+                var length = vectorToPlayer.Length;
+
+                // apply push
+                vectorToPlayer.X *= MinimalOpponentLengthFromCornerKick/length;
+                vectorToPlayer.Y *= MinimalOpponentLengthFromCornerKick/length;
+
+                player.Position.X = position.X + vectorToPlayer.X;
+                player.Position.Y = position.Y + vectorToPlayer.Y;
+            }
+
+        }
+
         private FootballPlayer GetNearestPlayerToBall(int fromWhichTeam)
         {
             FootballPlayer nearestPlayer = null;
-            FootballPlayer[] players = GameState.FootballPlayers;
-            Ball ball = GameState.Ball;
+            var players = GameState.FootballPlayers;
+            var ball = GameState.Ball;
 
             if (fromWhichTeam == 1)
             {
                 nearestPlayer = players[1];
                 for (int i = 2; i < 11; i++)
-                    if (DistanceBetween(ball, players[i]) < DistanceBetween(ball, nearestPlayer))
+                    if (Vector.DistanceBetween(ball.Position, players[i].Position) < 
+                        Vector.DistanceBetween(ball.Position, nearestPlayer.Position))
                         nearestPlayer = players[i];
             }
             if (fromWhichTeam == 2)
             {
                 nearestPlayer = players[12];
                 for (int i = 13; i < 22; i++)
-                    if (DistanceBetween(ball, players[i]) < DistanceBetween(ball, nearestPlayer))
+                    if (Vector.DistanceBetween(ball.Position, players[i].Position) < 
+                        Vector.DistanceBetween(ball.Position, nearestPlayer.Position))
                         nearestPlayer = players[i];
             }
 
@@ -645,17 +686,17 @@ namespace FootballAIGameServer
             // add kick actions to players
             for (var i = 0; i < 11; i++)
             {
-                GameState.FootballPlayers[i].KickX = player1Action?.PlayerActions[i].KickX ?? 0;
-                GameState.FootballPlayers[i].KickY = player1Action?.PlayerActions[i].KickY ?? 0;
+                GameState.FootballPlayers[i].Kick.X = player1Action?.PlayerActions[i].Kick.X ?? 0;
+                GameState.FootballPlayers[i].Kick.Y = player1Action?.PlayerActions[i].Kick.Y ?? 0;
             }
             for (var i = 0; i < 11; i++)
             {
-                GameState.FootballPlayers[i + 11].KickX = player2Action?.PlayerActions[i].KickX ?? 0;
-                GameState.FootballPlayers[i + 11].KickY = player2Action?.PlayerActions[i].KickY ?? 0;
+                GameState.FootballPlayers[i + 11].Kick.X = player2Action?.PlayerActions[i].Kick.X ?? 0;
+                GameState.FootballPlayers[i + 11].Kick.Y = player2Action?.PlayerActions[i].Kick.Y ?? 0;
             }
 
             var playersNearBallKicking = GameState.FootballPlayers.Where(
-                p => DistanceBetween(GameState.Ball, p) <= 2 && (p.KickX != 0 || p.KickY != 0));
+                p => Vector.DistanceBetween(GameState.Ball.Position, p.Position) <= 2 && (p.Kick.X != 0 || p.Kick.Y != 0));
 
             var kickWinner = GetKickWinner(playersNearBallKicking.ToArray());
 
@@ -667,24 +708,24 @@ namespace FootballAIGameServer
                 UpdateStoppedShots(kickWinner);
 
                 LastKicker = kickWinner;
-                GameState.Ball.VectorX = kickWinner.KickX;
-                GameState.Ball.VectorY = kickWinner.KickY;
+                GameState.Ball.Movement.X = kickWinner.Kick.X;
+                GameState.Ball.Movement.Y = kickWinner.Kick.Y;
 
                 // deviation of the kick
                 var angleDevation = (0.4 - kickWinner.Precision) * (Random.NextDouble() * 2 - 1);
 
                 // rotation applied (deviation)
-                GameState.Ball.VectorX = (float)(Math.Cos(angleDevation) * GameState.Ball.VectorX -
-                                                Math.Sin(angleDevation) * GameState.Ball.VectorY);
-                GameState.Ball.VectorY = (float)(Math.Sin(angleDevation) * GameState.Ball.VectorX +
-                                                Math.Cos(angleDevation) * GameState.Ball.VectorY);
+                GameState.Ball.Movement.X = (float)(Math.Cos(angleDevation) * GameState.Ball.Movement.X -
+                                                Math.Sin(angleDevation) * GameState.Ball.Movement.Y);
+                GameState.Ball.Movement.Y = (float)(Math.Sin(angleDevation) * GameState.Ball.Movement.X +
+                                                Math.Cos(angleDevation) * GameState.Ball.Movement.Y);
 
                 var newSpeed = GameState.Ball.CurrentSpeed;
                 var maxAllowedSpeed = 15 + LastKicker.KickPower * 10;
                 if (newSpeed > maxAllowedSpeed)
                 {
-                    GameState.Ball.VectorX *= (float)(maxAllowedSpeed / newSpeed);
-                    GameState.Ball.VectorY *= (float)(maxAllowedSpeed / newSpeed);
+                    GameState.Ball.Movement.X *= (float)(maxAllowedSpeed / newSpeed);
+                    GameState.Ball.Movement.Y *= (float)(maxAllowedSpeed / newSpeed);
                 }
             }
 
@@ -693,12 +734,12 @@ namespace FootballAIGameServer
                 GameState.Ball.CurrentSpeed;
             if (ratio < 0)
                 ratio = 0;
-            GameState.Ball.VectorX *= (float)ratio;
-            GameState.Ball.VectorY *= (float)ratio;
+            GameState.Ball.Movement.X *= (float)ratio;
+            GameState.Ball.Movement.Y *= (float)ratio;
 
             // update ball position
-            GameState.Ball.X += GameState.Ball.VectorX;
-            GameState.Ball.Y += GameState.Ball.VectorY;
+            GameState.Ball.Position.X += GameState.Ball.Movement.X;
+            GameState.Ball.Position.Y += GameState.Ball.Movement.Y;
         }
 
         private void UpdateStoppedShots(FootballPlayer currentWinner)
@@ -765,29 +806,29 @@ namespace FootballAIGameServer
 
         }
 
-        private Point GetIntersectionWithGoalLine(Ball ball, int whichGoalLine)
+        private Vector GetIntersectionWithGoalLine(Ball ball, int whichGoalLine)
         {
             double t = 0;
-            if (ball.VectorX == 0)
+            if (ball.Movement.X == 0)
                 return null;
 
             if (whichGoalLine == 1)
-                t = -ball.X / ball.VectorX;
+                t = -ball.Position.X / ball.Movement.X;
             else
-                t = (110 - ball.X) / ball.VectorX;
+                t = (110 - ball.Position.X) / ball.Movement.X;
 
             if (t < 0)
                 return null;
 
-            var intersection = new Point
+            var intersection = new Vector
             {
-                X = ball.X + t * ball.VectorX,
-                Y = ball.Y + t * ball.VectorY
+                X = ball.Position.X + t * ball.Movement.X,
+                Y = ball.Position.Y + t * ball.Movement.Y
             };
 
             // calculate speed at intersection
             var distanceFromIntersection =
-                Math.Sqrt(Math.Pow(intersection.X - ball.X, 2) - Math.Pow(intersection.Y - ball.Y, 2));
+                Math.Sqrt(Math.Pow(intersection.X - ball.Position.X, 2) - Math.Pow(intersection.Y - ball.Position.Y, 2));
             
             // at^2 + 2(v_0)t -s = 0, where v_0 = start ball speed, a = acceleration, s = distance, t = time
             // from that equation we calculate t
@@ -829,11 +870,6 @@ namespace FootballAIGameServer
             }
         }
 
-        private double DistanceBetween(Ball ball, FootballPlayer player)
-        {
-            return Math.Sqrt(Math.Pow(ball.X - player.X, 2) + Math.Pow(ball.Y - player.Y, 2));
-        }
-
         public void UpdatePlayersMovement(ActionMessage player1Action, ActionMessage player2Action)
         {
             if (player1Action != null)
@@ -846,39 +882,37 @@ namespace FootballAIGameServer
 
                     var oldSpeed = player.CurrentSpeed;
 
-                    var acceleration = new Point(action.VectorX - player.VectorX, action.VectorY - player.VectorY);
+                    var acceleration = new Vector(action.Movement.X - player.Movement.X, 
+                        action.Movement.Y - player.Movement.Y);
 
-                    var accelerationVectorLength =
-                        Math.Sqrt(Math.Pow(acceleration.X, 2) +
-                                  Math.Pow(acceleration.Y, 2));
-
+                    var accelerationVectorLength = acceleration.Length * 1000 / StepInterval; // [m/s]
 
                     if (accelerationVectorLength > MaxAcceleration)
                     {
                         var q = MaxAcceleration / accelerationVectorLength;
-                        var fixedAcceleration = new Point(acceleration.X * q, acceleration.Y * q);
+                        var fixedAcceleration = new Vector(acceleration.X * q, acceleration.Y * q);
 
                         Match.Player1ErrorLog += "Player acceleration correction.;";
-                        action.VectorX = (float)(player.VectorX + fixedAcceleration.X);
-                        action.VectorY = (float)(player.VectorY + fixedAcceleration.Y);
+                        action.Movement.X = (float)(player.Movement.X + fixedAcceleration.X);
+                        action.Movement.Y = (float)(player.Movement.Y + fixedAcceleration.Y);
                     }
 
 
-                    player.VectorX = action.VectorX;
-                    player.VectorY = action.VectorY;
+                    player.Movement.X = action.Movement.X;
+                    player.Movement.Y = action.Movement.Y;
                     var newSpeed = player.CurrentSpeed;
 
                     if (newSpeed > player.MaxSpeed)
                     {
                         // too high speed
                         Match.Player1ErrorLog += "Player speed correction.";
-                        player.VectorX *= (float)(player.MaxSpeed / newSpeed);
-                        player.VectorY *= (float)(player.MaxSpeed / newSpeed);
+                        player.Movement.X *= (float)(player.MaxSpeed / newSpeed);
+                        player.Movement.Y *= (float)(player.MaxSpeed / newSpeed);
                     }
 
                     // apply
-                    player.X += player.VectorX;
-                    player.Y += player.VectorY;
+                    player.Position.X += player.Movement.X;
+                    player.Position.Y += player.Movement.Y;
 
                 }
             }
@@ -887,8 +921,6 @@ namespace FootballAIGameServer
                 // default (nothing for now)
                 Console.WriteLine(Player1Connection.PlayerName + " timeout.");
             }
-
-
 
             if (player2Action != null)
             {
@@ -900,8 +932,8 @@ namespace FootballAIGameServer
 
                     var oldSpeed = player.CurrentSpeed;
 
-                    var accelerationX = action.VectorX - player.VectorX;
-                    var accelerationY = action.VectorY - player.VectorY;
+                    var accelerationX = action.Movement.X - player.Movement.X;
+                    var accelerationY = action.Movement.Y - player.Movement.Y;
 
                     var accelerationVectorLength =
                         Math.Sqrt(Math.Pow(accelerationX, 2) *
@@ -915,26 +947,26 @@ namespace FootballAIGameServer
                         var fixedAccelerationY = accelerationY * q;
 
                         //Match.Player2ErrorLog += "Player acceleration correction.;";
-                        action.VectorX = (float)(player.VectorX + fixedAccelerationX);
-                        action.VectorY = (float)(player.VectorY + fixedAccelerationY);
+                        action.Movement.X = (float)(player.Movement.X + fixedAccelerationX);
+                        action.Movement.Y = (float)(player.Movement.Y + fixedAccelerationY);
                     }
 
 
-                    player.VectorX = action.VectorX;
-                    player.VectorY = action.VectorY;
+                    player.Movement.X = action.Movement.X;
+                    player.Movement.Y = action.Movement.Y;
                     var newSpeed = player.CurrentSpeed;
 
                     if (newSpeed > player.MaxSpeed)
                     {
                         // too high speed
                         //Match.Player2ErrorLog += "Player speed correction.";
-                        player.VectorX *= (float)(player.MaxSpeed / newSpeed);
-                        player.VectorY *= (float)(player.MaxSpeed / newSpeed);
+                        player.Movement.X *= (float)(player.MaxSpeed / newSpeed);
+                        player.Movement.Y *= (float)(player.MaxSpeed / newSpeed);
                     }
 
                     // apply
-                    player.X += player.VectorX;
-                    player.Y += player.VectorY;
+                    player.Position.X += player.Movement.X;
+                    player.Position.Y += player.Movement.Y;
 
                 }
             }
@@ -947,17 +979,5 @@ namespace FootballAIGameServer
 
     }
 
-    class Point
-    {
-        public double X { get; set; }
-        public double Y { get; set; }
-
-        public Point() { }
-
-        public Point(double x, double y)
-        {
-            this.X = x;
-            this.Y = y;
-        }
-    }
+    
 }

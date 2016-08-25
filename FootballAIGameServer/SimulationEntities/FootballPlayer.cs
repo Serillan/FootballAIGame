@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FootballAIGameServer.CustomDataTypes;
 
 namespace FootballAIGameServer.SimulationEntities
 {
@@ -16,26 +17,24 @@ namespace FootballAIGameServer.SimulationEntities
 
         public float KickPower { get; set; }
 
-        public float X { get; set; }
+        public Vector Position { get; set; }
 
-        public float Y { get; set; }
+        public Vector Movement { get; set; }
 
-        public float VectorX { get; set; }
+        public Vector Kick { get; set; }
 
-        public float VectorY { get; set; }
-
-        public float KickX { get; set; }
-
-        public float KickY { get; set; }
+        public FootballPlayer()
+        {
+            Position = new Vector();
+            Movement = new Vector();
+            Kick = new Vector();
+        }
 
         /// <summary>
         /// Returns player current speed in metres per second.
         /// </summary>
         public double CurrentSpeed =>
-            VectorLength * 1000 / MatchSimulator.StepInterval;
-
-        public double VectorLength => Math.Sqrt(VectorX * VectorX + VectorY * VectorY);
-
+            Movement.Length * 1000 / MatchSimulator.StepInterval;
 
         public double MaxSpeed =>
              5 + Speed * 2.5 / 0.4;

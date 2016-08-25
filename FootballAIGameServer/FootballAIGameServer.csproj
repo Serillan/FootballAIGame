@@ -92,6 +92,7 @@
     <Compile Include="ApiForWeb\GameServerService.cs" />
     <Compile Include="ApiForWeb\IGameServerService.cs" />
     <Compile Include="ClientConnection.cs" />
+    <Compile Include="CustomDataTypes\Vector.cs" />
     <Compile Include="Messages\ActionMessage.cs" />
     <Compile Include="Messages\ClientMessage.cs" />
     <Compile Include="ConnectionManager.cs" />
@@ -109,6 +110,7 @@
     <Compile Include="SimulationEntities\Ball.cs" />
     <Compile Include="SimulationEntities\GameState.cs" />
     <Compile Include="SimulationEntities\FootballPlayer.cs" />
+    <Compile Include="SimulationEntities\PlayerAction.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config">
