@@ -84,25 +84,26 @@ namespace FootballAIGameServer
             }
             else
             {
-                for (var i = 11; i < 22; i++)
-                {
-                    data[4 + 4 * i + 0] = (float)gameState.FootballPlayers[i].Position.X;
-                    data[4 + 4 * i + 1] = (float)gameState.FootballPlayers[i].Position.Y;
-                    data[4 + 4 * i + 2] = (float)gameState.FootballPlayers[i].Movement.X;
-                    data[4 + 4 * i + 3] = (float)gameState.FootballPlayers[i].Movement.Y;
-                }
                 for (var i = 0; i < 11; i++)
                 {
-                    data[4 + 4*i + 0] = (float)gameState.FootballPlayers[i].Position.X;
-                    data[4 + 4*i + 1] = (float)gameState.FootballPlayers[i].Position.Y;
-                    data[4 + 4*i + 2] = (float)gameState.FootballPlayers[i].Movement.X;
-                    data[4 + 4*i + 3] = (float)gameState.FootballPlayers[i].Movement.Y;
+                    data[4 + 4 * i + 0] = (float)gameState.FootballPlayers[i + 11].Position.X;
+                    data[4 + 4 * i + 1] = (float)gameState.FootballPlayers[i + 11].Position.Y;
+                    data[4 + 4 * i + 2] = (float)gameState.FootballPlayers[i + 11].Movement.X;
+                    data[4 + 4 * i + 3] = (float)gameState.FootballPlayers[i + 11].Movement.Y;
+                }
+                for (var i = 11; i < 22; i++)
+                {
+                    data[4 + 4*i + 0] = (float)gameState.FootballPlayers[i - 11].Position.X;
+                    data[4 + 4*i + 1] = (float)gameState.FootballPlayers[i - 11].Position.Y;
+                    data[4 + 4*i + 2] = (float)gameState.FootballPlayers[i - 11].Movement.X;
+                    data[4 + 4*i + 3] = (float)gameState.FootballPlayers[i - 11].Movement.Y;
                 }
             }
 
             var byteArray = new byte[data.Length * 4];
             Buffer.BlockCopy(data, 0, byteArray, 0, byteArray.Length);
-
+            var back = new float[92];
+            Buffer.BlockCopy(byteArray, 0, back, 0, byteArray.Length);
             await Send(byteArray);
         }
 
@@ -128,7 +129,7 @@ namespace FootballAIGameServer
             while (true) // while correct message is not received
             {
                 //Console.WriteLine($"{PlayerName} - recieving line");
-                var firstLine = await NetworkReader.ReadLineAsync();
+                var firstLine = await ReadLineAsync();//await NetworkReader.ReadLineAsync();
                 //Console.WriteLine($"{PlayerName} - received line: {firstLine}");
 
                 if (firstLine.Length >= 6 && firstLine.Substring(firstLine.Length - 6) == "ACTION")
@@ -155,7 +156,7 @@ namespace FootballAIGameServer
                     if (tokens.Length != 3 || (tokens.Length > 0 && tokens[0] != "LOGIN"))
                     {
                         Console.WriteLine($"{PlayerName} - received line: {firstLine}");
-                        SendAsync("FAIL invalid message format.");
+                        //SendAsync("FAIL invalid message format.");
                         continue;
                     }
 
@@ -170,6 +171,22 @@ namespace FootballAIGameServer
             }
 
             return message;
+        }
+
+        public async Task<string> ReadLineAsync()
+        {
+            var bytes = new List<byte>();
+            var buffer = new byte[1];
+
+            while (true)
+            {
+                await NetworkStream.ReadAsync(buffer, 0, 1);
+                if (buffer[0] == (int) '\n')
+                    break;
+                bytes.Add(buffer[0]);
+            }
+
+            return Encoding.UTF8.GetString(bytes.ToArray());
         }
 
         public void CancelCurrentReceiving()

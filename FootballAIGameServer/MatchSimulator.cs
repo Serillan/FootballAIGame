@@ -465,6 +465,9 @@ namespace FootballAIGameServer
                         // goal kick
                         goalKeeper.Position.X = 110 - 16.5f;
                         goalKeeper.Position.Y = 75 / 2f;
+                        goalKeeper.Movement.X = 0;
+                        goalKeeper.Movement.Y = 0;
+
                         ball.Position.X = goalKeeper.Position.X;
                         ball.Position.Y = goalKeeper.Position.Y;
 
@@ -482,10 +485,14 @@ namespace FootballAIGameServer
                         var nearestPlayerFromOppositeTeam =
                             GetNearestPlayerToBall(lastTeam == 1 ? 2 : 1);
 
+                        nearestPlayerFromOppositeTeam.Movement.X = 0;
+                        nearestPlayerFromOppositeTeam.Movement.Y = 0;
                         nearestPlayerFromOppositeTeam.Position.X = 110;
                         nearestPlayerFromOppositeTeam.Position.Y = ball.Position.Y < 75/2f ? 0 : 75;
 
                     }
+                    // push all opponent players aways from the kickoff position
+                    PushPlayersFromPosition(lastTeam, ball.Position);
                 }
 
                 if (GameState.Ball.Position.X < 0)
@@ -496,6 +503,8 @@ namespace FootballAIGameServer
                         // goal kick
                         goalKeeper.Position.X = 16.5f;
                         goalKeeper.Position.Y = 75 / 2f;
+                        goalKeeper.Movement.X = 0;
+                        goalKeeper.Movement.Y = 0;
                         ball.Position.X = goalKeeper.Position.X;
                         ball.Position.Y = goalKeeper.Position.Y;
 
@@ -515,13 +524,15 @@ namespace FootballAIGameServer
 
                         nearestPlayerFromOppositeTeam.Position.X = 0;
                         nearestPlayerFromOppositeTeam.Position.Y = ball.Position.Y < 75/2f ? 0 : 75;
-                        
-                        
+                        nearestPlayerFromOppositeTeam.Movement.X = 0;
+                        nearestPlayerFromOppositeTeam.Movement.Y = 0;
+
                     }
+                    // push all opponent players aways from the kickoff position
+                    PushPlayersFromPosition(lastTeam, ball.Position);
                 }
 
-                // push all opponent players aways from the kickoff position
-                PushPlayersFromPosition(lastTeam, ball.Position);
+
             }
 
             // touch lines
@@ -534,6 +545,8 @@ namespace FootballAIGameServer
 
                 nearestPlayerFromOppositeTeam.Position.X = ball.Position.X;
                 nearestPlayerFromOppositeTeam.Position.Y = 0;
+                nearestPlayerFromOppositeTeam.Movement.X = 0;
+                nearestPlayerFromOppositeTeam.Movement.Y = 0;
 
                 // push all opponent players aways from the kickoff position
                 PushPlayersFromPosition(lastTeam, ball.Position);
@@ -548,6 +561,8 @@ namespace FootballAIGameServer
 
                 nearestPlayerFromOppositeTeam.Position.X = ball.Position.X;
                 nearestPlayerFromOppositeTeam.Position.Y = 75;
+                nearestPlayerFromOppositeTeam.Movement.X = 0;
+                nearestPlayerFromOppositeTeam.Movement.Y = 0;
 
                 // push all opponent players aways from the kickoff position
                 PushPlayersFromPosition(lastTeam, ball.Position);
@@ -651,6 +666,17 @@ namespace FootballAIGameServer
 
                 player.Position.X = position.X + vectorToPlayer.X;
                 player.Position.Y = position.Y + vectorToPlayer.Y;
+
+                if (player.Position.X > 110)
+                    player.Position.X = 110 - MinimalOpponentLengthFromCornerKick;
+                if (player.Position.Y > 75)
+                    player.Position.Y = 75 - MinimalOpponentLengthFromCornerKick;
+                if (player.Position.X < 0)
+                    player.Position.X = MinimalOpponentLengthFromCornerKick;
+                if (player.Position.Y < 0)
+                    player.Position.Y = MinimalOpponentLengthFromCornerKick;
+
+
             }
 
         }
@@ -913,7 +939,6 @@ namespace FootballAIGameServer
                     // apply
                     player.Position.X += player.Movement.X;
                     player.Position.Y += player.Movement.Y;
-
                 }
             }
             else
