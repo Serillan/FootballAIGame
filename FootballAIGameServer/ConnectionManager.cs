@@ -14,17 +14,18 @@ namespace FootballAIGameServer
 {
     public class ConnectionManager
     {
+        public const int GameServerPort = 50030;
+        public const int CheckConnectionsInterval = 5000; // [ms]
+
         public List<ClientConnection> Connections { get; set; }
         public List<ClientConnection> ActiveConnections { get; set; }
-        public const int GameServerPort = 50030;
-
         public List<ClientConnection> WantsToPlayConnections { get; set; }
 
+        public static ConnectionManager Instance => _instance ?? (_instance = new ConnectionManager());
         private static ConnectionManager _instance; // singleton instance
 
-        public static ConnectionManager Instance => _instance ?? (_instance = new ConnectionManager());
-
         private TcpListener Listener { get; set; }
+
 
         private ConnectionManager()
         {
@@ -34,11 +35,27 @@ namespace FootballAIGameServer
             WantsToPlayConnections = new List<ClientConnection>();
         }
 
+        public async Task StartListening()
+        {
+            Listener.Start();
+            StartCheckingConnections();
+            Console.WriteLine("Listening has started.");
+
+            while (true)
+            {
+                var client = await Listener.AcceptTcpClientAsync();
+                var connection = new ClientConnection(client);
+                Connections.Add(connection);
+                Console.WriteLine("New client connection established.");
+                WaitForLogin(connection);
+            }
+        }
+
         public async Task StartCheckingConnections()
         {
             while (true)
             {
-                await Task.Delay(5000);
+                await Task.Delay(CheckConnectionsInterval);
 
                 lock (Connections)
                 {
@@ -86,22 +103,6 @@ namespace FootballAIGameServer
             }
         }
 
-        public async Task StartListening()
-        {
-            Listener.Start();
-            StartCheckingConnections();
-            Console.WriteLine("Listening has started.");
-
-            while (true)
-            {
-                var client = await Listener.AcceptTcpClientAsync();
-                var connection = new ClientConnection(client);
-                Connections.Add(connection);
-                Console.WriteLine("New client connection established.");
-                WaitForLogin(connection);
-            }
-        }
-
         private async Task WaitForLogin(ClientConnection connection)
         {
             while (true)
@@ -111,8 +112,6 @@ namespace FootballAIGameServer
                 {
                     Console.WriteLine("Client has sent invalid message for connecting.");
                     connection.SendAsync("FAIL invalid message format.");
-
-                    
                 }
                 else
                 {
@@ -128,7 +127,7 @@ namespace FootballAIGameServer
             }
         }
 
-        private async Task<bool> ProcessLoginMessageAsync(LoginMessage message, ClientConnection connection)
+        private static async Task<bool> ProcessLoginMessageAsync(LoginMessage message, ClientConnection connection)
         {
             using (var context = new ApplicationDbContext())
             {
@@ -158,6 +157,5 @@ namespace FootballAIGameServer
 
             return true;
         }
-
     }
 }

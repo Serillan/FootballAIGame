@@ -10,7 +10,6 @@ namespace FootballAIGameServer.ApiForWeb
 {
     public class GameServerService : IGameServerService
     {
-
         public string WantsToPlay(string userName, string ai)
         {
             try

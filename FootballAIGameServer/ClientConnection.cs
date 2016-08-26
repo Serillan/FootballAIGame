@@ -19,28 +19,25 @@ namespace FootballAIGameServer
     {
         private TcpClient TcpClient { get; set; }
         private NetworkStream NetworkStream { get; set; }
-        private CancellationTokenSource CancellationTokenSource { get; set; }
+        private Task<ClientMessage> CurrentReceiveTask { get; set; }
 
         public bool IsActive { get; set; }
         public bool IsInMatch { get; set; }
         public string PlayerName { get; set; }
         public string AiName { get; set; }
 
-        private Task<ClientMessage> CurrentReceivetask { get; set; }
-
         public ClientConnection(TcpClient tcpClient)
         {
             this.TcpClient = tcpClient;
             this.TcpClient.NoDelay = true;
             this.NetworkStream = tcpClient.GetStream();
-            this.CancellationTokenSource = new CancellationTokenSource();
             IsActive = false;
         }
 
         public int PingTimeAverage()
         {
             long totalTime = 0;
-            var timeout = 5000;
+            var timeout = 500;
             var echoNum = 5;
             var succNum = 0;
             var pingSender = new Ping();
@@ -53,7 +50,6 @@ namespace FootballAIGameServer
                     succNum++;
                     totalTime += reply.RoundtripTime;
                 }
-                Console.WriteLine(reply.Status);
             }
             if (succNum == 0)
                 return 100; // default
@@ -63,7 +59,7 @@ namespace FootballAIGameServer
         public async Task SendAsync(string message)
         {
             var bytes = Encoding.UTF8.GetBytes(message + "\n");
-            Send(bytes);
+            await Send(bytes);
         }
 
         public async Task SendAsync(GameState gameState, int playerNumber)
@@ -113,17 +109,16 @@ namespace FootballAIGameServer
 
         public async Task Send(byte[] data)
         {
-            NetworkStream.Write(data, 0, data.Length);
-            NetworkStream.Flush();
+            await NetworkStream.WriteAsync(data, 0, data.Length);
         }
 
         public async Task<ClientMessage> ReceiveClientMessageAsync()
         {
-            if (CurrentReceivetask == null || CurrentReceivetask.IsCanceled || CurrentReceivetask.IsCompleted ||
-                CurrentReceivetask.IsFaulted)
-                CurrentReceivetask = ReceiveClientMessageAsyncTask();
+            if (CurrentReceiveTask == null || CurrentReceiveTask.IsCanceled || CurrentReceiveTask.IsCompleted ||
+                CurrentReceiveTask.IsFaulted)
+                CurrentReceiveTask = ReceiveClientMessageAsyncTask();
 
-            return await CurrentReceivetask;
+            return await CurrentReceiveTask;
         }
 
         private async Task<ClientMessage> ReceiveClientMessageAsyncTask()
@@ -142,7 +137,7 @@ namespace FootballAIGameServer
                         Console.WriteLine("line ending with action");
 
                     var data = new byte[176];
-                    await NetworkStream.ReadAsync(data, 0, data.Length, CancellationTokenSource.Token);
+                    await NetworkStream.ReadAsync(data, 0, data.Length);
                     //Console.WriteLine($"{PlayerName} - recieved action");
                     message = ActionMessage.ParseMessage(data);
                     break;
@@ -150,11 +145,11 @@ namespace FootballAIGameServer
                 else if (firstLine.Length >= 10 && firstLine.Substring(firstLine.Length - 10) == "PARAMETERS")
                 {
                     var data = new byte[176];
-                    await NetworkStream.ReadAsync(data, 0, data.Length, CancellationTokenSource.Token);
+                    await NetworkStream.ReadAsync(data, 0, data.Length);
                     message = ParametersMessage.ParseMessage(data);
                     break;
                 }
-                else // CONNECT expected
+                else // LOGIN expected
                 {
                     var tokens = firstLine.Split();
                     if (tokens.Length != 3 || (tokens.Length > 0 && tokens[0] != "LOGIN"))
@@ -192,29 +187,6 @@ namespace FootballAIGameServer
 
             return Encoding.UTF8.GetString(bytes.ToArray());
         }
-
-        public void CancelCurrentReceiving()
-        {
-            CancellationTokenSource.Cancel();
-        }
-
-        /*
-        public bool IsConnected
-        {
-            get
-            {
-                if (TcpClient?.Client == null || !TcpClient.Client.Connected)
-                    return false;
-
-                var part1 = TcpClient.Client.Poll(1000, SelectMode.SelectRead);
-                var part2 = (TcpClient.Client.Available == 0);
-                if (part1 && part2)
-                    return false;
-                else
-                    return true;
-            }
-        }
-        */
         
         public bool IsConnected
         {
@@ -222,24 +194,12 @@ namespace FootballAIGameServer
             {
                 try
                 {
-                    if (TcpClient != null && TcpClient.Client != null && TcpClient.Client.Connected)
+                    if (TcpClient?.Client != null && TcpClient.Client.Connected)
                     {
                         // Detect if client disconnected
-                        if (TcpClient.Client.Poll(0, SelectMode.SelectRead))
-                        {
-                           var buff = new byte[1];
-                            if (TcpClient.Client.Receive(buff, SocketFlags.Peek) == 0)
-                            {
-                                // Client disconnected
-                                return false;
-                            }
-                            else
-                            {
-                                return true;
-                            }
-                        }
-
-                        return true;
+                        if (!TcpClient.Client.Poll(0, SelectMode.SelectRead)) return true;
+                        var buff = new byte[1];
+                        return TcpClient.Client.Receive(buff, SocketFlags.Peek) != 0;
                     }
                     else
                     {
@@ -248,7 +208,6 @@ namespace FootballAIGameServer
                 }
                 catch
                 {
-                    Console.WriteLine("connection exc");
                     return false;
                 }
             }

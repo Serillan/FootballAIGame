@@ -32,6 +32,6 @@ namespace FootballAIGameServer.Messages
             parametersMessage.Players = players;
             return parametersMessage;
         }
-    }
 
+    }
 }

@@ -11,7 +11,7 @@ using FootballAIGameServer.Models;
 
 namespace FootballAIGameServer
 {
-    class Entry
+    public class Entry
     {
         public static void Main(string[] args)
         {
@@ -69,7 +69,7 @@ namespace FootballAIGameServer
             return false;
         }
 
-        static ConsoleEventDelegate Handler;   // Keeps it from getting garbage collected
+        static ConsoleEventDelegate Handler;  // Keeps it from getting garbage collected
 
         private delegate bool ConsoleEventDelegate(int eventType);
 

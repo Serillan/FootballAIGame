@@ -18,19 +18,22 @@ namespace FootballAIGameServer
 {
     public class MatchSimulator
     {
+
+        public const int NumberOfSimulationSteps = 1500;
+        public const int PlayerTimeForOneStep = 100; // [ms]
+        public const int StepInterval = 200; // [ms]
+        public const double MaxAcceleration = 3; // [m/s/s]
+        public const double MaxBallSpeed = 15; // [m/s]
+        public const double BallDecerelation = 1.5; // [m/s/s]
+        public const double MinimalOpponentLengthFromCornerKick = 6; // [m]
+
         public ClientConnection Player1Connection { get; set; }
         public ClientConnection Player2Connection { get; set; }
         public bool Player1CancelRequested { get; set; }
         public bool Player2CancelRequested { get; set; }
 
-        public const int NumberOfSimulationSteps = 1500;
-        public const int PlayerTimeForOneStep = 100; // [ms]
-        public const int StepInterval = 200;
-
-        public const double MaxAcceleration = 3; // [m/s/s]
-        public const double MaxBallSpeed = 15; // [m/s]
-        public const double BallDecerelation = 1.5; // [m/s/s]
-        public const double MinimalOpponentLengthFromCornerKick = 6; // [m]
+        public static List<MatchSimulator> RunningSimulations { get; set; }
+        public static Random Random { get; set; }
 
         private GameState GameState { get; set; }
         private Match Match { get; set; }
@@ -44,7 +47,6 @@ namespace FootballAIGameServer
         private int CurrentStep { get; set; }
         private int CurrentScore1 { get; set; }
         private int CurrentScore2 { get; set; }
-
         private string CurrentTime
         {
             get
@@ -56,16 +58,206 @@ namespace FootballAIGameServer
             }
         }
 
-        public static List<MatchSimulator> RunningSimulations { get; set; }
-        public static Random Random { get; set; }
-
         public MatchSimulator(ClientConnection player1Connection, ClientConnection player2Connection)
         {
             this.Player1Connection = player1Connection;
             this.Player2Connection = player2Connection;
         }
 
-        public async Task ProcessGettingParameters()
+        public async Task SimulateMatch()
+        {
+            await ProcessSimulationStart();
+
+            var firstBall = Random.Next(1, 3); // max is excluded
+
+            // first half
+            try
+            {
+                WhoIsOnLeft = 1;
+                SetStartingPositions(firstBall);
+                SaveState(); // save starting state
+
+                for (var step = 0; step < NumberOfSimulationSteps / 2; step++)
+                {
+                    CurrentStep = step;
+                    await ProcessSimulationStep(step);
+                    if (step % 100 == 0)
+                        Console.WriteLine(step);
+                }
+
+                // second half
+                WhoIsOnLeft = 2;
+                SetStartingPositions(firstBall == 1 ? 2 : 1);
+                for (var step = NumberOfSimulationSteps / 2; step < NumberOfSimulationSteps; step++)
+                {
+                    CurrentStep = step;
+                    await ProcessSimulationStep(step);
+                    if (step % 100 == 0)
+                        Console.WriteLine(step);
+                }
+
+                ProcessSimulationEnd();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("simulation exception");
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        private async Task ProcessSimulationStart()
+        {
+            if (RunningSimulations == null)
+                RunningSimulations = new List<MatchSimulator>();
+            RunningSimulations.Add(this);
+
+            Player1Connection.IsInMatch = true;
+            Player2Connection.IsInMatch = true;
+
+            Console.WriteLine($"Starting simulation between {Player1Connection.PlayerName}:{Player1Connection.AiName} " +
+                              $"and {Player2Connection.PlayerName}:{Player2Connection.AiName}");
+
+            Match = new Match()
+            {
+                Time = DateTime.Now,
+                Player1Ai = Player1Connection.AiName,
+                Player2Ai = Player2Connection.AiName,
+                Goals = ""
+            };
+
+            // 1. check pings
+            Ping1 = Player1Connection.PingTimeAverage();
+            Ping2 = Player2Connection.PingTimeAverage();
+            //Console.WriteLine($"{Player1Connection.PlayerName} ping = {Ping1}\n" +
+            //                  $"{Player2Connection.PlayerName} ping = {Ping2}");
+
+            Data = new List<float>();
+
+            GameState = new GameState
+            {
+                Ball = new Ball(),
+                FootballPlayers = new FootballPlayer[22]
+            };
+
+            await ProcessGettingParameters();
+
+            Message1 = Player1Connection.ReceiveClientMessageAsync();
+            Message2 = Player2Connection.ReceiveClientMessageAsync();
+        }
+
+        private async Task ProcessSimulationStep(int step)
+        {
+            ActionMessage actionMessage1 = null;
+            ActionMessage actionMessage2 = null;
+
+            if (Player1CancelRequested || Player2CancelRequested || !Player1Connection.IsActive || !Player2Connection.IsActive)
+                return;
+            try
+            {
+                await Player1Connection.SendAsync("GET ACTION");
+                await Player1Connection.SendAsync(GameState, 1);
+
+                await Player2Connection.SendAsync("GET ACTION");
+                await Player2Connection.SendAsync(GameState, 2);
+
+
+                var getMessage1Task = Task.WhenAny(Message1, Task.Delay(Ping1 + PlayerTimeForOneStep));
+                var getMessage2Task = Task.WhenAny(Message2, Task.Delay(Ping2 + PlayerTimeForOneStep));
+
+                var getMessage1Result = await getMessage1Task;
+                var getMessage2Result = await getMessage2Task;
+
+
+
+
+                if (Message1.IsFaulted || !Player1Connection.IsActive || Message2.IsFaulted ||
+                    !Player2Connection.IsActive)
+                {
+                    return;
+                }
+
+                if (getMessage1Result == Message1)
+                {
+                    actionMessage1 = Message1.Result as ActionMessage;
+                    if (step < NumberOfSimulationSteps - 1)
+                    {
+                        Message1 = Player1Connection.ReceiveClientMessageAsync();
+                    }
+                }
+
+                if (getMessage2Result == Message2 && !Message2.IsFaulted)
+                {
+                    actionMessage2 = Message2.Result as ActionMessage;
+                    if (step < NumberOfSimulationSteps - 1)
+                    {
+                        Message2 = Player2Connection.ReceiveClientMessageAsync();
+                    }
+                }
+            }
+            catch (IOException) // if player1 or player2 has disconnected
+            {
+                Console.WriteLine("step exception");
+                return;
+            }
+
+
+            UpdateMatch(actionMessage1, actionMessage2);
+            SaveState();
+        }
+
+        private void ProcessSimulationEnd()
+        {
+            Console.WriteLine($"Ending simulation between {Player1Connection.PlayerName}:{Player1Connection.AiName} " +
+                             $"and {Player2Connection.PlayerName}:{Player2Connection.AiName}");
+            using (var context = new ApplicationDbContext())
+            {
+                var player1 = context.Players.SingleOrDefault(p => p.Name == Player1Connection.PlayerName);
+                var player2 = context.Players.SingleOrDefault(p => p.Name == Player2Connection.PlayerName);
+                player1.PlayerState = PlayerState.Idle;
+                player2.PlayerState = PlayerState.Idle;
+
+                Match.Player1 = player1;
+                Match.Player2 = player2;
+                Match.Score = $"{CurrentScore1}:{CurrentScore2}";
+                Match.Winner = CurrentScore1 > CurrentScore2 ? 1 : CurrentScore1 < CurrentScore2 ? 2 : 0;
+
+                if (Message1.IsFaulted || !Player1Connection.IsActive)
+                {
+                    Match.Winner = 2;
+                    Match.Player1ErrorLog += "Player AI has disconnected.;";
+                }
+                if (Message2.IsFaulted || !Player2Connection.IsActive)
+                {
+                    Match.Winner = 1;
+                    Match.Player2ErrorLog += "Player AI has disconnected.;";
+                }
+
+                if (Player1CancelRequested)
+                {
+                    Match.Winner = 2;
+                    Match.Player1ErrorLog += "Player has cancelled the match.;";
+                }
+                if (Player2CancelRequested)
+                {
+                    Match.Winner = 1;
+                    Match.Player2ErrorLog += "Player has cancelled the match.;";
+                }
+
+                var matchByteData = new byte[Data.Count * 4];
+                Buffer.BlockCopy(Data.ToArray(), 0, matchByteData, 0, Data.Count * 4);
+                Match.MatchData = matchByteData;
+
+                context.Matches.Add(Match);
+
+                context.SaveChanges();
+
+                RunningSimulations.Remove(this);
+                Player1Connection.IsInMatch = false;
+                Player2Connection.IsInMatch = false;
+            }
+        }
+
+        private async Task ProcessGettingParameters()
         {
             var getParameters1 = GetPlayersParameters(Player1Connection);
             var getParameters2 = GetPlayersParameters(Player2Connection);
@@ -145,49 +337,7 @@ namespace FootballAIGameServer
             }
         }
 
-        public async Task ProcessSimulationStart()
-        {
-            if (RunningSimulations == null)
-                RunningSimulations = new List<MatchSimulator>();
-            RunningSimulations.Add(this);
-
-            Player1Connection.IsInMatch = true;
-            Player2Connection.IsInMatch = true;
-
-            Console.WriteLine($"Starting simulation between {Player1Connection.PlayerName}:{Player1Connection.AiName} " +
-                              $"and {Player2Connection.PlayerName}:{Player2Connection.AiName}");
-
-            Match = new Match()
-            {
-                Time = DateTime.Now,
-                Player1Ai = Player1Connection.AiName,
-                Player2Ai = Player2Connection.AiName,
-                Goals = ""
-            };
-
-            // 1. check pings -todo timeout check
-            Ping1 = Player1Connection.PingTimeAverage();
-            Ping2 = Player2Connection.PingTimeAverage();
-            Console.WriteLine($"{Player1Connection.PlayerName} ping = {Ping1}\n" +
-                              $"{Player2Connection.PlayerName} ping = {Ping2}");
-
-            Data = new List<float>();
-
-            // todo
-            // check player states and update them
-            GameState = new GameState
-            {
-                Ball = new Ball(),
-                FootballPlayers = new FootballPlayer[22]
-            };
-
-            await ProcessGettingParameters();
-
-            Message1 = Player1Connection.ReceiveClientMessageAsync();
-            Message2 = Player2Connection.ReceiveClientMessageAsync();
-        }
-
-        public void SetStartingPositions(int whoHasBall)
+        private void SetStartingPositions(int whoHasBall)
         {
             var players = GameState.FootballPlayers;
 
@@ -266,157 +416,12 @@ namespace FootballAIGameServer
             }
         }
 
-        public async Task ProcessSimulationStep(int step)
+        private void UpdateMatch(ActionMessage player1Action, ActionMessage player2Action)
         {
-            ActionMessage actionMessage1 = null;
-            ActionMessage actionMessage2 = null;
-
-            if (Player1CancelRequested || Player2CancelRequested || !Player1Connection.IsActive || !Player2Connection.IsActive)
-                return;
-            try
-            {
-                await Player1Connection.SendAsync("GET ACTION");
-                await Player1Connection.SendAsync(GameState, 1);
-
-                await Player2Connection.SendAsync("GET ACTION");
-                await Player2Connection.SendAsync(GameState, 2);
-
-
-                var getMessage1Task = Task.WhenAny(Message1, Task.Delay(Ping1 + PlayerTimeForOneStep));
-                var getMessage2Task = Task.WhenAny(Message2, Task.Delay(Ping2 + PlayerTimeForOneStep));
-
-                var getMessage1Result = await getMessage1Task;
-                var getMessage2Result = await getMessage2Task;
-
-
-
-
-                if (Message1.IsFaulted || !Player1Connection.IsActive || Message2.IsFaulted ||
-                    !Player2Connection.IsActive)
-                {
-                    return;
-                }
-
-                if (getMessage1Result == Message1)
-                {
-                    actionMessage1 = Message1.Result as ActionMessage;
-                    if (step < NumberOfSimulationSteps - 1)
-                    {
-                        Message1 = Player1Connection.ReceiveClientMessageAsync();
-                    }
-                }
-
-                if (getMessage2Result == Message2 && !Message2.IsFaulted)
-                {
-                    actionMessage2 = Message2.Result as ActionMessage;
-                    if (step < NumberOfSimulationSteps - 1)
-                    {
-                        Message2 = Player2Connection.ReceiveClientMessageAsync();
-                    }
-                }
-            }
-            catch (IOException) // if player1 or player2 has disconnected
-            {
-                Console.WriteLine("step exception");
-                return;
-            }
-
-
-            UpdateMatch(actionMessage1, actionMessage2);
-            SaveState();
-        }
-
-        public async Task SimulateMatch()
-        {
-            await ProcessSimulationStart();
-
-            var firstBall = Random.Next(1, 3); // max is excluded
-
-            // first half
-            try
-            {
-                WhoIsOnLeft = 1;
-                SetStartingPositions(firstBall);
-                SaveState(); // save starting state
-
-                for (var step = 0; step < NumberOfSimulationSteps / 2; step++)
-                {
-                    CurrentStep = step;
-                    await ProcessSimulationStep(step);
-                    if (step % 100 == 0)
-                        Console.WriteLine(step);
-                }
-
-                // second half
-                WhoIsOnLeft = 2;
-                SetStartingPositions(firstBall == 1 ? 2 : 1);
-                for (var step = NumberOfSimulationSteps / 2; step < NumberOfSimulationSteps; step++)
-                {
-                    CurrentStep = step;
-                    await ProcessSimulationStep(step);
-                    if (step % 100 == 0)
-                        Console.WriteLine(step);
-                }
-
-                ProcessEnding();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("simulation exception");
-                Console.WriteLine(ex.Message);
-            }
-        }
-
-        private void ProcessEnding()
-        {
-            Console.WriteLine($"Ending simulation between {Player1Connection.PlayerName}:{Player1Connection.AiName} " +
-                             $"and {Player2Connection.PlayerName}:{Player2Connection.AiName}");
-            using (var context = new ApplicationDbContext())
-            {
-                var player1 = context.Players.SingleOrDefault(p => p.Name == Player1Connection.PlayerName);
-                var player2 = context.Players.SingleOrDefault(p => p.Name == Player2Connection.PlayerName);
-                player1.PlayerState = PlayerState.Idle;
-                player2.PlayerState = PlayerState.Idle;
-
-                Match.Player1 = player1;
-                Match.Player2 = player2;
-                Match.Score = $"{CurrentScore1}:{CurrentScore2}";
-                Match.Winner = CurrentScore1 > CurrentScore2 ? 1 : CurrentScore1 < CurrentScore2 ? 2 : 0;
-
-                if (Message1.IsFaulted || !Player1Connection.IsActive)
-                {
-                    Match.Winner = 2;
-                    Match.Player1ErrorLog += "Player AI has disconnected.;";
-                }
-                if (Message2.IsFaulted || !Player2Connection.IsActive)
-                {
-                    Match.Winner = 1;
-                    Match.Player2ErrorLog += "Player AI has disconnected.;";
-                }
-
-                if (Player1CancelRequested)
-                {
-                    Match.Winner = 2;
-                    Match.Player1ErrorLog += "Player has cancelled the match.;";
-                }
-                if (Player2CancelRequested)
-                {
-                    Match.Winner = 1;
-                    Match.Player2ErrorLog += "Player has cancelled the match.;";
-                }
-
-                var matchByteData = new byte[Data.Count * 4];
-                Buffer.BlockCopy(Data.ToArray(), 0, matchByteData, 0, Data.Count * 4);
-                Match.MatchData = matchByteData;
-
-                context.Matches.Add(Match);
-
-                context.SaveChanges();
-
-                RunningSimulations.Remove(this);
-                Player1Connection.IsInMatch = false;
-                Player2Connection.IsInMatch = false;
-            }
+            UpdatePlayers(player1Action, player2Action);
+            UpdateBall(player1Action, player2Action);
+            HandleOuts();
+            HandleGoals();
         }
 
         private void SaveState()
@@ -450,15 +455,174 @@ namespace FootballAIGameServer
             return ((ParametersMessage)message).Players;
         }
 
-        private void UpdateMatch(ActionMessage player1Action, ActionMessage player2Action)
+        private void UpdatePlayers(ActionMessage player1Action, ActionMessage player2Action)
         {
-            UpdatePlayersMovement(player1Action, player2Action);
-            UpdateBall(player1Action, player2Action);
-            HandleOut();
-            HandleGoals();
+            if (player1Action != null)
+            {
+                // movement
+                for (var i = 0; i < 11; i++)
+                {
+                    var player = GameState.FootballPlayers[i];
+                    var action = player1Action.PlayerActions[i];
+
+                    var oldSpeed = player.CurrentSpeed;
+
+                    var acceleration = new Vector(action.Movement.X - player.Movement.X,
+                        action.Movement.Y - player.Movement.Y);
+
+                    var accelerationVectorLength = acceleration.Length * 1000 / StepInterval; // [m/s]
+
+                    if (accelerationVectorLength > MaxAcceleration)
+                    {
+                        var q = MaxAcceleration / accelerationVectorLength;
+                        var fixedAcceleration = new Vector(acceleration.X * q, acceleration.Y * q);
+
+                        Match.Player1ErrorLog += "Player acceleration correction.;";
+                        action.Movement.X = (float)(player.Movement.X + fixedAcceleration.X);
+                        action.Movement.Y = (float)(player.Movement.Y + fixedAcceleration.Y);
+                    }
+
+
+                    player.Movement.X = action.Movement.X;
+                    player.Movement.Y = action.Movement.Y;
+                    var newSpeed = player.CurrentSpeed;
+
+                    if (newSpeed > player.MaxSpeed)
+                    {
+                        // too high speed
+                        Match.Player1ErrorLog += "Player speed correction.";
+                        player.Movement.X *= (float)(player.MaxSpeed / newSpeed);
+                        player.Movement.Y *= (float)(player.MaxSpeed / newSpeed);
+                    }
+
+                    // apply
+                    player.Position.X += player.Movement.X;
+                    player.Position.Y += player.Movement.Y;
+                }
+            }
+            else
+            {
+                // default (nothing for now)
+                Console.WriteLine(Player1Connection.PlayerName + " timeout.");
+            }
+
+            if (player2Action != null)
+            {
+                // movement
+                for (var i = 0; i < 11; i++)
+                {
+                    var player = GameState.FootballPlayers[i + 11];
+                    var action = player2Action.PlayerActions[i];
+
+                    var oldSpeed = player.CurrentSpeed;
+
+                    var accelerationX = action.Movement.X - player.Movement.X;
+                    var accelerationY = action.Movement.Y - player.Movement.Y;
+
+                    var accelerationVectorLength =
+                        Math.Sqrt(Math.Pow(accelerationX, 2) *
+                                  Math.Pow(accelerationY, 2));
+
+
+                    if (accelerationVectorLength > MaxAcceleration)
+                    {
+                        var q = MaxAcceleration / accelerationVectorLength;
+                        var fixedAccelerationX = accelerationX * q;
+                        var fixedAccelerationY = accelerationY * q;
+
+                        //Match.Player2ErrorLog += "Player acceleration correction.;";
+                        action.Movement.X = (float)(player.Movement.X + fixedAccelerationX);
+                        action.Movement.Y = (float)(player.Movement.Y + fixedAccelerationY);
+                    }
+
+
+                    player.Movement.X = action.Movement.X;
+                    player.Movement.Y = action.Movement.Y;
+                    var newSpeed = player.CurrentSpeed;
+
+                    if (newSpeed > player.MaxSpeed)
+                    {
+                        // too high speed
+                        //Match.Player2ErrorLog += "Player speed correction.";
+                        player.Movement.X *= (float)(player.MaxSpeed / newSpeed);
+                        player.Movement.Y *= (float)(player.MaxSpeed / newSpeed);
+                    }
+
+                    // apply
+                    player.Position.X += player.Movement.X;
+                    player.Position.Y += player.Movement.Y;
+
+                }
+            }
+            else
+            {
+                // default (nothing for now)
+                Console.WriteLine(Player2Connection.PlayerName + " timeout.");
+            }
         }
 
-        private void HandleOut()
+        private void UpdateBall(ActionMessage player1Action, ActionMessage player2Action)
+        {
+            // add kick actions to players
+            for (var i = 0; i < 11; i++)
+            {
+                GameState.FootballPlayers[i].Kick.X = player1Action?.PlayerActions[i].Kick.X ?? 0;
+                GameState.FootballPlayers[i].Kick.Y = player1Action?.PlayerActions[i].Kick.Y ?? 0;
+            }
+            for (var i = 0; i < 11; i++)
+            {
+                GameState.FootballPlayers[i + 11].Kick.X = player2Action?.PlayerActions[i].Kick.X ?? 0;
+                GameState.FootballPlayers[i + 11].Kick.Y = player2Action?.PlayerActions[i].Kick.Y ?? 0;
+            }
+
+            var playersNearBallKicking = GameState.FootballPlayers.Where(
+                p => Vector.DistanceBetween(GameState.Ball.Position, p.Position) <= 2 && (p.Kick.X != 0 || p.Kick.Y != 0));
+
+            var kickWinner = GetKickWinner(playersNearBallKicking.ToArray());
+
+            // apply kick
+            if (kickWinner != null)
+            {
+
+                // check whether the ball was shot or shot on target
+                UpdateStoppedShots(kickWinner);
+
+                LastKicker = kickWinner;
+                GameState.Ball.Movement.X = kickWinner.Kick.X;
+                GameState.Ball.Movement.Y = kickWinner.Kick.Y;
+
+                // deviation of the kick
+                var angleDevation = (0.4 - kickWinner.Precision) * (Random.NextDouble() * 2 - 1);
+
+                // rotation applied (deviation)
+                GameState.Ball.Movement.X = (float)(Math.Cos(angleDevation) * GameState.Ball.Movement.X -
+                                                Math.Sin(angleDevation) * GameState.Ball.Movement.Y);
+                GameState.Ball.Movement.Y = (float)(Math.Sin(angleDevation) * GameState.Ball.Movement.X +
+                                                Math.Cos(angleDevation) * GameState.Ball.Movement.Y);
+
+                var newSpeed = GameState.Ball.CurrentSpeed;
+                var maxAllowedSpeed = 15 + LastKicker.KickPower * 10;
+                if (newSpeed > maxAllowedSpeed)
+                {
+                    GameState.Ball.Movement.X *= (float)(maxAllowedSpeed / newSpeed);
+                    GameState.Ball.Movement.Y *= (float)(maxAllowedSpeed / newSpeed);
+                }
+            }
+
+            // ball deceralation
+            var ratio = (GameState.Ball.CurrentSpeed - (BallDecerelation * StepInterval / 1000)) /
+                GameState.Ball.CurrentSpeed;
+            if (ratio < 0)
+                ratio = 0;
+            GameState.Ball.Movement.X *= (float)ratio;
+            GameState.Ball.Movement.Y *= (float)ratio;
+
+            // update ball position
+            GameState.Ball.Position.X += GameState.Ball.Movement.X;
+            GameState.Ball.Position.Y += GameState.Ball.Movement.Y;
+        }
+
+        private void HandleOuts()
         {
             var lastTeam = 0;
             var players = GameState.FootballPlayers;
@@ -672,6 +836,70 @@ namespace FootballAIGameServer
             }
         }
 
+        private void UpdateStoppedShots(FootballPlayer currentWinner)
+        {
+            var ball = GameState.Ball;
+            var currentWinnerTeam = 0;
+            var lastWinnerTeam = 0;
+            for (var i = 0; i < 11; i++)
+            {
+                if (GameState.FootballPlayers[i] == currentWinner)
+                    currentWinnerTeam = i < 11 ? 1 : 2;
+                if (GameState.FootballPlayers[i] == LastKicker)
+                    lastWinnerTeam = i < 11 ? 1 : 2;
+            }
+
+            if (lastWinnerTeam == currentWinnerTeam)
+                return;
+
+            var intersectionWithGoalLine1 = GetIntersectionWithGoalLine(GameState.Ball, 1);
+            var intersectionWithGoalLine2 = GetIntersectionWithGoalLine(GameState.Ball, 2);
+
+            var wasBallGoingToGoalLine1 = intersectionWithGoalLine1 != null;
+            var wasBallGoingToGoalLine2 = intersectionWithGoalLine2 != null;
+            var wasBallGoingToGoalPost1 = intersectionWithGoalLine1 != null
+                                          && intersectionWithGoalLine1.Y > 75f / 2 - 7.32 &&
+                                          intersectionWithGoalLine1.Y < 75f / 2 + 7.32;
+            var wasBallGoingToGoalPost2 = intersectionWithGoalLine2 != null
+                                          && intersectionWithGoalLine2.Y > 75f / 2 - 7.32 &&
+                                          intersectionWithGoalLine2.Y < 75f / 2 + 7.32;
+
+
+            // process result
+            if (wasBallGoingToGoalLine1 && lastWinnerTeam != WhoIsOnLeft)
+            {
+                if (lastWinnerTeam == 1)
+                    Match.Shots1++;
+                else
+                    Match.Shots2++;
+                if (wasBallGoingToGoalPost1)
+                {
+                    if (lastWinnerTeam == 1)
+                        Match.ShotsOnTarget1++;
+                    else
+                        Match.ShotsOnTarget2++;
+                }
+            }
+
+            if (wasBallGoingToGoalLine2 && lastWinnerTeam == WhoIsOnLeft)
+            {
+                if (lastWinnerTeam == 1)
+                    Match.Shots1++;
+                else
+                    Match.Shots2++;
+
+                if (wasBallGoingToGoalPost1)
+                {
+                    if (lastWinnerTeam == 1)
+                        Match.ShotsOnTarget1++;
+                    else
+                        Match.ShotsOnTarget2++;
+                }
+            }
+
+
+        }
+
         private void PushPlayersFromPosition(int teamToBePushedNumber, Vector position)
         {
             var toBePushedPlayers = new List<FootballPlayer>();
@@ -735,131 +963,6 @@ namespace FootballAIGameServer
             return nearestPlayer;
         }
 
-        private void UpdateBall(ActionMessage player1Action, ActionMessage player2Action)
-        {
-            // add kick actions to players
-            for (var i = 0; i < 11; i++)
-            {
-                GameState.FootballPlayers[i].Kick.X = player1Action?.PlayerActions[i].Kick.X ?? 0;
-                GameState.FootballPlayers[i].Kick.Y = player1Action?.PlayerActions[i].Kick.Y ?? 0;
-            }
-            for (var i = 0; i < 11; i++)
-            {
-                GameState.FootballPlayers[i + 11].Kick.X = player2Action?.PlayerActions[i].Kick.X ?? 0;
-                GameState.FootballPlayers[i + 11].Kick.Y = player2Action?.PlayerActions[i].Kick.Y ?? 0;
-            }
-
-            var playersNearBallKicking = GameState.FootballPlayers.Where(
-                p => Vector.DistanceBetween(GameState.Ball.Position, p.Position) <= 2 && (p.Kick.X != 0 || p.Kick.Y != 0));
-
-            var kickWinner = GetKickWinner(playersNearBallKicking.ToArray());
-
-            // apply kick
-            if (kickWinner != null)
-            {
-
-                // check whether the ball was shot or shot on target
-                UpdateStoppedShots(kickWinner);
-
-                LastKicker = kickWinner;
-                GameState.Ball.Movement.X = kickWinner.Kick.X;
-                GameState.Ball.Movement.Y = kickWinner.Kick.Y;
-
-                // deviation of the kick
-                var angleDevation = (0.4 - kickWinner.Precision) * (Random.NextDouble() * 2 - 1);
-
-                // rotation applied (deviation)
-                GameState.Ball.Movement.X = (float)(Math.Cos(angleDevation) * GameState.Ball.Movement.X -
-                                                Math.Sin(angleDevation) * GameState.Ball.Movement.Y);
-                GameState.Ball.Movement.Y = (float)(Math.Sin(angleDevation) * GameState.Ball.Movement.X +
-                                                Math.Cos(angleDevation) * GameState.Ball.Movement.Y);
-
-                var newSpeed = GameState.Ball.CurrentSpeed;
-                var maxAllowedSpeed = 15 + LastKicker.KickPower * 10;
-                if (newSpeed > maxAllowedSpeed)
-                {
-                    GameState.Ball.Movement.X *= (float)(maxAllowedSpeed / newSpeed);
-                    GameState.Ball.Movement.Y *= (float)(maxAllowedSpeed / newSpeed);
-                }
-            }
-
-            // ball deceralation
-            var ratio = (GameState.Ball.CurrentSpeed - (BallDecerelation * StepInterval / 1000)) /
-                GameState.Ball.CurrentSpeed;
-            if (ratio < 0)
-                ratio = 0;
-            GameState.Ball.Movement.X *= (float)ratio;
-            GameState.Ball.Movement.Y *= (float)ratio;
-
-            // update ball position
-            GameState.Ball.Position.X += GameState.Ball.Movement.X;
-            GameState.Ball.Position.Y += GameState.Ball.Movement.Y;
-        }
-
-        private void UpdateStoppedShots(FootballPlayer currentWinner)
-        {
-            var ball = GameState.Ball;
-            var currentWinnerTeam = 0;
-            var lastWinnerTeam = 0;
-            for (var i = 0; i < 11; i++)
-            {
-                if (GameState.FootballPlayers[i] == currentWinner)
-                    currentWinnerTeam = i < 11 ? 1 : 2;
-                if (GameState.FootballPlayers[i] == LastKicker)
-                    lastWinnerTeam = i < 11 ? 1 : 2;
-            }
-
-            if (lastWinnerTeam == currentWinnerTeam)
-                return;
-
-            var intersectionWithGoalLine1 = GetIntersectionWithGoalLine(GameState.Ball, 1);
-            var intersectionWithGoalLine2 = GetIntersectionWithGoalLine(GameState.Ball, 2);
-
-            var wasBallGoingToGoalLine1 = intersectionWithGoalLine1 != null;
-            var wasBallGoingToGoalLine2 = intersectionWithGoalLine2 != null;
-            var wasBallGoingToGoalPost1 = intersectionWithGoalLine1 != null
-                                          && intersectionWithGoalLine1.Y > 75f/2 - 7.32 &&
-                                          intersectionWithGoalLine1.Y < 75f/2 + 7.32;
-            var wasBallGoingToGoalPost2 = intersectionWithGoalLine2 != null
-                                          && intersectionWithGoalLine2.Y > 75f / 2 - 7.32 &&
-                                          intersectionWithGoalLine2.Y < 75f / 2 + 7.32;
-
-
-            // process result
-            if (wasBallGoingToGoalLine1 && lastWinnerTeam != WhoIsOnLeft)
-            {
-                if (lastWinnerTeam == 1)
-                    Match.Shots1++;
-                else
-                    Match.Shots2++;
-                if (wasBallGoingToGoalPost1)
-                {
-                    if (lastWinnerTeam == 1)
-                        Match.ShotsOnTarget1++;
-                    else
-                        Match.ShotsOnTarget2++;
-                }
-            }
-
-            if (wasBallGoingToGoalLine2 && lastWinnerTeam == WhoIsOnLeft)
-            {
-                if (lastWinnerTeam == 1)
-                    Match.Shots1++;
-                else
-                    Match.Shots2++;
-
-                if (wasBallGoingToGoalPost1)
-                {
-                    if (lastWinnerTeam == 1)
-                        Match.ShotsOnTarget1++;
-                    else
-                        Match.ShotsOnTarget2++;
-                }
-            }
-
-
-        }
-
         private Vector GetIntersectionWithGoalLine(Ball ball, int whichGoalLine)
         {
             double t = 0;
@@ -895,7 +998,7 @@ namespace FootballAIGameServer
             // final speed = v + a * t
             var speedAtIntersection = ball.CurrentSpeed + BallDecerelation*time;
 
-            // is speed higher than minimal shot speed (0 for now)
+            // is speed higher than minimal shot speed (4 for now)
             if (speedAtIntersection <= 4)
                 return null;
 
@@ -924,113 +1027,5 @@ namespace FootballAIGameServer
             }
         }
 
-        public void UpdatePlayersMovement(ActionMessage player1Action, ActionMessage player2Action)
-        {
-            if (player1Action != null)
-            {
-                // movement
-                for (var i = 0; i < 11; i++)
-                {
-                    var player = GameState.FootballPlayers[i];
-                    var action = player1Action.PlayerActions[i];
-
-                    var oldSpeed = player.CurrentSpeed;
-
-                    var acceleration = new Vector(action.Movement.X - player.Movement.X, 
-                        action.Movement.Y - player.Movement.Y);
-
-                    var accelerationVectorLength = acceleration.Length * 1000 / StepInterval; // [m/s]
-
-                    if (accelerationVectorLength > MaxAcceleration)
-                    {
-                        var q = MaxAcceleration / accelerationVectorLength;
-                        var fixedAcceleration = new Vector(acceleration.X * q, acceleration.Y * q);
-
-                        Match.Player1ErrorLog += "Player acceleration correction.;";
-                        action.Movement.X = (float)(player.Movement.X + fixedAcceleration.X);
-                        action.Movement.Y = (float)(player.Movement.Y + fixedAcceleration.Y);
-                    }
-
-
-                    player.Movement.X = action.Movement.X;
-                    player.Movement.Y = action.Movement.Y;
-                    var newSpeed = player.CurrentSpeed;
-
-                    if (newSpeed > player.MaxSpeed)
-                    {
-                        // too high speed
-                        Match.Player1ErrorLog += "Player speed correction.";
-                        player.Movement.X *= (float)(player.MaxSpeed / newSpeed);
-                        player.Movement.Y *= (float)(player.MaxSpeed / newSpeed);
-                    }
-
-                    // apply
-                    player.Position.X += player.Movement.X;
-                    player.Position.Y += player.Movement.Y;
-                }
-            }
-            else
-            {
-                // default (nothing for now)
-                Console.WriteLine(Player1Connection.PlayerName + " timeout.");
-            }
-
-            if (player2Action != null)
-            {
-                // movement
-                for (var i = 0; i < 11; i++)
-                {
-                    var player = GameState.FootballPlayers[i + 11];
-                    var action = player2Action.PlayerActions[i];
-
-                    var oldSpeed = player.CurrentSpeed;
-
-                    var accelerationX = action.Movement.X - player.Movement.X;
-                    var accelerationY = action.Movement.Y - player.Movement.Y;
-
-                    var accelerationVectorLength =
-                        Math.Sqrt(Math.Pow(accelerationX, 2) *
-                                  Math.Pow(accelerationY, 2));
-
-
-                    if (accelerationVectorLength > MaxAcceleration)
-                    {
-                        var q = MaxAcceleration / accelerationVectorLength;
-                        var fixedAccelerationX = accelerationX * q;
-                        var fixedAccelerationY = accelerationY * q;
-
-                        //Match.Player2ErrorLog += "Player acceleration correction.;";
-                        action.Movement.X = (float)(player.Movement.X + fixedAccelerationX);
-                        action.Movement.Y = (float)(player.Movement.Y + fixedAccelerationY);
-                    }
-
-
-                    player.Movement.X = action.Movement.X;
-                    player.Movement.Y = action.Movement.Y;
-                    var newSpeed = player.CurrentSpeed;
-
-                    if (newSpeed > player.MaxSpeed)
-                    {
-                        // too high speed
-                        //Match.Player2ErrorLog += "Player speed correction.";
-                        player.Movement.X *= (float)(player.MaxSpeed / newSpeed);
-                        player.Movement.Y *= (float)(player.MaxSpeed / newSpeed);
-                    }
-
-                    // apply
-                    player.Position.X += player.Movement.X;
-                    player.Position.Y += player.Movement.Y;
-
-                }
-            }
-            else
-            {
-                // default (nothing for now)
-                Console.WriteLine(Player2Connection.PlayerName + " timeout.");
-            }
-        }
-
     }
-
-    
 }
