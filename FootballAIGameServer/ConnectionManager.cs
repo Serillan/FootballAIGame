@@ -39,9 +39,11 @@ namespace FootballAIGameServer
             while (true)
             {
                 await Task.Delay(5000);
+
                 lock (Connections)
                 {
                     var toBeRemovedConnections = new List<ClientConnection>();
+
                     foreach (var clientConnection in Connections)
                     {
                         if (!clientConnection.IsConnected)
@@ -50,6 +52,10 @@ namespace FootballAIGameServer
                             toBeRemovedConnections.Add(clientConnection);
                             Console.WriteLine($"Player {clientConnection.PlayerName} with AI " +
                                               $"{clientConnection.AiName} has disconnected.");
+                        }
+                        else if (!clientConnection.IsInMatch && clientConnection.IsActive)
+                        {
+                            clientConnection.SendAsync("keepalive");
                         }
                     }
 
@@ -72,10 +78,8 @@ namespace FootballAIGameServer
                             if (player.ActiveAis == "")
                                 player.ActiveAis = null;
                         }
-
                         context.SaveChanges();
                     }
-
                     Connections.RemoveAll(c => toBeRemovedConnections.Contains(c));
                     ActiveConnections.RemoveAll(c => c.IsActive == false);
                 }
@@ -114,9 +118,9 @@ namespace FootballAIGameServer
                 {
                     if (await ProcessLoginMessageAsync((LoginMessage) clientMessage, connection))
                     {
+                        await connection.SendAsync("CONNECTED");
                         connection.IsActive = true;
                         ActiveConnections.Add(connection);
-                        connection.SendAsync("CONNECTED");
                         Console.WriteLine($"Player {connection.PlayerName} with ai {connection.AiName} has log on.");
                         break;
                     }

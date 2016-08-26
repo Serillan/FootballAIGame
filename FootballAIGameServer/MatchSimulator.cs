@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
 using System.ServiceModel.Channels;
+using System.ServiceModel.Configuration;
 using System.Text;
 using System.Threading.Tasks;
 using FootballAIGameServer.CustomDataTypes;
@@ -149,6 +150,9 @@ namespace FootballAIGameServer
             if (RunningSimulations == null)
                 RunningSimulations = new List<MatchSimulator>();
             RunningSimulations.Add(this);
+
+            Player1Connection.IsInMatch = true;
+            Player2Connection.IsInMatch = true;
 
             Console.WriteLine($"Starting simulation between {Player1Connection.PlayerName}:{Player1Connection.AiName} " +
                               $"and {Player2Connection.PlayerName}:{Player2Connection.AiName}");
@@ -410,6 +414,8 @@ namespace FootballAIGameServer
                 context.SaveChanges();
 
                 RunningSimulations.Remove(this);
+                Player1Connection.IsInMatch = false;
+                Player2Connection.IsInMatch = false;
             }
         }
 
@@ -431,9 +437,17 @@ namespace FootballAIGameServer
 
         private async Task<FootballPlayer[]> GetPlayersParameters(ClientConnection playerConnection)
         {
-            await playerConnection.SendAsync("GET PARAMETERS");
-            var parametersMessage = await playerConnection.ReceiveClientMessageAsync();
-            return ((ParametersMessage)parametersMessage).Players;
+            ClientMessage message;
+
+            while (true)
+            {
+                await playerConnection.SendAsync("GET PARAMETERS");
+                message = await playerConnection.ReceiveClientMessageAsync();
+                if (message is ParametersMessage)
+                    break;
+            }
+
+            return ((ParametersMessage)message).Players;
         }
 
         private void UpdateMatch(ActionMessage player1Action, ActionMessage player2Action)
@@ -470,6 +484,8 @@ namespace FootballAIGameServer
 
                         ball.Position.X = goalKeeper.Position.X;
                         ball.Position.Y = goalKeeper.Position.Y;
+                        ball.Movement.X = 0f;
+                        ball.Movement.Y = 0f;
 
                         if (lastTeam == 1)
                             Match.Shots1++;
@@ -481,6 +497,8 @@ namespace FootballAIGameServer
                         // corner kick
                         ball.Position.X = 109;
                         ball.Position.Y = ball.Position.Y >= 75f / 2 + 7.32 / 2 ? 74 : 1;
+                        ball.Movement.X = 0f;
+                        ball.Movement.Y = 0f;
 
                         var nearestPlayerFromOppositeTeam =
                             GetNearestPlayerToBall(lastTeam == 1 ? 2 : 1);
@@ -500,13 +518,17 @@ namespace FootballAIGameServer
                     if (WhoIsOnLeft != lastTeam)
                     {
                         var goalKeeper = lastTeam == 1 ? players[11] : players[0];
+
                         // goal kick
                         goalKeeper.Position.X = 16.5f;
                         goalKeeper.Position.Y = 75 / 2f;
                         goalKeeper.Movement.X = 0;
                         goalKeeper.Movement.Y = 0;
+
                         ball.Position.X = goalKeeper.Position.X;
                         ball.Position.Y = goalKeeper.Position.Y;
+                        ball.Movement.X = 0f;
+                        ball.Movement.Y = 0f;
 
                         if (lastTeam == 1)
                             Match.Shots1++;
@@ -518,6 +540,8 @@ namespace FootballAIGameServer
                         // corner kick
                         ball.Position.X = 1;
                         ball.Position.Y = ball.Position.Y >= 75f / 2 + 7.32 / 2 ? 74 : 1;
+                        ball.Movement.X = 0f;
+                        ball.Movement.Y = 0f;
 
                         var nearestPlayerFromOppositeTeam =
                            GetNearestPlayerToBall(lastTeam == 1 ? 2 : 1);
@@ -539,6 +563,8 @@ namespace FootballAIGameServer
             if (ball.Position.Y < 0)
             {
                 ball.Position.Y = 1;
+                ball.Movement.X = 0f;
+                ball.Movement.Y = 0f;
 
                 var nearestPlayerFromOppositeTeam =
                           GetNearestPlayerToBall(lastTeam == 1 ? 2 : 1);
@@ -555,6 +581,8 @@ namespace FootballAIGameServer
             if (ball.Position.Y > 75)
             {
                 ball.Position.Y = 74;
+                ball.Movement.X = 0f;
+                ball.Movement.Y = 0f;
 
                 var nearestPlayerFromOppositeTeam =
                     GetNearestPlayerToBall(lastTeam == 1 ? 2 : 1);

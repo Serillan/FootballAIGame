@@ -19,11 +19,10 @@ namespace FootballAIGameServer
     {
         private TcpClient TcpClient { get; set; }
         private NetworkStream NetworkStream { get; set; }
-        private StreamReader NetworkReader { get; set; }
-        private StreamWriter NetworkWriter { get; set; }
         private CancellationTokenSource CancellationTokenSource { get; set; }
 
         public bool IsActive { get; set; }
+        public bool IsInMatch { get; set; }
         public string PlayerName { get; set; }
         public string AiName { get; set; }
 
@@ -34,8 +33,6 @@ namespace FootballAIGameServer
             this.TcpClient = tcpClient;
             this.TcpClient.NoDelay = true;
             this.NetworkStream = tcpClient.GetStream();
-            this.NetworkReader = new StreamReader(NetworkStream);
-            this.NetworkWriter = new StreamWriter(NetworkStream) { AutoFlush = true };
             this.CancellationTokenSource = new CancellationTokenSource();
             IsActive = false;
         }
@@ -43,17 +40,24 @@ namespace FootballAIGameServer
         public int PingTimeAverage()
         {
             long totalTime = 0;
-            var timeout = 330;
+            var timeout = 5000;
             var echoNum = 5;
+            var succNum = 0;
             var pingSender = new Ping();
 
             for (int i = 0; i < echoNum; i++)
             {
                 var reply = pingSender.Send(((IPEndPoint)TcpClient.Client.RemoteEndPoint).Address, timeout);
-                if (reply.Status != IPStatus.BadDestination)
+                if (reply.Status != IPStatus.BadDestination && reply.Status != IPStatus.TimedOut)
+                {
+                    succNum++;
                     totalTime += reply.RoundtripTime;
+                }
+                Console.WriteLine(reply.Status);
             }
-            return (int)(totalTime / echoNum);
+            if (succNum == 0)
+                return 100; // default
+            return (int)(totalTime / succNum);
         }
 
         public async Task SendAsync(string message)
@@ -75,10 +79,10 @@ namespace FootballAIGameServer
             {
                 for (var i = 0; i < 22; i++)
                 {
-                    data[4 + 4*i + 0] = (float)gameState.FootballPlayers[i].Position.X;
-                    data[4 + 4*i + 1] = (float)gameState.FootballPlayers[i].Position.Y;
-                    data[4 + 4*i + 2] = (float)gameState.FootballPlayers[i].Movement.X;
-                    data[4 + 4*i + 3] = (float)gameState.FootballPlayers[i].Movement.Y;
+                    data[4 + 4 * i + 0] = (float)gameState.FootballPlayers[i].Position.X;
+                    data[4 + 4 * i + 1] = (float)gameState.FootballPlayers[i].Position.Y;
+                    data[4 + 4 * i + 2] = (float)gameState.FootballPlayers[i].Movement.X;
+                    data[4 + 4 * i + 3] = (float)gameState.FootballPlayers[i].Movement.Y;
 
                 }
             }
@@ -93,10 +97,10 @@ namespace FootballAIGameServer
                 }
                 for (var i = 11; i < 22; i++)
                 {
-                    data[4 + 4*i + 0] = (float)gameState.FootballPlayers[i - 11].Position.X;
-                    data[4 + 4*i + 1] = (float)gameState.FootballPlayers[i - 11].Position.Y;
-                    data[4 + 4*i + 2] = (float)gameState.FootballPlayers[i - 11].Movement.X;
-                    data[4 + 4*i + 3] = (float)gameState.FootballPlayers[i - 11].Movement.Y;
+                    data[4 + 4 * i + 0] = (float)gameState.FootballPlayers[i - 11].Position.X;
+                    data[4 + 4 * i + 1] = (float)gameState.FootballPlayers[i - 11].Position.Y;
+                    data[4 + 4 * i + 2] = (float)gameState.FootballPlayers[i - 11].Movement.X;
+                    data[4 + 4 * i + 3] = (float)gameState.FootballPlayers[i - 11].Movement.Y;
                 }
             }
 
@@ -181,7 +185,7 @@ namespace FootballAIGameServer
             while (true)
             {
                 await NetworkStream.ReadAsync(buffer, 0, 1);
-                if (buffer[0] == (int) '\n')
+                if (buffer[0] == (int)'\n')
                     break;
                 bytes.Add(buffer[0]);
             }
@@ -194,6 +198,24 @@ namespace FootballAIGameServer
             CancellationTokenSource.Cancel();
         }
 
+        /*
+        public bool IsConnected
+        {
+            get
+            {
+                if (TcpClient?.Client == null || !TcpClient.Client.Connected)
+                    return false;
+
+                var part1 = TcpClient.Client.Poll(1000, SelectMode.SelectRead);
+                var part2 = (TcpClient.Client.Available == 0);
+                if (part1 && part2)
+                    return false;
+                else
+                    return true;
+            }
+        }
+        */
+        
         public bool IsConnected
         {
             get
@@ -231,5 +253,6 @@ namespace FootballAIGameServer
                 }
             }
         }
+        
     }
 }
