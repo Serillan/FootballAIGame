@@ -26,6 +26,7 @@ namespace FootballAIGameServer
         public const double MaxBallSpeed = 15; // [m/s]
         public const double BallDecerelation = 1.5; // [m/s/s]
         public const double MinimalOpponentLengthFromCornerKick = 6; // [m]
+        public const int MaximumNumberOfSameKindErrorInLog = 5;
 
         public ClientConnection Player1Connection { get; set; }
         public ClientConnection Player2Connection { get; set; }
@@ -57,6 +58,10 @@ namespace FootballAIGameServer
                 return $"{minutes}:{seconds}";
             }
         }
+        private int NumberOfAccelerationCorrections1 { get; set; }
+        private int NumberOfAccelerationCorrections2 { get; set; }
+        private int NumberOfSpeedCorrections1 { get; set; }
+        private int NumberOfSpeedCorrections2 { get; set; }
 
         public MatchSimulator(ClientConnection player1Connection, ClientConnection player2Connection)
         {
@@ -122,6 +127,8 @@ namespace FootballAIGameServer
                 Time = DateTime.Now,
                 Player1Ai = Player1Connection.AiName,
                 Player2Ai = Player2Connection.AiName,
+                Player1ErrorLog = "",
+                Player2ErrorLog = "",
                 Goals = ""
             };
 
@@ -224,23 +231,23 @@ namespace FootballAIGameServer
                 if (Message1.IsFaulted || !Player1Connection.IsActive)
                 {
                     Match.Winner = 2;
-                    Match.Player1ErrorLog += "Player AI has disconnected.;";
+                    Match.Player1ErrorLog += $"{CurrentTime} - Player AI has disconnected.;";
                 }
                 if (Message2.IsFaulted || !Player2Connection.IsActive)
                 {
                     Match.Winner = 1;
-                    Match.Player2ErrorLog += "Player AI has disconnected.;";
+                    Match.Player2ErrorLog += $"{CurrentTime} - Player AI has disconnected.;";
                 }
 
                 if (Player1CancelRequested)
                 {
                     Match.Winner = 2;
-                    Match.Player1ErrorLog += "Player has cancelled the match.;";
+                    Match.Player1ErrorLog += $"{CurrentTime} - Player has cancelled the match.;";
                 }
                 if (Player2CancelRequested)
                 {
                     Match.Winner = 1;
-                    Match.Player2ErrorLog += "Player has cancelled the match.;";
+                    Match.Player2ErrorLog += $"{CurrentTime} - Player has cancelled the match.;";
                 }
 
                 var matchByteData = new byte[Data.Count * 4];
@@ -259,8 +266,8 @@ namespace FootballAIGameServer
 
         private async Task ProcessGettingParameters()
         {
-            var getParameters1 = GetPlayersParameters(Player1Connection);
-            var getParameters2 = GetPlayersParameters(Player2Connection);
+            var getParameters1 = GetPlayerParameters(Player1Connection);
+            var getParameters2 = GetPlayerParameters(Player2Connection);
             var result1 = await Task.WhenAny(getParameters1, Task.Delay(500 + Ping1));
             var result2 = await Task.WhenAny(getParameters2, Task.Delay(500 + Ping2));
 
@@ -440,7 +447,7 @@ namespace FootballAIGameServer
                 Data.Add(num);
         }
 
-        private async Task<FootballPlayer[]> GetPlayersParameters(ClientConnection playerConnection)
+        private static async Task<FootballPlayer[]> GetPlayerParameters(ClientConnection playerConnection)
         {
             ClientMessage message;
 
@@ -465,21 +472,22 @@ namespace FootballAIGameServer
                     var player = GameState.FootballPlayers[i];
                     var action = player1Action.PlayerActions[i];
 
-                    var oldSpeed = player.CurrentSpeed;
-
                     var acceleration = new Vector(action.Movement.X - player.Movement.X,
                         action.Movement.Y - player.Movement.Y);
 
-                    var accelerationVectorLength = acceleration.Length * 1000 / StepInterval; // [m/s]
+                    var accelerationValue = acceleration.Length * 1000 / StepInterval; // [m/s]
 
-                    if (accelerationVectorLength > MaxAcceleration)
+                    if (accelerationValue > MaxAcceleration)
                     {
-                        var q = MaxAcceleration / accelerationVectorLength;
+                        var q = MaxAcceleration / accelerationValue;
                         var fixedAcceleration = new Vector(acceleration.X * q, acceleration.Y * q);
 
-                        Match.Player1ErrorLog += "Player acceleration correction.;";
                         action.Movement.X = (float)(player.Movement.X + fixedAcceleration.X);
                         action.Movement.Y = (float)(player.Movement.Y + fixedAcceleration.Y);
+
+                        if (NumberOfAccelerationCorrections1++ < MaximumNumberOfSameKindErrorInLog)
+                            Match.Player1ErrorLog += $"{CurrentTime} - Player{i} acceleration correction.;";
+                        
                     }
 
 
@@ -490,9 +498,11 @@ namespace FootballAIGameServer
                     if (newSpeed > player.MaxSpeed)
                     {
                         // too high speed
-                        Match.Player1ErrorLog += "Player speed correction.";
                         player.Movement.X *= (float)(player.MaxSpeed / newSpeed);
                         player.Movement.Y *= (float)(player.MaxSpeed / newSpeed);
+
+                        if (NumberOfSpeedCorrections1++ < MaximumNumberOfSameKindErrorInLog)
+                            Match.Player1ErrorLog += $"{CurrentTime} - Player{i} speed correction.;";
                     }
 
                     // apply
@@ -514,25 +524,22 @@ namespace FootballAIGameServer
                     var player = GameState.FootballPlayers[i + 11];
                     var action = player2Action.PlayerActions[i];
 
-                    var oldSpeed = player.CurrentSpeed;
+                    var acceleration = new Vector(action.Movement.X - player.Movement.X,
+                        action.Movement.Y - player.Movement.Y);
 
-                    var accelerationX = action.Movement.X - player.Movement.X;
-                    var accelerationY = action.Movement.Y - player.Movement.Y;
+                    var accelerationValue = acceleration.Length * 1000 / StepInterval; // [m/s]
 
-                    var accelerationVectorLength =
-                        Math.Sqrt(Math.Pow(accelerationX, 2) *
-                                  Math.Pow(accelerationY, 2));
-
-
-                    if (accelerationVectorLength > MaxAcceleration)
+                    if (accelerationValue > MaxAcceleration)
                     {
-                        var q = MaxAcceleration / accelerationVectorLength;
-                        var fixedAccelerationX = accelerationX * q;
-                        var fixedAccelerationY = accelerationY * q;
+                        var q = MaxAcceleration / accelerationValue;
+                        var fixedAcceleration = new Vector(acceleration.X * q, acceleration.Y * q);
 
-                        //Match.Player2ErrorLog += "Player acceleration correction.;";
-                        action.Movement.X = (float)(player.Movement.X + fixedAccelerationX);
-                        action.Movement.Y = (float)(player.Movement.Y + fixedAccelerationY);
+                        action.Movement.X = (float)(player.Movement.X + fixedAcceleration.X);
+                        action.Movement.Y = (float)(player.Movement.Y + fixedAcceleration.Y);
+
+                        if (NumberOfAccelerationCorrections2++ < MaximumNumberOfSameKindErrorInLog)
+                            Match.Player2ErrorLog += $"{CurrentTime} - Player{i} acceleration correction.;";
+
                     }
 
 
@@ -542,10 +549,11 @@ namespace FootballAIGameServer
 
                     if (newSpeed > player.MaxSpeed)
                     {
-                        // too high speed
-                        //Match.Player2ErrorLog += "Player speed correction.";
                         player.Movement.X *= (float)(player.MaxSpeed / newSpeed);
                         player.Movement.Y *= (float)(player.MaxSpeed / newSpeed);
+
+                        if (NumberOfSpeedCorrections2++ < MaximumNumberOfSameKindErrorInLog)
+                            Match.Player2ErrorLog += $"{CurrentTime} - Player{i} speed correction.;";
                     }
 
                     // apply
@@ -719,8 +727,6 @@ namespace FootballAIGameServer
                     // push all opponent players aways from the kickoff position
                     PushPlayersFromPosition(lastTeam, ball.Position);
                 }
-
-
             }
 
             // touch lines
@@ -765,7 +771,6 @@ namespace FootballAIGameServer
         private void HandleGoals()
         {
             var lastTeam = 0;
-            var players = GameState.FootballPlayers;
             var ball = GameState.Ball;
 
             for (var i = 0; i < 22; i++)
