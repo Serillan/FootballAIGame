@@ -16,38 +16,110 @@ using FootballAIGameServer.SimulationEntities;
 
 namespace FootballAIGameServer
 {
+    /// <summary>
+    /// Responsible for football match between two AIs simulation.
+    /// </summary>
     public class MatchSimulator
     {
-
+        #region Simulation constants
+       
+        /// <summary>
+        /// The total number of simulation steps.
+        /// </summary>
         public const int NumberOfSimulationSteps = 1500;
+
+        /// <summary>
+        /// The time in milliseconds that player AI has for generating action in one simulation step.
+        /// </summary>
         public const int PlayerTimeForOneStep = 100; // [ms]
+
+        /// <summary>
+        /// The time in milliseconds of one simulation step.
+        /// </summary>
         public const int StepInterval = 200; // [ms]
+
+        /// <summary>
+        /// The maximum allowed acceleration in metres per second squared of football player.
+        /// </summary>
         public const double MaxAcceleration = 3; // [m/s/s]
+
+        /// <summary>
+        /// The maximum ball speed in metres per second.
+        /// </summary>
         public const double MaxBallSpeed = 15; // [m/s]
+
+        /// <summary>
+        /// The ball decerelation in metres per second squared.
+        /// </summary>
         public const double BallDecerelation = 1.5; // [m/s/s]
-        public const double MinimalOpponentLengthFromCornerKick = 6; // [m]
+
+        /// <summary>
+        /// The minimal opponent length from kickoff in metres.
+        /// </summary>
+        public const double MinimalOpponentLengthFromKickoff = 6; // [m]
+
+        /// <summary>
+        /// The maximum number of errors of the same kind in the error log.
+        /// </summary>
         public const int MaximumNumberOfSameKindErrorInLog = 5;
 
-        public ClientConnection Player1Connection { get; set; }
-        public ClientConnection Player2Connection { get; set; }
+#endregion
+
+        /// <summary>
+        /// Gets the first player AI <see cref="ClientConnection"/>.
+        /// </summary>
+        /// <value>
+        /// The player1 ai connection.
+        /// </value>
+        public ClientConnection Player1AiConnection { get; private set; }
+
+        /// <summary>
+        /// Gets the second player AI <see cref="ClientConnection"/>.
+        /// </summary>
+        /// <value>
+        /// The player2 ai connection.
+        /// </value>
+        public ClientConnection Player2AiConnection { get; private set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether first player has requested to cancel the match.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if first player requested to cancel the match; otherwise, <c>false</c>.
+        /// </value>
         public bool Player1CancelRequested { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether second player has requested to cancel the match.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if second player requested to cancel the match; otherwise, <c>false</c>.
+        /// </value>
         public bool Player2CancelRequested { get; set; }
 
+        /// <summary>
+        /// Gets or sets the list of currently running simulations.
+        /// </summary>
+        /// <value>
+        /// The list of currently running simulations.
+        /// </value>
         public static List<MatchSimulator> RunningSimulations { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="System.Random"/> used for generating random numbers.
+        /// </summary>
         public static Random Random { get; set; }
 
         private GameState GameState { get; set; }
         private Match Match { get; set; }
         private int Ping1 { get; set; }
         private int Ping2 { get; set; }
-        private List<float> Data { get; set; }
+        private List<float> MatchData { get; set; }
         private Task<ClientMessage> Message1 { get; set; }
         private Task<ClientMessage> Message2 { get; set; }
         private FootballPlayer LastKicker { get; set; }
         private int WhoIsOnLeft { get; set; }
         private int CurrentStep { get; set; }
-        private int CurrentScore1 { get; set; }
-        private int CurrentScore2 { get; set; }
         private string CurrentTime
         {
             get
@@ -58,15 +130,17 @@ namespace FootballAIGameServer
                 return $"{minutes}:{seconds}";
             }
         }
+        private int CurrentScore1 { get; set; }
+        private int CurrentScore2 { get; set; }
         private int NumberOfAccelerationCorrections1 { get; set; }
         private int NumberOfAccelerationCorrections2 { get; set; }
         private int NumberOfSpeedCorrections1 { get; set; }
         private int NumberOfSpeedCorrections2 { get; set; }
 
-        public MatchSimulator(ClientConnection player1Connection, ClientConnection player2Connection)
+        public MatchSimulator(ClientConnection player1AiConnection, ClientConnection player2AiConnection)
         {
-            this.Player1Connection = player1Connection;
-            this.Player2Connection = player2Connection;
+            this.Player1AiConnection = player1AiConnection;
+            this.Player2AiConnection = player2AiConnection;
         }
 
         public async Task SimulateMatch()
@@ -116,29 +190,29 @@ namespace FootballAIGameServer
                 RunningSimulations = new List<MatchSimulator>();
             RunningSimulations.Add(this);
 
-            Player1Connection.IsInMatch = true;
-            Player2Connection.IsInMatch = true;
+            Player1AiConnection.IsInMatch = true;
+            Player2AiConnection.IsInMatch = true;
 
-            Console.WriteLine($"Starting simulation between {Player1Connection.PlayerName}:{Player1Connection.AiName} " +
-                              $"and {Player2Connection.PlayerName}:{Player2Connection.AiName}");
+            Console.WriteLine($"Starting simulation between {Player1AiConnection.PlayerName}:{Player1AiConnection.AiName} " +
+                              $"and {Player2AiConnection.PlayerName}:{Player2AiConnection.AiName}");
 
             Match = new Match()
             {
                 Time = DateTime.Now,
-                Player1Ai = Player1Connection.AiName,
-                Player2Ai = Player2Connection.AiName,
+                Player1Ai = Player1AiConnection.AiName,
+                Player2Ai = Player2AiConnection.AiName,
                 Player1ErrorLog = "",
                 Player2ErrorLog = "",
                 Goals = ""
             };
 
             // 1. check pings
-            Ping1 = Player1Connection.PingTimeAverage();
-            Ping2 = Player2Connection.PingTimeAverage();
+            Ping1 = Player1AiConnection.PingTimeAverage();
+            Ping2 = Player2AiConnection.PingTimeAverage();
             //Console.WriteLine($"{Player1Connection.PlayerName} ping = {Ping1}\n" +
             //                  $"{Player2Connection.PlayerName} ping = {Ping2}");
 
-            Data = new List<float>();
+            MatchData = new List<float>();
 
             GameState = new GameState
             {
@@ -148,8 +222,8 @@ namespace FootballAIGameServer
 
             await ProcessGettingParameters();
 
-            Message1 = Player1Connection.ReceiveClientMessageAsync();
-            Message2 = Player2Connection.ReceiveClientMessageAsync();
+            Message1 = Player1AiConnection.ReceiveClientMessageAsync();
+            Message2 = Player2AiConnection.ReceiveClientMessageAsync();
         }
 
         private async Task ProcessSimulationStep(int step)
@@ -157,15 +231,15 @@ namespace FootballAIGameServer
             ActionMessage actionMessage1 = null;
             ActionMessage actionMessage2 = null;
 
-            if (Player1CancelRequested || Player2CancelRequested || !Player1Connection.IsActive || !Player2Connection.IsActive)
+            if (Player1CancelRequested || Player2CancelRequested || !Player1AiConnection.IsActive || !Player2AiConnection.IsActive)
                 return;
             try
             {
-                await Player1Connection.SendAsync("GET ACTION");
-                await Player1Connection.SendAsync(GameState, 1);
+                await Player1AiConnection.SendAsync("GET ACTION");
+                await Player1AiConnection.SendAsync(GameState, 1);
 
-                await Player2Connection.SendAsync("GET ACTION");
-                await Player2Connection.SendAsync(GameState, 2);
+                await Player2AiConnection.SendAsync("GET ACTION");
+                await Player2AiConnection.SendAsync(GameState, 2);
 
 
                 var getMessage1Task = Task.WhenAny(Message1, Task.Delay(Ping1 + PlayerTimeForOneStep));
@@ -177,8 +251,8 @@ namespace FootballAIGameServer
 
 
 
-                if (Message1.IsFaulted || !Player1Connection.IsActive || Message2.IsFaulted ||
-                    !Player2Connection.IsActive)
+                if (Message1.IsFaulted || !Player1AiConnection.IsActive || Message2.IsFaulted ||
+                    !Player2AiConnection.IsActive)
                 {
                     return;
                 }
@@ -188,7 +262,7 @@ namespace FootballAIGameServer
                     actionMessage1 = Message1.Result as ActionMessage;
                     if (step < NumberOfSimulationSteps - 1)
                     {
-                        Message1 = Player1Connection.ReceiveClientMessageAsync();
+                        Message1 = Player1AiConnection.ReceiveClientMessageAsync();
                     }
                 }
 
@@ -197,7 +271,7 @@ namespace FootballAIGameServer
                     actionMessage2 = Message2.Result as ActionMessage;
                     if (step < NumberOfSimulationSteps - 1)
                     {
-                        Message2 = Player2Connection.ReceiveClientMessageAsync();
+                        Message2 = Player2AiConnection.ReceiveClientMessageAsync();
                     }
                 }
             }
@@ -214,26 +288,25 @@ namespace FootballAIGameServer
 
         private void ProcessSimulationEnd()
         {
-            Console.WriteLine($"Ending simulation between {Player1Connection.PlayerName}:{Player1Connection.AiName} " +
-                             $"and {Player2Connection.PlayerName}:{Player2Connection.AiName}");
+            Console.WriteLine($"Ending simulation between {Player1AiConnection.PlayerName}:{Player1AiConnection.AiName} " +
+                             $"and {Player2AiConnection.PlayerName}:{Player2AiConnection.AiName}");
             using (var context = new ApplicationDbContext())
             {
-                var player1 = context.Players.SingleOrDefault(p => p.Name == Player1Connection.PlayerName);
-                var player2 = context.Players.SingleOrDefault(p => p.Name == Player2Connection.PlayerName);
+                var player1 = context.Players.SingleOrDefault(p => p.Name == Player1AiConnection.PlayerName);
+                var player2 = context.Players.SingleOrDefault(p => p.Name == Player2AiConnection.PlayerName);
                 player1.PlayerState = PlayerState.Idle;
                 player2.PlayerState = PlayerState.Idle;
-
                 Match.Player1 = player1;
                 Match.Player2 = player2;
                 Match.Score = $"{CurrentScore1}:{CurrentScore2}";
                 Match.Winner = CurrentScore1 > CurrentScore2 ? 1 : CurrentScore1 < CurrentScore2 ? 2 : 0;
 
-                if (Message1.IsFaulted || !Player1Connection.IsActive)
+                if (Message1.IsFaulted || !Player1AiConnection.IsActive)
                 {
                     Match.Winner = 2;
                     Match.Player1ErrorLog += $"{CurrentTime} - Player AI has disconnected.;";
                 }
-                if (Message2.IsFaulted || !Player2Connection.IsActive)
+                if (Message2.IsFaulted || !Player2AiConnection.IsActive)
                 {
                     Match.Winner = 1;
                     Match.Player2ErrorLog += $"{CurrentTime} - Player AI has disconnected.;";
@@ -250,8 +323,8 @@ namespace FootballAIGameServer
                     Match.Player2ErrorLog += $"{CurrentTime} - Player has cancelled the match.;";
                 }
 
-                var matchByteData = new byte[Data.Count * 4];
-                Buffer.BlockCopy(Data.ToArray(), 0, matchByteData, 0, Data.Count * 4);
+                var matchByteData = new byte[MatchData.Count * 4];
+                Buffer.BlockCopy(MatchData.ToArray(), 0, matchByteData, 0, MatchData.Count * 4);
                 Match.MatchData = matchByteData;
 
                 context.Matches.Add(Match);
@@ -259,15 +332,15 @@ namespace FootballAIGameServer
                 context.SaveChanges();
 
                 RunningSimulations.Remove(this);
-                Player1Connection.IsInMatch = false;
-                Player2Connection.IsInMatch = false;
+                Player1AiConnection.IsInMatch = false;
+                Player2AiConnection.IsInMatch = false;
             }
         }
 
         private async Task ProcessGettingParameters()
         {
-            var getParameters1 = GetPlayerParameters(Player1Connection);
-            var getParameters2 = GetPlayerParameters(Player2Connection);
+            var getParameters1 = GetPlayerParameters(Player1AiConnection);
+            var getParameters2 = GetPlayerParameters(Player2AiConnection);
             var result1 = await Task.WhenAny(getParameters1, Task.Delay(500 + Ping1));
             var result2 = await Task.WhenAny(getParameters2, Task.Delay(500 + Ping2));
 
@@ -444,7 +517,7 @@ namespace FootballAIGameServer
             }
 
             foreach (var num in currentStateData)
-                Data.Add(num);
+                MatchData.Add(num);
         }
 
         private static async Task<FootballPlayer[]> GetPlayerParameters(ClientConnection playerConnection)
@@ -513,7 +586,7 @@ namespace FootballAIGameServer
             else
             {
                 // default (nothing for now)
-                Console.WriteLine(Player1Connection.PlayerName + " timeout.");
+                Console.WriteLine(Player1AiConnection.PlayerName + " timeout.");
             }
 
             if (player2Action != null)
@@ -565,7 +638,7 @@ namespace FootballAIGameServer
             else
             {
                 // default (nothing for now)
-                Console.WriteLine(Player2Connection.PlayerName + " timeout.");
+                Console.WriteLine(Player2AiConnection.PlayerName + " timeout.");
             }
         }
 
@@ -780,7 +853,7 @@ namespace FootballAIGameServer
             if (ball.Position.X < 0 && ball.Position.Y < 75f / 2 + 7.32 / 2 && ball.Position.Y > 75f / 2 - 7.32 / 2)
             {
                 var teamNameThatScored =
-                    WhoIsOnLeft == 1 ? Player2Connection.PlayerName : Player1Connection.PlayerName;
+                    WhoIsOnLeft == 1 ? Player2AiConnection.PlayerName : Player1AiConnection.PlayerName;
 
                 if (WhoIsOnLeft == 1)
                 {
@@ -811,7 +884,7 @@ namespace FootballAIGameServer
             else if (ball.Position.X > 110 && ball.Position.Y < 75f / 2 + 7.32 / 2 && ball.Position.Y > 75f / 2 - 7.32 / 2)
             {
                 var teamNameThatScored =
-                    WhoIsOnLeft == 2 ? Player2Connection.PlayerName : Player1Connection.PlayerName;
+                    WhoIsOnLeft == 2 ? Player2AiConnection.PlayerName : Player1AiConnection.PlayerName;
 
                 if (WhoIsOnLeft == 1)
                 {
@@ -912,7 +985,7 @@ namespace FootballAIGameServer
             for (var i = 0; i < 11; i++)
             {
                 var player = GameState.FootballPlayers[teamToBePushedNumber == 1 ? i : i + 11];
-                if (Vector.DistanceBetween(player.Position, position) < MinimalOpponentLengthFromCornerKick)
+                if (Vector.DistanceBetween(player.Position, position) < MinimalOpponentLengthFromKickoff)
                     toBePushedPlayers.Add(player);
             }
 
@@ -922,20 +995,20 @@ namespace FootballAIGameServer
                 var length = vectorToPlayer.Length;
 
                 // apply push
-                vectorToPlayer.X *= MinimalOpponentLengthFromCornerKick/length;
-                vectorToPlayer.Y *= MinimalOpponentLengthFromCornerKick/length;
+                vectorToPlayer.X *= MinimalOpponentLengthFromKickoff/length;
+                vectorToPlayer.Y *= MinimalOpponentLengthFromKickoff/length;
 
                 player.Position.X = position.X + vectorToPlayer.X;
                 player.Position.Y = position.Y + vectorToPlayer.Y;
 
                 if (player.Position.X > 110)
-                    player.Position.X = 110 - MinimalOpponentLengthFromCornerKick;
+                    player.Position.X = 110 - MinimalOpponentLengthFromKickoff;
                 if (player.Position.Y > 75)
-                    player.Position.Y = 75 - MinimalOpponentLengthFromCornerKick;
+                    player.Position.Y = 75 - MinimalOpponentLengthFromKickoff;
                 if (player.Position.X < 0)
-                    player.Position.X = MinimalOpponentLengthFromCornerKick;
+                    player.Position.X = MinimalOpponentLengthFromKickoff;
                 if (player.Position.Y < 0)
-                    player.Position.Y = MinimalOpponentLengthFromCornerKick;
+                    player.Position.Y = MinimalOpponentLengthFromKickoff;
 
 
             }

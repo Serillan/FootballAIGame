@@ -80,9 +80,9 @@ namespace FootballAIGameServer.ApiForWeb
         {
             foreach (var runningSimulation in MatchSimulator.RunningSimulations)
             {
-                if (runningSimulation.Player1Connection.PlayerName == playerName)
+                if (runningSimulation.Player1AiConnection.PlayerName == playerName)
                     runningSimulation.Player1CancelRequested = true;
-                if (runningSimulation.Player2Connection.PlayerName == playerName)
+                if (runningSimulation.Player2AiConnection.PlayerName == playerName)
                     runningSimulation.Player2CancelRequested = true;
             }
         }
