@@ -7,10 +7,25 @@ using FootballAIGameServer.SimulationEntities;
 
 namespace FootballAIGameServer.Messages
 {
+    /// <summary>
+    /// Represents a parameter message received from a client.
+    /// </summary>
+    /// <seealso cref="FootballAIGameServer.Messages.ClientMessage" />
     public class ParametersMessage : ClientMessage
     {
+        /// <summary>
+        /// Gets or sets the players. Players have their parameters set accordingly.
+        /// </summary>
+        /// <value>
+        /// The players.
+        /// </value>
         public FootballPlayer[] Players { get; set; }
 
+        /// <summary>
+        /// Parses the message.
+        /// </summary>
+        /// <param name="data">The binary data.</param>
+        /// <returns></returns>
         public static ParametersMessage ParseMessage(byte[] data)
         {
             var parametersMessage = new ParametersMessage();
@@ -25,7 +40,7 @@ namespace FootballAIGameServer.Messages
                 {
                     Speed = floatData[4*i + 0],
                     Precision = floatData[4*i + 1],
-                    Possesion = floatData[4*i + 2],
+                    Possession = floatData[4*i + 2],
                     KickPower = floatData[4*i + 3]
                 };
             }

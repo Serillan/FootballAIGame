@@ -17,7 +17,7 @@ using FootballAIGameServer.SimulationEntities;
 namespace FootballAIGameServer
 {
     /// <summary>
-    /// Responsible for football match between two AIs simulation.
+    /// Responsible for simulating a football match between two AIs.
     /// </summary>
     public class MatchSimulator
     {
@@ -39,24 +39,24 @@ namespace FootballAIGameServer
         public const int StepInterval = 200; // [ms]
 
         /// <summary>
-        /// The maximum allowed acceleration in metres per second squared of football player.
+        /// The maximum allowed acceleration in meters per second squared of football player.
         /// </summary>
         public const double MaxAcceleration = 3; // [m/s/s]
 
         /// <summary>
-        /// The maximum ball speed in metres per second.
+        /// The maximum ball speed in meters per second.
         /// </summary>
         public const double MaxBallSpeed = 15; // [m/s]
 
         /// <summary>
-        /// The ball decerelation in metres per second squared.
+        /// The ball deceleration in meters per second squared.
         /// </summary>
         public const double BallDecerelation = 1.5; // [m/s/s]
 
         /// <summary>
-        /// The minimal opponent length from kickoff in metres.
+        /// The minimal opponent length from kickoff in meters.
         /// </summary>
-        public const double MinimalOpponentLengthFromKickoff = 6; // [m]
+        public const double MinimalOpponentDirectionFromKickoff = 6; // [m]
 
         /// <summary>
         /// The maximum number of errors of the same kind in the error log.
@@ -69,7 +69,7 @@ namespace FootballAIGameServer
         /// Gets the first player AI <see cref="ClientConnection"/>.
         /// </summary>
         /// <value>
-        /// The player1 ai connection.
+        /// The player1 AI connection.
         /// </value>
         public ClientConnection Player1AiConnection { get; private set; }
 
@@ -77,7 +77,7 @@ namespace FootballAIGameServer
         /// Gets the second player AI <see cref="ClientConnection"/>.
         /// </summary>
         /// <value>
-        /// The player2 ai connection.
+        /// The player2 AI connection.
         /// </value>
         public ClientConnection Player2AiConnection { get; private set; }
 
@@ -137,12 +137,21 @@ namespace FootballAIGameServer
         private int NumberOfSpeedCorrections1 { get; set; }
         private int NumberOfSpeedCorrections2 { get; set; }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MatchSimulator"/> class.
+        /// </summary>
+        /// <param name="player1AiConnection">The player1 AI connection that will play the match.</param>
+        /// <param name="player2AiConnection">The player2 AI connection that will play the match.</param>
         public MatchSimulator(ClientConnection player1AiConnection, ClientConnection player2AiConnection)
         {
             this.Player1AiConnection = player1AiConnection;
             this.Player2AiConnection = player2AiConnection;
         }
 
+        /// <summary>
+        /// Simulates the match.
+        /// </summary>
+        /// <returns>Task that will be completed with simulation.</returns>
         public async Task SimulateMatch()
         {
             await ProcessSimulationStart();
@@ -184,6 +193,11 @@ namespace FootballAIGameServer
             }
         }
 
+        /// <summary>
+        /// Processes the simulation start. New match is initialized. Players parameters
+        /// and ping are set.
+        /// </summary>
+        /// <returns></returns>
         private async Task ProcessSimulationStart()
         {
             if (RunningSimulations == null)
@@ -226,6 +240,12 @@ namespace FootballAIGameServer
             Message2 = Player2AiConnection.ReceiveClientMessageAsync();
         }
 
+        /// <summary>
+        /// Processes the simulation step. Client action are retrieved and the game state is updated
+        /// accordingly.
+        /// </summary>
+        /// <param name="step">The step number.</param>
+        /// <returns></returns>
         private async Task ProcessSimulationStep(int step)
         {
             ActionMessage actionMessage1 = null;
@@ -286,6 +306,9 @@ namespace FootballAIGameServer
             SaveState();
         }
 
+        /// <summary>
+        /// Processes the simulation end. The match is saved to the database.
+        /// </summary>
         private void ProcessSimulationEnd()
         {
             Console.WriteLine($"Ending simulation between {Player1AiConnection.PlayerName}:{Player1AiConnection.AiName} " +
@@ -315,12 +338,22 @@ namespace FootballAIGameServer
                 if (Player1CancelRequested)
                 {
                     Match.Winner = 2;
-                    Match.Player1ErrorLog += $"{CurrentTime} - Player has cancelled the match.;";
+                    Match.Player1ErrorLog += $"{CurrentTime} - Player has canceled the match.;";
                 }
                 if (Player2CancelRequested)
                 {
                     Match.Winner = 1;
-                    Match.Player2ErrorLog += $"{CurrentTime} - Player has cancelled the match.;";
+                    Match.Player2ErrorLog += $"{CurrentTime} - Player has canceled the match.;";
+                }
+
+                switch (Match.Winner)
+                {
+                    case 1:
+                        player1.WonGames++;
+                        break;
+                    case 2:
+                        player2.WonGames++;
+                        break;
                 }
 
                 var matchByteData = new byte[MatchData.Count * 4];
@@ -337,6 +370,10 @@ namespace FootballAIGameServer
             }
         }
 
+        /// <summary>
+        /// Processes getting of the players parameters from both AIs.
+        /// </summary>
+        /// <returns></returns>
         private async Task ProcessGettingParameters()
         {
             var getParameters1 = GetPlayerParameters(Player1AiConnection);
@@ -351,8 +388,8 @@ namespace FootballAIGameServer
                 {
                     var par = getParameters1.Result[i];
                     if (par.Speed <= 0.4001 && par.KickPower <= 0.4001 &&
-                        par.Possesion <= 0.4001 && par.Precision <= 0.4001 &&
-                        par.Speed + par.KickPower + par.Possesion + par.Precision - 1 <= 0.01)
+                        par.Possession <= 0.4001 && par.Precision <= 0.4001 &&
+                        par.Speed + par.KickPower + par.Possession + par.Precision - 1 <= 0.01)
                     {
                         GameState.FootballPlayers[i] = getParameters1.Result[i];
                     }
@@ -362,7 +399,7 @@ namespace FootballAIGameServer
                         {
                             Speed = 0.25f,
                             KickPower = 0.25f,
-                            Possesion = 0.25f,
+                            Possession = 0.25f,
                             Precision = 0.25f
                         };
                     }
@@ -375,7 +412,7 @@ namespace FootballAIGameServer
                     {
                         Speed = 0.25f,
                         KickPower = 0.25f,
-                        Possesion = 0.25f,
+                        Possession = 0.25f,
                         Precision = 0.25f
                     };
             }
@@ -387,8 +424,8 @@ namespace FootballAIGameServer
                 {
                     var par = getParameters2.Result[i];
                     if (par.Speed <= 0.4001 && par.KickPower <= 0.4001 &&
-                        par.Possesion <= 0.4001 && par.Precision <= 0.4001 &&
-                        par.Speed + par.KickPower + par.Possesion + par.Precision - 1 <= 0.01)
+                        par.Possession <= 0.4001 && par.Precision <= 0.4001 &&
+                        par.Speed + par.KickPower + par.Possession + par.Precision - 1 <= 0.01)
                     {
                         GameState.FootballPlayers[i + 11] = getParameters2.Result[i];
                     }
@@ -398,7 +435,7 @@ namespace FootballAIGameServer
                         {
                             Speed = 0.25f,
                             KickPower = 0.25f,
-                            Possesion = 0.25f,
+                            Possession = 0.25f,
                             Precision = 0.25f
                         };
                     }
@@ -411,12 +448,16 @@ namespace FootballAIGameServer
                     {
                         Speed = 0.25f,
                         KickPower = 0.25f,
-                        Possesion = 0.25f,
+                        Possession = 0.25f,
                         Precision = 0.25f
                     };
             }
         }
 
+        /// <summary>
+        /// Sets the starting positions.
+        /// </summary>
+        /// <param name="whoHasBall">The number indicating whether player1 (1) or player2 (2) has the ball.</param>
         private void SetStartingPositions(int whoHasBall)
         {
             var players = GameState.FootballPlayers;
@@ -459,7 +500,7 @@ namespace FootballAIGameServer
                 players[i + 11].Position.Y = players[i].Position.Y;
             }
 
-            // noone is moving
+            // no one is moving
             foreach (var player in players)
                 player.Movement.X = player.Movement.Y = 0;
 
@@ -496,6 +537,11 @@ namespace FootballAIGameServer
             }
         }
 
+        /// <summary>
+        /// Updates the match. Simulates current simulation step with the given players actions.
+        /// </summary>
+        /// <param name="player1Action">The player1 action.</param>
+        /// <param name="player2Action">The player2 action.</param>
         private void UpdateMatch(ActionMessage player1Action, ActionMessage player2Action)
         {
             UpdatePlayers(player1Action, player2Action);
@@ -504,6 +550,9 @@ namespace FootballAIGameServer
             HandleGoals();
         }
 
+        /// <summary>
+        /// Saves the current <see cref="GameState"/> to the <see cref="MatchData"/>.
+        /// </summary>
         private void SaveState()
         {
             var currentStateData = new float[46];
@@ -520,6 +569,11 @@ namespace FootballAIGameServer
                 MatchData.Add(num);
         }
 
+        /// <summary>
+        /// Gets the player parameters from the given AI.
+        /// </summary>
+        /// <param name="playerConnection">The player AI connection.</param>
+        /// <returns>The array of football players with their parameters set accordingly.</returns>
         private static async Task<FootballPlayer[]> GetPlayerParameters(ClientConnection playerConnection)
         {
             ClientMessage message;
@@ -535,6 +589,11 @@ namespace FootballAIGameServer
             return ((ParametersMessage)message).Players;
         }
 
+        /// <summary>
+        /// Updates the players movements according to the given AI actions.
+        /// </summary>
+        /// <param name="player1Action">The player1 AI action.</param>
+        /// <param name="player2Action">The player2 AI action.</param>
         private void UpdatePlayers(ActionMessage player1Action, ActionMessage player2Action)
         {
             if (player1Action != null)
@@ -543,7 +602,7 @@ namespace FootballAIGameServer
                 for (var i = 0; i < 11; i++)
                 {
                     var player = GameState.FootballPlayers[i];
-                    var action = player1Action.PlayerActions[i];
+                    var action = player1Action.PlayersActions[i];
 
                     var acceleration = new Vector(action.Movement.X - player.Movement.X,
                         action.Movement.Y - player.Movement.Y);
@@ -595,7 +654,7 @@ namespace FootballAIGameServer
                 for (var i = 0; i < 11; i++)
                 {
                     var player = GameState.FootballPlayers[i + 11];
-                    var action = player2Action.PlayerActions[i];
+                    var action = player2Action.PlayersActions[i];
 
                     var acceleration = new Vector(action.Movement.X - player.Movement.X,
                         action.Movement.Y - player.Movement.Y);
@@ -642,18 +701,23 @@ namespace FootballAIGameServer
             }
         }
 
+        /// <summary>
+        /// Updates the ball movement according to the given AI actions.
+        /// </summary>
+        /// <param name="player1Action">The player1 AI action.</param>
+        /// <param name="player2Action">The player2 AI action.</param>
         private void UpdateBall(ActionMessage player1Action, ActionMessage player2Action)
         {
             // add kick actions to players
             for (var i = 0; i < 11; i++)
             {
-                GameState.FootballPlayers[i].Kick.X = player1Action?.PlayerActions[i].Kick.X ?? 0;
-                GameState.FootballPlayers[i].Kick.Y = player1Action?.PlayerActions[i].Kick.Y ?? 0;
+                GameState.FootballPlayers[i].Kick.X = player1Action?.PlayersActions[i].Kick.X ?? 0;
+                GameState.FootballPlayers[i].Kick.Y = player1Action?.PlayersActions[i].Kick.Y ?? 0;
             }
             for (var i = 0; i < 11; i++)
             {
-                GameState.FootballPlayers[i + 11].Kick.X = player2Action?.PlayerActions[i].Kick.X ?? 0;
-                GameState.FootballPlayers[i + 11].Kick.Y = player2Action?.PlayerActions[i].Kick.Y ?? 0;
+                GameState.FootballPlayers[i + 11].Kick.X = player2Action?.PlayersActions[i].Kick.X ?? 0;
+                GameState.FootballPlayers[i + 11].Kick.Y = player2Action?.PlayersActions[i].Kick.Y ?? 0;
             }
 
             var playersNearBallKicking = GameState.FootballPlayers.Where(
@@ -666,7 +730,7 @@ namespace FootballAIGameServer
             {
 
                 // check whether the ball was shot or shot on target
-                UpdateStoppedShots(kickWinner);
+                HandleStoppedShots(kickWinner);
 
                 LastKicker = kickWinner;
                 GameState.Ball.Movement.X = kickWinner.Kick.X;
@@ -690,7 +754,7 @@ namespace FootballAIGameServer
                 }
             }
 
-            // ball deceralation
+            // ball deceleration
             var ratio = (GameState.Ball.CurrentSpeed - (BallDecerelation * StepInterval / 1000)) /
                 GameState.Ball.CurrentSpeed;
             if (ratio < 0)
@@ -703,6 +767,9 @@ namespace FootballAIGameServer
             GameState.Ball.Position.Y += GameState.Ball.Movement.Y;
         }
 
+        /// <summary>
+        /// Handles out of play rules simulation.
+        /// </summary>
         private void HandleOuts()
         {
             var lastTeam = 0;
@@ -841,6 +908,9 @@ namespace FootballAIGameServer
 
         }
 
+        /// <summary>
+        /// Handles the goals.
+        /// </summary>
         private void HandleGoals()
         {
             var lastTeam = 0;
@@ -914,14 +984,19 @@ namespace FootballAIGameServer
             }
         }
 
-        private void UpdateStoppedShots(FootballPlayer currentWinner)
+        /// <summary>
+        /// Handles the stopped shots. Updates shots and shots on target statistics
+        /// accordingly.
+        /// </summary>
+        /// <param name="currentKickWinner">The current kick winner.</param>
+        private void HandleStoppedShots(FootballPlayer currentKickWinner)
         {
             var ball = GameState.Ball;
             var currentWinnerTeam = 0;
             var lastWinnerTeam = 0;
             for (var i = 0; i < 11; i++)
             {
-                if (GameState.FootballPlayers[i] == currentWinner)
+                if (GameState.FootballPlayers[i] == currentKickWinner)
                     currentWinnerTeam = i < 11 ? 1 : 2;
                 if (GameState.FootballPlayers[i] == LastKicker)
                     lastWinnerTeam = i < 11 ? 1 : 2;
@@ -978,6 +1053,13 @@ namespace FootballAIGameServer
 
         }
 
+        /// <summary>
+        /// Pushes the players from the given team away from the given <see cref="position"/> in 
+        /// accordance to the <see cref="MinimalOpponentDirectionFromKickoff"/>.
+        /// Used for pushing opponent players from kickoffs.
+        /// </summary>
+        /// <param name="teamToBePushedNumber">The team to be pushed number.</param>
+        /// <param name="position">The position from which the players will be pushed aways.</param>
         private void PushPlayersFromPosition(int teamToBePushedNumber, Vector position)
         {
             var toBePushedPlayers = new List<FootballPlayer>();
@@ -985,7 +1067,7 @@ namespace FootballAIGameServer
             for (var i = 0; i < 11; i++)
             {
                 var player = GameState.FootballPlayers[teamToBePushedNumber == 1 ? i : i + 11];
-                if (Vector.DistanceBetween(player.Position, position) < MinimalOpponentLengthFromKickoff)
+                if (Vector.DistanceBetween(player.Position, position) < MinimalOpponentDirectionFromKickoff)
                     toBePushedPlayers.Add(player);
             }
 
@@ -995,26 +1077,31 @@ namespace FootballAIGameServer
                 var length = vectorToPlayer.Length;
 
                 // apply push
-                vectorToPlayer.X *= MinimalOpponentLengthFromKickoff/length;
-                vectorToPlayer.Y *= MinimalOpponentLengthFromKickoff/length;
+                vectorToPlayer.X *= MinimalOpponentDirectionFromKickoff/length;
+                vectorToPlayer.Y *= MinimalOpponentDirectionFromKickoff/length;
 
                 player.Position.X = position.X + vectorToPlayer.X;
                 player.Position.Y = position.Y + vectorToPlayer.Y;
 
                 if (player.Position.X > 110)
-                    player.Position.X = 110 - MinimalOpponentLengthFromKickoff;
+                    player.Position.X = 110 - MinimalOpponentDirectionFromKickoff;
                 if (player.Position.Y > 75)
-                    player.Position.Y = 75 - MinimalOpponentLengthFromKickoff;
+                    player.Position.Y = 75 - MinimalOpponentDirectionFromKickoff;
                 if (player.Position.X < 0)
-                    player.Position.X = MinimalOpponentLengthFromKickoff;
+                    player.Position.X = MinimalOpponentDirectionFromKickoff;
                 if (player.Position.Y < 0)
-                    player.Position.Y = MinimalOpponentLengthFromKickoff;
+                    player.Position.Y = MinimalOpponentDirectionFromKickoff;
 
 
             }
 
         }
 
+        /// <summary>
+        /// Gets the nearest player to the ball from the given team .
+        /// </summary>
+        /// <param name="fromWhichTeam">Team number.</param>
+        /// <returns>Nearest player to the ball from the given team.</returns>
         private FootballPlayer GetNearestPlayerToBall(int fromWhichTeam)
         {
             FootballPlayer nearestPlayer = null;
@@ -1041,24 +1128,31 @@ namespace FootballAIGameServer
             return nearestPlayer;
         }
 
+        /// <summary>
+        /// Gets the intersection with goal line that ball would have if it wasn't stopped by any player.
+        /// </summary>
+        /// <param name="ball">The ball.</param>
+        /// <param name="whichGoalLine">The number of the goal line.</param>
+        /// <returns>Intersection with the goal line point. Null if there is not such intersection (ball 
+        /// is not moving to the goal line or it is moving too slow).</returns>
         private Vector GetIntersectionWithGoalLine(Ball ball, int whichGoalLine)
         {
-            double t = 0;
+            double ballMovementToIntersectionVectorRatio;
             if (ball.Movement.X == 0)
                 return null;
 
             if (whichGoalLine == 1)
-                t = -ball.Position.X / ball.Movement.X;
+                ballMovementToIntersectionVectorRatio = -ball.Position.X / ball.Movement.X;
             else
-                t = (110 - ball.Position.X) / ball.Movement.X;
+                ballMovementToIntersectionVectorRatio = (110 - ball.Position.X) / ball.Movement.X;
 
-            if (t < 0)
+            if (ballMovementToIntersectionVectorRatio < 0)
                 return null;
 
             var intersection = new Vector
             {
-                X = ball.Position.X + t * ball.Movement.X,
-                Y = ball.Position.Y + t * ball.Movement.Y
+                X = ball.Position.X + ballMovementToIntersectionVectorRatio * ball.Movement.X,
+                Y = ball.Position.Y + ballMovementToIntersectionVectorRatio * ball.Movement.Y
             };
 
             // calculate speed at intersection
@@ -1083,6 +1177,11 @@ namespace FootballAIGameServer
             return intersection;
         }
 
+        /// <summary>
+        /// Gets the kick winner in accordance to the kickers near the ball parameters.
+        /// </summary>
+        /// <param name="kickers">The kickers near the ball.</param>
+        /// <returns>The kick winner.</returns>
         private FootballPlayer GetKickWinner(FootballPlayer[] kickers)
         {
             if (kickers.Length == 0)
@@ -1090,7 +1189,7 @@ namespace FootballAIGameServer
             if (LastKicker != null && kickers.Contains(LastKicker))
             {
                 kickers = kickers.Where(k => k != LastKicker).ToArray();
-                var lastKickerWeight = 1.5 + LastKicker.Possesion;
+                var lastKickerWeight = 1.5 + LastKicker.Possession;
                 var winNumber = Random.NextDouble() * (kickers.Length + lastKickerWeight);
                 winNumber -= lastKickerWeight;
                 if (winNumber < 0)

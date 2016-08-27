@@ -87,7 +87,7 @@ namespace FootballAIGameServer
                             player.ActiveAis = String.Join(";", newAis);
 
                             player.PlayerState = PlayerState.Idle; // todo error message
-                            ConnectionManager.Instance.WantsToPlayConnections.Remove(toBeRemovedConnection);
+                            Instance.WantsToPlayConnections.Remove(toBeRemovedConnection);
 
                             if (player.SelectedAi == toBeRemovedConnection.AiName)
                                 player.SelectedAi = "";
@@ -120,7 +120,7 @@ namespace FootballAIGameServer
                         await connection.SendAsync("CONNECTED");
                         connection.IsActive = true;
                         ActiveConnections.Add(connection);
-                        Console.WriteLine($"Player {connection.PlayerName} with ai {connection.AiName} has log on.");
+                        Console.WriteLine($"Player {connection.PlayerName} with AI {connection.AiName} has log on.");
                         break;
                     }
                 }
@@ -136,7 +136,7 @@ namespace FootballAIGameServer
                     .FirstOrDefaultAsync(p => p.Name == message.PlayerName);
                 if (player == null)
                 {
-                    connection.SendAsync("Invalid Playername");
+                    connection.SendAsync("Invalid player name");
                     return false;
                 }
                 if (player.ActiveAis == null)

@@ -28,9 +28,9 @@ namespace FootballAIGameServer
 
         public ClientConnection(TcpClient tcpClient)
         {
-            this.TcpClient = tcpClient;
-            this.TcpClient.NoDelay = true;
-            this.NetworkStream = tcpClient.GetStream();
+            TcpClient = tcpClient;
+            TcpClient.NoDelay = true;
+            NetworkStream = tcpClient.GetStream();
             IsActive = false;
         }
 
@@ -127,7 +127,7 @@ namespace FootballAIGameServer
 
             while (true) // while correct message is not received
             {
-                //Console.WriteLine($"{PlayerName} - recieving line");
+                //Console.WriteLine($"{PlayerName} - receiving line");
                 var firstLine = await ReadLineAsync();//await NetworkReader.ReadLineAsync();
                 //Console.WriteLine($"{PlayerName} - received line: {firstLine}");
 
@@ -138,7 +138,7 @@ namespace FootballAIGameServer
 
                     var data = new byte[176];
                     await NetworkStream.ReadAsync(data, 0, data.Length);
-                    //Console.WriteLine($"{PlayerName} - recieved action");
+                    //Console.WriteLine($"{PlayerName} - received action");
                     message = ActionMessage.ParseMessage(data);
                     break;
                 }

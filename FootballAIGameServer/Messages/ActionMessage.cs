@@ -8,10 +8,25 @@ using FootballAIGameServer.SimulationEntities;
 
 namespace FootballAIGameServer.Messages
 {
+    /// <summary>
+    /// Represents an action message received from a client.
+    /// </summary>
+    /// <seealso cref="FootballAIGameServer.Messages.ClientMessage" />
     public class ActionMessage : ClientMessage
     {
-        public PlayerAction[] PlayerActions { get; set; }
+        /// <summary>
+        /// Gets or sets the players actions.
+        /// </summary>
+        /// <value>
+        /// The players actions.
+        /// </value>
+        public PlayerAction[] PlayersActions { get; set; }
 
+        /// <summary>
+        /// Parses the message.
+        /// </summary>
+        /// <param name="data">The binary data.</param>
+        /// <returns></returns>
         public static ActionMessage ParseMessage(byte[] data)
         {
             var actionMessage = new ActionMessage();
@@ -28,7 +43,7 @@ namespace FootballAIGameServer.Messages
                     Kick = new Vector(floatData[4*i + 2], floatData[4*i + 3])
                 };
             }
-            actionMessage.PlayerActions = playerActions;
+            actionMessage.PlayersActions = playerActions;
             return actionMessage;
         }
     }
