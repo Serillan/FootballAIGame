@@ -16,7 +16,6 @@ namespace FootballAIGameServer
     /// </summary>
     public class Entry
     {
-
         /// <summary>
         /// The entry point of the application. Starts the <see cref="GameServerService"/> and
         /// start listening on port <see cref="ConnectionManager.GameServerPort"/> for new AI

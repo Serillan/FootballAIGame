@@ -15,17 +15,106 @@ using FootballAIGameServer.SimulationEntities;
 
 namespace FootballAIGameServer
 {
+    /// <summary>
+    /// Responsible for keeping TCP connection to the connected client.
+    /// Provides methods for communicating with the client.
+    /// </summary>
     public class ClientConnection
     {
-        private TcpClient TcpClient { get; set; }
-        private NetworkStream NetworkStream { get; set; }
-        private Task<ClientMessage> CurrentReceiveTask { get; set; }
-
+        /// <summary>
+        /// Gets or sets a value indicating whether the connection is active.
+        /// Connection becomes active when the client successfully logs in.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if the connection is active; otherwise, <c>false</c>.
+        /// </value>
         public bool IsActive { get; set; }
+
+        /// <summary>
+        /// Gets a value indicating whether this instance is connected.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if this instance is connected; otherwise, <c>false</c>.
+        /// </value>
+        public bool IsConnected
+        {
+            get
+            {
+                try
+                {
+                    if (TcpClient?.Client != null && TcpClient.Client.Connected)
+                    {
+                        // Detect if client disconnected
+                        if (!TcpClient.Client.Poll(0, SelectMode.SelectRead)) return true;
+                        var buff = new byte[1];
+                        return TcpClient.Client.Receive(buff, SocketFlags.Peek) != 0;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this instance is in match.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if this instance is in match; otherwise, <c>false</c>.
+        /// </value>
         public bool IsInMatch { get; set; }
+
+        /// <summary>
+        /// Gets or sets the name of the player with which the client has log on.
+        /// </summary>
+        /// <value>
+        /// The name of the player.
+        /// </value>
         public string PlayerName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the name of the AI with which the client has log on.
+        /// </summary>
+        /// <value>
+        /// The name of the AI.
+        /// </value>
         public string AiName { get; set; }
 
+        /// <summary>
+        /// Gets or sets the TCP client associated with the connected client.
+        /// </summary>
+        /// <value>
+        /// The TCP client.
+        /// </value>
+        private TcpClient TcpClient { get; set; }
+
+        /// <summary>
+        /// Gets or sets the network stream associated with the connected client.
+        /// </summary>
+        /// <value>
+        /// The network stream.
+        /// </value>
+        private NetworkStream NetworkStream { get; set; }
+
+        /// <summary>
+        /// Gets or sets the current receive task. There is always one receive task for
+        /// receiving client messages. After the message was received new receive task
+        /// is created when somebody uses <see cref="ReceiveClientMessageAsync"/> method.
+        /// </summary>
+        /// <value>
+        /// The current receive task.
+        /// </value>
+        private Task<ClientMessage> CurrentReceiveTask { get; set; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ClientConnection"/> class.
+        /// </summary>
+        /// <param name="tcpClient">The TCP client connected to the client application.</param>
         public ClientConnection(TcpClient tcpClient)
         {
             TcpClient = tcpClient;
@@ -34,6 +123,12 @@ namespace FootballAIGameServer
             IsActive = false;
         }
 
+        /// <summary>
+        /// Pings the connected client several times and computes average round trip time in milliseconds.
+        /// If client doesn't allow pinging, returns default round trip time.
+        /// </summary>
+        /// <returns>The average round trip time if client allows pings; otherwise returns the default 
+        /// round trip time.</returns>
         public int PingTimeAverage()
         {
             long totalTime = 0;
@@ -56,12 +151,22 @@ namespace FootballAIGameServer
             return (int)(totalTime / succNum);
         }
 
+        /// <summary>
+        /// Sends message to the client asynchronously.
+        /// </summary>
+        /// <param name="message">The message.</param>
         public async Task SendAsync(string message)
         {
             var bytes = Encoding.UTF8.GetBytes(message + "\n");
             await Send(bytes);
         }
 
+        /// <summary>
+        /// Sends the specified game state to the client asynchronously.
+        /// </summary>
+        /// <param name="gameState">State of the game.</param>
+        /// <param name="playerNumber">1 if first 11 players from the given game state are
+        /// client's players; otherwise 2 (seconds half are client's players)</param>
         public async Task SendAsync(GameState gameState, int playerNumber)
         {
             var data = new float[92];
@@ -104,14 +209,22 @@ namespace FootballAIGameServer
             Buffer.BlockCopy(data, 0, byteArray, 0, byteArray.Length);
             var back = new float[92];
             Buffer.BlockCopy(byteArray, 0, back, 0, byteArray.Length);
-            await Send(byteArray);
+            await SendAsync(byteArray);
         }
 
-        public async Task Send(byte[] data)
+        /// <summary>
+        /// Sends the specified data to the client asynchronously.
+        /// </summary>
+        /// <param name="data">The data.</param>
+        public async Task SendAsync(byte[] data)
         {
             await NetworkStream.WriteAsync(data, 0, data.Length);
         }
 
+        /// <summary>
+        /// Receives the client message asynchronously.
+        /// </summary>
+        /// <returns>The next received client message.</returns>
         public async Task<ClientMessage> ReceiveClientMessageAsync()
         {
             if (CurrentReceiveTask == null || CurrentReceiveTask.IsCanceled || CurrentReceiveTask.IsCompleted ||
@@ -121,6 +234,31 @@ namespace FootballAIGameServer
             return await CurrentReceiveTask;
         }
 
+        /// <summary>
+        /// Reads the next line asynchronously.
+        /// </summary>
+        /// <returns>The read line.</returns>
+        public async Task<string> ReadLineAsync()
+        {
+            var bytes = new List<byte>();
+            var buffer = new byte[1];
+
+            while (true)
+            {
+                await NetworkStream.ReadAsync(buffer, 0, 1);
+                if (buffer[0] == (int)'\n')
+                    break;
+                bytes.Add(buffer[0]);
+            }
+
+            return Encoding.UTF8.GetString(bytes.ToArray());
+        }
+
+        /// <summary>
+        /// Receives the client message asynchronously task. There is always only
+        /// one receiving at any moment.
+        /// </summary>
+        /// <returns>The next received client message.</returns>
         private async Task<ClientMessage> ReceiveClientMessageAsyncTask()
         {
             ClientMessage message;
@@ -172,46 +310,7 @@ namespace FootballAIGameServer
             return message;
         }
 
-        public async Task<string> ReadLineAsync()
-        {
-            var bytes = new List<byte>();
-            var buffer = new byte[1];
-
-            while (true)
-            {
-                await NetworkStream.ReadAsync(buffer, 0, 1);
-                if (buffer[0] == (int)'\n')
-                    break;
-                bytes.Add(buffer[0]);
-            }
-
-            return Encoding.UTF8.GetString(bytes.ToArray());
-        }
         
-        public bool IsConnected
-        {
-            get
-            {
-                try
-                {
-                    if (TcpClient?.Client != null && TcpClient.Client.Connected)
-                    {
-                        // Detect if client disconnected
-                        if (!TcpClient.Client.Poll(0, SelectMode.SelectRead)) return true;
-                        var buff = new byte[1];
-                        return TcpClient.Client.Receive(buff, SocketFlags.Peek) != 0;
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                }
-                catch
-                {
-                    return false;
-                }
-            }
-        }
         
     }
 }

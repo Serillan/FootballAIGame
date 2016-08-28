@@ -42,10 +42,10 @@ namespace FootballAIGameServer.Models
         public int MaximumNumberOfPlayers { get; set; }
 
         /// <summary>
-        /// Gets or sets the players.
+        /// Gets or sets the collection of players that are participating in the tournament.
         /// </summary>
         /// <value>
-        /// The players.
+        /// The players participating.
         /// </value>
         public ICollection<Player> Players { get; set; }
 

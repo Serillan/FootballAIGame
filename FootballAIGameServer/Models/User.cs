@@ -17,7 +17,7 @@ namespace FootballAIGameServer.Models
     public class User : IdentityUser
     {
         /// <summary>
-        /// Gets or sets the <see cref="Models.Player"/> class corresponding to this user.
+        /// Gets or sets the <see cref="Models.Player"/> class corresponding to the user.
         /// </summary>
         /// <value>
         /// The player.
