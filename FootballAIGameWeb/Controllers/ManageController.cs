@@ -11,6 +11,10 @@ using FootballAIGameWeb.ViewModels.Manage;
 
 namespace FootballAIGameWeb.Controllers
 {
+    /// <summary>
+    /// The default Asp.NET Identity ManageController class.
+    /// </summary>
+    /// <seealso cref="System.Web.Mvc.Controller" />
     [Authorize]
     public class ManageController : Controller
     {

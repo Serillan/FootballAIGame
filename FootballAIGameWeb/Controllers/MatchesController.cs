@@ -10,19 +10,32 @@ namespace FootballAIGameWeb.Controllers
 {
     public class MatchesController : Controller
     {
+        /// <summary>
+        /// The application database context used for accessing database using entity framework.
+        /// </summary>
         private ApplicationDbContext _context;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MatchesController"/> class.
+        /// </summary>
         public MatchesController()
         {
             _context = new ApplicationDbContext();
         }
 
+        /// <summary>
+        /// Releases unmanaged resources and optionally releases managed resources.
+        /// </summary>
+        /// <param name="disposing">true to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
         protected override void Dispose(bool disposing)
         {
             _context.Dispose();
         }
 
-        // GET: matches
+        /// <summary>
+        /// Returns the matches index view.
+        /// </summary>
+        /// <returns>The index matches view.</returns>
         public ActionResult Index()
         {
             var viewModel = _context.Matches
@@ -33,7 +46,12 @@ namespace FootballAIGameWeb.Controllers
             return View(viewModel);
         }
 
-        // GET: matches/details/id
+        /// <summary>
+        /// Returns the match details view.
+        /// </summary>
+        /// <param name="id">The match identifier.</param>
+        /// <returns>The details view if the match with the specified identifier exists;
+        /// otherwise returns HttpNotFound response.</returns>
         public ActionResult Details(int id)
         {
             var match = _context.Matches
@@ -47,6 +65,12 @@ namespace FootballAIGameWeb.Controllers
             return View("Details", match);
         }
 
+        /// <summary>
+        /// Returns the match errors view.
+        /// </summary>
+        /// <param name="id">The match identifier.</param>
+        /// <returns>The errrs view if the match with the specified identifier exists;
+        /// otherwise returns HttpNotFound response.</returns>
         public ActionResult Errors(int id)
         {
             var match = _context.Matches
@@ -60,6 +84,12 @@ namespace FootballAIGameWeb.Controllers
             return View("Errors", match);
         }
 
+        /// <summary>
+        /// Returns the match watch view.
+        /// </summary>
+        /// <param name="id">The match identifier.</param>
+        /// <returns>The watch view if the match with the specified identifier exists;
+        /// otherwise returns HttpNotFound response.</returns>
         public ActionResult Watch(int id)
         {
             var match = _context.Matches

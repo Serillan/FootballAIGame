@@ -12,8 +12,17 @@ namespace FootballAIGameWeb.Controllers
 {
     public class PlayersController : Controller
     {
+        /// <summary>
+        /// The application database context used for accessing database using entity framework.
+        /// </summary>
         private ApplicationDbContext _context;
 
+        /// <summary>
+        /// Gets the current connected player.
+        /// </summary>
+        /// <value>
+        /// The current player.
+        /// </value>
         private Player CurrentPlayer
         {
             get
@@ -26,17 +35,27 @@ namespace FootballAIGameWeb.Controllers
             }
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PlayersController"/> class.
+        /// </summary>
         public PlayersController()
         {
             _context = new ApplicationDbContext();
         }
 
+        /// <summary>
+        /// Releases unmanaged resources and optionally releases managed resources.
+        /// </summary>
+        /// <param name="disposing">true to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
         protected override void Dispose(bool disposing)
         {
             _context.Dispose();
         }
 
-        // GET: players
+        /// <summary>
+        /// Returns the players index view.
+        /// </summary>
+        /// <returns>The index matches view.</returns>
         public ActionResult Index()
         {
             var viewModel = _context.Players.ToList();
@@ -44,7 +63,12 @@ namespace FootballAIGameWeb.Controllers
             return View(viewModel);
         }
 
-        // GET: players/details/id
+        /// <summary>
+        /// Returns the player details view.
+        /// </summary>
+        /// <param name="id">The player name.</param>
+        /// <returns>The details view if the player with the specified name exists;
+        /// otherwise returns HttpNotFound response.</returns>
         public ActionResult Details(string id)
         {
             var player = _context.Players.SingleOrDefault(p => p.Name == id);

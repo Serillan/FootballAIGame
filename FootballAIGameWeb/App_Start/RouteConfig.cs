@@ -9,6 +9,11 @@ namespace FootballAIGameWeb
 {
     public class RouteConfig
     {
+        /// <summary>
+        /// Registers the routes. Routes are used to determine which action should be called
+        /// when the server receives http request.
+        /// </summary>
+        /// <param name="routes">The routes.</param>
         public static void RegisterRoutes(RouteCollection routes)
         {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");

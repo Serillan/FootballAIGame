@@ -162,7 +162,7 @@
                     .on("click",
                         function () {
                             $("span[data-valmsg-for='OpponentPlayerName']").text("");
-
+                            $("#btn").prop("disabled", true);
                             if (aiMustBeSelected()) {
                                 $.ajax({
                                     url: "/api/game/startrandommatch",
@@ -173,6 +173,7 @@
                                     error: function (xhr, status, error) {
                                         var json = JSON.parse(xhr.responseText);
                                         toastr.error(json.message);
+                                        $("#btn").prop("disabled", false);
                                     }
                                 });
                             }

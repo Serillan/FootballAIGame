@@ -13,6 +13,10 @@ using FootballAIGameWeb.ViewModels.Account;
 
 namespace FootballAIGameWeb.Controllers
 {
+    /// <summary>
+    /// The default Asp.NET Identity AccountController class.
+    /// </summary>
+    /// <seealso cref="System.Web.Mvc.Controller" />
     [Authorize]
     public class AccountController : Controller
     {

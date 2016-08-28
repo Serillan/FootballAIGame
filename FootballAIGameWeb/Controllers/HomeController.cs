@@ -15,8 +15,17 @@ namespace FootballAIGameWeb.Controllers
 {
     public class HomeController : Controller
     {
+        /// <summary>
+        /// The application database context used for accessing database using entity framework.
+        /// </summary>
         private ApplicationDbContext _context;
 
+        /// <summary>
+        /// Gets the current connected player.
+        /// </summary>
+        /// <value>
+        /// The current player.
+        /// </value>
         private Player CurrentPlayer
         {
             get
@@ -29,16 +38,29 @@ namespace FootballAIGameWeb.Controllers
             }
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HomeController"/> class.
+        /// </summary>
         public HomeController()
         {
             _context = new ApplicationDbContext();
         }
 
+        /// <summary>
+        /// Releases unmanaged resources and optionally releases managed resources.
+        /// </summary>
+        /// <param name="disposing">true to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
         protected override void Dispose(bool disposing)
         {
             _context.Dispose();
         }
 
+        /// <summary>
+        /// Returns default index view with last matches and next tournaments if the user is
+        /// not log on. Otherwise returns player home view.
+        /// </summary>
+        /// <returns>Default index view with last matches and next tournaments if the user is
+        /// not log on; otherwise returns player home view.</returns>
         public ActionResult Index()
         {
             if (User?.Identity != null && User.Identity.IsAuthenticated)
@@ -64,6 +86,60 @@ namespace FootballAIGameWeb.Controllers
             return View(viewModel);
         }
 
+        /// <summary>
+        /// Returns view corresponding to the current player state.
+        /// </summary>
+        /// <returns>The view corresponding to the current player state.</returns>
+        private ActionResult PlayerHome()
+        {
+            var player = CurrentPlayer;
+
+            switch (player.PlayerState)
+            {
+                case PlayerState.WaitingForOpponentToAcceptChallenge:
+                    return View("WaitingForOpponentToAcceptChallenge");
+                case PlayerState.LookingForOpponent:
+                    return View("LookingForOpponent");
+                case PlayerState.PlayingMatch:
+                    return View("PlayingMatch");
+            }
+
+            return View("PlayerHome", GetNewPlayerHomeViewModel());
+        }
+
+        /// <summary>
+        /// Returns the about view.
+        /// </summary>
+        /// <returns>The about view.</returns>
+        public ActionResult About()
+        {
+            ViewBag.Message = "Your application description page.";
+
+            return View();
+        }
+
+        /// <summary>
+        /// Returns the how to play view.
+        /// </summary>
+        /// <returns>The how to play view.</returns>
+        public ActionResult HowToPlay()
+        {
+            return View();
+        }
+
+        /// <summary>
+        /// Returns the statistics view.
+        /// </summary>
+        /// <returns>The statistics view.</returns>
+        public ActionResult Statistics()
+        {
+            return View();
+        }
+
+        /// <summary>
+        /// Gets the new player home view model.
+        /// </summary>
+        /// <returns>The new player home view model</returns>
         private PlayerHomeViewModel GetNewPlayerHomeViewModel()
         {
             var player = CurrentPlayer;
@@ -92,38 +168,5 @@ namespace FootballAIGameWeb.Controllers
             return viewModel;
         }
 
-        private ActionResult PlayerHome()
-        {
-            var player = CurrentPlayer;
-
-            switch (player.PlayerState)
-            {
-                case PlayerState.WaitingForOpponentToAcceptChallenge:
-                    return View("WaitingForOpponentToAcceptChallenge");
-                case PlayerState.LookingForOpponent:
-                    return View("LookingForOpponent");
-                case PlayerState.PlayingMatch:
-                    return View("PlayingMatch");
-            }
-
-            return View("PlayerHome", GetNewPlayerHomeViewModel());
-        }
-
-        public ActionResult About()
-        {
-            ViewBag.Message = "Your application description page.";
-
-            return View();
-        }
-
-        public ActionResult HowToPlay()
-        {
-            return View();
-        }
-
-        public ActionResult Statistics()
-        {
-            return View();
-        }
     }
 }

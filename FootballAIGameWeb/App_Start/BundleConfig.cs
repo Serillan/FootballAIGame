@@ -5,7 +5,11 @@ namespace FootballAIGameWeb
 {
     public class BundleConfig
     {
-        // For more information on bundling, visit http://go.microsoft.com/fwlink/?LinkId=301862
+        /// <summary>
+        /// Registers the bundles. Bundling is a feature that combines multiple files into a single file.
+        /// Also it performs a variety of different code optimizations.
+        /// </summary>
+        /// <param name="bundles">The bundles collection.</param>
         public static void RegisterBundles(BundleCollection bundles)
         {
             bundles.Add(new ScriptBundle("~/bundles/libraries").Include(
@@ -25,8 +29,6 @@ namespace FootballAIGameWeb
             bundles.Add(new ScriptBundle("~/bundles/jqueryval").Include(
                         "~/Scripts/jquery.validate*"));
 
-            // Use the development version of Modernizr to develop with and learn from. Then, when you're
-            // ready for production, use the build tool at http://modernizr.com to pick only the tests you need.
             bundles.Add(new ScriptBundle("~/bundles/modernizr").Include(
                         "~/Scripts/modernizr-*"));
 

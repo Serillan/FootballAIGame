@@ -15,9 +15,21 @@ using Microsoft.AspNet.Identity;
 
 namespace FootballAIGameWeb.Controllers.Api
 {
+    /// <summary>
+    /// Web API controller that exposes web services for using the application.
+    /// Web browser uses AJAX calls to call these services in accordance to
+    /// the user actions.
+    /// </summary>
+    /// <seealso cref="System.Web.Http.ApiController" />
+    [Authorize]
     public class GameController : ApiController
     {
 
+        /// <summary>
+        /// Gets the current connected player.
+        /// </summary>
+        /// <param name="context">The application database context.</param>
+        /// <returns>The current connected player.</returns>
         private Player GetCurrentPlayer(ApplicationDbContext context)
         {
             var userId = User.Identity.GetUserId();
@@ -29,6 +41,12 @@ namespace FootballAIGameWeb.Controllers.Api
             return player;
         }
 
+        /// <summary>
+        /// Declines the specified challenge. If the specified challenge doesn't
+        /// exist, it does nothing.
+        /// </summary>
+        /// <param name="id">The challenge identifier.</param>
+        /// <returns>Ok http response.</returns>
         [HttpDelete]
         public IHttpActionResult Decline(string id)
         {
@@ -49,6 +67,10 @@ namespace FootballAIGameWeb.Controllers.Api
             return Ok();
         }
 
+        /// <summary>
+        /// Cancels the current player challenge.
+        /// </summary>
+        /// <returns>Ok http response.</returns>
         [HttpDelete]
         public IHttpActionResult CancelChallenge()
         {
@@ -68,6 +90,11 @@ namespace FootballAIGameWeb.Controllers.Api
             }
         }
 
+        /// <summary>
+        /// Selects the specified AI.
+        /// </summary>
+        /// <param name="id">The AI name.</param>
+        /// <returns>Ok http response.</returns>
         [HttpPut]
         public IHttpActionResult SelectAi(string id)
         {
@@ -83,6 +110,12 @@ namespace FootballAIGameWeb.Controllers.Api
             return Ok();
         }
 
+        /// <summary>
+        /// If the specified AI is not currently selected, select it. Otherwise
+        /// unselect it.
+        /// </summary>
+        /// <param name="id">The AI name.</param>
+        /// <returns>Ok http response.</returns>
         [HttpPut]
         public IHttpActionResult ToggleAi(string id)
         {
@@ -97,6 +130,12 @@ namespace FootballAIGameWeb.Controllers.Api
             return Ok();
         }
 
+        /// <summary>
+        /// Challenges the player.
+        /// </summary>
+        /// <param name="id">The player name.</param>
+        /// <returns>Ok http response if the challenge was succesfully created;
+        /// otherwise returns BadRequest response with a corresponding error message.</returns>
         [HttpPost]
         public IHttpActionResult ChallengePlayer(string id)
         {
@@ -174,6 +213,11 @@ namespace FootballAIGameWeb.Controllers.Api
             }
         }
 
+        /// <summary>
+        /// Starts looking for a random match.
+        /// </summary>
+        /// <returns>Ok http response if looking for random match has succesfully started;
+        /// otherwise returns BadRequest response with a corresponding error message.</returns>
         [HttpPost]
         public IHttpActionResult StartRandomMatch()
         {
@@ -184,7 +228,6 @@ namespace FootballAIGameWeb.Controllers.Api
                 {
                     using (var gameServer = new GameServerService.GameServerServiceClient())
                     {
-
                         player = GetCurrentPlayer(context);
 
                         if (player.PlayerState != PlayerState.Idle)
@@ -208,6 +251,10 @@ namespace FootballAIGameWeb.Controllers.Api
 
         }
 
+        /// <summary>
+        /// Gets the state of the current player.
+        /// </summary>
+        /// <returns>Ok http response with the player state in it's body.</returns>
         [HttpGet]
         public IHttpActionResult GetPlayerState()
         {
@@ -218,6 +265,12 @@ namespace FootballAIGameWeb.Controllers.Api
             }
         }
 
+        /// <summary>
+        /// Gets the current player last match result.
+        /// </summary>
+        /// <returns>The http ok response with the match Id and the result string
+        /// in it's body if the current player has played at least one match; 
+        /// otherwise returns HttpNotFound response. </returns>
         [HttpGet]
         public IHttpActionResult GetLastMatchResult()
         {
@@ -243,6 +296,10 @@ namespace FootballAIGameWeb.Controllers.Api
             }
         }
 
+        /// <summary>
+        /// Gets the names of challengers that are challenging current player.
+        /// </summary>
+        /// <returns>Ok Http response with opponent names in it's body.</returns>
         [HttpGet]
         public IHttpActionResult GetChallengersNames()
         {
@@ -254,7 +311,7 @@ namespace FootballAIGameWeb.Controllers.Api
                     .Include(c => c.ChallengingPlayer)
                     .Include(c => c.ChallengedPlayer)
                     .Where(c => c.ChallengedPlayer.UserId == player.UserId)
-                    .Select(c => c.ChallengingPlayer.Name) // only oppont names
+                    .Select(c => c.ChallengingPlayer.Name) // only names
                     .ToList();
 
 
@@ -262,6 +319,11 @@ namespace FootballAIGameWeb.Controllers.Api
             }
         }
 
+        /// <summary>
+        /// Gets the active AIs names that are connected to the game server
+        /// with the current player name.
+        /// </summary>
+        /// <returns>Ok Http response with player's active AI names in it's body.</returns>
         [HttpGet]
         public IHttpActionResult GetActiveAis()
         {
@@ -273,6 +335,16 @@ namespace FootballAIGameWeb.Controllers.Api
             }
         }
 
+        /// <summary>
+        /// Gets the match data.
+        /// Match data is binary representation of game states from all simulation steps. <para />
+        /// For each step there is a ball position with a movement vector and 22 players positions and movement vectors. <para />
+        /// Everything is encoded as float. So each step takes 23*4 = 92 floats = 368 Bytes
+        /// </summary>
+        /// <param name="id">The match identifier.</param>
+        /// <returns>The http ok response with the match data in binary form in it's body if the match with
+        /// the specified identifier exists; otherwise returns HttpNotFound response. </returns>
+        [AllowAnonymous]
         [HttpGet]
         public IHttpActionResult GetMatchData(int id)
         {
@@ -287,12 +359,16 @@ namespace FootballAIGameWeb.Controllers.Api
                 var result = new HttpResponseMessage(HttpStatusCode.OK);
                 result.Content = new ByteArrayContent(data);
                 result.Content.Headers.ContentType =
-                    new MediaTypeHeaderValue("application/octet-stream");
+                    new MediaTypeHeaderValue("application/octet-stream"); // binary data
 
                 return ResponseMessage(result);
             }
         }
 
+        /// <summary>
+        /// Cancels looking for opponent. Does nothing it the player is not currently looking for opponent.
+        /// </summary>
+        /// <returns>Ok http response.</returns>
         [HttpPut]
         public IHttpActionResult CancelLooking()
         {
@@ -315,6 +391,11 @@ namespace FootballAIGameWeb.Controllers.Api
             }
         }
 
+        /// <summary>
+        /// Cancels the match in which the current player currently is. Does nothing if the player
+        /// is not currently in any match.
+        /// </summary>
+        /// <returns>Ok http response.</returns>
         [HttpPut]
         public IHttpActionResult CancelMatch()
         {
