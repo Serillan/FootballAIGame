@@ -154,6 +154,8 @@ namespace FootballAIGameServer
 
                             if (player.ActiveAis == "")
                                 player.ActiveAis = null;
+
+                            toBeRemovedConnection.Dispose();
                         }
                         context.SaveChanges();
                     }
@@ -227,5 +229,6 @@ namespace FootballAIGameServer
 
             return true;
         }
+
     }
 }

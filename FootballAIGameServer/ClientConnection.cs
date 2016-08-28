@@ -19,7 +19,8 @@ namespace FootballAIGameServer
     /// Responsible for keeping TCP connection to the connected client.
     /// Provides methods for communicating with the client.
     /// </summary>
-    public class ClientConnection
+    /// <seealso cref="System.IDisposable" />
+    public class ClientConnection : IDisposable
     {
         /// <summary>
         /// Gets or sets a value indicating whether the connection is active.
@@ -158,7 +159,7 @@ namespace FootballAIGameServer
         public async Task SendAsync(string message)
         {
             var bytes = Encoding.UTF8.GetBytes(message + "\n");
-            await Send(bytes);
+            await SendAsync(bytes);
         }
 
         /// <summary>
@@ -310,7 +311,12 @@ namespace FootballAIGameServer
             return message;
         }
 
-        
-        
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        public void Dispose()
+        {
+            TcpClient.Close();
+        }
     }
 }
