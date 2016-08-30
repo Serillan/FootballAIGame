@@ -3,6 +3,42 @@
 }
 
 <h2>
-
-
+    How to play
 </h2>
+
+<section>
+    <p>
+        In order to compete against other players you need to have an active TCP Client application
+        that will be connected to the game server and that will
+        be sending AI actions during match simulation to the game server as the response to the received
+        request from the server.
+    </p>
+    <img style="margin: 1em" alt="Client-Server Schema" src="/Content/Images/ClientServerSchema.svg"/>
+    <p>
+        You can have more than one connected AI application. When you choose to play a match you select
+        an AI with which you will play.
+    </p>
+    <p>
+        There are prepared projects that implement the communication with the server
+        in accordance to the protocol, so you can focus just on implementing the AI behavior.
+        They also implement some basic AI behavior (moving and kicking randomly).
+    </p>
+</section>
+
+<section>
+    <h3>
+        Rules of the simulation
+    </h3>
+</section>
+
+
+<section>
+    <h3>Projects</h3>
+    <a href="https://github.com/Serillan/FootballAIGameClient">C# project</a>
+</section>
+<p>
+    In the project you should be concerned about AI class, which has methods that you can modify to customize AI behavior.
+</p>
+
+@section scripts {
+}
