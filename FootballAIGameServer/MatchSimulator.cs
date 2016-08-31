@@ -22,7 +22,7 @@ namespace FootballAIGameServer
     public class MatchSimulator
     {
         #region Simulation constants
-       
+
         /// <summary>
         /// The total number of simulation steps.
         /// </summary>
@@ -63,7 +63,7 @@ namespace FootballAIGameServer
         /// </summary>
         public const int MaximumNumberOfSameKindErrorInLog = 5;
 
-#endregion
+        #endregion
 
         /// <summary>
         /// Gets the first player AI <see cref="ClientConnection"/>.
@@ -158,15 +158,22 @@ namespace FootballAIGameServer
 
             var firstBall = Random.Next(1, 3); // max is excluded
 
-            // first half
             try
             {
+                // first half
                 WhoIsOnLeft = 1;
                 SetStartingPositions(firstBall);
                 SaveState(); // save starting state
 
                 for (var step = 0; step < NumberOfSimulationSteps / 2; step++)
                 {
+                    if (Player1CancelRequested || Player2CancelRequested || !Player1AiConnection.IsActive ||
+                        !Player2AiConnection.IsActive)
+                    {
+                        ProcessSimulationEnd();
+                        return;
+                    }
+
                     CurrentStep = step;
                     await ProcessSimulationStep(step);
                     if (step % 100 == 0)
@@ -178,6 +185,13 @@ namespace FootballAIGameServer
                 SetStartingPositions(firstBall == 1 ? 2 : 1);
                 for (var step = NumberOfSimulationSteps / 2; step < NumberOfSimulationSteps; step++)
                 {
+                    if (Player1CancelRequested || Player2CancelRequested || !Player1AiConnection.IsActive ||
+                        !Player2AiConnection.IsActive)
+                    {
+                        ProcessSimulationEnd();
+                        return;
+                    }
+
                     CurrentStep = step;
                     await ProcessSimulationStep(step);
                     if (step % 100 == 0)
@@ -200,10 +214,6 @@ namespace FootballAIGameServer
         /// <returns></returns>
         private async Task ProcessSimulationStart()
         {
-            if (RunningSimulations == null)
-                RunningSimulations = new List<MatchSimulator>();
-            RunningSimulations.Add(this);
-
             Player1AiConnection.IsInMatch = true;
             Player2AiConnection.IsInMatch = true;
 
@@ -251,8 +261,6 @@ namespace FootballAIGameServer
             ActionMessage actionMessage1 = null;
             ActionMessage actionMessage2 = null;
 
-            if (Player1CancelRequested || Player2CancelRequested || !Player1AiConnection.IsActive || !Player2AiConnection.IsActive)
-                return;
             try
             {
                 await Player1AiConnection.SendAsync("GET ACTION");
@@ -619,7 +627,7 @@ namespace FootballAIGameServer
 
                         if (NumberOfAccelerationCorrections1++ < MaximumNumberOfSameKindErrorInLog)
                             Match.Player1ErrorLog += $"{CurrentTime} - Player{i} acceleration correction.;";
-                        
+
                     }
 
 
@@ -728,7 +736,6 @@ namespace FootballAIGameServer
             // apply kick
             if (kickWinner != null)
             {
-
                 // check whether the ball was shot or shot on target
                 HandleStoppedShots(kickWinner);
 
@@ -737,7 +744,7 @@ namespace FootballAIGameServer
                 GameState.Ball.Movement.Y = kickWinner.Kick.Y;
 
                 // deviation of the kick
-                var angleDevation = (0.4 - kickWinner.Precision) * (Random.NextDouble() * 2 - 1);
+                var angleDevation = 1 / 4f * (0.4 - kickWinner.Precision) * (Random.NextDouble() * 2 - 1);
 
                 // rotation applied (deviation)
                 GameState.Ball.Movement.X = (float)(Math.Cos(angleDevation) * GameState.Ball.Movement.X -
@@ -818,7 +825,7 @@ namespace FootballAIGameServer
                         nearestPlayerFromOppositeTeam.Movement.X = 0;
                         nearestPlayerFromOppositeTeam.Movement.Y = 0;
                         nearestPlayerFromOppositeTeam.Position.X = 110;
-                        nearestPlayerFromOppositeTeam.Position.Y = ball.Position.Y < 75/2f ? 0 : 75;
+                        nearestPlayerFromOppositeTeam.Position.Y = ball.Position.Y < 75 / 2f ? 0 : 75;
 
                     }
                     // push all opponent players aways from the kickoff position
@@ -859,7 +866,7 @@ namespace FootballAIGameServer
                            GetNearestPlayerToBall(lastTeam == 1 ? 2 : 1);
 
                         nearestPlayerFromOppositeTeam.Position.X = 0;
-                        nearestPlayerFromOppositeTeam.Position.Y = ball.Position.Y < 75/2f ? 0 : 75;
+                        nearestPlayerFromOppositeTeam.Position.Y = ball.Position.Y < 75 / 2f ? 0 : 75;
                         nearestPlayerFromOppositeTeam.Movement.X = 0;
                         nearestPlayerFromOppositeTeam.Movement.Y = 0;
 
@@ -1077,8 +1084,8 @@ namespace FootballAIGameServer
                 var length = vectorToPlayer.Length;
 
                 // apply push
-                vectorToPlayer.X *= MinimalOpponentDirectionFromKickoff/length;
-                vectorToPlayer.Y *= MinimalOpponentDirectionFromKickoff/length;
+                vectorToPlayer.X *= MinimalOpponentDirectionFromKickoff / length;
+                vectorToPlayer.Y *= MinimalOpponentDirectionFromKickoff / length;
 
                 player.Position.X = position.X + vectorToPlayer.X;
                 player.Position.Y = position.Y + vectorToPlayer.Y;
@@ -1112,7 +1119,7 @@ namespace FootballAIGameServer
             {
                 nearestPlayer = players[1];
                 for (int i = 2; i < 11; i++)
-                    if (Vector.DistanceBetween(ball.Position, players[i].Position) < 
+                    if (Vector.DistanceBetween(ball.Position, players[i].Position) <
                         Vector.DistanceBetween(ball.Position, nearestPlayer.Position))
                         nearestPlayer = players[i];
             }
@@ -1120,7 +1127,7 @@ namespace FootballAIGameServer
             {
                 nearestPlayer = players[12];
                 for (int i = 13; i < 22; i++)
-                    if (Vector.DistanceBetween(ball.Position, players[i].Position) < 
+                    if (Vector.DistanceBetween(ball.Position, players[i].Position) <
                         Vector.DistanceBetween(ball.Position, nearestPlayer.Position))
                         nearestPlayer = players[i];
             }
@@ -1158,17 +1165,17 @@ namespace FootballAIGameServer
             // calculate speed at intersection
             var distanceFromIntersection =
                 Math.Sqrt(Math.Pow(intersection.X - ball.Position.X, 2) - Math.Pow(intersection.Y - ball.Position.Y, 2));
-            
+
             // at^2 + 2(v_0)t -s = 0, where v_0 = start ball speed, a = acceleration, s = distance, t = time
             // from that equation we calculate t
-            var discriminant = 4*Math.Pow(ball.CurrentSpeed, 2) - 8*BallDecerelation*distanceFromIntersection;
+            var discriminant = 4 * Math.Pow(ball.CurrentSpeed, 2) - 8 * BallDecerelation * distanceFromIntersection;
             if (discriminant < 0)
                 return null; // ball will stop -> no intersection reached
 
-            var time = (ball.CurrentSpeed - Math.Sqrt(discriminant))/BallDecerelation;
+            var time = (ball.CurrentSpeed - Math.Sqrt(discriminant)) / BallDecerelation;
 
             // final speed = v + a * t
-            var speedAtIntersection = ball.CurrentSpeed + BallDecerelation*time;
+            var speedAtIntersection = ball.CurrentSpeed + BallDecerelation * time;
 
             // is speed higher than minimal shot speed (4 for now)
             if (speedAtIntersection <= 4)
@@ -1203,6 +1210,5 @@ namespace FootballAIGameServer
                 return kickers[winNumber];
             }
         }
-
     }
 }

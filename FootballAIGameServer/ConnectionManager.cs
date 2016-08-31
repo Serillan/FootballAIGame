@@ -99,7 +99,10 @@ namespace FootballAIGameServer
             {
                 var client = await Listener.AcceptTcpClientAsync();
                 var connection = new ClientConnection(client);
-                Connections.Add(connection);
+                lock (Connections)
+                {
+                    Connections.Add(connection);
+                }
                 Console.WriteLine("New client connection established.");
                 WaitForLogin(connection);
             }
@@ -147,7 +150,10 @@ namespace FootballAIGameServer
                             player.ActiveAis = String.Join(";", newAis);
 
                             player.PlayerState = PlayerState.Idle; // todo error message
-                            Instance.WantsToPlayConnections.Remove(toBeRemovedConnection);
+                            lock (WantsToPlayConnections)
+                            {
+                                WantsToPlayConnections.Remove(toBeRemovedConnection);
+                            }
 
                             if (player.SelectedAi == toBeRemovedConnection.AiName)
                                 player.SelectedAi = "";
@@ -160,7 +166,10 @@ namespace FootballAIGameServer
                         context.SaveChanges();
                     }
                     Connections.RemoveAll(c => toBeRemovedConnections.Contains(c));
-                    ActiveConnections.RemoveAll(c => c.IsActive == false);
+                    lock (ActiveConnections)
+                    {
+                        ActiveConnections.RemoveAll(c => c.IsActive == false);
+                    }
                 }
             }
         }
@@ -181,11 +190,14 @@ namespace FootballAIGameServer
                 }
                 else
                 {
-                    if (await ProcessLoginMessageAsync((LoginMessage) clientMessage, connection))
+                    if (await ProcessLoginMessageAsync((LoginMessage)clientMessage, connection))
                     {
                         await connection.SendAsync("CONNECTED");
                         connection.IsActive = true;
-                        ActiveConnections.Add(connection);
+                        lock (ActiveConnections)
+                        {
+                            ActiveConnections.Add(connection);
+                        }
                         Console.WriteLine($"Player {connection.PlayerName} with AI {connection.AiName} has log on.");
                         break;
                     }

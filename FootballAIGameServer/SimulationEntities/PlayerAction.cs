@@ -14,7 +14,6 @@ namespace FootballAIGameServer.SimulationEntities
     {
         /// <summary>
         /// Gets or sets the desired movement vector of the player.
-        /// <see cref="MatchSimulator"/> will 
         /// </summary>
         /// <value>
         /// The movement vector.
