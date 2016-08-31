@@ -34,10 +34,10 @@ namespace FootballAIGameWeb.GameServerService {
         System.Threading.Tasks.Task CancelMatchAsync(string playerName);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameServerService/CancelLooking", ReplyAction="http://tempuri.org/IGameServerService/CancelLookingResponse")]
-        void CancelLooking(string playername);
+        void CancelLooking(string playerName);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameServerService/CancelLooking", ReplyAction="http://tempuri.org/IGameServerService/CancelLookingResponse")]
-        System.Threading.Tasks.Task CancelLookingAsync(string playername);
+        System.Threading.Tasks.Task CancelLookingAsync(string playerName);
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
@@ -91,12 +91,12 @@ namespace FootballAIGameWeb.GameServerService {
             return base.Channel.CancelMatchAsync(playerName);
         }
         
-        public void CancelLooking(string playername) {
-            base.Channel.CancelLooking(playername);
+        public void CancelLooking(string playerName) {
+            base.Channel.CancelLooking(playerName);
         }
         
-        public System.Threading.Tasks.Task CancelLookingAsync(string playername) {
-            return base.Channel.CancelLookingAsync(playername);
+        public System.Threading.Tasks.Task CancelLookingAsync(string playerName) {
+            return base.Channel.CancelLookingAsync(playerName);
         }
     }
 }

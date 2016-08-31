@@ -87,7 +87,7 @@ namespace FootballAIGameWeb.Controllers
         }
 
         /// <summary>
-        /// Returns view corresponding to the current player state.
+        /// Returns the view corresponding to the current player state.
         /// </summary>
         /// <returns>The view corresponding to the current player state.</returns>
         private ActionResult PlayerHome()
@@ -108,7 +108,7 @@ namespace FootballAIGameWeb.Controllers
         }
 
         /// <summary>
-        /// Returns the about view.
+        /// Returns about view.
         /// </summary>
         /// <returns>The about view.</returns>
         public ActionResult About()
@@ -119,7 +119,7 @@ namespace FootballAIGameWeb.Controllers
         }
 
         /// <summary>
-        /// Returns the how to play view.
+        /// Returns how to play view.
         /// </summary>
         /// <returns>The how to play view.</returns>
         public ActionResult HowToPlay()
@@ -128,7 +128,7 @@ namespace FootballAIGameWeb.Controllers
         }
 
         /// <summary>
-        /// Returns the protocol view.
+        /// Returns protocol view.
         /// </summary>
         /// <returns>The protocol view.</returns>
         public ActionResult Protocol()
@@ -137,7 +137,7 @@ namespace FootballAIGameWeb.Controllers
         }
 
         /// <summary>
-        /// Returns the rules view.
+        /// Returns restriction view.
         /// </summary>
         /// <returns>The rules view.</returns>
         public ActionResult Restrictions()
@@ -146,7 +146,7 @@ namespace FootballAIGameWeb.Controllers
         }
 
         /// <summary>
-        /// Returns the statistics view.
+        /// Returns statistics view.
         /// </summary>
         /// <returns>The statistics view.</returns>
         public ActionResult Statistics()

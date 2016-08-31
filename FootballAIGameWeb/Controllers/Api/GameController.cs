@@ -9,6 +9,7 @@ using System.Net.Http.Headers;
 using System.ServiceModel;
 using System.Threading;
 using System.Web.Http;
+using System.Web.UI.WebControls;
 using FootballAIGameWeb.GameServerService;
 using FootballAIGameWeb.Models;
 using Microsoft.AspNet.Identity;
@@ -193,8 +194,14 @@ namespace FootballAIGameWeb.Controllers.Api
                     {
                         using (var gameServer = new GameServerService.GameServerServiceClient())
                         {
-                            gameServer.StartGame(player.Name, player.SelectedAi,
+                            var msg = gameServer.StartGame(player.Name, player.SelectedAi,
                                 challengeInDb.ChallengingPlayer.Name, challengeInDb.ChallengingPlayer.SelectedAi);
+
+                            if (msg != "ok")
+                            {
+                                context.SaveChanges();
+                                return BadRequest(msg);
+                            }
                         }
 
                         challengeInDb.ChallengingPlayer.PlayerState = PlayerState.PlayingMatch;
@@ -235,20 +242,25 @@ namespace FootballAIGameWeb.Controllers.Api
 
                         player.PlayerState = PlayerState.LookingForOpponent;
                         context.SaveChanges(); // must be done before calling service!
-                        gameServer.WantsToPlay(player.Name, player.SelectedAi);
+
+                        string msg;
+                        if ((msg = gameServer.WantsToPlay(player.Name, player.SelectedAi)) != "ok")
+                        {
+                            player.PlayerState = PlayerState.Idle;
+                            context.SaveChanges();
+                            return BadRequest(msg);
+                        }
                     }
                 }
-                catch (CommunicationObjectFaultedException)
+                catch (CommunicationObjectFaultedException ex)
                 {
                     player.PlayerState = PlayerState.Idle;
                     context.SaveChanges();
-
                     return BadRequest("Game Server is offline.");
                 }
             }
 
             return Ok();
-
         }
 
         /// <summary>
