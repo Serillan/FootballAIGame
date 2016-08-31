@@ -26,13 +26,6 @@
 </section>
 
 <section>
-    <h3>
-        Rules of the simulation
-    </h3>
-</section>
-
-
-<section>
     <h3>Projects</h3>
     <a href="https://github.com/Serillan/FootballAIGameClient">C# project</a>
 </section>
@@ -40,5 +33,37 @@
     In the project you should be concerned about AI class, which has methods that you can modify to customize AI behavior.
 </p>
 
-@section scripts {
-}
+<section>
+    <h3>
+        The football match overview
+    </h3>
+    <p>
+        The football match in the game has 5 minutes length. Each game step is 200ms long, so the total number of
+        game steps is 1500.
+        Before the match starts, the server will ask clients for the parameters settings for the football players.
+        After the server has received the responses it will start the game simulation.
+        In each game step the server will request action from both AI clients.
+        In the request the server also sends the current game state.
+        Clients have 100ms to send their actions back to the server. If server doesn't receive the
+        actions in time, it uses default behavior for the football team.
+        After the game ends, the players are notified and everyone can see the match in statistics and watch it.
+    </p>
+    <p>
+        The football field is two-dimensional with 110 meters width and 75 meters height.
+        The rules are different than in the real football match. There is no offside rule for
+        now and fouls don't exist. The positions where players are placed during kickoffs, goals or
+        match starts are set by the server.
+    </p>
+</section>
+
+<section>
+    <h3>
+        Details
+    </h3>
+    <a href="Protocol">Communication protocol between game server and AI client</a><br/>
+    <a href="Restrictions">Simulation Restrictions.</a>
+</section>
+
+
+
+

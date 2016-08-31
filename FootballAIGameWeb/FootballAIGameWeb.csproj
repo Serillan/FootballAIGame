@@ -463,7 +463,6 @@
     <Content Include="Content\DataTables\images\sort_desc.png" />
     <Content Include="Content\DataTables\images\sort_desc_disabled.png" />
     <Content Include="Content\DataTables\swf\flashExport.swf" />
-    <Content Include="Content\Images\ClientServerSchema.png" />
     <Content Include="Content\Images\ClientServerSchema.svg" />
     <Content Include="Content\toastr.css" />
     <Content Include="Content\toastr.min.css" />
@@ -637,6 +636,8 @@
     <Content Include="Views\Matches\Details.cshtml" />
     <Content Include="Views\Matches\Watch.cshtml" />
     <Content Include="Views\Matches\Errors.cshtml" />
+    <Content Include="Views\Home\Protocol.cshtml" />
+    <Content Include="Views\Home\Restrictions.cshtml" />
     <None Include="Web.Production.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

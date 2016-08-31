@@ -1,0 +1,86 @@
+﻿@{
+    ViewBag.Title = "Protocol";
+}
+
+<h2>
+    Protocol
+</h2>
+
+<section>
+    <p>If you want to create the AI client application, you need to satisfy this communication protocol.</p>
+    <p>
+        All string messages from the server and string messages that server expects are encoded in UTF-8.
+        Every string message ends with the newline character.
+    </p>
+</section>
+
+<section>
+    <h3>Connecting to the server</h3>
+    <p>
+        The game server is listening on the IP address 13.69.197.216 (gameserver.northeurope.cloudapp.azure.com) on port 50030.
+    </p>
+    <p>
+        You need to connect on the server using TCP.
+        After you are connected you will be regularly receiving <code>keepalive</code> messages,
+        ignore those.
+    </p>
+    <p>
+        You need to log in with the AI.
+        The server expects message in the form: <code>LOGIN UserName AIName</code> on a separate line (ending with the newline character).
+    </p>
+    <p>
+        If your log in is successful you will receive <code>CONNECTED</code> otherwise you will receive the message with a reason why your log in failed.
+    </p>
+
+</section>
+<section>
+    <h3>Match simulation</h3>
+    <h4>Parameters</h4>
+    <p>
+        When your application receives <code>GET PARAMETERS</code>, that means that the new match simulation is starting and that
+        you need to send your football team parameters settings.
+    </p>
+    <p>
+        Your response should be in the following format:
+    <p>
+        <code>
+            PARAMATERS[newLine][player1Speed][player1Precision][player1Possession][player1KickPower][player2Speed]...[player11KickPower]
+        </code>
+    </p>
+    </p>
+    <p>
+        <code>PARAMATERS</code> followed by new line character should be encoded in UTF8.
+        Immediately after it there should be 44 float numbers (4B each) in binary format
+        that describe all team players parameters.
+        The first player is goalkeeper. Next 4 players are defenders, next 4 are midfielders and the last 2 are forwards.
+        That's how they will be placed when the match starts, but except for goalkeeper, they can have any roles in your AI.
+    </p>
+    <h4>Actions</h4>
+    <p>
+        After the parameters have been send there will be regular requests from the server for the action with the current game state in the following format:
+    <p>
+        <code>
+            GET ACTION[newLine][ballPositionX][ballPositionY][ballMovementX][ballMovementY][player1X][player1Y][player1MovementX][player1MovementY][player2X]...[player22MovementY]
+        </code>
+    </p>
+    </p>
+    <p>
+        All position and movement vector coordinates are float numbers in binary format (4B for each).
+        First 11 players are your players and the second half are opponent players.
+    </p>
+    <p>
+        Server expects AI Action response in the following format:
+        <p>
+            <code>
+                ACTION[newLine][player1MovementX][player1MovementY][player1KickX][player1KickY]...[player11KickY]
+            </code>
+        </p>
+    <p>
+        Movement vector of the football player describes the change of player position per one simulation step (200ms).
+        Kick vector describes the movement vector that ball would ideally get if the kick was successful.
+        If the kick is not successful, it's the same case as if the kick hasn't happened.
+        If the kick vectors are (0,0) it means that the player didn't do any kick in current step
+        (to stop the ball player needs to do small kick (0.001, 0.001))
+    </p>
+</section>
+

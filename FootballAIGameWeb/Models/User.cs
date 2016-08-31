@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -16,6 +17,13 @@ namespace FootballAIGameWeb.Models
     /// <seealso cref="Microsoft.AspNet.Identity.EntityFramework.IdentityUser" />
     public class User : IdentityUser
     {
+        /// <summary>
+        /// Gets or sets user name.
+        /// </summary>
+        [Required]
+        [RegularExpression(@"^[^\s]+$", ErrorMessage = "Space is not allowed in User Name.")]
+        public override string UserName { get; set; }
+
         /// <summary>
         /// Gets or sets the <see cref="Models.Player"/> class corresponding to the user.
         /// </summary>

@@ -128,6 +128,24 @@ namespace FootballAIGameWeb.Controllers
         }
 
         /// <summary>
+        /// Returns the protocol view.
+        /// </summary>
+        /// <returns>The protocol view.</returns>
+        public ActionResult Protocol()
+        {
+            return View();
+        }
+
+        /// <summary>
+        /// Returns the rules view.
+        /// </summary>
+        /// <returns>The rules view.</returns>
+        public ActionResult Restrictions()
+        {
+            return View();
+        }
+
+        /// <summary>
         /// Returns the statistics view.
         /// </summary>
         /// <returns>The statistics view.</returns>
