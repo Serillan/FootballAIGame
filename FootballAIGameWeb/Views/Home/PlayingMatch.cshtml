@@ -7,6 +7,10 @@
 <div class="container text-center" style="margin-top: 4em;">
     <h2 id="heading" style="margin-bottom: 0em">Game is being simulated.</h2>
     <h2 id="dots">&nbsp;</h2>
+    <div class="progress">
+        <div id="progress" class="progress-bar" role="progressbar" style="width: 0">
+        </div>
+    </div>
     <button id="btn" style="margin-top: 2em" class="btn btn-danger">Cancel</button>
 </div>
 
@@ -63,16 +67,23 @@
                         }
                     }
                 });
-
-                $("#btn").click(function() {
-                    $.ajax({
-                        url: "/api/game/cancelmatch",
-                        method: "put"
-                    });
-                    clearInterval(anim);
-                    $("#btn").prop("disabled", true);
-                });
+                $.ajax({
+                    url: "/api/game/getmatchstep",
+                    success: function(response) {
+                        var percentage = Math.round(response / 1500 * 100);
+                        $("#progress").css("width", percentage + "%");
+                    }
+            });
             }
+            
+            $("#btn").click(function() {
+                $.ajax({
+                    url: "/api/game/cancelmatch",
+                    method: "put"
+                });
+                clearInterval(anim);
+                $("#btn").prop("disabled", true);
+            });
         });
     </script>
 }

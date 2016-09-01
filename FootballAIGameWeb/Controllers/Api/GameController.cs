@@ -432,5 +432,25 @@ namespace FootballAIGameWeb.Controllers.Api
                 return Ok();
             }
         }
+
+        [HttpGet]
+        public IHttpActionResult GetMatchStep()
+        {
+            using (var context = new ApplicationDbContext())
+            {
+                var currentPlayer = GetCurrentPlayer(context);
+                try
+                {
+                    using (var gameServer = new GameServerService.GameServerServiceClient())
+                    {
+                        return Ok(gameServer.GetCurrentMatchStep(currentPlayer.Name));
+                    }
+                }
+                catch (CommunicationObjectFaultedException)
+                {
+                    return BadRequest("Game Server is offline.");
+                }
+            }
+        }
     }
 }

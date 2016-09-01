@@ -38,6 +38,12 @@
   <wsdl:message name="IGameServerService_CancelLooking_OutputMessage">
     <wsdl:part name="parameters" element="tns:CancelLookingResponse" />
   </wsdl:message>
+  <wsdl:message name="IGameServerService_GetCurrentMatchStep_InputMessage">
+    <wsdl:part name="parameters" element="tns:GetCurrentMatchStep" />
+  </wsdl:message>
+  <wsdl:message name="IGameServerService_GetCurrentMatchStep_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GetCurrentMatchStepResponse" />
+  </wsdl:message>
   <wsdl:portType name="IGameServerService">
     <wsdl:operation name="WantsToPlay">
       <wsdl:input wsaw:Action="http://tempuri.org/IGameServerService/WantsToPlay" message="tns:IGameServerService_WantsToPlay_InputMessage" />
@@ -54,6 +60,10 @@
     <wsdl:operation name="CancelLooking">
       <wsdl:input wsaw:Action="http://tempuri.org/IGameServerService/CancelLooking" message="tns:IGameServerService_CancelLooking_InputMessage" />
       <wsdl:output wsaw:Action="http://tempuri.org/IGameServerService/CancelLookingResponse" message="tns:IGameServerService_CancelLooking_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="GetCurrentMatchStep">
+      <wsdl:input wsaw:Action="http://tempuri.org/IGameServerService/GetCurrentMatchStep" message="tns:IGameServerService_GetCurrentMatchStep_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IGameServerService/GetCurrentMatchStepResponse" message="tns:IGameServerService_GetCurrentMatchStep_OutputMessage" />
     </wsdl:operation>
   </wsdl:portType>
   <wsdl:binding name="NetTcpBinding_IGameServerService" type="tns:IGameServerService">
@@ -88,6 +98,15 @@
     </wsdl:operation>
     <wsdl:operation name="CancelLooking">
       <soap12:operation soapAction="http://tempuri.org/IGameServerService/CancelLooking" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetCurrentMatchStep">
+      <soap12:operation soapAction="http://tempuri.org/IGameServerService/GetCurrentMatchStep" style="document" />
       <wsdl:input>
         <soap12:body use="literal" />
       </wsdl:input>

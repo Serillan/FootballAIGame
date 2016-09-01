@@ -38,6 +38,12 @@ namespace FootballAIGameWeb.GameServerService {
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameServerService/CancelLooking", ReplyAction="http://tempuri.org/IGameServerService/CancelLookingResponse")]
         System.Threading.Tasks.Task CancelLookingAsync(string playerName);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameServerService/GetCurrentMatchStep", ReplyAction="http://tempuri.org/IGameServerService/GetCurrentMatchStepResponse")]
+        int GetCurrentMatchStep(string playerName);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameServerService/GetCurrentMatchStep", ReplyAction="http://tempuri.org/IGameServerService/GetCurrentMatchStepResponse")]
+        System.Threading.Tasks.Task<int> GetCurrentMatchStepAsync(string playerName);
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
@@ -97,6 +103,14 @@ namespace FootballAIGameWeb.GameServerService {
         
         public System.Threading.Tasks.Task CancelLookingAsync(string playerName) {
             return base.Channel.CancelLookingAsync(playerName);
+        }
+        
+        public int GetCurrentMatchStep(string playerName) {
+            return base.Channel.GetCurrentMatchStep(playerName);
+        }
+        
+        public System.Threading.Tasks.Task<int> GetCurrentMatchStepAsync(string playerName) {
+            return base.Channel.GetCurrentMatchStepAsync(playerName);
         }
     }
 }
