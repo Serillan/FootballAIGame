@@ -168,6 +168,7 @@ namespace FootballAIGameServer
         /// <param name="gameState">State of the game.</param>
         /// <param name="playerNumber">1 if first 11 players from the given game state are
         /// client's players; otherwise 2 (seconds half are client's players)</param>
+        /// <returns></returns>
         public async Task SendAsync(GameState gameState, int playerNumber)
         {
             var data = new float[92];
@@ -206,10 +207,11 @@ namespace FootballAIGameServer
                 }
             }
 
-            var byteArray = new byte[data.Length * 4];
-            Buffer.BlockCopy(data, 0, byteArray, 0, byteArray.Length);
-            var back = new float[92];
-            Buffer.BlockCopy(byteArray, 0, back, 0, byteArray.Length);
+            var byteArray = new byte[data.Length * 4 + 4];
+            var numArray = new int[1] {gameState.Step};
+
+            Buffer.BlockCopy(numArray, 0, byteArray, 0, 4);
+            Buffer.BlockCopy(data, 0, byteArray, 4, data.Length * 4);
             await SendAsync(byteArray);
         }
 
@@ -275,7 +277,7 @@ namespace FootballAIGameServer
                     if (firstLine != "ACTION")
                         Console.WriteLine("line ending with action");
 
-                    var data = new byte[176];
+                    var data = new byte[180];
                     await NetworkStream.ReadAsync(data, 0, data.Length);
                     //Console.WriteLine($"{PlayerName} - received action");
                     message = ActionMessage.ParseMessage(data);
@@ -317,6 +319,19 @@ namespace FootballAIGameServer
         public void Dispose()
         {
             TcpClient.Close();
+        }
+
+        public async Task<ClientMessage> ReceiveActionMessageAsync(int step)
+        {
+            while (true)
+            {
+                var message = await ReceiveClientMessageAsync();
+                var actionMessage = message as ActionMessage;
+                if (actionMessage?.Step == step)
+                    return actionMessage;
+                else if (actionMessage?.Step > step)
+                    return null;
+            }
         }
     }
 }

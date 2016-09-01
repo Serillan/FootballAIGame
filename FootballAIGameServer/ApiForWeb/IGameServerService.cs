@@ -46,5 +46,12 @@ namespace FootballAIGameServer.ApiForWeb
         /// <param name="playerName">The player name.</param>
         [OperationContract]
         void CancelLooking(string playerName);
+
+        /// <summary>
+        /// Gets the current simulation step of the match in which the specified player currently is.
+        /// </summary>
+        /// <param name="playerName">Name of the player.</param>
+        [OperationContract]
+        int GetCurrentMatchStep(string playerName);
     }
 }

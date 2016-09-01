@@ -82,6 +82,14 @@ namespace FootballAIGameServer
         public ClientConnection Player2AiConnection { get; private set; }
 
         /// <summary>
+        /// Gets or sets the current simulation step.
+        /// </summary>
+        /// <value>
+        /// The current simulation step.
+        /// </value>
+        public int CurrentStep { get; set; }
+
+        /// <summary>
         /// Gets or sets a value indicating whether first player has requested to cancel the match.
         /// </summary>
         /// <value>
@@ -119,7 +127,7 @@ namespace FootballAIGameServer
         private Task<ClientMessage> Message2 { get; set; }
         private FootballPlayer LastKicker { get; set; }
         private int WhoIsOnLeft { get; set; }
-        private int CurrentStep { get; set; }
+        
         private string CurrentTime
         {
             get
@@ -260,6 +268,7 @@ namespace FootballAIGameServer
         {
             ActionMessage actionMessage1 = null;
             ActionMessage actionMessage2 = null;
+            GameState.Step = step;
 
             try
             {
@@ -269,15 +278,14 @@ namespace FootballAIGameServer
                 await Player2AiConnection.SendAsync("GET ACTION");
                 await Player2AiConnection.SendAsync(GameState, 2);
 
+                var receiveActionMessage1 = Player1AiConnection.ReceiveActionMessageAsync(step);
+                var receiveActionMessage2 = Player2AiConnection.ReceiveActionMessageAsync(step);
 
-                var getMessage1Task = Task.WhenAny(Message1, Task.Delay(Ping1 + PlayerTimeForOneStep));
-                var getMessage2Task = Task.WhenAny(Message2, Task.Delay(Ping2 + PlayerTimeForOneStep));
+                var getMessage1Task = Task.WhenAny(receiveActionMessage1, Task.Delay(Ping1 + PlayerTimeForOneStep));
+                var getMessage2Task = Task.WhenAny(receiveActionMessage2, Task.Delay(Ping2 + PlayerTimeForOneStep));
 
                 var getMessage1Result = await getMessage1Task;
                 var getMessage2Result = await getMessage2Task;
-
-
-
 
                 if (Message1.IsFaulted || !Player1AiConnection.IsActive || Message2.IsFaulted ||
                     !Player2AiConnection.IsActive)
@@ -285,7 +293,7 @@ namespace FootballAIGameServer
                     return;
                 }
 
-                if (getMessage1Result == Message1)
+                if (getMessage1Result == receiveActionMessage1 && !receiveActionMessage1.IsFaulted)
                 {
                     actionMessage1 = Message1.Result as ActionMessage;
                     if (step < NumberOfSimulationSteps - 1)
@@ -294,7 +302,7 @@ namespace FootballAIGameServer
                     }
                 }
 
-                if (getMessage2Result == Message2 && !Message2.IsFaulted)
+                if (getMessage2Result == receiveActionMessage2 && !receiveActionMessage2.IsFaulted)
                 {
                     actionMessage2 = Message2.Result as ActionMessage;
                     if (step < NumberOfSimulationSteps - 1)

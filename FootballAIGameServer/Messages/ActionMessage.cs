@@ -23,6 +23,11 @@ namespace FootballAIGameServer.Messages
         public PlayerAction[] PlayersActions { get; set; }
 
         /// <summary>
+        /// Gets or sets the simulation step of this action.
+        /// </summary>
+        public int Step { get; set; }
+
+        /// <summary>
         /// Parses the message.
         /// </summary>
         /// <param name="data">The binary data.</param>
@@ -31,8 +36,11 @@ namespace FootballAIGameServer.Messages
         {
             var actionMessage = new ActionMessage();
 
-            var floatData = new float[data.Length/4];
-            Buffer.BlockCopy(data, 0, floatData, 0, data.Length);
+            var intData = new int[1];
+            var floatData = new float[(data.Length-4)/4];
+            
+            Buffer.BlockCopy(data, 0, intData, 0, 4);
+            Buffer.BlockCopy(data, 4, floatData, 0, data.Length - 4);
 
             var playerActions = new PlayerAction[11];
             for (var i = 0; i < 11; i++)
@@ -44,6 +52,7 @@ namespace FootballAIGameServer.Messages
                 };
             }
             actionMessage.PlayersActions = playerActions;
+            actionMessage.Step = intData[0];
             return actionMessage;
         }
     }

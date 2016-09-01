@@ -91,6 +91,9 @@ namespace FootballAIGameServer.ApiForWeb
                 if (connection1 == null || connection2 == null)
                     return "AI is no longer active.";
 
+                if (connection1.IsInMatch || connection2.IsInMatch)
+                    return "Player is already in a match";
+
                 if (userName1 == userName2)
                     Console.WriteLine("User cannot challenge himself.");
 
@@ -137,6 +140,21 @@ namespace FootballAIGameServer.ApiForWeb
             {
                 ConnectionManager.Instance.WantsToPlayConnections.RemoveAll(p => p.PlayerName == playerName);
             }
+        }
+
+        /// <summary>
+        /// Gets the current simulation step of the match in which the specified player currently is.
+        /// </summary>
+        /// <param name="playerName">Name of the player.</param>
+        /// <returns></returns>
+        public int GetCurrentMatchStep(string playerName)
+        {
+            var match = MatchSimulator.RunningSimulations
+                .FirstOrDefault(m => m.Player1AiConnection.PlayerName == playerName ||
+                                     m.Player2AiConnection.PlayerName == playerName);
+            if (match == null)
+                return 1500;
+            return match.CurrentStep;
         }
     }
 }

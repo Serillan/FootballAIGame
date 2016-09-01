@@ -28,5 +28,10 @@ namespace FootballAIGameServer.SimulationEntities
         /// The ball.
         /// </value>
         public Ball Ball { get; set; }
+
+        /// <summary>
+        /// Gets or sets the simulation step number from which this instance is.
+        /// </summary>
+        public int Step { get; set; }
     }
 }

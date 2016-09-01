@@ -149,14 +149,16 @@ namespace FootballAIGameServer
                             var newAis = player.ActiveAis.Split(';').Where(s => s != toBeRemovedConnection.AiName);
                             player.ActiveAis = String.Join(";", newAis);
 
-                            player.PlayerState = PlayerState.Idle; // todo error message
                             lock (WantsToPlayConnections)
                             {
                                 WantsToPlayConnections.Remove(toBeRemovedConnection);
                             }
 
                             if (player.SelectedAi == toBeRemovedConnection.AiName)
+                            {
                                 player.SelectedAi = "";
+                                player.PlayerState = PlayerState.Idle; // todo error message
+                            }
 
                             if (player.ActiveAis == "")
                                 player.ActiveAis = null;
