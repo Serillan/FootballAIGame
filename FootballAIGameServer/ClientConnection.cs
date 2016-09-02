@@ -321,7 +321,12 @@ namespace FootballAIGameServer
             TcpClient.Close();
         }
 
-        public async Task<ClientMessage> ReceiveActionMessageAsync(int step)
+        /// <summary>
+        /// Receives the action message asynchronously.
+        /// </summary>
+        /// <param name="step">The expected simulation step of the action message.</param>
+        /// <returns>The next received action client message with the specified step.</returns>
+        public async Task<ActionMessage> ReceiveActionMessageAsync(int step)
         {
             while (true)
             {

@@ -128,10 +128,12 @@ namespace FootballAIGameServer
                     {
                         if (!clientConnection.IsConnected)
                         {
+                            if (clientConnection.IsActive)
+                                Console.WriteLine($"Player {clientConnection.PlayerName} with AI " +
+                                              $"{clientConnection.AiName} has disconnected.");
                             clientConnection.IsActive = false;
                             toBeRemovedConnections.Add(clientConnection);
-                            Console.WriteLine($"Player {clientConnection.PlayerName} with AI " +
-                                              $"{clientConnection.AiName} has disconnected.");
+                            
                         }
                         else if (!clientConnection.IsInMatch && clientConnection.IsActive)
                         {
@@ -146,22 +148,26 @@ namespace FootballAIGameServer
                         {
                             var player =
                                 context.Players.SingleOrDefault(p => p.Name == toBeRemovedConnection.PlayerName);
-                            var newAis = player.ActiveAis.Split(';').Where(s => s != toBeRemovedConnection.AiName);
-                            player.ActiveAis = String.Join(";", newAis);
 
-                            lock (WantsToPlayConnections)
+                            if (player != null)
                             {
-                                WantsToPlayConnections.Remove(toBeRemovedConnection);
-                            }
+                                var newAis = player.ActiveAis.Split(';').Where(s => s != toBeRemovedConnection.AiName);
+                                player.ActiveAis = string.Join(";", newAis);
 
-                            if (player.SelectedAi == toBeRemovedConnection.AiName)
-                            {
-                                player.SelectedAi = "";
-                                player.PlayerState = PlayerState.Idle; // todo error message
-                            }
+                                lock (WantsToPlayConnections)
+                                {
+                                    WantsToPlayConnections.Remove(toBeRemovedConnection);
+                                }
 
-                            if (player.ActiveAis == "")
-                                player.ActiveAis = null;
+                                if (player.SelectedAi == toBeRemovedConnection.AiName)
+                                {
+                                    player.SelectedAi = "";
+                                    player.PlayerState = PlayerState.Idle; // todo error message
+                                }
+
+                                if (player.ActiveAis == "")
+                                    player.ActiveAis = null;
+                            }
 
                             toBeRemovedConnection.Dispose();
                         }
