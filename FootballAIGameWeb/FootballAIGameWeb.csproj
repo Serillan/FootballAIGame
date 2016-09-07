@@ -188,6 +188,7 @@
     <Compile Include="Controllers\ManageController.cs" />
     <Compile Include="Controllers\MatchesController.cs" />
     <Compile Include="Controllers\PlayersController.cs" />
+    <Compile Include="Controllers\ProjectsController.cs" />
     <Compile Include="Controllers\TournamentsController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -479,6 +480,7 @@
     <Content Include="Content\toastr.scss" />
     <Content Include="Content\toastr.less" />
     <None Include="Properties\PublishProfiles\footballaigame - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\footballaigame.pubxml" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\CustomScripts\clickable-row.js" />
     <Content Include="Scripts\CustomScripts\initialization.js" />
@@ -638,6 +640,7 @@
     <Content Include="Views\Matches\Errors.cshtml" />
     <Content Include="Views\Home\Protocol.cshtml" />
     <Content Include="Views\Home\Restrictions.cshtml" />
+    <Content Include="Views\Projects\CSharp.cshtml" />
     <None Include="Web.Production.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
