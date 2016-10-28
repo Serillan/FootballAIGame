@@ -277,12 +277,21 @@
     <Compile Include="Migrations\201608272159364_RemovePlayerIdFromUser.Designer.cs">
       <DependentUpon>201608272159364_RemovePlayerIdFromUser.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201610281948143_AddTournamentPlayerEntity.cs" />
+    <Compile Include="Migrations\201610281948143_AddTournamentPlayerEntity.Designer.cs">
+      <DependentUpon>201610281948143_AddTournamentPlayerEntity.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201610282017355_AddNewTournamentProperties.cs" />
+    <Compile Include="Migrations\201610282017355_AddNewTournamentProperties.Designer.cs">
+      <DependentUpon>201610282017355_AddNewTournamentProperties.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\ApplicationDbContext.cs" />
     <Compile Include="Models\Challenge.cs" />
     <Compile Include="Models\Match.cs" />
     <Compile Include="Models\Player.cs" />
     <Compile Include="Models\Tournament.cs" />
+    <Compile Include="Models\TournamentPlayer.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Service References\GameServerService\Reference.cs">
@@ -719,6 +728,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201608272159364_RemovePlayerIdFromUser.resx">
       <DependentUpon>201608272159364_RemovePlayerIdFromUser.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201610281948143_AddTournamentPlayerEntity.resx">
+      <DependentUpon>201610281948143_AddTournamentPlayerEntity.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201610282017355_AddNewTournamentProperties.resx">
+      <DependentUpon>201610282017355_AddNewTournamentProperties.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

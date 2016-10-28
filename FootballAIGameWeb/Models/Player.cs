@@ -33,12 +33,12 @@ namespace FootballAIGameWeb.Models
         public string Name { get; set; }
 
         /// <summary>
-        /// Gets or sets the tournaments in which the player has participated.
+        /// Gets or sets the tournaments in which the player has participated. // TODO change
         /// </summary>
         /// <value>
         /// The tournaments in which the player has participated.
         /// </value>
-        public ICollection<Tournament> Tournaments { get; set; }
+        public ICollection<TournamentPlayer> Tournaments { get; set; }
 
         /// <summary>
         /// Gets or sets the AIs applications connected to the game server associated with the player. <para />
@@ -65,6 +65,7 @@ namespace FootballAIGameWeb.Models
         /// The state of the player.
         /// </value>
         /// <seealso cref="PlayerState"/>
+        [Required]
         public PlayerState PlayerState { get; set; }
 
         /// <summary>
@@ -96,7 +97,7 @@ namespace FootballAIGameWeb.Models
     public enum PlayerState
     {
         /// <summary>
-        /// Player is currently in match with his selected AI.
+        /// Player is currently in a match with his selected AI.
         /// </summary>
         PlayingMatch,
         /// <summary>
@@ -110,6 +111,14 @@ namespace FootballAIGameWeb.Models
         /// <summary>
         /// Player is idle.
         /// </summary>
-        Idle
+        Idle,
+        /// <summary>
+        /// Player is currently in a running tournament and waiting for next match.
+        /// </summary>
+        PlayingTournamentWaiting,
+        /// <summary>
+        /// Player is currently in a running tournament and playing a match.
+        /// </summary>
+        PlayingTournamentPlaying
     }
 }
