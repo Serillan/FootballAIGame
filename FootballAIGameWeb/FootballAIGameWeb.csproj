@@ -320,6 +320,7 @@
     <Compile Include="ViewModels\Manage\SetPasswordViewModel.cs" />
     <Compile Include="ViewModels\Manage\VerifyPhoneNumberViewModel.cs" />
     <Compile Include="ViewModels\Players\PlayerDetailsViewModel.cs" />
+    <Compile Include="ViewModels\Tournaments\TournamentDetailsViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap-cerulean.css" />
@@ -474,6 +475,7 @@
     <Content Include="Content\DataTables\images\sort_desc_disabled.png" />
     <Content Include="Content\DataTables\swf\flashExport.swf" />
     <Content Include="Content\Images\ClientServerSchema.svg" />
+    <Content Include="Content\jquery-editable-select.css" />
     <Content Include="Content\toastr.css" />
     <Content Include="Content\toastr.min.css" />
     <Content Include="favicon.ico" />
@@ -493,7 +495,8 @@
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\CustomScripts\clickable-row.js" />
     <Content Include="Scripts\CustomScripts\initialization.js" />
-    <Content Include="Scripts\CustomScripts\jquery.binarytransport.js" />
+    <Content Include="Scripts\jquery-editable-select.js" />
+    <Content Include="Scripts\jquery.binarytransport.js" />
     <Content Include="Scripts\CustomScripts\selectable-row.js" />
     <Content Include="Scripts\DataTables\autoFill.bootstrap.js" />
     <Content Include="Scripts\DataTables\autoFill.bootstrap.min.js" />

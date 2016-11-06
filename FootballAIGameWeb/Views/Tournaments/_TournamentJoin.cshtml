@@ -1,7 +1,23 @@
-﻿<p style="margin-top: 2em">
-    You can sign in to the tournament with AI that you is not currently active. <br />
+﻿@model FootballAIGameWeb.ViewModels.Tournaments.TournamentDetailsViewModel
+
+
+<p style="margin-top: 4em">
+    You can also join the tournament with AI that you is not currently active. <br />
 </p>
 <p class="text-danger">
-    You are expected to be online 5 minutes before tournament starts, otherwise you
+    Your AI is expected to be active 5 minutes before the tournament starts, otherwise you
     will be disqualified.
 </p>
+
+<div style="margin: auto; margin-top: 2em; max-width: 60%">
+    <label for="ai-selection">AI Name</label>
+    <select class="form-control" id="ai-selection">
+        @foreach (var ai in Model.ActiveAIs)
+        {
+            <option>@ai</option>
+        }
+    </select>
+    <button class="btn btn-default" style="margin-top: 1em">Join</button>
+</div>
+
+

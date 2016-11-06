@@ -5,6 +5,8 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using FootballAIGameWeb.Models;
+using FootballAIGameWeb.ViewModels.Tournaments;
+using Microsoft.AspNet.Identity;
 
 namespace FootballAIGameWeb.Controllers
 {
@@ -14,6 +16,24 @@ namespace FootballAIGameWeb.Controllers
         /// The application database context used for accessing database using entity framework.
         /// </summary>
         private ApplicationDbContext _context;
+
+        /// <summary>
+        /// Gets the current connected player.
+        /// </summary>
+        /// <value>
+        /// The current player.
+        /// </value>
+        private Player CurrentPlayer
+        {
+            get
+            {
+                var userId = User.Identity.GetUserId();
+                var user = _context.Users
+                    .Include(u => u.Player)
+                    .SingleOrDefault(u => u.Id == userId);
+                return user?.Player;
+            }
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TournamentsController"/> class.
@@ -67,11 +87,17 @@ namespace FootballAIGameWeb.Controllers
 
             if (tournament == null)
                 return HttpNotFound();
-
             tournament.Players = 
                 tournament.Players.OrderBy(p => p.PlayerPosition).ToList();
 
-            return View("Details", tournament);
+            var activeAIs = CurrentPlayer?.ActiveAis?.Split(';').ToList() ?? new List<string>();
+            var viewModel = new TournamentDetailsViewModel()
+            {
+                Tournament = tournament,
+                ActiveAIs = activeAIs
+            };
+
+            return View("Details", viewModel);
         }
     }
 }

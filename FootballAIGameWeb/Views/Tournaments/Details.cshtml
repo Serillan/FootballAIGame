@@ -1,5 +1,5 @@
 ﻿@using FootballAIGameWeb.Models
-@model FootballAIGameWeb.Models.Tournament
+@model FootballAIGameWeb.ViewModels.Tournaments.TournamentDetailsViewModel
 
 @{
     ViewBag.Title = "Tournament Details";
@@ -14,7 +14,7 @@
     <table class="table table-hover">
         <thead>
         <tr>
-            @if (Model.TournamentState == TournamentState.Finished)
+            @if (Model.Tournament.TournamentState == TournamentState.Finished)
             {
                 <th class="text-center">Position</th>
             }
@@ -24,10 +24,10 @@
         </tr>
         </thead>
         <tbody>
-            @foreach (var playerT in Model.Players)
+            @foreach (var playerT in Model.Tournament.Players)
             {
                 <tr>
-                    @if (Model.TournamentState == TournamentState.Finished)
+                    @if (Model.Tournament.TournamentState == TournamentState.Finished)
                     {
                         <td>@playerT.PlayerPosition</td>
                     }
@@ -41,10 +41,10 @@
 </div>
 
 <div class="container col-sm-4 text-center">
-    <h4>@Model.Name</h4>
+    <h4>@Model.Tournament.Name</h4>
     <p style="margin-top: 4em"><h6>State</h6> 
     @{
-        switch (Model.TournamentState)
+        switch (Model.Tournament.TournamentState)
         {
             case TournamentState.Unstarted:
                 <text>Not yet started</text>
@@ -60,13 +60,13 @@
                 break;
         }
     }</p>
-    <p><h6>Number of Signed Players</h6> @Model.Players.Count</p>
-    <p><h6>Minimum Number of Players</h6> @Model.MinimumNumberOfPlayers</p>
-    <p><h6>Maximum Number of Players</h6> @Model.MaximumNumberOfPlayers</p>
+    <p><h6>Number of Signed Players</h6> @Model.Tournament.Players.Count</p>
+    <p><h6>Minimum Number of Players</h6> @Model.Tournament.MinimumNumberOfPlayers</p>
+    <p><h6>Maximum Number of Players</h6> @Model.Tournament.MaximumNumberOfPlayers</p>
 </div>
 
 <div class="container col-sm-4 text-center">
-    @if (Model.TournamentState == TournamentState.Unstarted)
+    @if (Model.Tournament.TournamentState == TournamentState.Unstarted)
     {
         @Html.Partial("_TournamentJoin");
     }
@@ -75,3 +75,12 @@
         @Html.Partial("_TournanamentMatches");
     }
 </div>
+
+
+@section scripts {
+    <script>
+        $(document).ready(function() {
+            $("select#ai-selection").editableSelect();
+        });
+    </script>
+}

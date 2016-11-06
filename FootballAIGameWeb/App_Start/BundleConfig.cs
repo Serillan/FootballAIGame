@@ -18,13 +18,14 @@ namespace FootballAIGameWeb
                         "~/Scripts/bootstrap.js",
                         "~/Scripts/respond.js",
                         "~/Scripts/datatables/datatables.bootstrap.js",
-                        "~/Scripts/toastr.js"));
+                        "~/Scripts/toastr.js",
+                        "~/Scripts/jquery-editable-select.js",
+                        "~/Scripts/jquery.binarytransport.js"));
 
             bundles.Add(new ScriptBundle("~/bundles/custom").Include(
                         "~/Scripts/CustomScripts/clickable-row.js",
                         "~/Scripts/CustomScripts/selectable-row.js",
-                        "~/Scripts/CustomScripts/initialization.js",
-                        "~/Scripts/CustomScripts/jquery.binarytransport.js"));
+                        "~/Scripts/CustomScripts/initialization.js"));
 
             bundles.Add(new ScriptBundle("~/bundles/jqueryval").Include(
                         "~/Scripts/jquery.validate*"));
@@ -36,7 +37,8 @@ namespace FootballAIGameWeb
                       "~/Content/datatables/css/datatables.bootstrap.css",
                       "~/Content/bootstrap-cerulean.css",
                       "~/Content/toastr.css",
-                      "~/Content/site.css"));
+                      "~/Content/site.css",
+                      "~/Content/jquery-editable-select.css"));
         }
     }
 }
