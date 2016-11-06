@@ -650,6 +650,9 @@
     <Content Include="Views\Home\Protocol.cshtml" />
     <Content Include="Views\Home\Restrictions.cshtml" />
     <Content Include="Views\Projects\CSharp.cshtml" />
+    <Content Include="Views\Tournaments\Next.cshtml" />
+    <Content Include="Views\Tournaments\_TournanamentMatches.cshtml" />
+    <Content Include="Views\Tournaments\_TournamentJoin.cshtml" />
     <None Include="Web.Production.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

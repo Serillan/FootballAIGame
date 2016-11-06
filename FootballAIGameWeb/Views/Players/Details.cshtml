@@ -28,11 +28,11 @@
 
                 if (match.Winner == 0) // draw
                 {
-            <tr class="clickable-row" data-href="/matches/details/@match.Id">
-                <td>@match.Time</td>
-                <td>@otherPlayer.Name</td>
-                <td>Draw</td>
-            </tr>
+                    <tr class="clickable-row" data-href="/matches/details/@match.Id">
+                        <td>@match.Time</td>
+                        <td>@otherPlayer.Name</td>
+                        <td>Draw</td>
+                    </tr>
 
                 }
                 else if (match.Winner == playerNumber)
@@ -45,11 +45,11 @@
                 }
                 else
                 {
-            <tr class="danger clickable-row" data-href="/matches/details/@match.Id">
-                <td>@match.Time</td>
-                <td>@otherPlayer.Name</td>
-                <td>Loose</td>
-            </tr>
+                    <tr class="danger clickable-row" data-href="/matches/details/@match.Id">
+                        <td>@match.Time</td>
+                        <td>@otherPlayer.Name</td>
+                        <td>Loose</td>
+                    </tr>
                 }
             }
         </tbody>
@@ -76,11 +76,11 @@
     <h3>Last Tournaments</h3>
     <table class="table table-responsive table-hover">
         <thead>
-        <tr>
-            <th>Time</th>
-            <th>Name</th>
-            <th>Position</th>
-        </tr>
+            <tr>
+                <th>Time</th>
+                <th>Name</th>
+                <th>Position</th>
+            </tr>
         </thead>
     </table>
 </div>
@@ -89,12 +89,11 @@
 {
     <script>
         $(document)
-            .ready(function() {
+            .ready(function () {
 
                 @if (Model.SelectedAi != null)
                 {
-                    <text>
-                $("select").val("@Model.SelectedAi");</text>
+                    <text>$("select").val("@Model.SelectedAi");</text>
                 }
                 else if (Model.ActiveAIs.Count != 0)
                 {
@@ -103,7 +102,7 @@
 
                 $("#challenge")
                     .on("click",
-                        function() {
+                        function () {
 
                             var selectedAi = $("option:selected").text();
                             if (selectedAi === undefined || selectedAi === "") {
@@ -114,20 +113,20 @@
                             $.ajax({
                                 url: "/api/game/selectai/" + selectedAi,
                                 method: "put",
-                                success: function() {
+                                success: function () {
                                     $.ajax({
                                         url: "/api/game/challengeplayer/@Model.Player.Name",
                                         method: "post",
-                                        success: function() {
+                                        success: function () {
                                             location.replace("/");
                                         },
-                                        error: function(xhr, status, error) {
+                                        error: function (xhr, status, error) {
                                             var json = JSON.parse(xhr.responseText);
                                             toastr.error(json.message);
                                         }
                                     });
                                 },
-                                error: function(xhr, status, error) {
+                                error: function (xhr, status, error) {
                                     toastr.error(xhr.responseText.message);
                                 }
                             });

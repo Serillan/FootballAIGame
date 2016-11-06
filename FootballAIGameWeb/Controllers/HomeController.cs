@@ -72,7 +72,7 @@ namespace FootballAIGameWeb.Controllers
             {
                 NextTournaments = _context.Tournaments
                     .Include(t => t.Players)
-                    .Where(t => t.StartTime.CompareTo(DateTime.Now) > 0)
+                    .Where(t => t.TournamentState == TournamentState.Unstarted)
                     .OrderBy(t => t.StartTime)
                     .ToList(),
 

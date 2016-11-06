@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
@@ -32,12 +33,25 @@ namespace FootballAIGameWeb.Controllers
         }
 
         /// <summary>
-        /// Returns the players index view.
+        /// Returns the tournaments index view.
         /// </summary>
-        /// <returns>The players index view.</returns>
+        /// <returns>The tournaments index view.</returns>
         public ActionResult Index()
         {
-            return View();
+            var viewModel = _context.Tournaments
+                .Include(t => t.Players)
+                .Where(t => t.TournamentState != TournamentState.Unstarted);
+
+            return View(viewModel);
+        }
+
+        public ActionResult Next()
+        {
+            var viewModel = _context.Tournaments
+                .Include(t => t.Players)
+                .Where(t => t.TournamentState == TournamentState.Unstarted);
+
+            return View(viewModel);
         }
 
         /// <summary>
@@ -47,10 +61,15 @@ namespace FootballAIGameWeb.Controllers
         /// <returns>The details of the specified tournament.</returns>
         public ActionResult Details(int id)
         {
-            var tournament = _context.Tournaments.SingleOrDefault(t => t.Id == id);
+            var tournament = _context.Tournaments
+                .Include(t => t.Players.Select(tp => tp.Player))  // nested include
+                .SingleOrDefault(t => t.Id == id);
 
             if (tournament == null)
                 return HttpNotFound();
+
+            tournament.Players = 
+                tournament.Players.OrderBy(p => p.PlayerPosition).ToList();
 
             return View("Details", tournament);
         }
