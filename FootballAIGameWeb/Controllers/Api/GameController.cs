@@ -452,5 +452,43 @@ namespace FootballAIGameWeb.Controllers.Api
                 }
             }
         }
+
+        [HttpPost]
+        [Route("api/game/jointournament/{tournamentId}/{playerId}/{aiName}")]
+        public IHttpActionResult JoinTournament(int tournamentId, string playerId, string aiName)
+        {
+            using (var context = new ApplicationDbContext())
+            {
+                var tournament = context.Tournaments.SingleOrDefault(t => t.Id == tournamentId);
+                if (tournament == null)
+                    return BadRequest("Invalid tournament ID.");
+                if (tournament.TournamentState != TournamentState.Unstarted)
+                    return BadRequest("The tournament has already started.");
+
+                var player = context.Players.SingleOrDefault(p => p.UserId == playerId);
+                if (player == null)
+                    return BadRequest("Invalid player ID.");
+
+                if (tournament.Players == null)
+                    tournament.Players = new List<TournamentPlayer>();
+
+                if (tournament.Players.Any(tp => tp.Player == player))
+                    return BadRequest("Player is already joined.");
+
+                if (string.IsNullOrEmpty(aiName))
+                    return BadRequest("Invalid AI.");
+
+                tournament.Players.Add(new TournamentPlayer()
+                {
+                    Player = player,
+                    PlayerAi = aiName,
+                    PlayerPosition = null
+                });
+
+                context.SaveChanges();
+            }
+
+            return Ok();
+        }
     }
 }

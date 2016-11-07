@@ -121,8 +121,7 @@
                                             location.replace("/");
                                         },
                                         error: function (xhr, status, error) {
-                                            var json = JSON.parse(xhr.responseText);
-                                            toastr.error(json.message);
+                                            toastr.error(json.responseText.message);
                                         }
                                     });
                                 },

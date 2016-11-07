@@ -41,7 +41,7 @@
 </div>
 
 <div class="container col-sm-4 text-center">
-    <h4>@Model.Tournament.Name</h4>
+    <h4>@Model.Tournament.Name (@Model.Tournament.StartTime)</h4>
     <p style="margin-top: 4em"><h6>State</h6> 
     @{
         switch (Model.Tournament.TournamentState)
@@ -81,6 +81,22 @@
     <script>
         $(document).ready(function() {
             $("select#ai-selection").editableSelect();
+            $("button#join").on("click", function() {
+                var selectedAi = $("input#ai-selection").val();
+
+                $.ajax({
+                    url: "/api/game/jointournament/@Model.Tournament.Id/@Model.CurrentPlayer.UserId/" + selectedAi,
+                    method: "post",
+                    success: function() {
+                        location.reload();
+                    },
+                    error: function(xhr, status, error) {
+                        toastr.error(xhr.responseText.message);
+                    }
+                });
+            });
+
+
         });
     </script>
 }

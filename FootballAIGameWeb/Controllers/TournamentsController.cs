@@ -94,7 +94,8 @@ namespace FootballAIGameWeb.Controllers
             var viewModel = new TournamentDetailsViewModel()
             {
                 Tournament = tournament,
-                ActiveAIs = activeAIs
+                ActiveAIs = activeAIs,
+                CurrentPlayer = this.CurrentPlayer
             };
 
             return View("Details", viewModel);

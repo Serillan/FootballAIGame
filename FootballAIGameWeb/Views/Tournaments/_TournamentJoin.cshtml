@@ -9,15 +9,26 @@
     will be disqualified.
 </p>
 
-<div style="margin: auto; margin-top: 2em; max-width: 60%">
-    <label for="ai-selection">AI Name</label>
-    <select class="form-control" id="ai-selection">
-        @foreach (var ai in Model.ActiveAIs)
+@if (Model.CurrentPlayer != null)
+{
+    <div style="margin: auto; margin-top: 2em; max-width: 60%">
+        @if (Model.Tournament.Players.All(tp => tp.Player != Model.CurrentPlayer))
         {
-            <option>@ai</option>
+            <label for="ai-selection">AI Name</label>
+            <select class="form-control" id="ai-selection">
+                @foreach (var ai in Model.ActiveAIs)
+                {
+                    <option>@ai</option>
+                }
+            </select>
+            <button class="btn btn-default" id="join" style="margin-top: 1em">Join</button>
         }
-    </select>
-    <button class="btn btn-default" style="margin-top: 1em">Join</button>
-</div>
+        else
+        {
+            <button class="btn btn-default" id="cancel" style="margin-top: 1em">Cancel</button>
+        }
+
+    </div>
+}
 
 

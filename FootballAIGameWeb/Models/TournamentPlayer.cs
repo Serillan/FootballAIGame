@@ -17,6 +17,8 @@ namespace FootballAIGameWeb.Models
 
         public Player Player { get; set; }
 
+        public string PlayerAi { get; set; }
+
         public Tournament Tournament { get; set; }
 
         public int? PlayerPosition { get; set; }
