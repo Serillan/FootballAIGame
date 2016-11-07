@@ -67,6 +67,14 @@ namespace FootballAIGameWeb.Models
         /// </value>
         public ICollection<TournamentPlayer> Players { get; set; }
 
+        /// <summary>
+        /// Gets or sets the tournament's matches.
+        /// </summary>
+        /// <value>
+        /// The tournament's matches.
+        /// </value>
+        public ICollection<Match> Matches { get; set; }
+
     }
 
     public enum TournamentState

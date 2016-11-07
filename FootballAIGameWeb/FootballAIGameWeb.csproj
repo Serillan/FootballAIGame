@@ -285,6 +285,10 @@
     <Compile Include="Migrations\201610282017355_AddNewTournamentProperties.Designer.cs">
       <DependentUpon>201610282017355_AddNewTournamentProperties.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201611071324415_AddTournamentMatches.cs" />
+    <Compile Include="Migrations\201611071324415_AddTournamentMatches.Designer.cs">
+      <DependentUpon>201611071324415_AddTournamentMatches.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\ApplicationDbContext.cs" />
     <Compile Include="Models\Challenge.cs" />
@@ -740,6 +744,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201610282017355_AddNewTournamentProperties.resx">
       <DependentUpon>201610282017355_AddNewTournamentProperties.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201611071324415_AddTournamentMatches.resx">
+      <DependentUpon>201611071324415_AddTournamentMatches.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
