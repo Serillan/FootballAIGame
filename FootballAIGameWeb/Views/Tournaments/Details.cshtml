@@ -13,15 +13,15 @@
     <h3>Players</h3>
     <table class="table table-hover">
         <thead>
-        <tr>
-            @if (Model.Tournament.TournamentState == TournamentState.Finished)
+            <tr>
+                @if (Model.Tournament.TournamentState == TournamentState.Finished)
             {
-                <th class="text-center">Position</th>
-            }
-            <th class="text-center">Name</th>
-            <th class="text-center">Score</th>
-            <th class="text-center">Details</th>
-        </tr>
+                    <th class="text-center">Position</th>
+                }
+                <th class="text-center">Name</th>
+                <th class="text-center">Score</th>
+                <th class="text-center">Details</th>
+            </tr>
         </thead>
         <tbody>
             @foreach (var playerT in Model.Tournament.Players)
@@ -42,24 +42,26 @@
 
 <div class="container col-sm-4 text-center">
     <h4>@Model.Tournament.Name (@Model.Tournament.StartTime)</h4>
-    <p style="margin-top: 4em"><h6>State</h6> 
-    @{
-        switch (Model.Tournament.TournamentState)
-        {
-            case TournamentState.Unstarted:
-                <text>Not yet started</text>
-                break;
-            case TournamentState.Finished:
-                <text>Finished</text>
-                break;
-            case TournamentState.NotEnoughtPlayersClosed:
-                <text>Closed - There was not enough players signed at start time</text>
-                break;
-            case TournamentState.Running:
-                <text>Currently running</text>
-                break;
+    <p style="margin-top: 4em">
+        <h6>State</h6>
+        @{
+            switch (Model.Tournament.TournamentState)
+            {
+                case TournamentState.Unstarted:
+                    <text>Not yet started</text>
+                    break;
+                case TournamentState.Finished:
+                    <text>Finished</text>
+                    break;
+                case TournamentState.NotEnoughtPlayersClosed:
+                    <text>Closed - There was not enough players signed at start time</text>
+                    break;
+                case TournamentState.Running:
+                    <text>Currently running</text>
+                    break;
+            }
         }
-    }</p>
+    </p>
     <p><h6>Number of Signed Players</h6> @Model.Tournament.Players.Count</p>
     <p><h6>Minimum Number of Players</h6> @Model.Tournament.MinimumNumberOfPlayers</p>
     <p><h6>Maximum Number of Players</h6> @Model.Tournament.MaximumNumberOfPlayers</p>
@@ -79,14 +81,27 @@
 
 @section scripts {
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             $("select#ai-selection").editableSelect();
-            $("button#join").on("click", function() {
-                var selectedAi = $("input#ai-selection").val();
 
+            $("button#join").on("click", function () {
+                var selectedAi = $("input#ai-selection").val();
                 $.ajax({
-                    url: "/api/game/jointournament/@Model.Tournament.Id/@Model.CurrentPlayer.UserId/" + selectedAi,
+                    url: "/api/game/jointournament/@Model.Tournament.Id/" + selectedAi,
                     method: "post",
+                    success: function () {
+                        location.reload();
+                    },
+                    error: function (xhr, status, error) {
+                        toastr.error(xhr.responseText.message);
+                    }
+                });
+            });
+
+            $("button#cancel").on("click", function () {
+                $.ajax({
+                    url: "/api/game/leavetournament/@Model.Tournament.Id",
+                    method: "put",
                     success: function() {
                         location.reload();
                     },

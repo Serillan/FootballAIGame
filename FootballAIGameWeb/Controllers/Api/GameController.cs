@@ -454,8 +454,8 @@ namespace FootballAIGameWeb.Controllers.Api
         }
 
         [HttpPost]
-        [Route("api/game/jointournament/{tournamentId}/{playerId}/{aiName}")]
-        public IHttpActionResult JoinTournament(int tournamentId, string playerId, string aiName)
+        [Route("api/game/jointournament/{tournamentId}/{aiName}")]
+        public IHttpActionResult JoinTournament(int tournamentId, string aiName)
         {
             using (var context = new ApplicationDbContext())
             {
@@ -465,9 +465,7 @@ namespace FootballAIGameWeb.Controllers.Api
                 if (tournament.TournamentState != TournamentState.Unstarted)
                     return BadRequest("The tournament has already started.");
 
-                var player = context.Players.SingleOrDefault(p => p.UserId == playerId);
-                if (player == null)
-                    return BadRequest("Invalid player ID.");
+                var player = GetCurrentPlayer(context);
 
                 if (tournament.Players == null)
                     tournament.Players = new List<TournamentPlayer>();
@@ -485,6 +483,30 @@ namespace FootballAIGameWeb.Controllers.Api
                     PlayerPosition = null
                 });
 
+                context.SaveChanges();
+            }
+
+            return Ok();
+        }
+
+        [HttpPut]
+        public IHttpActionResult LeaveTournament(int id)
+        {
+            using (var context = new ApplicationDbContext())
+            {
+                var player = GetCurrentPlayer(context);
+                var tournament = context.Tournaments
+                    .Include(t => t.Players.Select(tp => tp.Player))
+                    .SingleOrDefault(t => t.Id == id);
+                if (tournament == null)
+                    return BadRequest("Invalid tournament ID");
+
+                if (tournament.Players == null)
+                    return Ok();
+
+                var tournamnetPlayer = tournament.Players.SingleOrDefault(tp => tp.Player == player);
+                tournament.Players.Remove(tournamnetPlayer);
+                
                 context.SaveChanges();
             }
 
