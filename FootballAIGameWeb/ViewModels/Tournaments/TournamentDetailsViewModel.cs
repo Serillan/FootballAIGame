@@ -13,5 +13,7 @@ namespace FootballAIGameWeb.ViewModels.Tournaments
         public List<string> ActiveAIs { get; set; }
 
         public Player CurrentPlayer { get; set; }
+
+        public TournamentPlayer CurrentTournamentPlayer { get; set; }
     }
 }

@@ -17,6 +17,8 @@ namespace FootballAIGameWeb.ViewModels.Home
 
         public List<Match> LastMatches { get; set; }
 
+        public List<Tournament> JoinedTournaments { get; set; }
+
         [Display(Name = "Name")]
         public string OpponentPlayerName { get; set; }
 

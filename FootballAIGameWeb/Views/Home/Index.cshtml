@@ -19,7 +19,7 @@
         <tbody>
         @foreach (var tournament in Model.NextTournaments)
         {
-            <tr class="clickable-row" data-href="/tournaments/details/@tournament.Id">
+            <tr class="clickable-row" data-href="/Tournaments/Details/@tournament.Id">
                 <td>@tournament.Name</td>
                 <td>@tournament.StartTime</td>
                 <td>@tournament.Players.Count() / @tournament.MaximumNumberOfPlayers</td>

@@ -1,11 +1,13 @@
-﻿@model FootballAIGameWeb.ViewModels.Home.PlayerHomeViewModel
+﻿@using FootballAIGameWeb.Models
+@model FootballAIGameWeb.ViewModels.Home.PlayerHomeViewModel
 @{
     ViewBag.Title = "Home Page";
 }
 
 
 
-<div class="form-horizontal"> @* for correct vertical alignment of Name label *@
+<div class="form-horizontal">
+    @* for correct vertical alignment of Name label *@
     <div class="container col-sm-3 text-center table-responsive" style="margin-top: 2em">
         <h3>Active AIs</h3>
         <table id="ai-table" class="table table-hover" style="border: 2px solid white">
@@ -29,6 +31,19 @@
     <div class="container col-sm-5 text-center" style="margin-top: 2em; text-align: center">
         <h3>Score: @Model.Player.Score</h3>
         <button id="random" type="submit" class="btn btn-primary" style="white-space: normal; margin: 1em; margin-top: 4em">Match against random opponent</button>
+        
+        <div class="col-sm-12" style="margin-top: 1em">
+            <button autofocus id="challenge" type="submit" class="btn btn-default" style="margin: 1em auto">Challenge Player</button>
+            <div class="form-group text-center col-sm-12" style="margin: 0 auto">
+                @Html.LabelFor(m => m.OpponentPlayerName, new { @class = "col-sm-1 col-sm-offset-2 control-label", style = "margin-right: 1em" })
+                <div class="col-sm-7">
+                    @Html.TextBoxFor(m => m.OpponentPlayerName, new { @class = "form-control", style = "margin: 0 auto; max-width: 15em" })
+                    <span class="field-validation-valid text-danger" data-valmsg-for="OpponentPlayerName"></span>
+                </div>
+            </div>
+        </div>
+        
+
     </div>
 
     <div class="container col-sm-4 text-center table-responsive" style="margin-top: 2em">
@@ -49,31 +64,29 @@
                     var playerAi = playerNumber == 1 ? match.Player1Ai : match.Player2Ai;
                     var otherPlayer = playerNumber == 1 ? match.Player2 : match.Player1;
 
-                    if (match.Winner == 0) // draw
+                    string trClass;
+                    string result;
+                    if (match.Winner == 0)
                     {
-                        <tr class="clickable-row" data-href="/matches/details/@match.Id">
-                            <td>Draw</td>
-                            <td>@playerAi</td>
-                            <td>@otherPlayer.Name</td>
-                        </tr>
-
+                        trClass = "";
+                        result = "Draw";
                     }
                     else if (match.Winner == playerNumber)
                     {
-                        <tr class="success clickable-row" data-href="/matches/details/@match.Id">
-                            <td>Win</td>
-                            <td>@playerAi</td>
-                            <td>@otherPlayer.Name</td>
-                        </tr>
+                        trClass = "success";
+                        result = "Win";
                     }
                     else
                     {
-                        <tr class="danger clickable-row" data-href="/matches/details/@match.Id">
-                            <td>Loose</td>
-                            <td>@playerAi</td>
-                            <td>@otherPlayer.Name</td>
-                        </tr>
+                        trClass = "danger";
+                        result = "Loose";
                     }
+
+                <tr class="clickable-row @trClass" data-href="/matches/details/@match.Id">
+                    <td>@result</td>
+                    <td>@playerAi</td>
+                    <td>@otherPlayer.Name</td>
+                </tr>
                 }
             </tbody>
         </table>
@@ -97,21 +110,43 @@
         </div>
 
         <div class="container col-sm-5" style="text-align: center">
-
-            <button autofocus id="challenge" type="submit" class="btn btn-default" style="margin: 1em auto">Challenge Player</button>
-
-            <div class="form-group text-center col-sm-12" style="margin: 0 auto">
-                @Html.LabelFor(m => m.OpponentPlayerName, new { @class = "col-sm-1 col-sm-offset-2 control-label", style = "margin-right: 1em" })
-                <div class="col-sm-7">
-                    @Html.TextBoxFor(m => m.OpponentPlayerName, new { @class = "form-control", style = "margin: 0 auto; max-width: 15em" })
-                    <span class="field-validation-valid text-danger" data-valmsg-for="OpponentPlayerName"></span>
-                </div>
-            </div>
-
-            <div class="container text-center col-sm-12" style="margin-top: 4em">
+            
+            <div class="container text-center col-sm-12" style="margin-top: 2em">
                 <a href="/Tournaments/Next" class="btn btn-default">Next Tournaments</a>
             </div>
 
+        </div>
+
+        <div class="container col-sm-4" style="text-align: center">
+            <h3>Joined Tournaments</h3>
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th class="text-center">Time</th>
+                        <th class="text-center">Name</th>
+                        <th class="text-center">Players</th>
+                        <th class="text-center">AI</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var tournament in Model.JoinedTournaments)
+                    {
+                        var trClass = "success";
+                        if (tournament.TournamentState != TournamentState.Unstarted)
+                        {
+                            trClass = "danger";
+                        }
+
+                        <tr class="clickable-row @trClass" data-href="/Tournaments/Details/@tournament.Id">
+                            <td>@tournament.StartTime</td>
+                            <td>@tournament.Name</td>
+                            <td>@tournament.Players.Count() / @tournament.MaximumNumberOfPlayers</td>
+                            <td>@tournament.Players.Single(tp => tp.Player == Model.Player).PlayerAi</td>
+                        </tr>
+                    }
+                </tbody>
+
+            </table>
         </div>
     </div>
 </div>

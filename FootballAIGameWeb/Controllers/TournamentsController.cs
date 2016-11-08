@@ -91,11 +91,14 @@ namespace FootballAIGameWeb.Controllers
                 tournament.Players.OrderBy(p => p.PlayerPosition).ToList();
 
             var activeAIs = CurrentPlayer?.ActiveAis?.Split(';').ToList() ?? new List<string>();
+            var currentTournamentPlayer = tournament.Players.SingleOrDefault(tp => tp.Player == CurrentPlayer);
+                
             var viewModel = new TournamentDetailsViewModel()
             {
                 Tournament = tournament,
                 ActiveAIs = activeAIs,
-                CurrentPlayer = this.CurrentPlayer
+                CurrentPlayer = this.CurrentPlayer,
+                CurrentTournamentPlayer = currentTournamentPlayer
             };
 
             return View("Details", viewModel);

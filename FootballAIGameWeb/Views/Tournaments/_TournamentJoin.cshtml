@@ -12,7 +12,7 @@
 @if (Model.CurrentPlayer != null)
 {
     <div style="margin: auto; margin-top: 2em; max-width: 60%">
-        @if (Model.Tournament.Players.All(tp => tp.Player != Model.CurrentPlayer))
+        @if (Model.CurrentTournamentPlayer == null)
         {
             <label for="ai-selection">AI Name</label>
             <select class="form-control" id="ai-selection">
@@ -25,6 +25,8 @@
         }
         else
         {
+            <p class="text-info">You are currently sign in with AI:</p>
+            <p>@Model.CurrentTournamentPlayer.PlayerAi</p>
             <button class="btn btn-default" id="cancel" style="margin-top: 1em">Cancel</button>
         }
 
