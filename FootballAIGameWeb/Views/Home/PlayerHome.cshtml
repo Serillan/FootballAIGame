@@ -268,7 +268,7 @@
                         });
 
                 @* works for dynamically created elements as well *@
-                @* mousedown instread of click, because while mouse is *@
+                @* mousedown instead of click, because while mouse is *@
                 @* being pressed, the control might change and the event won't fire *@
                 $(document).on("click", "#challenge", processChallenge);
                 $(document).on("mousedown", ".accept-challenge", processChallenge);
@@ -322,6 +322,14 @@
                             $(".selectable-row[data-selected]").addClass("success");
                             // add click handle
                             //$(".selectable-row").click(selectableRowClickHandle);
+                        }
+                    });
+                    $.ajax({
+                        url: "/api/game/getplayerstate",
+                        method: "get",
+                        success: function(response) {
+                            if (@((int) PlayerState.Idle) !== response)
+                                location.replace("/");
                         }
                     });
                 };

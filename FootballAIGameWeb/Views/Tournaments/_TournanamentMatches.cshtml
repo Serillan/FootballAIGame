@@ -1,6 +1,36 @@
-﻿<h3>Matches</h3>
+﻿@model FootballAIGameWeb.ViewModels.Tournaments.TournamentDetailsViewModel
+
+<h3>Matches</h3>
 <table class="table table-responsive table-hover">
     <thead>
-        <tr></tr>
+        <tr>
+            <th>Time</th>
+            <th>Player 1</th>
+            <th>Player 2</th>
+        </tr>
     </thead>
+    <tbody>
+        @foreach (var match in Model.Tournament.Matches)
+            {
+            <tr class="clickable-row" data-href="/matches/details/@match.Id">
+                <td>@match.Time</td>
+                @if (match.Winner == 1)
+                {
+                    <td class="success">@match.Player1.Name</td>
+                        <td>@match.Player2.Name</td>
+                }
+                else if (match.Winner == 2)
+                {
+                    <td>@match.Player1.Name</td>
+                    <td class="success">@match.Player2.Name</td>
+                }
+                else // draw
+                {
+                    <td>@match.Player1.Name</td>
+                    <td>@match.Player2.Name</td>
+                }
+            </tr>
+        }
+    </tbody>
+
 </table>

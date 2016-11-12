@@ -1,0 +1,158 @@
+﻿@using FootballAIGameWeb.Models
+@model FootballAIGameWeb.ViewModels.Home.PlayingTournamentViewModel
+
+@{
+    ViewBag.Title = "Tournament Simulation";
+    var playingMatchText = "Match is being simulated";
+    var waitingText = "Waiting for the next match";
+}
+
+<h3 class="text-center">
+    @Model.Tournament.Name Tournament is being simulated!
+</h3>
+
+<div style="margin-top: 2em">
+
+    <div class="col-sm-3 text-center">
+        <h4>Players</h4>
+
+    </div>
+
+    <div class="col-sm-6 text-center">
+        <h3 id="state" style="margin-bottom: 0em">
+            @{
+                switch (Model.CurrentPlayer.PlayerState)
+                {
+                    case PlayerState.PlayingTournamentWaiting:
+                        <text>@waitingText</text>
+                        break;
+                    case PlayerState.PlayingTournamentPlaying:
+                        <text>@playingMatchText</text>
+                        break;
+                }
+            }
+        </h3>
+        <h3 id="dots">&nbsp;</h3>
+        @if (Model.CurrentPlayer.PlayerState == PlayerState.PlayingTournamentPlaying)
+        {
+            <div class= "progress" id="progress-div" style="margin-top: 1em">
+                <div id= "progress" class="progress-bar" role="progressbar" style="width: 0"></div>
+            </div>
+        }
+        else
+        {
+            <div id="progress-div"></div>
+        }
+        <button id="btn" style="margin-top: 2em; font-size: 70%" class="btn btn-danger">Leave Tournament</button>
+    </div>
+
+    <div class="col-sm-3 text-center">
+        <h4>Matches</h4>
+
+    </div>
+</div>
+
+
+
+
+@section scripts {
+    <script>
+
+        $(document)
+            .ready(function() {
+                ajaxCalls = setInterval(ajaxCall, 1000);
+                animation = setInterval(animationFunc, 1000);
+                ajaxCallsFunctions = [playerStateCall];
+                var counter = 0;
+
+                function animationFunc() {
+                    counter++;
+                    var dots = String.fromCharCode(160); //&nbsp;
+                    if (counter > 3)
+                        counter = 0;
+                    for (var i = 0; i < counter; i++)
+                        dots = dots + ".";
+                    $("#dots").text(dots);
+                }
+
+                $("#btn").on("click.leaveTournament", function() {
+                    $.ajax({
+                        url: "/api/game/leavetournament/@Model.Tournament.Id",
+                        method: "put",
+                        success: function() {
+                            ajaxCallsFunctions.splice(ajaxCallsFunctions.indexOf(playerStateCall), 1);
+                            $("#state").text("You have left the tournament.");
+                            clearInterval(animation);
+                            $("#dots").text("");
+                            $("div#progress-div").html("");
+                            $("#btn").removeClass("btn-danger").addClass("btn-success").text("Home");
+                            $("#btn").off("click.leaveTournament"); // remove old handler (using namespace)
+                            $("#btn").on("click", function() {
+                                location.replace("/");
+                            });
+                        }
+                    });
+                });
+
+                function playerStateCall() {
+                    $.ajax({
+                        url: "/api/game/getplayerstate",
+                        method: "get",
+                        success: function(response) {
+                            switch (response) {
+                                case @((int) PlayerState.PlayingTournamentWaiting):
+                                    if ($("#state").text() !== "@waitingText") {
+                                        $("#state").text("@waitingText");
+                                        $("div#progress-div").html("");
+                                    }
+                                    break;
+                                case @((int) PlayerState.PlayingTournamentPlaying):
+                                    if ($("#state").text() !== "@playingMatchText") {
+                                        $("#state").text("@playingMatchText");
+
+                                        var progressBar =
+                                            '<div class= "progress" id="progress-div" style="margin-top: 1em">' +
+                                            '    <div id= "progress" class="progress-bar" role="progressbar" style="width: 0"></div>' +
+                                            '</div>';
+
+                                        $("div#progress-div").html(progressBar);
+                                    }
+
+                                    break;
+                                default:
+                                    // show final position
+                                    $.ajax({
+                                        url: "/api/game/gettournamentposition/@Model.Tournament.Id",
+                                        method: "get",
+                                        success: function(response) {
+                                            ajaxCallsFunctions.splice(ajaxCallsFunctions.indexOf(playerStateCall), 1);
+                                            // write state
+                                            $("#state").text("Your final position: " + response);
+                                            clearInterval(animation);
+                                            $("#dots").text("");
+                                            $("div#progress-div").html("");
+                                            $("#btn").removeClass("btn-danger").addClass("btn-success").text("Home");
+                                            $("#btn").off("click.leaveTournament"); // remove old handler (using namespace)
+                                            $("#btn").on("click", function() {
+                                                location.replace("/");
+                                            });
+                                        }
+                                    });
+                            }
+
+                        }
+                    });
+                }
+
+                function ajaxCall() {
+                    for (var i = 0; i < ajaxCallsFunctions.length; i++)
+                        ajaxCallsFunctions[i]();
+                }
+
+                // first initial call
+                ajaxCall();
+            });
+
+
+    </script>
+}

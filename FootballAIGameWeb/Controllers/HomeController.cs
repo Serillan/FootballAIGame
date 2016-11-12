@@ -102,6 +102,14 @@ namespace FootballAIGameWeb.Controllers
                     return View("LookingForOpponent");
                 case PlayerState.PlayingMatch:
                     return View("PlayingMatch");
+                case PlayerState.PlayingTournamentPlaying:
+                case PlayerState.PlayingTournamentWaiting:
+                    var viewModel = GetPlayingTournamentViewModel();
+                    if (viewModel != null)
+                        return View("PlayingTournament", viewModel);
+                    player.PlayerState = PlayerState.Idle;  // tournament wasn't found -> back to idle
+                    _context.SaveChanges();
+                    break;
             }
 
             return View("PlayerHome", GetNewPlayerHomeViewModel());
@@ -200,7 +208,21 @@ namespace FootballAIGameWeb.Controllers
             return viewModel;
         }
 
-        class JoinedTournamentComparer : IComparer<Tournament>
+        private PlayingTournamentViewModel GetPlayingTournamentViewModel()
+        {
+            var tournament = _context.Tournaments
+                .SingleOrDefault(t => t.TournamentState == TournamentState.Running);
+            var viewModel = new PlayingTournamentViewModel()
+            {
+                Tournament = tournament,
+                CurrentPlayer = CurrentPlayer
+            };
+            
+
+            return viewModel;
+        }
+
+        private class JoinedTournamentComparer : IComparer<Tournament>
         {
             public int Compare(Tournament x, Tournament y)
             {

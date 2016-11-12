@@ -319,6 +319,7 @@
     <Compile Include="ViewModels\Account\VerifyCodeViewModel.cs" />
     <Compile Include="ViewModels\Home\IndexViewModel.cs" />
     <Compile Include="ViewModels\Home\PlayerHomeViewModel.cs" />
+    <Compile Include="ViewModels\Home\PlayingTournamentViewModel.cs" />
     <Compile Include="ViewModels\Manage\AddPhoneNumberViewModel.cs" />
     <Compile Include="ViewModels\Manage\ChangePasswordViewModel.cs" />
     <Compile Include="ViewModels\Manage\ConfigureTwoFactorViewModel.cs" />
@@ -664,6 +665,7 @@
     <Content Include="Views\Tournaments\Next.cshtml" />
     <Content Include="Views\Tournaments\_TournanamentMatches.cshtml" />
     <Content Include="Views\Tournaments\_TournamentJoin.cshtml" />
+    <Content Include="Views\Home\PlayingTournament.cshtml" />
     <None Include="Web.Production.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

@@ -83,6 +83,8 @@ namespace FootballAIGameWeb.Controllers
         {
             var tournament = _context.Tournaments
                 .Include(t => t.Players.Select(tp => tp.Player))  // nested include
+                .Include(t => t.Matches.Select(m => m.Player1))
+                .Include(t => t.Matches.Select(m => m.Player2))
                 .SingleOrDefault(t => t.Id == id);
 
             if (tournament == null)

@@ -504,13 +504,43 @@ namespace FootballAIGameWeb.Controllers.Api
                 if (tournament.Players == null)
                     return Ok();
 
-                var tournamnetPlayer = tournament.Players.SingleOrDefault(tp => tp.Player == player);
-                tournament.Players.Remove(tournamnetPlayer);
+                var tournamentPlayer = tournament.Players.SingleOrDefault(tp => tp.Player == player);
+                if (tournamentPlayer == null)
+                    return BadRequest("Player is not in the tournament.");
+
+                if (tournament.TournamentState == TournamentState.Unstarted)
+                    tournament.Players.Remove(tournamentPlayer);
+
+                if (tournament.TournamentState == TournamentState.Running)
+                   tournamentPlayer.Player.PlayerState = PlayerState.Idle;
                 
                 context.SaveChanges();
             }
 
             return Ok();
+        }
+
+        [HttpGet]
+        public IHttpActionResult GetTournamentPosition(int id)
+        {
+            using (var context = new ApplicationDbContext())
+            {
+                var tournament = context.Tournaments
+                    .Include(t => t.Players.Select(tp => tp.Player))
+                    .SingleOrDefault(t => t.Id == id);
+                if (tournament == null)
+                    return NotFound();
+                var tournamentPlayer = tournament.Players
+                    .SingleOrDefault(tp => tp.Player == GetCurrentPlayer(context));
+
+                if (tournamentPlayer == null)
+                    return NotFound();
+
+                if (tournamentPlayer.PlayerPosition == null)
+                    return BadRequest();
+
+                return Ok(tournamentPlayer.PlayerPosition);
+            }
         }
     }
 }
