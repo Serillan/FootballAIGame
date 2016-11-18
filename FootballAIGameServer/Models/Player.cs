@@ -96,7 +96,7 @@ namespace FootballAIGameServer.Models
     public enum PlayerState
     {
         /// <summary>
-        /// Player is currently in match with his selected AI.
+        /// Player is currently in a match with his selected AI.
         /// </summary>
         PlayingMatch,
         /// <summary>
@@ -110,6 +110,14 @@ namespace FootballAIGameServer.Models
         /// <summary>
         /// Player is idle.
         /// </summary>
-        Idle
+        Idle,
+        /// <summary>
+        /// Player is currently in a running tournament and waiting for next match.
+        /// </summary>
+        PlayingTournamentWaiting,
+        /// <summary>
+        /// Player is currently in a running tournament and playing a match.
+        /// </summary>
+        PlayingTournamentPlaying
     }
 }

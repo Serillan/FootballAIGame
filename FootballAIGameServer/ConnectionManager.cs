@@ -79,7 +79,7 @@ namespace FootballAIGameServer
         /// </summary>
         private ConnectionManager()
         {
-            Listener = new TcpListener(IPAddress.Any, GameServerPort);
+            Listener = new TcpListener(IPAddress.Loopback, GameServerPort); // TODO change to IPAdress.Any
             Connections = new List<ClientConnection>();
             ActiveConnections = new List<ClientConnection>();
             WantsToPlayConnections = new List<ClientConnection>();
