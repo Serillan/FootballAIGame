@@ -211,7 +211,17 @@ namespace FootballAIGameWeb.Controllers
         private PlayingTournamentViewModel GetPlayingTournamentViewModel()
         {
             var tournament = _context.Tournaments
+                .Include(t => t.Matches.Select(m => m.Player1))
+                .Include(t => t.Matches.Select(m => m.Player2))
+                .Include(t => t.Players.Select(tp => tp.Player))
                 .SingleOrDefault(t => t.TournamentState == TournamentState.Running);
+
+            if (tournament?.Players != null)
+                tournament.Players = tournament.Players
+                    .OrderBy(p => p.PlayerPosition)
+                    .ThenByDescending(p => p.Player.Score)
+                    .ToList();
+
             var viewModel = new PlayingTournamentViewModel()
             {
                 Tournament = tournament,

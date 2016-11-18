@@ -4,7 +4,7 @@
 <table class="table table-responsive table-hover">
     <thead>
         <tr>
-            <th>Time</th>
+            <th>Score</th>
             <th>Player 1</th>
             <th>Player 2</th>
         </tr>
@@ -13,7 +13,7 @@
         @foreach (var match in Model.Tournament.Matches)
             {
             <tr class="clickable-row" data-href="/matches/details/@match.Id">
-                <td>@match.Time</td>
+                <td>@match.Score</td>
                 @if (match.Winner == 1)
                 {
                     <td class="success">@match.Player1.Name</td>
@@ -32,5 +32,4 @@
             </tr>
         }
     </tbody>
-
 </table>

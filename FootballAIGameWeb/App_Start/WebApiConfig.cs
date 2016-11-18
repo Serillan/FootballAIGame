@@ -18,6 +18,7 @@ namespace FootballAIGameWeb
         {
             // set camel case for json objects
             var settings = config.Formatters.JsonFormatter.SerializerSettings;
+            settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             settings.ContractResolver = new CamelCasePropertyNamesContractResolver();
             settings.Formatting = Formatting.Indented;
 

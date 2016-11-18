@@ -10,9 +10,11 @@ using System.ServiceModel;
 using System.Threading;
 using System.Web.Http;
 using System.Web.UI.WebControls;
+using FootballAIGameWeb.Dtos;
 using FootballAIGameWeb.GameServerService;
 using FootballAIGameWeb.Models;
 using Microsoft.AspNet.Identity;
+using Newtonsoft.Json;
 
 namespace FootballAIGameWeb.Controllers.Api
 {
@@ -394,7 +396,8 @@ namespace FootballAIGameWeb.Controllers.Api
                     {
                         gameServer.CancelLooking(player.Name);
                     }
-                } catch (CommunicationObjectFaultedException) { }
+                }
+                catch (CommunicationObjectFaultedException) { }
 
                 if (player.PlayerState == PlayerState.LookingForOpponent)
                     player.PlayerState = PlayerState.Idle;
@@ -512,8 +515,8 @@ namespace FootballAIGameWeb.Controllers.Api
                     tournament.Players.Remove(tournamentPlayer);
 
                 if (tournament.TournamentState == TournamentState.Running)
-                   tournamentPlayer.Player.PlayerState = PlayerState.Idle;
-                
+                    tournamentPlayer.Player.PlayerState = PlayerState.Idle;
+
                 context.SaveChanges();
             }
 
@@ -542,5 +545,54 @@ namespace FootballAIGameWeb.Controllers.Api
                 return Ok(tournamentPlayer.PlayerPosition);
             }
         }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public IHttpActionResult GetTournamentInfo(int id)
+        {
+            using (var context = new ApplicationDbContext())
+            {
+                var tournament = context.Tournaments
+                    .Include(t => t.Players.Select(tp => tp.Player))
+                    .Include(t => t.Matches.Select(m => m.Player1))
+                    .Include(t => t.Matches.Select(m => m.Player2))
+                    .SingleOrDefault(t => t.Id == id);
+
+                if (tournament == null)
+                    return NotFound();
+
+                var playersDto = tournament.Players.Select(tp => new TournamentPlayerDto()
+                {
+                    Name = tp.Player.Name,
+                    Position = tp.PlayerPosition,
+                    Score = tp.Player.Score
+                }).OrderBy(p => p.Position).ThenByDescending(p => p.Score).ToList();
+
+
+                var matchesDto = tournament.Matches.Select(m => new MatchDto()
+                {
+                    Id = m.Id,
+                    Winner = m.Winner,
+                    Score = m.Score,
+                    Player1Name = m.Player1.Name,
+                    Player2Name = m.Player2.Name,
+                }).ToList();
+
+                var dto = new TournamentInfoDto()
+                {
+                    Players = playersDto,
+                    Matches = matchesDto,
+                    TournamentState = tournament.TournamentState
+                };
+
+                return Ok(dto);
+            }
+
+        }
+
+
+
+
+
     }
 }
