@@ -65,6 +65,7 @@ namespace FootballAIGameServer.Models
         /// The state of the player.
         /// </value>
         /// <seealso cref="PlayerState"/>
+        [Required]
         public PlayerState PlayerState { get; set; }
 
         /// <summary>

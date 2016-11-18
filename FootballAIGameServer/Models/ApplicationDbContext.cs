@@ -2,6 +2,7 @@
 using System.Data.Entity;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 
 namespace FootballAIGameServer.Models
@@ -52,7 +53,7 @@ namespace FootballAIGameServer.Models
         /// Initializes a new instance of the <see cref="ApplicationDbContext"/> class.
         /// </summary>
         public ApplicationDbContext()
-            : base("DefaultConnection")
+            : base("DefaultConnection", throwIfV1Schema: false)
         {
         }
 

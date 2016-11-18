@@ -48,9 +48,14 @@ namespace FootballAIGameServer
             // initialize random
             MatchSimulator.Random = new Random();
 
+            // plan tournaments
+            Console.WriteLine("Tournaments ");
+            TournamentSimulator.PlanNextTournaments();
+
             // start listening
             var manager = ConnectionManager.Instance;
-            manager.StartListening().Wait(); 
+            manager.StartListening().Wait();
+
         }
 
         /// <summary>
