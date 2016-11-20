@@ -124,6 +124,8 @@ namespace FootballAIGameServer
         /// </summary>
         public static Random Random { get; set; }
 
+        private int? TournamentId { get; set; }
+
         private GameState GameState { get; set; }
         private Match Match { get; set; }
         private int Ping1 { get; set; }
@@ -156,10 +158,12 @@ namespace FootballAIGameServer
         /// </summary>
         /// <param name="player1AiConnection">The player1 AI connection that will play the match.</param>
         /// <param name="player2AiConnection">The player2 AI connection that will play the match.</param>
-        public MatchSimulator(ClientConnection player1AiConnection, ClientConnection player2AiConnection)
+        /// <param name="tournamentId">The tournament Id. (optional)</param>
+        public MatchSimulator(ClientConnection player1AiConnection, ClientConnection player2AiConnection, int? tournamentId)
         {
             this.Player1AiConnection = player1AiConnection;
             this.Player2AiConnection = player2AiConnection;
+            this.TournamentId = tournamentId;
         }
 
         /// <summary>
@@ -355,6 +359,7 @@ namespace FootballAIGameServer
                 Match.Player2 = player2;
                 Match.Score = $"{CurrentScore1}:{CurrentScore2}";
                 Match.Winner = CurrentScore1 > CurrentScore2 ? 1 : CurrentScore1 < CurrentScore2 ? 2 : 0;
+                Match.TournamentId = TournamentId;
 
                 if (Message1.IsFaulted || !Player1AiConnection.IsActive)
                 {

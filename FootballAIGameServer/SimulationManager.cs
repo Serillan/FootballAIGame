@@ -13,7 +13,7 @@ namespace FootballAIGameServer
         /// <value>
         /// The list of currently running simulations.
         /// </value>
-        public static List<MatchSimulator> RunningSimulations { get; set; }
+        public static List<MatchSimulator> RunningSimulations { get; set; } = new List<MatchSimulator>();
 
         /// <summary>
         /// Cancels the game match in which a given player is.
@@ -40,10 +40,11 @@ namespace FootballAIGameServer
         /// <param name="ai1">The player1 AI name.</param>
         /// <param name="userName2">The player2 name.</param>
         /// <param name="ai2">The player2 AI name.</param>
+        /// <param name="tournamentId">The tournament Id. (optional)</param>
         /// <returns>
         /// "ok" if operation was successful; otherwise, error message
         /// </returns>
-        public static string StartMatch(string userName1, string ai1, string userName2, string ai2)
+        public static string StartMatch(string userName1, string ai1, string userName2, string ai2, int? tournamentId = null)
         {
             var manager = ConnectionManager.Instance;
             lock (manager.ActiveConnections)
@@ -62,10 +63,8 @@ namespace FootballAIGameServer
                 if (userName1 == userName2)
                     Console.WriteLine("User cannot challenge himself.");
 
-                var matchSimulator = new MatchSimulator(connection1, connection2);
+                var matchSimulator = new MatchSimulator(connection1, connection2, tournamentId);
 
-                if (RunningSimulations == null)
-                    RunningSimulations = new List<MatchSimulator>();
                 lock (RunningSimulations)
                 {
                     RunningSimulations.Add(matchSimulator);

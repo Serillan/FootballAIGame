@@ -20,7 +20,7 @@ namespace FootballAIGameServer
 
         private TimeSpan TimeUntilStart => StartTime - DateTime.Now;
 
-        public static List<TournamentSimulator> RunningTournaments { get; set; } 
+        public static List<TournamentSimulator> RunningTournaments { get; set; }
             = new List<TournamentSimulator>();
 
         public static void PlanNextTournaments()
@@ -50,24 +50,26 @@ namespace FootballAIGameServer
 
         public async Task PlanSimulation()
         {
-            Console.WriteLine($"Simulation {TournamentId} is being planned!");
+            Console.WriteLine($"Simulation of tournament {TournamentId} is being planned!");
+            await Task.Delay(10000);
+
 
             // sleep until 5 minutes before tournament
             if (TimeUntilStart.TotalMinutes > 5)
             {
                 //await Task.Delay(TimeUntilStart - TimeSpan.FromMinutes(5));
-                Console.WriteLine($"Simulation {TournamentId} is awaken 5 minutes before start!");
+                Console.WriteLine($"Simulation of tournament {TournamentId} is awaken 5 minutes before start!");
                 KickInactive();
             }
 
             // when tournament starts
             //if (TimeUntilStart.TotalSeconds > 0)
-                //await Task.Delay(TimeUntilStart);
-            await Task.Delay(10000);
+            //await Task.Delay(TimeUntilStart);
 
-            Console.WriteLine($"Simulation {TournamentId} is being simulated!");
+            Console.WriteLine($"Simulation of tournament {TournamentId} is being simulated!");
             KickInactive();
             await Simulate();
+            Console.WriteLine($"Simulation of tournament {TournamentId} ends!");
         }
 
         private async Task Simulate()
@@ -111,18 +113,28 @@ namespace FootballAIGameServer
                 context.SaveChanges();
             }
 
-            // while there is more than 0 player -> round simulation
-                while (players.Count > 0)
-                    await SimulateRound(players, tournament);
+            // while there is more than 1 player -> round simulation
+            while (players.Count > 1)
+                players = await SimulateRound(players, tournament);
 
-                // set state to finished
+            if (players.Count == 1)
+            {
+                var player = players.First();
+                player.PlayerPosition = 1;
+                player.Player.PlayerState = PlayerState.Idle;
+                SavePlayers(players);
+            }
 
-
-
-            
+            // set state to finished
+            using (var context = new ApplicationDbContext())
+            {
+                tournament = context.Tournaments.Single(t => t.Id == TournamentId);
+                tournament.TournamentState = TournamentState.Finished;
+                context.SaveChanges();
+            }
         }
 
-        private async Task SimulateRound(List<TournamentPlayer> players, Tournament tournament)
+        private async Task<List<TournamentPlayer>> SimulateRound(List<TournamentPlayer> players, Tournament tournament)
         {
             Console.WriteLine($"Tournament {TournamentId} : Simulating round.");
 
@@ -157,26 +169,58 @@ namespace FootballAIGameServer
                     firstPlayer = tournamentPlayer;
                 else // start new match
                 {
-                    SimulationManager.StartMatch(firstPlayer.Player.Name, firstPlayer.PlayerAi, 
-                        tournamentPlayer.Player.Name, tournamentPlayer.PlayerAi);
+                    SimulationManager.StartMatch(firstPlayer.Player.Name, firstPlayer.PlayerAi,
+                        tournamentPlayer.Player.Name, tournamentPlayer.PlayerAi, TournamentId);
                     // update player states
                     firstPlayer.Player.PlayerState = PlayerState.PlayingTournamentPlaying;
                     tournamentPlayer.Player.PlayerState = PlayerState.PlayingTournamentPlaying;
-
                     // add match to matches
                     matches.Add(SimulationManager.GetMatchSimulator(firstPlayer.Player.Name));
+                    firstPlayer = null;
                 }
             }
+
+            SavePlayers(players); // update states
 
             await Task.WhenAll(matches.Select(m => m.CurrentSimulationTask).ToArray());
 
             players.ForEach(p => p.Player.PlayerState = PlayerState.PlayingTournamentWaiting);
 
-            
+            // get looser position number
+            var exp = 1;
+            while (exp*2 < players.Count)
+                exp *= 2;
+            var looserPos = exp + 1; // ex. from 8. (2^3) to 5. (2^2+1) player they will have position 5
+
+            foreach (var matchSimulator in matches)
+            {
+                TournamentPlayer winner, looser;
+
+                if (matchSimulator.Winner != null)
+                {
+                    winner = players.First(p => p.Player.Name == matchSimulator.Winner);
+                    looser = matchSimulator.Player1AiConnection.PlayerName == matchSimulator.Winner
+                        ? players.First(p => p.Player.Name == matchSimulator.Player2AiConnection.PlayerName)
+                        : players.First(p => p.Player.Name == matchSimulator.Player1AiConnection.PlayerName);
+
+                    advancingPlayers.Add(winner);
+                    // todo set looser position
+                }
+                else
+                {
+                    var p1 = players.First(p => p.Player.Name == matchSimulator.Player1AiConnection.PlayerName);
+                    var p2 = players.First(p => p.Player.Name == matchSimulator.Player2AiConnection.PlayerName);
+                    var rndWinner = MatchSimulator.Random.Next(2);
+                    winner = rndWinner == 0 ? p1 : p2;
+                    looser = rndWinner == 0 ? p2 : p1;
+                }
+                
+                advancingPlayers.Add(winner);
+                looser.PlayerPosition = looserPos;
+            }
 
             SavePlayers(players);
-            // ...
-            
+            return advancingPlayers;
         }
 
         /// <summary>
@@ -197,6 +241,7 @@ namespace FootballAIGameServer
                     dbPlayer.Player.PlayerState = player.Player.PlayerState;
                     dbPlayer.PlayerPosition = player.PlayerPosition;
                 }
+                context.SaveChanges();
             }
         }
 
