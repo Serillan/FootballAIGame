@@ -94,6 +94,10 @@ namespace FootballAIGameServer.Models
         /// <summary>
         /// Tournament was closed because there were not enought players signed at start time.
         /// </summary>
-        NotEnoughtPlayersClosed
+        NotEnoughtPlayersClosed,
+        /// <summary>
+        /// Tournament was closed because there there was an error during it's simulation.
+        /// </summary>
+        ErrorClosed
     }
 }

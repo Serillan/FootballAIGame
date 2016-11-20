@@ -49,8 +49,8 @@ namespace FootballAIGameServer
             MatchSimulator.Random = new Random();
 
             // plan tournaments
-            Console.WriteLine("Tournaments ");
             TournamentSimulator.PlanNextTournaments();
+            Console.WriteLine("Tournaments planned.");
 
             // start listening
             var manager = ConnectionManager.Instance;
@@ -66,26 +66,26 @@ namespace FootballAIGameServer
         /// <returns></returns>
         private static bool ConsoleEventHandler(int eventType)
         {
-            if (eventType == 2 || eventType == 4) // if application is being closed
+            if (eventType != 2 && eventType != 4) return false; // if application is not being closed
+
+            var manager = ConnectionManager.Instance;
+            using (var context = new ApplicationDbContext())
             {
-                var manager = ConnectionManager.Instance;
-                using (var context = new ApplicationDbContext())
+                var players = context.Players.ToList();
+
+                foreach (var player in players)
                 {
-                    var players = context.Players.ToList();
-
-                    foreach (var player in players)
-                    {
-                        player.SelectedAi = null;
-                        player.ActiveAis = null;
-                        player.PlayerState = PlayerState.Idle; // todo show browser clients that error has occurred
-                    }
-
-                    context.SaveChanges();
+                    player.SelectedAi = null;
+                    player.ActiveAis = null;
+                    player.PlayerState = PlayerState.Idle; // TODO show browser clients that error has occurred
                 }
-                return false;
+
+                TournamentSimulator.CloseRunningTournaments(context);
+                
+                context.SaveChanges();
             }
-            // console closing event
             return false;
+            // console closing event
         }
 
         /// <summary>

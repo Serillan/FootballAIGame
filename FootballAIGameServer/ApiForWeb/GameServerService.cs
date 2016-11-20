@@ -80,36 +80,7 @@ namespace FootballAIGameServer.ApiForWeb
         /// </returns>
         public string StartGame(string userName1, string ai1, string userName2, string ai2)
         {
-            var manager = ConnectionManager.Instance;
-            lock (manager.ActiveConnections)
-            {
-                var connection1 = manager.ActiveConnections
-                    .FirstOrDefault(c => c.PlayerName == userName1 && c.AiName == ai1);
-                var connection2 = manager.ActiveConnections
-                    .FirstOrDefault(c => c.PlayerName == userName2 && c.AiName == ai2);
-
-                if (connection1 == null || connection2 == null)
-                    return "AI is no longer active.";
-
-                if (connection1.IsInMatch || connection2.IsInMatch)
-                    return "Player is already in a match";
-
-                if (userName1 == userName2)
-                    Console.WriteLine("User cannot challenge himself.");
-
-                var matchSimulator = new MatchSimulator(connection1, connection2);
-
-                if (MatchSimulator.RunningSimulations == null)
-                    MatchSimulator.RunningSimulations = new List<MatchSimulator>();
-                lock (MatchSimulator.RunningSimulations)
-                {
-                    MatchSimulator.RunningSimulations.Add(matchSimulator);
-                }
-
-                matchSimulator.SimulateMatch();
-
-                return "ok";
-            }
+            return SimulationManager.StartMatch(userName1, ai1, userName2, ai2);
         }
 
         /// <summary>
@@ -118,16 +89,7 @@ namespace FootballAIGameServer.ApiForWeb
         /// <param name="playerName">Name of the player.</param>
         public void CancelMatch(string playerName)
         {
-            lock (MatchSimulator.RunningSimulations)
-            {
-                foreach (var runningSimulation in MatchSimulator.RunningSimulations)
-                {
-                    if (runningSimulation.Player1AiConnection.PlayerName == playerName)
-                        runningSimulation.Player1CancelRequested = true;
-                    if (runningSimulation.Player2AiConnection.PlayerName == playerName)
-                        runningSimulation.Player2CancelRequested = true;
-                }
-            }
+            SimulationManager.CancelMatch(playerName);
         }
 
         /// <summary>
@@ -149,12 +111,10 @@ namespace FootballAIGameServer.ApiForWeb
         /// <returns></returns>
         public int GetCurrentMatchStep(string playerName)
         {
-            var match = MatchSimulator.RunningSimulations
+            var match = SimulationManager.RunningSimulations
                 .FirstOrDefault(m => m.Player1AiConnection.PlayerName == playerName ||
                                      m.Player2AiConnection.PlayerName == playerName);
-            if (match == null)
-                return 1500;
-            return match.CurrentStep;
+            return match?.CurrentStep ?? 1500;
         }
     }
 }

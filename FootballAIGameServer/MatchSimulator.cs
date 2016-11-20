@@ -66,6 +66,14 @@ namespace FootballAIGameServer
         #endregion
 
         /// <summary>
+        /// Gets or sets the current simulation task.
+        /// </summary>
+        /// <value>
+        /// The current simulation task.
+        /// </value>
+        public Task CurrentSimulationTask { get; private set; }
+
+        /// <summary>
         /// Gets the first player AI <see cref="ClientConnection"/>.
         /// </summary>
         /// <value>
@@ -90,6 +98,12 @@ namespace FootballAIGameServer
         public int CurrentStep { get; set; }
 
         /// <summary>
+        /// Gets or sets the winner. If the match has not yet ended or it ended
+        /// in draw, returns null.
+        /// </summary>
+        public string Winner { get; set; }
+
+        /// <summary>
         /// Gets or sets a value indicating whether first player has requested to cancel the match.
         /// </summary>
         /// <value>
@@ -104,14 +118,6 @@ namespace FootballAIGameServer
         /// <c>true</c> if second player requested to cancel the match; otherwise, <c>false</c>.
         /// </value>
         public bool Player2CancelRequested { get; set; }
-
-        /// <summary>
-        /// Gets or sets the list of currently running simulations.
-        /// </summary>
-        /// <value>
-        /// The list of currently running simulations.
-        /// </value>
-        public static List<MatchSimulator> RunningSimulations { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="System.Random"/> used for generating random numbers.
@@ -161,6 +167,16 @@ namespace FootballAIGameServer
         /// </summary>
         /// <returns>Task that will be completed with simulation.</returns>
         public async Task SimulateMatch()
+        {
+            CurrentSimulationTask = Simulate();
+            await CurrentSimulationTask;
+        }
+
+        /// <summary>
+        /// Simulates the match. <see cref="SimulateMatch"/> is it's public wrapper, that is used to set 
+        /// <see cref="CurrentSimulationTask"/> property.
+        /// </summary>
+        private async Task Simulate()
         {
             await ProcessSimulationStart();
 
@@ -331,8 +347,8 @@ namespace FootballAIGameServer
                              $"and {Player2AiConnection.PlayerName}:{Player2AiConnection.AiName}");
             using (var context = new ApplicationDbContext())
             {
-                var player1 = context.Players.SingleOrDefault(p => p.Name == Player1AiConnection.PlayerName);
-                var player2 = context.Players.SingleOrDefault(p => p.Name == Player2AiConnection.PlayerName);
+                var player1 = context.Players.Single(p => p.Name == Player1AiConnection.PlayerName);
+                var player2 = context.Players.Single(p => p.Name == Player2AiConnection.PlayerName);
                 player1.PlayerState = PlayerState.Idle;
                 player2.PlayerState = PlayerState.Idle;
                 Match.Player1 = player1;
@@ -366,9 +382,11 @@ namespace FootballAIGameServer
                 {
                     case 1:
                         player1.WonGames++;
+                        Winner = Player1AiConnection.PlayerName;
                         break;
                     case 2:
                         player2.WonGames++;
+                        Winner = Player2AiConnection.PlayerName;
                         break;
                 }
 
@@ -380,7 +398,7 @@ namespace FootballAIGameServer
 
                 context.SaveChanges();
 
-                RunningSimulations.Remove(this);
+                SimulationManager.RunningSimulations.Remove(this);
                 Player1AiConnection.IsInMatch = false;
                 Player2AiConnection.IsInMatch = false;
             }
