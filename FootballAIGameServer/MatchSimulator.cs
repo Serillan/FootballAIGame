@@ -31,7 +31,7 @@ namespace FootballAIGameServer
         /// <summary>
         /// The time in milliseconds that player AI has for generating action in one simulation step.
         /// </summary>
-        public const int PlayerTimeForOneStep = 100; // [ms]
+        public const int PlayerTimeForOneStep = 1000000; // [ms]
 
         /// <summary>
         /// The time in milliseconds of one simulation step.
@@ -292,20 +292,22 @@ namespace FootballAIGameServer
 
             try
             {
+                var receiveActionMessage1 = Player1AiConnection.ReceiveActionMessageAsync(step);
+                var receiveActionMessage2 = Player2AiConnection.ReceiveActionMessageAsync(step);
+
                 await Player1AiConnection.SendAsync("GET ACTION");
                 await Player1AiConnection.SendAsync(GameState, 1);
 
                 await Player2AiConnection.SendAsync("GET ACTION");
                 await Player2AiConnection.SendAsync(GameState, 2);
-
-                var receiveActionMessage1 = Player1AiConnection.ReceiveActionMessageAsync(step);
-                var receiveActionMessage2 = Player2AiConnection.ReceiveActionMessageAsync(step);
+                //Console.WriteLine($"{GameState.Step} sent!");
 
                 var getMessage1Task = Task.WhenAny(receiveActionMessage1, Task.Delay(Ping1 + PlayerTimeForOneStep));
                 var getMessage2Task = Task.WhenAny(receiveActionMessage2, Task.Delay(Ping2 + PlayerTimeForOneStep));
 
                 var getMessage1Result = await getMessage1Task;
                 var getMessage2Result = await getMessage2Task;
+                //Console.WriteLine($"{GameState.Step} received actions.");
 
                 if (Message1.IsFaulted || !Player1AiConnection.IsActive || Message2.IsFaulted ||
                     !Player2AiConnection.IsActive)

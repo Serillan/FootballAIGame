@@ -268,7 +268,7 @@ namespace FootballAIGameServer
 
             while (true) // while correct message is not received
             {
-                //Console.WriteLine($"{PlayerName} - receiving line");
+                //Console.WriteLine($"{PlayerName} - recieving line");
                 var firstLine = await ReadLineAsync();//await NetworkReader.ReadLineAsync();
                 //Console.WriteLine($"{PlayerName} - received line: {firstLine}");
 
@@ -335,7 +335,19 @@ namespace FootballAIGameServer
                 if (actionMessage?.Step == step)
                     return actionMessage;
                 else if (actionMessage?.Step > step)
+                {
+                    Console.WriteLine($"Wrong action received! Received {actionMessage.Step} instead of {step}");
                     return null;
+                }
+                else if (actionMessage?.Step < step)
+                {
+                    Console.WriteLine($"Wrong action received! Received {actionMessage.Step} instead of {step}");
+                    return null;
+                }
+                else
+                {
+                    Console.WriteLine($"Wrong action received! actionMessage.Step == null, expected step - {step}");
+                }
             }
         }
     }

@@ -169,6 +169,7 @@ namespace FootballAIGameServer
                     firstPlayer = tournamentPlayer;
                 else // start new match
                 {
+                    await Task.Delay(10000);
                     SimulationManager.StartMatch(firstPlayer.Player.Name, firstPlayer.PlayerAi,
                         tournamentPlayer.Player.Name, tournamentPlayer.PlayerAi, TournamentId);
                     // update player states
@@ -203,8 +204,6 @@ namespace FootballAIGameServer
                         ? players.First(p => p.Player.Name == matchSimulator.Player2AiConnection.PlayerName)
                         : players.First(p => p.Player.Name == matchSimulator.Player1AiConnection.PlayerName);
 
-                    advancingPlayers.Add(winner);
-                    // todo set looser position
                 }
                 else
                 {
@@ -217,6 +216,7 @@ namespace FootballAIGameServer
                 
                 advancingPlayers.Add(winner);
                 looser.PlayerPosition = looserPos;
+                looser.Player.PlayerState = PlayerState.Idle;
             }
 
             SavePlayers(players);
