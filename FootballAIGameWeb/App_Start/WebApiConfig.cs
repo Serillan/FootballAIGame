@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Web.Http;
+using FootballAIGameWeb.Helpers;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 
 namespace FootballAIGameWeb
@@ -21,6 +25,7 @@ namespace FootballAIGameWeb
             settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             settings.ContractResolver = new CamelCasePropertyNamesContractResolver();
             settings.Formatting = Formatting.Indented;
+            settings.Converters.Add(new CustomDateTimeConverter());
 
             // configure routing
             config.MapHttpAttributeRoutes();
@@ -44,5 +49,6 @@ namespace FootballAIGameWeb
 
 
         }
+
     }
 }

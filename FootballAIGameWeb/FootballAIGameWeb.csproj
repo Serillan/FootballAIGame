@@ -193,9 +193,12 @@
     <Compile Include="Dtos\MatchDto.cs" />
     <Compile Include="Dtos\TournamentInfoDto.cs" />
     <Compile Include="Dtos\TournamentPlayerDto.cs" />
+    <Compile Include="Dtos\TournamentTableEntryDto.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Helpers\CustomDateTimeConverter.cs" />
+    <Compile Include="Helpers\JoinedTournamentComparer.cs" />
     <Compile Include="Migrations\201608091238327_InitialMigration.cs" />
     <Compile Include="Migrations\201608091238327_InitialMigration.Designer.cs">
       <DependentUpon>201608091238327_InitialMigration.cs</DependentUpon>

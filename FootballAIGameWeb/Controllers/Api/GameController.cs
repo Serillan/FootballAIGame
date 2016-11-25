@@ -12,6 +12,7 @@ using System.Web.Http;
 using System.Web.UI.WebControls;
 using FootballAIGameWeb.Dtos;
 using FootballAIGameWeb.GameServerService;
+using FootballAIGameWeb.Helpers;
 using FootballAIGameWeb.Models;
 using Microsoft.AspNet.Identity;
 using Newtonsoft.Json;
@@ -543,6 +544,43 @@ namespace FootballAIGameWeb.Controllers.Api
                     return BadRequest();
 
                 return Ok(tournamentPlayer.PlayerPosition);
+            }
+        }
+
+        [HttpGet]
+        public IHttpActionResult GetJoinedTournaments()
+        {
+            using (var context = new ApplicationDbContext())
+            {
+                var player = GetCurrentPlayer(context);
+                var joinedTournaments = context.Tournaments
+                    .Include(t => t.Players.Select(tp => tp.Player))
+                    .AsEnumerable() // to use comparison with player (only allowed in memory!)
+                    .Where(t => t.Players.Any(tp => tp.Player == player))
+                    .ToList();
+
+                joinedTournaments.Sort(new JoinedTournamentComparer());
+                
+                // unstarted + 5 newest finished
+                var i = 0;
+                joinedTournaments = joinedTournaments
+                    .TakeWhile(t => t.TournamentState == TournamentState.Unstarted ||
+                                    i++ < 5).ToList();
+
+                var joinedTournamentsDtos = joinedTournaments
+                    .Select(t => new TournamentTableEntryDto()
+                        {
+                           Id = t.Id,
+                           StartTime = t.StartTime,
+                           TournamentState = t.TournamentState,
+                           Name = t.Name,
+                           MaximumNumberOfPlayers = t.MaximumNumberOfPlayers,
+                           CurrentNumberOfPlayers = t.Players.Count,
+                           CurrentPlayerJoinedAi = t.Players.Single(tp => tp.Player.Name == player.Name).PlayerAi
+                        }
+                    );
+
+                return Ok(joinedTournamentsDtos);
             }
         }
 
