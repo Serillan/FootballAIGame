@@ -148,19 +148,19 @@
                         url: "/api/game/gettournamentinfo/@Model.Tournament.Id",
                         method: "get",
                         success: function(response) {
-                            var playerTableBody = '';
+                            var playersTableBody = '';
                             for (var i = 0; i < response.players.length; i++) {
                                 var player = response.players[i];
                                 if (player.position === null)
                                     player.position = '';     // don't show null
-                                playerTableBody +=
+                                playersTableBody +=
                                     '<tr class="clickable-row" data-href="/Players/Details/' + player.name +'">' +
                                         '<td>' + player.position + '</td>' +
                                         '<td>' + player.name + '</td>' +
                                         '<td>' + player.score + '</td>' +
                                      '</tr>';
                             }
-                            $("#players-body").html(playerTableBody);
+                            $("#players-body").html(playersTableBody);
 
                             var matchesTableBody = '';
                             for (var i = 0; i < response.matches.length; i++) {

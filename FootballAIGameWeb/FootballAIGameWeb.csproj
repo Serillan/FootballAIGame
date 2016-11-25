@@ -296,6 +296,10 @@
     <Compile Include="Migrations\201611071956588_AddPlayerAiToTournamentPlayer.Designer.cs">
       <DependentUpon>201611071956588_AddPlayerAiToTournamentPlayer.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201611201231237_AddTournamentReferenceToMatch.cs" />
+    <Compile Include="Migrations\201611201231237_AddTournamentReferenceToMatch.Designer.cs">
+      <DependentUpon>201611201231237_AddTournamentReferenceToMatch.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\ApplicationDbContext.cs" />
     <Compile Include="Models\Challenge.cs" />
@@ -759,6 +763,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201611071956588_AddPlayerAiToTournamentPlayer.resx">
       <DependentUpon>201611071956588_AddPlayerAiToTournamentPlayer.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201611201231237_AddTournamentReferenceToMatch.resx">
+      <DependentUpon>201611201231237_AddTournamentReferenceToMatch.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

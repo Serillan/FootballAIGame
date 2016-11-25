@@ -135,5 +135,9 @@ namespace FootballAIGameWeb.Models
         /// </summary>
         /// <value>1 if Player1 won, 2 if Player2 won, otherwise (draw) returns 0.</value>
         public int Winner { get; set; }
+
+        public int? TournamentId { get; set; }
+
+        public Tournament Tournament { get; set; }
     }
 }

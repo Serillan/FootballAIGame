@@ -105,5 +105,10 @@ namespace FootballAIGameWeb.Controllers
 
             return View("Details", viewModel);
         }
+
+        public ActionResult TournamentMatches()
+        {
+            return PartialView("_TournanamentMatches");
+        }
     }
 }

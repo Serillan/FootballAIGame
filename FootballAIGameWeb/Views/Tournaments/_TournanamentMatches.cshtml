@@ -4,12 +4,12 @@
 <table class="table table-responsive table-hover">
     <thead>
         <tr>
-            <th>Score</th>
-            <th>Player 1</th>
-            <th>Player 2</th>
+            <th class="text-center">Score</th>
+            <th class="text-center">Player 1</th>
+            <th class="text-center">Player 2</th>
         </tr>
     </thead>
-    <tbody>
+    <tbody id="matches-body">
         @foreach (var match in Model.Tournament.Matches)
             {
             <tr class="clickable-row" data-href="/matches/details/@match.Id">

@@ -31,7 +31,6 @@
     <div class="container col-sm-5 text-center" style="margin-top: 2em; text-align: center">
         <h3>Score: @Model.Player.Score</h3>
         <button id="random" type="submit" class="btn btn-primary" style="white-space: normal; margin: 1em; margin-top: 4em">Match against random opponent</button>
-        
         <div class="col-sm-12" style="margin-top: 1em">
             <button autofocus id="challenge" type="submit" class="btn btn-default" style="margin: 1em auto">Challenge Player</button>
             <div class="form-group text-center col-sm-12" style="margin: 0 auto">
@@ -274,7 +273,7 @@
                 $(document).on("mousedown", ".accept-challenge", processChallenge);
                 $(document).on("mousedown", ".decline-challenge", declineChallenge);
                 $(document).on("mousedown", "table#ai-table tr.selectable-row", aiTableClickHandler);
-
+                
                 // challenges polling
                 var ajaxCallx = function () {
                     $.ajax({
@@ -311,6 +310,7 @@
                                         response[i] +
                                         '</td></tr>';
                                 } else {
+                                    
                                     newTableBody = newTableBody +
                                         '<tr class="selectable-row"><td>' +
                                         response[i] +

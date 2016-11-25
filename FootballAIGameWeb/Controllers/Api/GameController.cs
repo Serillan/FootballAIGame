@@ -590,9 +590,5 @@ namespace FootballAIGameWeb.Controllers.Api
 
         }
 
-
-
-
-
     }
 }
