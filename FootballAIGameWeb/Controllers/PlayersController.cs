@@ -4,6 +4,7 @@ using System.Data.Entity;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using FootballAIGameWeb.Helpers;
 using FootballAIGameWeb.Models;
 using FootballAIGameWeb.ViewModels.Players;
 using Microsoft.AspNet.Identity;
@@ -80,13 +81,7 @@ namespace FootballAIGameWeb.Controllers
             var activeAIs = CurrentPlayer?.ActiveAis?.Split(';').ToList() ?? new List<string>();
 
             var orderedPlayers = _context.Players.OrderByDescending(p => p.Score).ToList();
-            var rank = 1;
-            foreach (var orderedPlayer in orderedPlayers)
-            {
-                if (orderedPlayer.UserId == player.UserId)
-                    break;
-                rank++;
-            }
+            var rank = 1 + orderedPlayers.TakeWhile(orderedPlayer => orderedPlayer.UserId != player.UserId).Count();
 
             var lastMatches = _context.Matches
                 .Include(m => m.Player1)
@@ -95,7 +90,14 @@ namespace FootballAIGameWeb.Controllers
                 .OrderByDescending(m => m.Time)
                 .Take(5).ToList();
 
-            var lastTournaments = new List<Tournament>(); // TODO
+            var lastTournaments = _context.Tournaments
+                .Include(t => t.Players.Select(tp => tp.Player))
+                .AsEnumerable() // to use comparison with player (only allowed in memory!)
+                .Where(t => t.TournamentState == TournamentState.Finished && 
+                            t.Players.Any(tp => tp.Player == player))
+                .ToList();
+
+            lastTournaments.Sort(new JoinedTournamentComparer());
 
             var viewModel = new PlayerDetailsViewModel()
             {

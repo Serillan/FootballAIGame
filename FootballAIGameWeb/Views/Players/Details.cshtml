@@ -76,12 +76,22 @@
     <h3>Last Tournaments</h3>
     <table class="table table-responsive table-hover">
         <thead>
-            <tr>
-                <th>Time</th>
-                <th>Name</th>
-                <th>Position</th>
-            </tr>
+        <tr>
+            <th class="text-center">Time</th>
+            <th class="text-center">Name</th>
+            <th class="text-center">Position</th>
+        </tr>
         </thead>
+        <tbody>
+            @foreach (var tournament in Model.LastTournaments)
+            {
+                <tr class="clickable-row" data-href="/Tournaments/Details/@tournament.Id">
+                    <td>@tournament.StartTime</td>
+                    <td>@tournament.Name</td>
+                    <td>@tournament.Players.Single(t => t.Player.Name == Model.CurrentPlayer.Name).PlayerPosition</td>
+                </tr>
+            }
+        </tbody>
     </table>
 </div>
 
