@@ -17,7 +17,7 @@ namespace FootballAIGameWeb.Migrations
             AutomaticMigrationsEnabled = false;
         }
 
-        protected override void Seed(FootballAIGameWeb.Models.ApplicationDbContext context)
+        protected override void Seed(ApplicationDbContext context)
         {
             //  This method will be called after migrating to the latest version.
 
@@ -41,22 +41,32 @@ namespace FootballAIGameWeb.Migrations
                 manager.Create(role);
             }
 
-            // add all admin roles to default admin (if the admin exists)
-            if (context.Users.Any(u => u.UserName == "admin"))
+            // default admin
+            var adminName = "admin";
+            var adminPassword = "admin28";
+            var adminRoles = new List<string>() { "TournamentAdmin" };
+
+            // create default admin
+            if (!context.Users.Any(u => u.UserName == adminName))
             {
                 var store = new UserStore<User>(context);
                 var manager = new UserManager<User>(store);
-                var admin = context.Users.Single(u => u.UserName == "admin");
+                var user = new User { UserName = adminName }; // email is not set yet!
+                manager.Create(user, adminPassword);
+                context.Players.Add(new Player(user));
+            }
 
-                // add admin to all admin roles
-                var adminRoles = new List<string>() {"TournamentAdmin"};
-
+            // give all admin roles to the default admin
+            var admin = context.Users.SingleOrDefault(u => u.UserName == adminName);
+            if (admin != null)
+            {
+                var store = new UserStore<User>(context);
+                var manager = new UserManager<User>(store);
                 foreach (var adminRole in adminRoles)
                 {
                     if (!manager.IsInRole(admin.Id, adminRole))
                         manager.AddToRole(admin.Id, adminRole);
                 }
-                
             }
         }
     }

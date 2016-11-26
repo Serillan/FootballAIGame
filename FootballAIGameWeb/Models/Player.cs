@@ -92,6 +92,27 @@ namespace FootballAIGameWeb.Models
         /// </value>
         public int WonTournaments { get; set; }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Player"/> class.
+        /// </summary>
+        /// <param name="user">The user.</param>
+        public Player(User user)
+        {
+            UserId = user.Id;
+            Name = user.UserName;
+            PlayerState = PlayerState.Idle;
+            Score = 0;
+            WonGames = 0;
+            WonTournaments = 0;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Player"/> class.
+        /// Parameterless constructor must be present for entity framework to work correctly!
+        /// </summary>
+        public Player()
+        {
+        }
     }
 
     public enum PlayerState

@@ -10,6 +10,7 @@ using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using FootballAIGameWeb.Models;
 using FootballAIGameWeb.ViewModels.Account;
+using Microsoft.AspNet.Identity.EntityFramework;
 
 namespace FootballAIGameWeb.Controllers
 {
@@ -171,15 +172,7 @@ namespace FootballAIGameWeb.Controllers
                     // create Player object for this User
                     using (var context = new ApplicationDbContext())
                     {
-                        context.Players.Add(new Player()
-                        {
-                            UserId = user.Id,
-                            Name = user.UserName,
-                            PlayerState = PlayerState.Idle,
-                            Score = 0,
-                            WonGames = 0,
-                            WonTournaments = 0,
-                        });
+                        context.Players.Add(new Player(user));
                         context.SaveChanges();
                     }
 
