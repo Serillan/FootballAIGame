@@ -60,16 +60,18 @@ namespace FootballAIGameWeb.Controllers
         {
             var viewModel = _context.Tournaments
                 .Include(t => t.Players)
-                .Where(t => t.TournamentState != TournamentState.Unstarted);
+                .Where(t => t.TournamentState != TournamentState.Unstarted &&
+                            t.TournamentState != TournamentState.Running);
 
             return View(viewModel);
         }
 
-        public ActionResult Next()
+        public ActionResult Current()
         {
             var viewModel = _context.Tournaments
                 .Include(t => t.Players)
-                .Where(t => t.TournamentState == TournamentState.Unstarted);
+                .Where(t => t.TournamentState == TournamentState.Unstarted || 
+                            t.TournamentState == TournamentState.Running);
 
             return View(viewModel);
         }
@@ -89,17 +91,19 @@ namespace FootballAIGameWeb.Controllers
 
             if (tournament == null)
                 return HttpNotFound();
+
             tournament.Players = 
-                tournament.Players.OrderBy(p => p.PlayerPosition).ToList();
+                tournament.Players.OrderBy(p => p.PlayerPosition)
+                .ThenByDescending(p => p.Player.Score).ToList();
 
             var activeAIs = CurrentPlayer?.ActiveAis?.Split(';').ToList() ?? new List<string>();
             var currentTournamentPlayer = tournament.Players.SingleOrDefault(tp => tp.Player == CurrentPlayer);
-                
+            
             var viewModel = new TournamentDetailsViewModel()
             {
                 Tournament = tournament,
                 ActiveAIs = activeAIs,
-                CurrentPlayer = this.CurrentPlayer,
+                CurrentPlayer = CurrentPlayer,
                 CurrentTournamentPlayer = currentTournamentPlayer
             };
 

@@ -672,7 +672,7 @@
     <Content Include="Views\Home\Protocol.cshtml" />
     <Content Include="Views\Home\Restrictions.cshtml" />
     <Content Include="Views\Projects\CSharp.cshtml" />
-    <Content Include="Views\Tournaments\Next.cshtml" />
+    <Content Include="Views\Tournaments\Current.cshtml" />
     <Content Include="Views\Tournaments\_TournanamentMatches.cshtml" />
     <Content Include="Views\Tournaments\_TournamentJoin.cshtml" />
     <Content Include="Views\Home\PlayingTournament.cshtml" />
