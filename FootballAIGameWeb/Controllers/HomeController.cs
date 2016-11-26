@@ -73,7 +73,8 @@ namespace FootballAIGameWeb.Controllers
             {
                 NextTournaments = _context.Tournaments
                     .Include(t => t.Players)
-                    .Where(t => t.TournamentState == TournamentState.Unstarted)
+                    .Where(t => t.TournamentState == TournamentState.Unstarted ||
+                                t.TournamentState == TournamentState.Running)
                     .OrderBy(t => t.StartTime)
                     .ToList(),
 

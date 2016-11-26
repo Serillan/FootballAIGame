@@ -628,5 +628,28 @@ namespace FootballAIGameWeb.Controllers.Api
 
         }
 
+        [HttpDelete]
+        [Authorize(Roles = RolesNames.TournamentAdmin)]
+        public IHttpActionResult DeleteTournament(int id)
+        {
+            using (var context = new ApplicationDbContext())
+            {
+                var tournament = context.Tournaments.SingleOrDefault(t => t.Id == id);
+                if (tournament == null)
+                    return BadRequest("The tournament doesn't exist.");
+                // TODO let server know (if the server is not yet running it won't start the tournament)
+                if (tournament.TournamentState == TournamentState.Running) // if it was already running
+                    return BadRequest("The tournament has already started and cannot be deleted anymore.");
+
+                // remove tournament matches (though there shouldn't be any!)
+                context.Matches.RemoveRange(
+                    context.Matches.Where(m => m.TournamentId == id));
+
+                context.Tournaments.Remove(tournament); // todo check if tournamentplayers are deleted
+                context.SaveChanges();
+                return Ok();
+            }
+        }
+
     }
 }

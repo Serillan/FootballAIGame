@@ -73,7 +73,7 @@ namespace FootballAIGameWeb.Controllers
                 .Where(t => t.TournamentState == TournamentState.Unstarted || 
                             t.TournamentState == TournamentState.Running);
 
-            return View(viewModel);
+            return User.IsInRole(RolesNames.TournamentAdmin) ? View("CurrentForAdmin", viewModel) : View(viewModel);
         }
 
         /// <summary>
@@ -113,6 +113,29 @@ namespace FootballAIGameWeb.Controllers
         public ActionResult TournamentMatches()
         {
             return PartialView("_TournanamentMatches");
+        }
+
+        [Authorize(Roles = RolesNames.TournamentAdmin)]
+        public ActionResult ManageReccuring()
+        {
+            var viewModel = _context.Tournaments
+                .Include(t => t.Players)
+                .Where(t => t.TournamentState == TournamentState.Unstarted ||
+                            t.TournamentState == TournamentState.Running);
+
+            return View(viewModel);
+        }
+
+        [Authorize(Roles = RolesNames.TournamentAdmin)]
+        public ActionResult Create()
+        {
+            return View();
+        }
+
+        [Authorize(Roles = RolesNames.TournamentAdmin)]
+        public ActionResult CreateReccuring()
+        {
+            return View();
         }
     }
 }

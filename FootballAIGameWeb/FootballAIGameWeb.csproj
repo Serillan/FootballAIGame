@@ -308,6 +308,7 @@
     <Compile Include="Models\Challenge.cs" />
     <Compile Include="Models\Match.cs" />
     <Compile Include="Models\Player.cs" />
+    <Compile Include="Models\RoleName.cs" />
     <Compile Include="Models\Tournament.cs" />
     <Compile Include="Models\TournamentPlayer.cs" />
     <Compile Include="Models\User.cs" />
@@ -676,6 +677,10 @@
     <Content Include="Views\Tournaments\_TournanamentMatches.cshtml" />
     <Content Include="Views\Tournaments\_TournamentJoin.cshtml" />
     <Content Include="Views\Home\PlayingTournament.cshtml" />
+    <Content Include="Views\Tournaments\CurrentForAdmin.cshtml" />
+    <Content Include="Views\Tournaments\ManageReccuring.cshtml" />
+    <Content Include="Views\Tournaments\Create.cshtml" />
+    <Content Include="Views\Tournaments\CreateReccuring.cshtml" />
     <None Include="Web.Production.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
