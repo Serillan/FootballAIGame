@@ -20,7 +20,10 @@ namespace FootballAIGameWeb
                         "~/Scripts/datatables/datatables.bootstrap.js",
                         "~/Scripts/toastr.js",
                         "~/Scripts/jquery-editable-select.js",
-                        "~/Scripts/jquery.binarytransport.js"));
+                        "~/Scripts/jquery.binarytransport.js",
+                        "~/Scripts/moment.js",
+                        "~/Scripts/moment-with-locales.js",
+                        "~/Scripts/bootstrap-datetimepicker.js"));
 
             bundles.Add(new ScriptBundle("~/bundles/custom").Include(
                         "~/Scripts/CustomScripts/clickable-row.js",
@@ -38,7 +41,8 @@ namespace FootballAIGameWeb
                       "~/Content/bootstrap-cerulean.css",
                       "~/Content/toastr.css",
                       "~/Content/site.css",
-                      "~/Content/jquery-editable-select.css"));
+                      "~/Content/jquery-editable-select.css",
+                      "~/Content/bootstrap-datetimepicker-build.less"));
         }
     }
 }

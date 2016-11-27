@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Web;
+using System.Web.Http.Results;
 using System.Web.Mvc;
 using FootballAIGameWeb.Models;
 using FootballAIGameWeb.ViewModels.Tournaments;
@@ -132,10 +133,28 @@ namespace FootballAIGameWeb.Controllers
             return View();
         }
 
+        [HttpPost]
+        [Authorize(Roles = RolesNames.TournamentAdmin)]
+        [ValidateAntiForgeryToken]
+        public ActionResult Create(Tournament tournament)
+        {
+            if (ModelState.IsValid)
+            {
+                _context.Tournaments.Add(tournament);
+                _context.SaveChanges();
+                return RedirectToAction("Current");
+            }
+
+            // If we got this far, something failed, redisplay form
+            return View(tournament);
+        }
+
         [Authorize(Roles = RolesNames.TournamentAdmin)]
         public ActionResult CreateReccuring()
         {
             return View();
         }
+
+
     }
 }

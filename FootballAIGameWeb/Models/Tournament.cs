@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Web;
@@ -22,7 +23,7 @@ namespace FootballAIGameWeb.Models
         /// <value>
         /// The tournament name.
         /// </value>
-        [Required]
+        [Required, DisplayName("Name")]
         public string Name { get; set; }
 
         /// <summary>
@@ -40,6 +41,7 @@ namespace FootballAIGameWeb.Models
         /// <value>
         /// The start time.
         /// </value>
+        [DisplayName("Start Time")]
         public DateTime StartTime { get; set; }
 
         /// <summary>
@@ -48,6 +50,7 @@ namespace FootballAIGameWeb.Models
         /// <value>
         /// The maximum number of players.
         /// </value>
+        [DisplayName("Maximum Number of Players")]
         public int MaximumNumberOfPlayers { get; set; }
 
         /// <summary>
@@ -57,6 +60,7 @@ namespace FootballAIGameWeb.Models
         /// <value>
         /// The minimum number of players.
         /// </value>
+        [DisplayName("Minimum Number of Players")]
         public int MinimumNumberOfPlayers { get; set; }
 
         /// <summary>

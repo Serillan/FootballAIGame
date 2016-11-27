@@ -36,7 +36,7 @@
             <td>@(tournament.TournamentState == TournamentState.Running ? "Running" : "Unstarted")</td>
             @if (tournament.TournamentState == TournamentState.Unstarted)
             {
-                <td id="delete" data-tournament-id="@tournament.Id" class="text-center"><a role="button">Delete</a></td>
+                <td class="text-center"><a class="delete" data-tournament-id="@tournament.Id" role="button">Delete</a></td>
             }
             <td><a href="Details/@tournament.Id">Details</a></td>
         </tr>
@@ -50,7 +50,7 @@
                 "order": [[0, "asc"]] // oldest first (the first that will start)
             });
 
-            $("#delete").on("click", function () {
+            $(".delete").on("click", function () {
                 var row = $(this).closest("tr");
                 var tournamentId = $(this).attr("data-tournament-id");
                 $.ajax({
@@ -60,8 +60,9 @@
                         toastr.success("The tournament was deleted.");
                         row.remove();
                     },
-                    error: function (response) {
-                        toastr.error(response);
+                    error: function (xhr) {
+                        var json = JSON.parse(xhr.responseText);
+                        toastr.error(json.message);
                     }
                 });
             });

@@ -95,8 +95,9 @@
                                 success: function () {
                                     location.reload();
                                 },
-                                error: function (xhr, status, error) {
-                                    toastr.error(xhr.responseText.message);
+                                error: function (xhr) {
+                                    var json = JSON.parse(xhr.responseText);
+                                    toastr.error(json.message);
                                 }
                             });
                         });
@@ -110,8 +111,9 @@
                                 success: function () {
                                     location.reload();
                                 },
-                                error: function (xhr, status, error) {
-                                    toastr.error(xhr.responseText.message);
+                                error: function (xhr) {
+                                    var json = JSON.parse(xhr.responseText);
+                                    toastr.error(json.message);
                                 }
                             });
                         });
