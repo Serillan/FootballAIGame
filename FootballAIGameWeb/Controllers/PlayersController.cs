@@ -59,9 +59,19 @@ namespace FootballAIGameWeb.Controllers
         /// <returns>The index matches view.</returns>
         public ActionResult Index()
         {
-            var viewModel = _context.Players.ToList();
+            if (User.IsInRole(RolesNames.MainAdmin))
+            {
+                var viewModel = _context.Players
+                    .Include(p => p.User.Roles)
+                    .ToList();
 
-            return View(viewModel);
+                return View("IndexForAdmin", viewModel);
+            }
+            else
+            {
+                var viewModel = _context.Players.ToList();
+                return View(viewModel);
+            }
         }
 
         /// <summary>

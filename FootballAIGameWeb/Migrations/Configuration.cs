@@ -41,10 +41,18 @@ namespace FootballAIGameWeb.Migrations
                 manager.Create(role);
             }
 
+            if (!context.Roles.Any(r => r.Name == RolesNames.MainAdmin))
+            {
+                var store = new RoleStore<IdentityRole>(context);
+                var manager = new RoleManager<IdentityRole>(store);
+                var role = new IdentityRole { Name = RolesNames.MainAdmin };
+                manager.Create(role);
+            }
+
             // default admin
             var adminName = "admin";
             var adminPassword = "admin28";
-            var adminRoles = new List<string>() { RolesNames.TournamentAdmin };
+            var adminRoles = new List<string>() { RolesNames.MainAdmin, RolesNames.TournamentAdmin };
 
             // create default admin
             if (!context.Users.Any(u => u.UserName == adminName))

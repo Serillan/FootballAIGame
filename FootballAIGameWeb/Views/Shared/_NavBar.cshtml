@@ -10,9 +10,30 @@
         </div>
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-                <li>@Html.ActionLink("About", "About", "Home")</li>
-                <li>@Html.ActionLink("How to play", "HowToPlay", "Home")</li>
-                <li>@Html.ActionLink("Statistics", "Statistics", "Home")</li>
+                <li>@Html.ActionLink("Players", "Index", "Players")</li>
+                <li>@Html.ActionLink("Matches", "Index", "Matches")</li>
+
+                <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                        Tournaments
+                        <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li>@Html.ActionLink("Current", "Current", "Tournaments")</li>
+                        <li>@Html.ActionLink("Finished", "Index", "Tournaments")</li>
+                    </ul>
+                </li>
+                <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                        About
+                        <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li>@Html.ActionLink("How to play", "HowToPlay", "Home")</li>
+                        <li>@Html.ActionLink("About", "About", "Home")</li>
+                    </ul>
+                </li>
+
             </ul>
             @Html.Partial("_LoginPartial")
         </div>

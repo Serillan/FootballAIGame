@@ -765,6 +765,7 @@
     <Content Include="Views\Tournaments\ManageReccuring.cshtml" />
     <Content Include="Views\Tournaments\Create.cshtml" />
     <Content Include="Views\Tournaments\CreateReccuring.cshtml" />
+    <Content Include="Views\Players\IndexForAdmin.cshtml" />
     <None Include="Web.Production.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

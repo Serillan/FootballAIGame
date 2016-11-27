@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.ServiceModel;
 using System.Threading;
+using System.Web;
 using System.Web.Http;
 using System.Web.UI.WebControls;
 using FootballAIGameWeb.Dtos;
@@ -15,6 +16,9 @@ using FootballAIGameWeb.GameServerService;
 using FootballAIGameWeb.Helpers;
 using FootballAIGameWeb.Models;
 using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.Owin;
+using Microsoft.AspNet.Identity.EntityFramework;
+using Microsoft.Owin.Security;
 using Newtonsoft.Json;
 
 namespace FootballAIGameWeb.Controllers.Api
@@ -655,5 +659,42 @@ namespace FootballAIGameWeb.Controllers.Api
             }
         }
 
+        [Route("api/game/togglerole/{userId}/{roleName}")]
+        [HttpPut]
+        [Authorize(Roles = RolesNames.MainAdmin)]
+        public IHttpActionResult ToggleRole(string userId, string roleName)
+        {
+            using (var context = new ApplicationDbContext())
+            {
+                var user = context.Users.SingleOrDefault(u => u.Id == userId);
+                var roleExists = context.Roles.Any(r => r.Name == roleName);
+                if (user == null || !roleExists)
+                    return NotFound();
+
+                var userStore = new UserStore<User>(context);
+                var userManager = new UserManager<User>(userStore);
+                if (!userManager.IsInRole(userId, roleName))
+                    userManager.AddToRole(userId, roleName);
+                else
+                    userManager.RemoveFromRole(userId, roleName);
+
+                context.SaveChanges();
+
+                // if it's current user (that has called this service), relog him (for changes to take effect)
+                if (user == GetCurrentPlayer(context).User)
+                {
+                    var authenticationManager = HttpContext.Current.GetOwinContext().Authentication;
+
+                    //Log the user out
+                    authenticationManager.SignOut();
+
+                    //Log the user back in
+                    var identity = userManager.CreateIdentity(user, DefaultAuthenticationTypes.ApplicationCookie);
+                    authenticationManager.SignIn(new AuthenticationProperties() {IsPersistent = true}, identity);
+                }
+
+                return Ok();
+            }
+        }
     }
 }
