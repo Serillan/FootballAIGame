@@ -12,7 +12,7 @@
     <tbody id="matches-body">
         @foreach (var match in Model.Tournament.Matches)
             {
-            <tr class="clickable-row" data-href="/matches/details/@match.Id">
+            <tr class="clickable-row" data-href="/Matches/Details/@match.Id">
                 <td>@match.Score</td>
                 @if (match.Winner == 1)
                 {

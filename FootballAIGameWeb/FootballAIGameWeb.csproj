@@ -303,13 +303,19 @@
     <Compile Include="Migrations\201611201231237_AddTournamentReferenceToMatch.Designer.cs">
       <DependentUpon>201611201231237_AddTournamentReferenceToMatch.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201611280204151_AddReccuringTournament.cs" />
+    <Compile Include="Migrations\201611280204151_AddReccuringTournament.Designer.cs">
+      <DependentUpon>201611280204151_AddReccuringTournament.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\ApplicationDbContext.cs" />
     <Compile Include="Models\Challenge.cs" />
     <Compile Include="Models\Match.cs" />
     <Compile Include="Models\Player.cs" />
+    <Compile Include="Models\ReccuringTournament.cs" />
     <Compile Include="Models\RoleName.cs" />
     <Compile Include="Models\Tournament.cs" />
+    <Compile Include="Models\TournamentBase.cs" />
     <Compile Include="Models\TournamentPlayer.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -504,6 +510,7 @@
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
     <Content Include="Content\bootstrap-superhero.css" />
+    <Content Include="Scripts\bootbox.min.js" />
     <Content Include="Scripts\bootstrap-datetimepicker.js" />
     <Content Include="Scripts\bootstrap-datetimepicker.min.js" />
     <Content Include="Scripts\bootstrap.js" />
@@ -859,6 +866,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201611201231237_AddTournamentReferenceToMatch.resx">
       <DependentUpon>201611201231237_AddTournamentReferenceToMatch.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201611280204151_AddReccuringTournament.resx">
+      <DependentUpon>201611280204151_AddReccuringTournament.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

@@ -44,7 +44,7 @@
         <tbody>
             @foreach (var match in Model.LastMatches)
             {
-                <tr class="clickable-row" data-href="/matches/details/@match.Id">
+                <tr class="clickable-row" data-href="/Matches/Details/@match.Id">
                     <td>@match.Time</td>
                     @if (match.Winner == 1)
                 {

@@ -119,11 +119,7 @@ namespace FootballAIGameWeb.Controllers
         [Authorize(Roles = RolesNames.TournamentAdmin)]
         public ActionResult ManageReccuring()
         {
-            var viewModel = _context.Tournaments
-                .Include(t => t.Players)
-                .Where(t => t.TournamentState == TournamentState.Unstarted ||
-                            t.TournamentState == TournamentState.Running);
-
+            var viewModel = _context.ReccuringTournaments;
             return View(viewModel);
         }
 
@@ -155,6 +151,30 @@ namespace FootballAIGameWeb.Controllers
             return View();
         }
 
+        [HttpPost]
+        [Authorize(Roles = RolesNames.TournamentAdmin)]
+        [ValidateAntiForgeryToken]
+        public ActionResult CreateReccuring(ReccuringTournament reccuringTournament)
+        {
+            if (ModelState.IsValid)
+            {
+                _context.ReccuringTournaments.Add(reccuringTournament);
+
+                // plan reccuringTournament.NumberOfPresentTournaments tournaments
+                var time = reccuringTournament.StartTime;
+                for (int i = 0; i < reccuringTournament.NumberOfPresentTournaments; i++)
+                {
+                    _context.Tournaments.Add(new Tournament(reccuringTournament, time));
+                    time += TimeSpan.FromMinutes(reccuringTournament.RecurrenceInterval);
+                }
+
+                _context.SaveChanges();
+                return RedirectToAction("ManageReccuring");
+            }
+
+            // If we got this far, something failed, redisplay form
+            return View(reccuringTournament);
+        }
 
     }
 }

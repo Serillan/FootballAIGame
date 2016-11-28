@@ -17,14 +17,14 @@
 
 <table id="match-table" class="table table-responsive table-hover">
     <thead>
-        <tr>
-            <th>Name</th>
-            <th>Score</th>
-            <th>Won games</th>
-            <th>Won tournaments</th>
-            <th>Tournament Admin</th>
-            <th>Details</th>
-        </tr>
+    <tr>
+        <th>Name</th>
+        <th>Score</th>
+        <th>Won games</th>
+        <th>Won tournaments</th>
+        <th>Tournament Admin</th>
+        <th>Details</th>
+    </tr>
     </thead>
     @{
         var context = new ApplicationDbContext();
@@ -48,49 +48,47 @@
                     </div>
                 }
             </td>
-            <td><a href="Details/@(player.Name)">Details</a></td>
+            <td><a href="/Players/Details/@(player.Name)">Details</a></td>
         </tr>
     }
 </table>
 
-
-
 @section scripts {
     <script>
-        $(document)
-            .ready(function() {
-                $("#match-table")
-                    .DataTable({
-                        "order": [[1, "desc"]]
-                    });
+        $(document).ready(function () {
+
+            $("#match-table")
+                .DataTable({
+                    "order": [[1, "desc"]]
+                });
 
 
-                $("input.tournament-admin")
-                    .change(function() {
-                        var userId = $(this).attr("data-user-id");
-                        var inp = $(this);
+            $("input.tournament-admin")
+                .change(function () {
+                    var userId = $(this).attr("data-user-id");
+                    var inp = $(this);
 
-                        $.ajax({
-                            url: "/api/game/togglerole/" + userId + "/@RolesNames.TournamentAdmin",
-                            method: "put",
-                            error: function(xhr, status, error) {
-                                if (error !== "Bad Request") {
-                                    toastr.error(error + " error.");
-                                } else {
-                                    var json = JSON.parse(xhr.responseText);
-                                    toastr.error(json.message);
-                                }
-                                
-                                // rollback
-                                if (inp.prop("checked"))
-                                    inp.prop("checked", false);
-                                else
-                                    inp.prop("checked", true);
+                    $.ajax({
+                        url: "/api/game/togglerole/" + userId + "/@RolesNames.TournamentAdmin",
+                        method: "put",
+                        error: function (xhr, status, error) {
+                            if (error !== "Bad Request") {
+                                toastr.error(error + " error.");
+                            } else {
+                                var json = JSON.parse(xhr.responseText);
+                                toastr.error(json.message);
                             }
-                        });
+
+                            // rollback
+                            if (inp.prop("checked"))
+                                inp.prop("checked", false);
+                            else
+                                inp.prop("checked", true);
+                        }
                     });
+                });
 
 
-            });
+        });
     </script>
 }

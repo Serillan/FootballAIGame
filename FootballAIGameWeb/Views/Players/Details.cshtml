@@ -83,17 +83,18 @@
         </tr>
         </thead>
         <tbody>
-            @foreach (var tournament in Model.LastTournaments)
-            {
-                <tr class="clickable-row" data-href="/Tournaments/Details/@tournament.Id">
-                    <td>@tournament.StartTime</td>
-                    <td>@tournament.Name</td>
-                    <td>@tournament.Players.Single(t => t.Player.Name == Model.CurrentPlayer.Name).PlayerPosition</td>
-                </tr>
-            }
+        @foreach (var tournament in Model.LastTournaments)
+        {
+            <tr class="clickable-row" data-href="/Tournaments/Details/@tournament.Id">
+                <td>@tournament.StartTime</td>
+                <td>@tournament.Name</td>
+                <td>@tournament.Players.Single(t => t.Player.Name == Model.Player.Name).PlayerPosition</td>
+            </tr>
+        }
         </tbody>
     </table>
 </div>
+
 
 @section scripts
 {

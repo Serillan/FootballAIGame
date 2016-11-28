@@ -27,7 +27,7 @@
             <td>@tournament.Players.Count</td>
             <td>@tournament.MaximumNumberOfPlayers</td>
             <td>@(tournament.TournamentState == TournamentState.Running ? "Running" : "Unstarted")</td>
-            <td><a href="Details/@tournament.Id">Details</a></td>
+            <td><a href="/Tournaments/Details/@tournament.Id">Details</a></td>
         </tr>
     }
 </table>

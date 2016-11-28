@@ -23,7 +23,8 @@ namespace FootballAIGameWeb
                         "~/Scripts/jquery.binarytransport.js",
                         "~/Scripts/moment.js",
                         "~/Scripts/moment-with-locales.js",
-                        "~/Scripts/bootstrap-datetimepicker.js"));
+                        "~/Scripts/bootstrap-datetimepicker.js",
+                        "~/Scripts/bootbox.min.js"));
 
             bundles.Add(new ScriptBundle("~/bundles/custom").Include(
                         "~/Scripts/CustomScripts/clickable-row.js",

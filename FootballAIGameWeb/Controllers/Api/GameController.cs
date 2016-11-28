@@ -643,17 +643,63 @@ namespace FootballAIGameWeb.Controllers.Api
             using (var context = new ApplicationDbContext())
             {
                 var tournament = context.Tournaments.SingleOrDefault(t => t.Id == id);
-                if (tournament == null)
-                    return BadRequest("The tournament doesn't exist.");
-                // TODO let server know (if the server is not yet running it won't start the tournament)
-                if (tournament.TournamentState == TournamentState.Running) // if it was already running
-                    return BadRequest("The tournament has already started and cannot be deleted anymore.");
+                var res = DeleteTournament(context, tournament);
+                if (res != "")
+                    return BadRequest(res);
 
-                // remove tournament matches (though there shouldn't be any!)
-                context.Matches.RemoveRange(
-                    context.Matches.Where(m => m.TournamentId == id));
+                context.SaveChanges();
+                return Ok();
+            }
+        }
 
-                context.Tournaments.Remove(tournament); // todo check if tournamentplayers are deleted
+        private string DeleteTournament(ApplicationDbContext context, Tournament tournament)
+        {
+            if (tournament == null)
+                return "The tournament doesn't exist.";
+            // TODO let server know (if the server is not yet running it won't start the tournament)
+            if (tournament.TournamentState == TournamentState.Running) // if it was already running
+                return "The tournament has already started and cannot be deleted anymore.";
+
+            // remove tournament matches (though there shouldn't be any!)
+            context.Matches.RemoveRange(
+                context.Matches.Where(m => m.TournamentId == tournament.Id));
+
+            context.Tournaments.Remove(tournament); // todo check if tournamentplayers are deleted
+
+            return "";
+        }
+
+        [Route("api/game/deletereccuringtournament/{id}/{deleteUnstarted}")]
+        [HttpDelete]
+        [Authorize(Roles = RolesNames.TournamentAdmin)]
+        public IHttpActionResult DeleteReccuringTournament(int id, bool deleteUnstarted)
+        {
+            using (var context = new ApplicationDbContext())
+            {
+                var reccuringTournament = context.ReccuringTournaments
+                    .Include(tr => tr.Tournaments)
+                    .SingleOrDefault(t => t.Id == id);
+
+                if (reccuringTournament == null)
+                    return NotFound();
+
+                foreach (var tournament in reccuringTournament.Tournaments)
+                {
+                    tournament.ReccuringTournament = null;
+                }
+
+                if (deleteUnstarted)
+                {
+                    var unstarted = reccuringTournament.Tournaments
+                        .Where(t => t.TournamentState == TournamentState.Unstarted).ToList();
+
+                    foreach (var tournament in unstarted)
+                    {
+                        DeleteTournament(context, tournament);
+                    }
+                }
+
+                context.ReccuringTournaments.Remove(reccuringTournament);
                 context.SaveChanges();
                 return Ok();
             }

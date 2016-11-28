@@ -1,5 +1,5 @@
 ﻿@using FootballAIGameWeb.Models
-@model IEnumerable<FootballAIGameWeb.Models.Tournament>
+@model IEnumerable<ReccuringTournament>
 @{
     ViewBag.Title = "Reccuring Tournaments";
 }
@@ -17,28 +17,25 @@
 <table id="match-table" class="table table-responsive table-hover">
     <thead>
         <tr>
-            <th>Start Time</th>
+            <th>First Start Time</th>
             <th>Name</th>
-            <th>Numer of Signed Players</th>
+            <th>Reccurence Interval (minutes)</th>
+            <th>Number of Present Tournaments</th>
+            <th>Minimum Number of Players</th>
             <th>Maximum Number of Players</th>
-            <th>State</th>
             <th>Admin Action</th>
-            <th>Details</th>
         </tr>
     </thead>
-    @foreach (var tournament in Model)
+    @foreach (var recTournament in Model)
     {
         <tr>
-            <td>@tournament.StartTime</td>
-            <td>@tournament.Name</td>
-            <td>@tournament.Players.Count</td>
-            <td>@tournament.MaximumNumberOfPlayers</td>
-            <td>@(tournament.TournamentState == TournamentState.Running ? "Running" : "Unstarted")</td>
-            @if (tournament.TournamentState == TournamentState.Unstarted)
-            {
-                <td class="text-center"><a class="delete" data-tournament-id="@tournament.Id" role="button">Delete</a></td>
-            }
-            <td><a href="Details/@tournament.Id">Details</a></td>
+            <td>@recTournament.StartTime</td>
+            <td>@recTournament.Name</td>
+            <td>@recTournament.RecurrenceInterval</td>
+            <td>@recTournament.NumberOfPresentTournaments</td>
+            <td>@recTournament.MinimumNumberOfPlayers</td>
+            <td>@recTournament.MaximumNumberOfPlayers</td>
+            <td class="text-center"><a class="delete" data-tournament-id="@recTournament.Id" role="button">Delete</a></td>
         </tr>
     }
 </table>
@@ -53,16 +50,32 @@
             $(".delete").on("click", function () {
                 var row = $(this).closest("tr");
                 var tournamentId = $(this).attr("data-tournament-id");
-                $.ajax({
-                    url: "/api/game/deletetournament/" + tournamentId,
-                    method: "delete",
-                    success: function () {
-                        toastr.success("The tournament was deleted.");
-                        row.remove();
+
+                bootbox.confirm({
+                    message: "Do you want to delete all unstarted tournaments from this reccuring tournament?",
+                    buttons: {
+                        confirm: {
+                            label: 'Yes',
+                            className: 'btn-success'
+                        },
+                        cancel: {
+                            label: 'No',
+                            className: 'btn-danger'
+                        }
                     },
-                    error: function (xhr) {
-                        var json = JSON.parse(xhr.responseText);
-                        toastr.error(json.message);
+                    callback: function (result) {
+                        $.ajax({
+                            url: "/api/game/deletereccuringtournament/" + tournamentId + "/" + result,
+                            method: "delete",
+                            success: function () {
+                                toastr.success("The reccuring tournament was deleted.");
+                                row.remove();
+                            },
+                            error: function (xhr) {
+                                var json = JSON.parse(xhr.responseText);
+                                toastr.error(json.message);
+                            }
+                        });
                     }
                 });
             });
