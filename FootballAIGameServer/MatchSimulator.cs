@@ -292,6 +292,7 @@ namespace FootballAIGameServer
 
             try
             {
+                await Task.Delay(20); // wait TODO delete
                 var receiveActionMessage1 = Player1AiConnection.ReceiveActionMessageAsync(step);
                 var receiveActionMessage2 = Player2AiConnection.ReceiveActionMessageAsync(step);
 
@@ -335,7 +336,7 @@ namespace FootballAIGameServer
             }
             catch (IOException) // if player1 or player2 has disconnected
             {
-                Console.WriteLine("step exception");
+                //Console.WriteLine("step exception");
                 return;
             }
 
@@ -355,8 +356,12 @@ namespace FootballAIGameServer
             {
                 var player1 = context.Players.Single(p => p.Name == Player1AiConnection.PlayerName);
                 var player2 = context.Players.Single(p => p.Name == Player2AiConnection.PlayerName);
-                player1.PlayerState = PlayerState.Idle;
-                player2.PlayerState = PlayerState.Idle;
+
+                player1.PlayerState = player1.PlayerState == PlayerState.PlayingTournamentPlaying ? 
+                    PlayerState.PlayingTournamentWaiting : PlayerState.Idle;
+                player2.PlayerState = player2.PlayerState == PlayerState.PlayingTournamentPlaying? 
+                    PlayerState.PlayingTournamentWaiting : PlayerState.Idle;
+
                 Match.Player1 = player1;
                 Match.Player2 = player2;
                 Match.Score = $"{CurrentScore1}:{CurrentScore2}";

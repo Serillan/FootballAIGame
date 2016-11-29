@@ -103,7 +103,9 @@
     <Compile Include="Models\Challenge.cs" />
     <Compile Include="Models\Match.cs" />
     <Compile Include="Models\Player.cs" />
+    <Compile Include="Models\ReccuringTournament.cs" />
     <Compile Include="Models\Tournament.cs" />
+    <Compile Include="Models\TournamentBase.cs" />
     <Compile Include="Models\TournamentPlayer.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="Entry.cs" />

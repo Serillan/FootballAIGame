@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.ServiceModel;
@@ -90,6 +91,18 @@ namespace FootballAIGameServer.ApiForWeb
         public void CancelMatch(string playerName)
         {
             SimulationManager.CancelMatch(playerName);
+        }
+
+        /// <summary>
+        /// Player will leave a running tournament in which he currently is.
+        /// If there is not such tournament, then it does nothing.
+        /// </summary>
+        /// <param name="playerName">The player name.</param>
+        public void LeaveRunningTournament(string playerName)
+        {
+            // cancel tournament match if player is in it
+            SimulationManager.CancelMatch(playerName);
+            TournamentSimulator.LeaveRunningTournament(playerName);
         }
 
         /// <summary>

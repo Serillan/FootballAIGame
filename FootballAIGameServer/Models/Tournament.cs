@@ -6,24 +6,8 @@ using System.Web;
 
 namespace FootballAIGameServer.Models
 {
-    public class Tournament
+    public class Tournament : TournamentBase
     {
-        /// <summary>
-        /// Gets or sets the identifier.
-        /// </summary>
-        /// <value>
-        /// The identifier.
-        /// </value>
-        public int Id { get; set; }
-
-        /// <summary>
-        /// Gets or sets the name of the tournament.
-        /// </summary>
-        /// <value>
-        /// The tournament name.
-        /// </value>
-        [Required]
-        public string Name { get; set; }
 
         /// <summary>
         /// Gets or sets the state of the tournament.
@@ -34,30 +18,7 @@ namespace FootballAIGameServer.Models
         [Required]
         public TournamentState TournamentState { get; set; }
 
-        /// <summary>
-        /// Gets or sets the start time of the tournament.
-        /// </summary>
-        /// <value>
-        /// The start time.
-        /// </value>
-        public DateTime StartTime { get; set; }
-
-        /// <summary>
-        /// Gets or sets the maximum number of players that can participate in the tournament.
-        /// </summary>
-        /// <value>
-        /// The maximum number of players.
-        /// </value>
-        public int MaximumNumberOfPlayers { get; set; }
-
-        /// <summary>
-        /// Gets or sets the minimum number of players that have to participate in the tournament for
-        /// the tournament to be able to start.
-        /// </summary>
-        /// <value>
-        /// The minimum number of players.
-        /// </value>
-        public int MinimumNumberOfPlayers { get; set; }
+        public ReccuringTournament ReccuringTournament { get; set; }
 
         /// <summary>
         /// Gets or sets the collection of players that are participating in the tournament.
@@ -75,6 +36,26 @@ namespace FootballAIGameServer.Models
         /// </value>
         public ICollection<Match> Matches { get; set; }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Tournament"/> class.
+        /// </summary>
+        public Tournament()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Tournament"/> class.
+        /// </summary>
+        /// <param name="reccuringTournament">The reccuring tournament.</param>
+        /// <param name="startTime">The start time.</param>
+        public Tournament(ReccuringTournament reccuringTournament, DateTime startTime)
+        {
+            StartTime = startTime;
+            Name = reccuringTournament.Name;
+            MinimumNumberOfPlayers = reccuringTournament.MinimumNumberOfPlayers;
+            MaximumNumberOfPlayers = reccuringTournament.MaximumNumberOfPlayers;
+            ReccuringTournament = reccuringTournament;
+        }
     }
 
     public enum TournamentState

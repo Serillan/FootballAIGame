@@ -41,6 +41,14 @@ namespace FootballAIGameServer.ApiForWeb
         void CancelMatch(string playerName);
 
         /// <summary>
+        /// Player will leave a running tournament in which he currently is.
+        /// If there is not such tournament, then it does nothing.
+        /// </summary>
+        /// <param name="playerName">The player name.</param>
+        [OperationContract]
+        void LeaveRunningTournament(string playerName);
+
+        /// <summary>
         /// Removes player from the random match queue.
         /// </summary>
         /// <param name="playerName">The player name.</param>
