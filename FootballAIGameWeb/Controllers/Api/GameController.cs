@@ -524,7 +524,22 @@ namespace FootballAIGameWeb.Controllers.Api
                     tournament.Players.Remove(tournamentPlayer);
 
                 if (tournament.TournamentState == TournamentState.Running)
+                {
+                    if (tournamentPlayer.Player.PlayerState == PlayerState.PlayingTournamentPlaying)
+                        try
+                        {
+                            using (var gameServer = new GameServerServiceClient())
+                            {
+                                gameServer.LeaveRunningTournament(tournamentPlayer.Player.Name);
+                            }
+                        }
+                        catch
+                        {
+                            // ignored
+                        }
+
                     tournamentPlayer.Player.PlayerState = PlayerState.Idle;
+                }
 
                 context.SaveChanges();
             }
@@ -568,7 +583,7 @@ namespace FootballAIGameWeb.Controllers.Api
                     .ToList();
 
                 joinedTournaments.Sort(new JoinedTournamentComparer());
-                
+
                 // unstarted + 5 newest finished
                 var i = 0;
                 joinedTournaments = joinedTournaments
@@ -577,15 +592,15 @@ namespace FootballAIGameWeb.Controllers.Api
 
                 var joinedTournamentsDtos = joinedTournaments
                     .Select(t => new TournamentTableEntryDto()
-                        {
-                           Id = t.Id,
-                           StartTime = t.StartTime,
-                           TournamentState = t.TournamentState,
-                           Name = t.Name,
-                           MaximumNumberOfPlayers = t.MaximumNumberOfPlayers,
-                           CurrentNumberOfPlayers = t.Players.Count,
-                           CurrentPlayerJoinedAi = t.Players.Single(tp => tp.Player.Name == player.Name).PlayerAi
-                        }
+                    {
+                        Id = t.Id,
+                        StartTime = t.StartTime,
+                        TournamentState = t.TournamentState,
+                        Name = t.Name,
+                        MaximumNumberOfPlayers = t.MaximumNumberOfPlayers,
+                        CurrentNumberOfPlayers = t.Players.Count,
+                        CurrentPlayerJoinedAi = t.Players.Single(tp => tp.Player.Name == player.Name).PlayerAi
+                    }
                     );
 
                 return Ok(joinedTournamentsDtos);
@@ -736,7 +751,7 @@ namespace FootballAIGameWeb.Controllers.Api
 
                     //Log the user back in
                     var identity = userManager.CreateIdentity(user, DefaultAuthenticationTypes.ApplicationCookie);
-                    authenticationManager.SignIn(new AuthenticationProperties() {IsPersistent = true}, identity);
+                    authenticationManager.SignIn(new AuthenticationProperties() { IsPersistent = true }, identity);
                 }
 
                 return Ok();

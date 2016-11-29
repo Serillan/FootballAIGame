@@ -10,8 +10,8 @@
   </wsp:Policy>
   <wsdl:types>
     <xsd:schema targetNamespace="http://tempuri.org/Imports">
-      <xsd:import namespace="http://tempuri.org/" />
-      <xsd:import namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
+      <xsd:import schemaLocation="" namespace="http://tempuri.org/" />
+      <xsd:import schemaLocation="" namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
     </xsd:schema>
   </wsdl:types>
   <wsdl:message name="IGameServerService_WantsToPlay_InputMessage">
@@ -31,6 +31,12 @@
   </wsdl:message>
   <wsdl:message name="IGameServerService_CancelMatch_OutputMessage">
     <wsdl:part name="parameters" element="tns:CancelMatchResponse" />
+  </wsdl:message>
+  <wsdl:message name="IGameServerService_LeaveRunningTournament_InputMessage">
+    <wsdl:part name="parameters" element="tns:LeaveRunningTournament" />
+  </wsdl:message>
+  <wsdl:message name="IGameServerService_LeaveRunningTournament_OutputMessage">
+    <wsdl:part name="parameters" element="tns:LeaveRunningTournamentResponse" />
   </wsdl:message>
   <wsdl:message name="IGameServerService_CancelLooking_InputMessage">
     <wsdl:part name="parameters" element="tns:CancelLooking" />
@@ -56,6 +62,10 @@
     <wsdl:operation name="CancelMatch">
       <wsdl:input wsaw:Action="http://tempuri.org/IGameServerService/CancelMatch" message="tns:IGameServerService_CancelMatch_InputMessage" />
       <wsdl:output wsaw:Action="http://tempuri.org/IGameServerService/CancelMatchResponse" message="tns:IGameServerService_CancelMatch_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="LeaveRunningTournament">
+      <wsdl:input wsaw:Action="http://tempuri.org/IGameServerService/LeaveRunningTournament" message="tns:IGameServerService_LeaveRunningTournament_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IGameServerService/LeaveRunningTournamentResponse" message="tns:IGameServerService_LeaveRunningTournament_OutputMessage" />
     </wsdl:operation>
     <wsdl:operation name="CancelLooking">
       <wsdl:input wsaw:Action="http://tempuri.org/IGameServerService/CancelLooking" message="tns:IGameServerService_CancelLooking_InputMessage" />
@@ -96,6 +106,15 @@
         <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
+    <wsdl:operation name="LeaveRunningTournament">
+      <soap12:operation soapAction="http://tempuri.org/IGameServerService/LeaveRunningTournament" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
     <wsdl:operation name="CancelLooking">
       <soap12:operation soapAction="http://tempuri.org/IGameServerService/CancelLooking" style="document" />
       <wsdl:input>
@@ -117,9 +136,9 @@
   </wsdl:binding>
   <wsdl:service name="GameServerService">
     <wsdl:port name="NetTcpBinding_IGameServerService" binding="tns:NetTcpBinding_IGameServerService">
-      <soap12:address location="net.tcp://gameserver:50028/GameService" />
+      <soap12:address location="net.tcp://127.0.0.1:50028/GameService" />
       <wsa10:EndpointReference>
-        <wsa10:Address>net.tcp://gameserver:50028/GameService</wsa10:Address>
+        <wsa10:Address>net.tcp://127.0.0.1:50028/GameService</wsa10:Address>
       </wsa10:EndpointReference>
     </wsdl:port>
   </wsdl:service>

@@ -54,8 +54,8 @@
         @if (Model.CurrentPlayer.PlayerState == PlayerState.PlayingTournamentPlaying)
         {
             <div id="progress-wrapper">
-                <div class= "progress" id="progress-div" style="margin-top: 1em">
-                    <div id="progress"  role="progressbar" style="width: 0"></div>
+                <div class="progress" id="progress-div" style="margin-top: 1em">
+                    <div id="progress" class="progress-bar"  role="progressbar" style="width: 0"></div>
                 </div>
             </div>
         }
@@ -213,13 +213,14 @@
 
                                         if (ajaxCallsFunctions.indexOf(matchStepCall === -1))
                                             ajaxCallsFunctions.push(matchStepCall);
-
+                                        
                                         var progressBar =
-                                            '<div class= "progress" id="progress-div" style="margin-top: 1em">' +
-                                            '    <div id= "progress" class="progress-bar" role="progressbar" style="width: 0"></div>' +
+                                            '<div class="progress" id="progress-div" style="margin-top: 1em">' +
+                                            '    <div id="progress" class="progress-bar" role="progressbar" style="width: 0"></div>' +
                                             '</div>';
 
                                         $("div#progress-wrapper").html(progressBar);
+                                        
                                     }
 
                                     break;
