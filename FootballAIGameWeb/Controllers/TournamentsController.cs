@@ -68,6 +68,9 @@ namespace FootballAIGameWeb.Controllers
             return View(viewModel);
         }
 
+        /// <summary>
+        /// Returns the current tournaments view.
+        /// </summary>
         public ActionResult Current()
         {
             var viewModel = _context.Tournaments
@@ -112,24 +115,38 @@ namespace FootballAIGameWeb.Controllers
             return View("Details", viewModel);
         }
 
+        /// <summary>
+        /// Returns the tournament matches partial view.
+        /// </summary>
         public ActionResult TournamentMatches()
         {
             return PartialView("_TournanamentMatches");
         }
 
+        /// <summary>
+        /// Returns the manage recurring tournaments view.
+        /// </summary>
         [Authorize(Roles = RolesNames.TournamentAdmin)]
-        public ActionResult ManageReccuring()
+        public ActionResult ManageRecurring()
         {
-            var viewModel = _context.ReccuringTournaments;
+            var viewModel = _context.RecurringTournaments;
             return View(viewModel);
         }
 
+        /// <summary>
+        /// Returns the create tournament view.
+        /// </summary>
         [Authorize(Roles = RolesNames.TournamentAdmin)]
         public ActionResult Create()
         {
             return View();
         }
 
+        /// <summary>
+        /// Creates the specified tournament if it's valid; otherwise returns
+        /// the create tournament view with the specified tournament as it's model.
+        /// </summary>
+        /// <param name="tournament">The tournament.</param>
         [HttpPost]
         [Authorize(Roles = RolesNames.TournamentAdmin)]
         [ValidateAntiForgeryToken]
@@ -158,26 +175,34 @@ namespace FootballAIGameWeb.Controllers
             return View(tournament);
         }
 
+        /// <summary>
+        /// Returns the create recurring tournament view.
+        /// </summary>
         [Authorize(Roles = RolesNames.TournamentAdmin)]
-        public ActionResult CreateReccuring()
+        public ActionResult CreateRecurring()
         {
             return View();
         }
 
+        /// <summary>
+        /// Creates the specified tournament if it's valid; otherwise returns 
+        /// the create recurring tournament view with the specified tournament as it's model.
+        /// </summary>
+        /// <param name="tournament">The recurring tournament.</param>
         [HttpPost]
         [Authorize(Roles = RolesNames.TournamentAdmin)]
         [ValidateAntiForgeryToken]
-        public ActionResult CreateReccuring(ReccuringTournament reccuringTournament)
+        public ActionResult CreateRecurring(RecurringTournament recurringTournament)
         {
-            if (!ModelState.IsValid) return View(reccuringTournament);
+            if (!ModelState.IsValid) return View(recurringTournament);
 
-            _context.ReccuringTournaments.Add(reccuringTournament);
+            _context.RecurringTournaments.Add(recurringTournament);
 
-            // plan reccuringTournament.NumberOfPresentTournaments tournaments
-            var time = reccuringTournament.StartTime;
-            for (int i = 0; i < reccuringTournament.NumberOfPresentTournaments; i++)
+            // plan recurringTournament.NumberOfPresentTournaments tournaments
+            var time = recurringTournament.StartTime;
+            for (int i = 0; i < recurringTournament.NumberOfPresentTournaments; i++)
             {
-                var tournament = new Tournament(reccuringTournament, time);
+                var tournament = new Tournament(recurringTournament, time);
                 _context.Tournaments.Add(tournament);
                 _context.SaveChanges();
 
@@ -194,10 +219,10 @@ namespace FootballAIGameWeb.Controllers
                     // ignored
                 }
 
-                time += TimeSpan.FromMinutes(reccuringTournament.RecurrenceInterval);
+                time += TimeSpan.FromMinutes(recurringTournament.RecurrenceInterval);
             }
 
-            return RedirectToAction("ManageReccuring");
+            return RedirectToAction("ManageRecurring");
         }
 
     }

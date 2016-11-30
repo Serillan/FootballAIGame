@@ -8,6 +8,9 @@ namespace FootballAIGameWeb.Models
 {
     public class Match
     {
+        /// <summary>
+        /// Gets or sets the identifier.
+        /// </summary>
         public int Id { get; set; }
 
         /// <summary>
@@ -136,8 +139,16 @@ namespace FootballAIGameWeb.Models
         /// <value>1 if Player1 won, 2 if Player2 won, otherwise (draw) returns 0.</value>
         public int Winner { get; set; }
 
+        /// <summary>
+        /// Gets or sets the tournament identifier to which this match belongs.
+        /// If the match is not part of a tournament it is equal to null.
+        /// </summary>
         public int? TournamentId { get; set; }
 
+        /// <summary>
+        /// Gets or sets the tournament to which this match belongs.
+        /// If the match is not part of a tournament it is equal to null.
+        /// </summary>
         public Tournament Tournament { get; set; }
     }
 }

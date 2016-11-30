@@ -32,7 +32,6 @@ namespace FootballAIGameWeb.Controllers.Api
     [Authorize]
     public class GameController : ApiController
     {
-
         /// <summary>
         /// Gets the current connected player.
         /// </summary>
@@ -259,7 +258,7 @@ namespace FootballAIGameWeb.Controllers.Api
                         }
                     }
                 }
-                catch (CommunicationObjectFaultedException ex)
+                catch (CommunicationObjectFaultedException)
                 {
                     player.PlayerState = PlayerState.Idle;
                     context.SaveChanges();
@@ -441,6 +440,10 @@ namespace FootballAIGameWeb.Controllers.Api
             }
         }
 
+        /// <summary>
+        /// Gets the current simulation step of the match in which the player currently is.
+        /// If he is not in any match then it returns the maximum step number.
+        /// </summary>
         [HttpGet]
         public IHttpActionResult GetMatchStep()
         {
@@ -461,6 +464,11 @@ namespace FootballAIGameWeb.Controllers.Api
             }
         }
 
+        /// <summary>
+        /// Join with the specified tournament with the specified AI.
+        /// </summary>
+        /// <param name="tournamentId">The tournament identifier.</param>
+        /// <param name="aiName">Name of the AI.</param>
         [HttpPost]
         [Route("api/game/jointournament/{tournamentId}/{aiName}")]
         public IHttpActionResult JoinTournament(int tournamentId, string aiName)
@@ -501,6 +509,10 @@ namespace FootballAIGameWeb.Controllers.Api
             return Ok();
         }
 
+        /// <summary>
+        /// Leaves the tournament.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
         [HttpPut]
         public IHttpActionResult LeaveTournament(int id)
         {
@@ -547,6 +559,11 @@ namespace FootballAIGameWeb.Controllers.Api
             return Ok();
         }
 
+        /// <summary>
+        /// Gets the tournament position.
+        /// </summary>
+        /// <param name="id">The tournament identifier.</param>
+        /// <returns></returns>
         [HttpGet]
         public IHttpActionResult GetTournamentPosition(int id)
         {
@@ -570,6 +587,9 @@ namespace FootballAIGameWeb.Controllers.Api
             }
         }
 
+        /// <summary>
+        /// Gets the joined tournaments.
+        /// </summary>
         [HttpGet]
         public IHttpActionResult GetJoinedTournaments()
         {
@@ -607,6 +627,12 @@ namespace FootballAIGameWeb.Controllers.Api
             }
         }
 
+        /// <summary>
+        /// Gets the tournament information contained in <see cref="TournamentInfoDto"/>.
+        /// </summary>
+        /// <param name="id">The tournament identifier.</param>
+        /// <returns><see cref="TournamentInfoDto"/> contained in OK response if the specified
+        /// tournament exists; otherwise returns NotFound response.</returns>
         [HttpGet]
         [AllowAnonymous]
         public IHttpActionResult GetTournamentInfo(int id)
@@ -651,6 +677,10 @@ namespace FootballAIGameWeb.Controllers.Api
 
         }
 
+        /// <summary>
+        /// Deletes the specified tournament.
+        /// </summary>
+        /// <param name="id">The tournament identifier.</param>
         [HttpDelete]
         [Authorize(Roles = RolesNames.TournamentAdmin)]
         public IHttpActionResult DeleteTournament(int id)
@@ -667,6 +697,11 @@ namespace FootballAIGameWeb.Controllers.Api
             }
         }
 
+        /// <summary>
+        /// Deletes the tournament.
+        /// </summary>
+        /// <param name="context">The context.</param>
+        /// <param name="tournament">The tournament.</param>
         private string DeleteTournament(ApplicationDbContext context, Tournament tournament)
         {
             if (tournament == null)
@@ -684,14 +719,20 @@ namespace FootballAIGameWeb.Controllers.Api
             return "";
         }
 
-        [Route("api/game/deletereccuringtournament/{id}/{deleteUnstarted}")]
+        /// <summary>
+        /// Deletes the specified recurring tournament.
+        /// </summary>
+        /// <param name="id">The recurring tournament identifier.</param>
+        /// <param name="deleteUnstarted">if set to <c>true</c> then it also deletes all created unstarted tournaments
+        /// belonging to the specified recurring tournament.</param>
+        [Route("api/game/deleterecurringtournament/{id}/{deleteUnstarted}")]
         [HttpDelete]
         [Authorize(Roles = RolesNames.TournamentAdmin)]
-        public IHttpActionResult DeleteReccuringTournament(int id, bool deleteUnstarted)
+        public IHttpActionResult DeleteRecurringTournament(int id, bool deleteUnstarted)
         {
             using (var context = new ApplicationDbContext())
             {
-                var reccuringTournament = context.ReccuringTournaments
+                var reccuringTournament = context.RecurringTournaments
                     .Include(tr => tr.Tournaments)
                     .SingleOrDefault(t => t.Id == id);
 
@@ -700,7 +741,7 @@ namespace FootballAIGameWeb.Controllers.Api
 
                 foreach (var tournament in reccuringTournament.Tournaments)
                 {
-                    tournament.ReccuringTournament = null;
+                    tournament.RecurringTournament = null;
                 }
 
                 if (deleteUnstarted)
@@ -714,12 +755,18 @@ namespace FootballAIGameWeb.Controllers.Api
                     }
                 }
 
-                context.ReccuringTournaments.Remove(reccuringTournament);
+                context.RecurringTournaments.Remove(reccuringTournament);
                 context.SaveChanges();
                 return Ok();
             }
         }
 
+        /// <summary>
+        /// If the specified user doesn't have the specified role then adds the role to the user; otherwise
+        /// removes it.
+        /// </summary>
+        /// <param name="userId">The user identifier.</param>
+        /// <param name="roleName">Name of the role.</param>
         [Route("api/game/togglerole/{userId}/{roleName}")]
         [HttpPut]
         [Authorize(Roles = RolesNames.MainAdmin)]

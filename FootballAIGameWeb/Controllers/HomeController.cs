@@ -211,6 +211,9 @@ namespace FootballAIGameWeb.Controllers
             return viewModel;
         }
 
+        /// <summary>
+        /// Gets the playing tournament view model.
+        /// </summary>
         private PlayingTournamentViewModel GetPlayingTournamentViewModel()
         {
             var tournament = _context.Tournaments

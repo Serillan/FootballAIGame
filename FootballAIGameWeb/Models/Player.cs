@@ -33,7 +33,7 @@ namespace FootballAIGameWeb.Models
         public string Name { get; set; }
 
         /// <summary>
-        /// Gets or sets the tournaments in which the player has participated. // TODO change
+        /// Gets or sets the tournaments in which the player has participated.
         /// </summary>
         /// <value>
         /// The tournaments in which the player has participated.

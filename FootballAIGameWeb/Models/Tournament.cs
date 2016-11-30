@@ -19,7 +19,11 @@ namespace FootballAIGameWeb.Models
         [Required]
         public TournamentState TournamentState { get; set; }
 
-        public ReccuringTournament ReccuringTournament { get; set; }
+        /// <summary>
+        /// Gets or sets the tournament to which this tournament belongs.
+        /// If the tournament is not part of a tournament it is equal to null.
+        /// </summary>
+        public RecurringTournament RecurringTournament { get; set; }
 
         /// <summary>
         /// Gets or sets the collection of players that are participating in the tournament.
@@ -49,13 +53,13 @@ namespace FootballAIGameWeb.Models
         /// </summary>
         /// <param name="reccuringTournament">The reccuring tournament.</param>
         /// <param name="startTime">The start time.</param>
-        public Tournament(ReccuringTournament reccuringTournament, DateTime startTime)
+        public Tournament(RecurringTournament reccuringTournament, DateTime startTime)
         {
             StartTime = startTime;
             Name = reccuringTournament.Name;
             MinimumNumberOfPlayers = reccuringTournament.MinimumNumberOfPlayers;
             MaximumNumberOfPlayers = reccuringTournament.MaximumNumberOfPlayers;
-            ReccuringTournament = reccuringTournament;
+            RecurringTournament = reccuringTournament;
         }
     }
 

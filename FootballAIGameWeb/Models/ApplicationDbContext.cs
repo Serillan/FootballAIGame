@@ -39,9 +39,21 @@ namespace FootballAIGameWeb.Models
         /// </value>
         public DbSet<Tournament> Tournaments { get; set; }
 
-        public DbSet<TournamentPlayer> TournamentPlayers { get; set; } // TODO comment
+        /// <summary>
+        /// Gets or sets the tournament players.
+        /// </summary>
+        /// <value>
+        /// The tournament players.
+        /// </value>
+        public DbSet<TournamentPlayer> TournamentPlayers { get; set; }
 
-        public DbSet<ReccuringTournament> ReccuringTournaments { get; set; }
+        /// <summary>
+        /// Gets or sets the recurring tournaments.
+        /// </summary>
+        /// <value>
+        /// The recurring tournaments.
+        /// </value>
+        public DbSet<RecurringTournament> RecurringTournaments { get; set; }
 
         /// <summary>
         /// Gets or sets the challenges.

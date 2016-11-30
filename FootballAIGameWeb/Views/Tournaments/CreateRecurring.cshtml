@@ -1,16 +1,16 @@
-﻿@model FootballAIGameWeb.Models.ReccuringTournament
+﻿@model FootballAIGameWeb.Models.RecurringTournament
 @{
-    ViewBag.Title = "Create Reccuring Tournament";
+    ViewBag.Title = "Create Recurring Tournament";
 }
 
 <h2>
-    Reccuring Tournament
+    Recurring Tournament
 </h2>
 
-@using (Html.BeginForm("CreateReccuring", "Tournaments", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+@using (Html.BeginForm("CreateRecurring", "Tournaments", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
 {
     @Html.AntiForgeryToken()
-    <h4>Create a new reccuring tournament.</h4>
+    <h4>Create a new recurring tournament.</h4>
     <hr />
     @Html.ValidationSummary("", new { @class = "text-danger" })
 

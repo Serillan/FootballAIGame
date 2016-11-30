@@ -307,12 +307,16 @@
     <Compile Include="Migrations\201611280204151_AddReccuringTournament.Designer.cs">
       <DependentUpon>201611280204151_AddReccuringTournament.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201611300339237_FixMispelledWord.cs" />
+    <Compile Include="Migrations\201611300339237_FixMispelledWord.Designer.cs">
+      <DependentUpon>201611300339237_FixMispelledWord.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\ApplicationDbContext.cs" />
     <Compile Include="Models\Challenge.cs" />
     <Compile Include="Models\Match.cs" />
     <Compile Include="Models\Player.cs" />
-    <Compile Include="Models\ReccuringTournament.cs" />
+    <Compile Include="Models\RecurringTournament.cs" />
     <Compile Include="Models\RoleName.cs" />
     <Compile Include="Models\Tournament.cs" />
     <Compile Include="Models\TournamentBase.cs" />
@@ -762,9 +766,9 @@
     <Content Include="Views\Tournaments\_TournamentJoin.cshtml" />
     <Content Include="Views\Home\PlayingTournament.cshtml" />
     <Content Include="Views\Tournaments\CurrentForAdmin.cshtml" />
-    <Content Include="Views\Tournaments\ManageReccuring.cshtml" />
+    <Content Include="Views\Tournaments\ManageRecurring.cshtml" />
     <Content Include="Views\Tournaments\Create.cshtml" />
-    <Content Include="Views\Tournaments\CreateReccuring.cshtml" />
+    <Content Include="Views\Tournaments\CreateRecurring.cshtml" />
     <Content Include="Views\Players\IndexForAdmin.cshtml" />
     <None Include="Service References\GameServerService\service.wsdl" />
     <None Include="Service References\GameServerService\service.xsd">
@@ -869,6 +873,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201611280204151_AddReccuringTournament.resx">
       <DependentUpon>201611280204151_AddReccuringTournament.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201611300339237_FixMispelledWord.resx">
+      <DependentUpon>201611300339237_FixMispelledWord.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

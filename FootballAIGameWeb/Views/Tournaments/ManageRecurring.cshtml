@@ -1,15 +1,15 @@
 ﻿@using FootballAIGameWeb.Models
-@model IEnumerable<ReccuringTournament>
+@model IEnumerable<RecurringTournament>
 @{
-    ViewBag.Title = "Reccuring Tournaments";
+    ViewBag.Title = "Recurring Tournaments";
 }
 
 <h2 class="text-center">
-    Reccuring Tournaments
+    Recurring Tournaments
 </h2>
 
 <div style="margin-bottom: 2em">
-    <a href="CreateReccuring" class="btn btn-success">New Reccuring Tournament</a>
+    <a href="CreateRecurring" class="btn btn-success">New Recurring Tournament</a>
     <a href="Current" class="btn btn-default">Current Tournaments</a>
 </div>
 
@@ -52,7 +52,7 @@
                 var tournamentId = $(this).attr("data-tournament-id");
 
                 bootbox.confirm({
-                    message: "Do you want to delete all unstarted tournaments from this reccuring tournament?",
+                    message: "Do you want to delete all unstarted tournaments from this recurring tournament?",
                     buttons: {
                         confirm: {
                             label: 'Yes',
@@ -65,10 +65,10 @@
                     },
                     callback: function (result) {
                         $.ajax({
-                            url: "/api/game/deletereccuringtournament/" + tournamentId + "/" + result,
+                            url: "/api/game/deleterecurringtournament/" + tournamentId + "/" + result,
                             method: "delete",
                             success: function () {
-                                toastr.success("The reccuring tournament was deleted.");
+                                toastr.success("The recurring tournament was deleted.");
                                 row.remove();
                             },
                             error: function (xhr) {

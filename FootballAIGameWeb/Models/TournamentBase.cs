@@ -7,6 +7,10 @@ using System.Web;
 
 namespace FootballAIGameWeb.Models
 {
+    /// <summary>
+    /// Represents the information about tournament that is shared between
+    /// <see cref="RecurringTournament"/> and <see cref="Tournament"/>.
+    /// </summary>
     public abstract class TournamentBase
     {
         /// <summary>
