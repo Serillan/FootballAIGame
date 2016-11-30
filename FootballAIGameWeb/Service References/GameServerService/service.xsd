@@ -56,6 +56,18 @@
       <xs:sequence />
     </xs:complexType>
   </xs:element>
+  <xs:element name="PlanTournament">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="tournamentId" type="xs:int" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="PlanTournamentResponse">
+    <xs:complexType>
+      <xs:sequence />
+    </xs:complexType>
+  </xs:element>
   <xs:element name="CancelLooking">
     <xs:complexType>
       <xs:sequence>

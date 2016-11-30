@@ -5,6 +5,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Http.Results;
 using System.Web.Mvc;
+using FootballAIGameWeb.GameServerService;
 using FootballAIGameWeb.Models;
 using FootballAIGameWeb.ViewModels.Tournaments;
 using Microsoft.AspNet.Identity;
@@ -138,6 +139,18 @@ namespace FootballAIGameWeb.Controllers
             {
                 _context.Tournaments.Add(tournament);
                 _context.SaveChanges();
+                // let server know
+                try
+                {
+                    using (var gameServer = new GameServerServiceClient())
+                    {
+                        gameServer.PlanTournament(tournament.Id);
+                    }
+                }
+                catch
+                {
+                    // ignored
+                }
                 return RedirectToAction("Current");
             }
 
@@ -164,12 +177,26 @@ namespace FootballAIGameWeb.Controllers
             var time = reccuringTournament.StartTime;
             for (int i = 0; i < reccuringTournament.NumberOfPresentTournaments; i++)
             {
-                _context.Tournaments.Add(new Tournament(reccuringTournament, time));
-                time += TimeSpan.FromMinutes(reccuringTournament.RecurrenceInterval);
+                var tournament = new Tournament(reccuringTournament, time);
+                _context.Tournaments.Add(tournament);
+                _context.SaveChanges();
+
                 // let server know
+                try
+                {
+                    using (var gameServer = new GameServerServiceClient())
+                    {
+                        gameServer.PlanTournament(tournament.Id);
+                    }
+                }
+                catch
+                {
+                    // ignored
+                }
+
+                time += TimeSpan.FromMinutes(reccuringTournament.RecurrenceInterval);
             }
 
-            _context.SaveChanges();
             return RedirectToAction("ManageReccuring");
         }
 

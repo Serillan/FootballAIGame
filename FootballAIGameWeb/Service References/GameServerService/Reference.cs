@@ -39,6 +39,12 @@ namespace FootballAIGameWeb.GameServerService {
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameServerService/LeaveRunningTournament", ReplyAction="http://tempuri.org/IGameServerService/LeaveRunningTournamentResponse")]
         System.Threading.Tasks.Task LeaveRunningTournamentAsync(string playerName);
         
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameServerService/PlanTournament", ReplyAction="http://tempuri.org/IGameServerService/PlanTournamentResponse")]
+        void PlanTournament(int tournamentId);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameServerService/PlanTournament", ReplyAction="http://tempuri.org/IGameServerService/PlanTournamentResponse")]
+        System.Threading.Tasks.Task PlanTournamentAsync(int tournamentId);
+        
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameServerService/CancelLooking", ReplyAction="http://tempuri.org/IGameServerService/CancelLookingResponse")]
         void CancelLooking(string playerName);
         
@@ -109,6 +115,14 @@ namespace FootballAIGameWeb.GameServerService {
         
         public System.Threading.Tasks.Task LeaveRunningTournamentAsync(string playerName) {
             return base.Channel.LeaveRunningTournamentAsync(playerName);
+        }
+        
+        public void PlanTournament(int tournamentId) {
+            base.Channel.PlanTournament(tournamentId);
+        }
+        
+        public System.Threading.Tasks.Task PlanTournamentAsync(int tournamentId) {
+            return base.Channel.PlanTournamentAsync(tournamentId);
         }
         
         public void CancelLooking(string playerName) {

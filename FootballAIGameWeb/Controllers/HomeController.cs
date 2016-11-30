@@ -76,6 +76,7 @@ namespace FootballAIGameWeb.Controllers
                     .Where(t => t.TournamentState == TournamentState.Unstarted ||
                                 t.TournamentState == TournamentState.Running)
                     .OrderBy(t => t.StartTime)
+                    .Take(5)
                     .ToList(),
 
                 LastMatches = _context.Matches
