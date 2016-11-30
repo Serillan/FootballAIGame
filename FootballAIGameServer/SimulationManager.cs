@@ -4,9 +4,13 @@ using System.Linq;
 
 namespace FootballAIGameServer
 {
+    /// <summary>
+    /// Responsible for managing <see cref="MatchSimulator"/> instances.
+    /// It provides methods for starting new simulations and accessing currently
+    /// running simulations.
+    /// </summary>
     public class SimulationManager
     {
-
         /// <summary>
         /// Gets or sets the list of currently running simulations.
         /// </summary>

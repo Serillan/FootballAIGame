@@ -292,7 +292,7 @@ namespace FootballAIGameServer
 
             try
             {
-                await Task.Delay(20); // wait TODO delete
+                //await Task.Delay(20); // wait TODO delete
                 var receiveActionMessage1 = Player1AiConnection.ReceiveActionMessageAsync(step);
                 var receiveActionMessage2 = Player2AiConnection.ReceiveActionMessageAsync(step);
 

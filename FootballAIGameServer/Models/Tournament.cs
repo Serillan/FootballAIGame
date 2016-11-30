@@ -6,6 +6,10 @@ using System.Web;
 
 namespace FootballAIGameServer.Models
 {
+    /// <summary>
+    /// Represents the Tournament.
+    /// </summary>
+    /// <seealso cref="FootballAIGameServer.Models.TournamentBase" />
     public class Tournament : TournamentBase
     {
 
@@ -18,7 +22,11 @@ namespace FootballAIGameServer.Models
         [Required]
         public TournamentState TournamentState { get; set; }
 
-        public ReccuringTournament ReccuringTournament { get; set; }
+        /// <summary>
+        /// Gets or sets the tournament to which this tournament belongs.
+        /// If the tournament is not part of a tournament it is equal to null.
+        /// </summary>
+        public RecurringTournament RecurringTournament { get; set; }
 
         /// <summary>
         /// Gets or sets the collection of players that are participating in the tournament.
@@ -46,15 +54,15 @@ namespace FootballAIGameServer.Models
         /// <summary>
         /// Initializes a new instance of the <see cref="Tournament"/> class.
         /// </summary>
-        /// <param name="reccuringTournament">The reccuring tournament.</param>
+        /// <param name="reccuringTournament">The recurring tournament.</param>
         /// <param name="startTime">The start time.</param>
-        public Tournament(ReccuringTournament reccuringTournament, DateTime startTime)
+        public Tournament(RecurringTournament reccuringTournament, DateTime startTime)
         {
             StartTime = startTime;
             Name = reccuringTournament.Name;
             MinimumNumberOfPlayers = reccuringTournament.MinimumNumberOfPlayers;
             MaximumNumberOfPlayers = reccuringTournament.MaximumNumberOfPlayers;
-            ReccuringTournament = reccuringTournament;
+            RecurringTournament = reccuringTournament;
         }
     }
 
@@ -73,11 +81,11 @@ namespace FootballAIGameServer.Models
         /// </summary>
         Finished,
         /// <summary>
-        /// Tournament was closed because there were not enought players signed at start time.
+        /// Tournament was closed because there were not enough players signed at start time.
         /// </summary>
         NotEnoughtPlayersClosed,
         /// <summary>
-        /// Tournament was closed because there there was an error during it's simulation.
+        /// Tournament was closed because there was an error during it's simulation.
         /// </summary>
         ErrorClosed
     }

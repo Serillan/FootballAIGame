@@ -49,7 +49,7 @@ namespace FootballAIGameServer
             MatchSimulator.Random = new Random();
 
             // plan tournaments
-            TournamentSimulator.PlanNextTournaments();
+            TournamentSimulator.PlanUnstartedTournaments();
             Console.WriteLine("Tournaments planned.");
 
             // start listening

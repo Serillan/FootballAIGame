@@ -17,7 +17,6 @@ namespace FootballAIGameServer.Models
     /// <seealso cref="Microsoft.AspNet.Identity.EntityFramework.IdentityUser" />
     public class User : IdentityUser
     {
-
         /// <summary>
         /// Gets or sets user name.
         /// </summary>

@@ -268,7 +268,7 @@ namespace FootballAIGameServer
 
             while (true) // while correct message is not received
             {
-                //Console.WriteLine($"{PlayerName} - recieving line");
+                //Console.WriteLine($"{PlayerName} - receiving line");
                 var firstLine = await ReadLineAsync();//await NetworkReader.ReadLineAsync();
                 //Console.WriteLine($"{PlayerName} - received line: {firstLine}");
 

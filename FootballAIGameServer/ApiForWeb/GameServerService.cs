@@ -138,7 +138,6 @@ namespace FootballAIGameServer.ApiForWeb
         /// Gets the current simulation step of the match in which the specified player currently is.
         /// </summary>
         /// <param name="playerName">Name of the player.</param>
-        /// <returns></returns>
         public int GetCurrentMatchStep(string playerName)
         {
             var match = SimulationManager.RunningSimulations

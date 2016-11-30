@@ -32,6 +32,12 @@ namespace FootballAIGameServer.Models
         /// </value>
         public string Name { get; set; }
 
+        /// <summary>
+        /// Gets or sets the tournaments in which the player has participated.
+        /// </summary>
+        /// <value>
+        /// The tournaments in which the player has participated.
+        /// </value>
         public ICollection<TournamentPlayer> Tournaments { get; set; }
 
         /// <summary>
