@@ -41,6 +41,8 @@ namespace FootballAIGameServer.Models
 
         public DbSet<TournamentPlayer> TournamentPlayers { get; set; } // TODO comment
 
+        public DbSet<ReccuringTournament> ReccuringTournaments { get; set; }
+
         /// <summary>
         /// Gets or sets the challenges.
         /// </summary>

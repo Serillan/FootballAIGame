@@ -49,6 +49,13 @@ namespace FootballAIGameServer.ApiForWeb
         void LeaveRunningTournament(string playerName);
 
         /// <summary>
+        /// Plans the tournament.
+        /// </summary>
+        /// <param name="tournamentId">The tournament identifier.</param>
+        [OperationContract]
+        void PlanTournament(int tournamentId);
+
+        /// <summary>
         /// Removes player from the random match queue.
         /// </summary>
         /// <param name="playerName">The player name.</param>

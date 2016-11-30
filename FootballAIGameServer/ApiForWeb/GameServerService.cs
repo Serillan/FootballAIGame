@@ -106,6 +106,23 @@ namespace FootballAIGameServer.ApiForWeb
         }
 
         /// <summary>
+        /// Plans the tournament.
+        /// </summary>
+        /// <param name="tournamentId">The tournament identifier.</param>
+        public void PlanTournament(int tournamentId)
+        {
+            using (var context = new ApplicationDbContext())
+            {
+                var tournament = context.Tournaments.SingleOrDefault(t => t.Id == tournamentId);
+                if (tournament == null)
+                    return;
+
+                var simulator = new TournamentSimulator(ConnectionManager.Instance, tournament);
+                simulator.PlanSimulation();
+            }
+        }
+
+        /// <summary>
         /// Removes player from the random match queue.
         /// </summary>
         /// <param name="playerName">The player name.</param>

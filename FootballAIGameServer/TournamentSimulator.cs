@@ -52,20 +52,20 @@ namespace FootballAIGameServer
         public async Task PlanSimulation()
         {
             Console.WriteLine($"Simulation of tournament {TournamentId} is being planned!");
-            await Task.Delay(10000);
+            //await Task.Delay(10000);
 
 
             // sleep until 5 minutes before tournament
             if (TimeUntilStart.TotalMinutes > 5)
             {
-                //await Task.Delay(TimeUntilStart - TimeSpan.FromMinutes(5));
+                await Task.Delay(TimeUntilStart - TimeSpan.FromMinutes(5));
                 Console.WriteLine($"Simulation of tournament {TournamentId} is awaken 5 minutes before start!");
                 KickInactive();
             }
 
             // when tournament starts
-            //if (TimeUntilStart.TotalSeconds > 0)
-            //await Task.Delay(TimeUntilStart);
+            if (TimeUntilStart.TotalSeconds > 0)
+                await Task.Delay(TimeUntilStart);
 
             Console.WriteLine($"Simulation of tournament {TournamentId} is being simulated!");
             KickInactive();
@@ -80,18 +80,27 @@ namespace FootballAIGameServer
         /// <param name="playerName">The player name.</param>
         public static void LeaveRunningTournament(string playerName)
         {
-            var tournament = RunningTournaments
-                .SingleOrDefault(t => t.Players.Any(p => p.Player.Name == playerName));
-            if (tournament == null)
+            TournamentSimulator tournamentSimulator;
+
+            lock (RunningTournaments)
+            {
+                tournamentSimulator = RunningTournaments
+                    .SingleOrDefault(t => t.Players.Any(p => p.Player.Name == playerName));
+            }
+
+            if (tournamentSimulator == null)
                 return;
 
-            tournament.Players.RemoveAll(p => p.Player.Name == playerName);
+            lock (tournamentSimulator.Players)
+            {
+                tournamentSimulator.Players.RemoveAll(p => p.Player.Name == playerName);
+            }
 
             // improve position for players that have already ended
             using (var context = new ApplicationDbContext())
             {
                 var playersWithPosition = context.TournamentPlayers
-                    .Where(tp => tp.TournamentId == tournament.TournamentId && tp.PlayerPosition != null);
+                    .Where(tp => tp.TournamentId == tournamentSimulator.TournamentId && tp.PlayerPosition != null);
                 foreach (var tournamentPlayer in playersWithPosition)
                 {
                     tournamentPlayer.PlayerPosition--;
@@ -109,6 +118,7 @@ namespace FootballAIGameServer
                 // get tournament
                 tournament = context.Tournaments
                     .Include(t => t.Players.Select(tp => tp.Player))
+                    .Include(t => t.ReccuringTournament)
                     .SingleOrDefault(t => t.Id == TournamentId);
 
                 if (tournament == null)
@@ -121,45 +131,107 @@ namespace FootballAIGameServer
                 if (tournament.Players.Count < tournament.MinimumNumberOfPlayers)
                 {
                     tournament.TournamentState = TournamentState.NotEnoughtPlayersClosed;
+                    if (tournament.ReccuringTournament != null)
+                    {
+                        var nextTournament = CreateNextReccuring(tournament);
+                        var simulator = new TournamentSimulator(ConnectionManager.Instance, nextTournament);
+                        simulator.PlanSimulation();
+                    }
                     context.SaveChanges();
                     return;
                 }
 
                 tournament.TournamentState = TournamentState.Running;
-                RunningTournaments.Add(this);
+                lock (RunningTournaments)
+                {
+                    RunningTournaments.Add(this);
+                }
 
                 // get players and update their states
                 Players = new List<TournamentPlayer>(); // players in tournament
-                foreach (var tournamentPlayer in tournament.Players)
-                    if (tournamentPlayer.Player.PlayerState == PlayerState.Idle)
-                    {
-                        tournamentPlayer.Player.PlayerState = PlayerState.PlayingTournamentWaiting;
-                        Players.Add(tournamentPlayer);
-                    }
+                lock (Players)
+                {
+                    foreach (var tournamentPlayer in tournament.Players)
+                        if (tournamentPlayer.Player.PlayerState == PlayerState.Idle)
+                        {
+                            tournamentPlayer.Player.PlayerState = PlayerState.PlayingTournamentWaiting;
+                            Players.Add(tournamentPlayer);
+                        }
+                }
 
                 context.SaveChanges();
             }
 
             // while there is more than 1 player -> round simulation
-            while (Players.Count > 1)
+            var n = 0;
+            lock (Players)
             {
-                Players = await SimulateRound(tournament);
+                n = Players.Count;
             }
 
-            if (Players.Count == 1)
+            while (n > 1)
             {
-                var player = Players.First();
-                player.PlayerPosition = 1;
-                player.Player.PlayerState = PlayerState.Idle;
+                Players = await SimulateRound(tournament);
+                lock (Players)
+                {
+                    n = Players.Count;
+                }
+            }
+
+            if (n == 1)
+            {
+                TournamentPlayer player;
+                lock (Players)
+                {
+                    player = Players.FirstOrDefault();
+                }
+
+                if (player != null)
+                {
+                    player.PlayerPosition = 1;
+                    player.Player.PlayerState = PlayerState.Idle;
+                }
+
                 SavePlayers(Players);
             }
 
             // set state to finished
             using (var context = new ApplicationDbContext())
             {
-                tournament = context.Tournaments.Single(t => t.Id == TournamentId);
+                tournament = context.Tournaments
+                    .Include(t => t.ReccuringTournament)
+                    .Single(t => t.Id == TournamentId);
                 tournament.TournamentState = TournamentState.Finished;
                 context.SaveChanges();
+            }
+
+            // if it's reccuring plan new one
+            if (tournament.ReccuringTournament != null)
+            {
+                var nextTournament = CreateNextReccuring(tournament);
+                var simulator = new TournamentSimulator(ConnectionManager.Instance, nextTournament);
+                simulator.PlanSimulation();
+            }
+        }
+
+        private static Tournament CreateNextReccuring(Tournament tournament)
+        {
+            using (var context = new ApplicationDbContext())
+            {
+                var reccuringTournament = context.ReccuringTournaments
+                    .Include(t => t.Tournaments)
+                    .SingleOrDefault(t => t.Id == tournament.ReccuringTournament.Id);
+
+                if (reccuringTournament == null)
+                    return null;
+
+                var lastTournamentTime = reccuringTournament.Tournaments.Max(t => t.StartTime);
+                var nextTournament = new Tournament(reccuringTournament,
+                    lastTournamentTime + TimeSpan.FromMinutes(reccuringTournament.RecurrenceInterval));
+                context.Tournaments.Add(nextTournament);
+                context.SaveChanges();
+
+                return nextTournament;
             }
         }
 
@@ -168,44 +240,47 @@ namespace FootballAIGameServer
             Console.WriteLine($"Tournament {TournamentId} : Simulating round.");
 
             var advancingPlayers = new List<TournamentPlayer>();
-
-            // first round byes (some players may proceed directly to second round 
-            // if number of players is not a power of two)
-            var isNumOfPlayersTwoPower = (Players.Count & (Players.Count - 1)) == 0;
-            if (!isNumOfPlayersTwoPower)
-            {
-                var nextPowerOfTwo = tournament.Players.Count;
-                while ((nextPowerOfTwo & (nextPowerOfTwo - 1)) != 0) // while it's not a power of two
-                    nextPowerOfTwo++;
-
-                // number of players without opponent (best will be chosen)
-                var numOfSkippingPlayers = nextPowerOfTwo - Players.Count;
-
-                var skippingPlayers = Players
-                    .OrderByDescending(p => p.Player.Score)
-                    .Take(numOfSkippingPlayers);
-
-                advancingPlayers.AddRange(skippingPlayers);
-                Players.RemoveAll(p => advancingPlayers.Contains(p));
-            }
-
-            TournamentPlayer firstPlayer = null;
             var matches = new List<MatchSimulator>();
 
-            foreach (var tournamentPlayer in Players)
+            lock (Players)
             {
-                if (firstPlayer == null)
-                    firstPlayer = tournamentPlayer;
-                else // start new match
+                // first round byes (some players may proceed directly to second round 
+                // if number of players is not a power of two)
+                var isNumOfPlayersTwoPower = (Players.Count & (Players.Count - 1)) == 0;
+                if (!isNumOfPlayersTwoPower)
                 {
-                    SimulationManager.StartMatch(firstPlayer.Player.Name, firstPlayer.PlayerAi,
-                        tournamentPlayer.Player.Name, tournamentPlayer.PlayerAi, TournamentId);
-                    // update player states
-                    firstPlayer.Player.PlayerState = PlayerState.PlayingTournamentPlaying;
-                    tournamentPlayer.Player.PlayerState = PlayerState.PlayingTournamentPlaying;
-                    // add match to matches
-                    matches.Add(SimulationManager.GetMatchSimulator(firstPlayer.Player.Name));
-                    firstPlayer = null;
+                    var nextPowerOfTwo = tournament.Players.Count;
+                    while ((nextPowerOfTwo & (nextPowerOfTwo - 1)) != 0) // while it's not a power of two
+                        nextPowerOfTwo++;
+
+                    // number of players without opponent (best will be chosen)
+                    var numOfSkippingPlayers = nextPowerOfTwo - Players.Count;
+
+                    var skippingPlayers = Players
+                        .OrderByDescending(p => p.Player.Score)
+                        .Take(numOfSkippingPlayers);
+
+                    advancingPlayers.AddRange(skippingPlayers);
+                    Players.RemoveAll(p => advancingPlayers.Contains(p));
+                }
+
+                TournamentPlayer firstPlayer = null;
+
+                foreach (var tournamentPlayer in Players)
+                {
+                    if (firstPlayer == null)
+                        firstPlayer = tournamentPlayer;
+                    else // start new match
+                    {
+                        SimulationManager.StartMatch(firstPlayer.Player.Name, firstPlayer.PlayerAi,
+                            tournamentPlayer.Player.Name, tournamentPlayer.PlayerAi, TournamentId);
+                        // update player states
+                        firstPlayer.Player.PlayerState = PlayerState.PlayingTournamentPlaying;
+                        tournamentPlayer.Player.PlayerState = PlayerState.PlayingTournamentPlaying;
+                        // add match to matches
+                        matches.Add(SimulationManager.GetMatchSimulator(firstPlayer.Player.Name));
+                        firstPlayer = null;
+                    }
                 }
             }
 
@@ -213,50 +288,58 @@ namespace FootballAIGameServer
 
             await Task.WhenAll(matches.Select(m => m.CurrentSimulationTask).ToArray());
 
-            Players.ForEach(p => p.Player.PlayerState = PlayerState.PlayingTournamentWaiting);
-
-            // get looser position number
-            var exp = 1;
-            while (exp*2 < Players.Count)
-                exp *= 2;
-            var looserPos = exp + 1; // ex. from 8. (2^3) to 5. (2^2+1) player they will have position 5
-
-            foreach (var matchSimulator in matches)
+            lock (Players)
             {
-                TournamentPlayer winner, looser;
+                Players.ForEach(p => p.Player.PlayerState = PlayerState.PlayingTournamentWaiting);
 
-                if (matchSimulator.Winner != null)
-                {
-                    winner = Players.FirstOrDefault(p => p.Player.Name == matchSimulator.Winner);
-                    looser = matchSimulator.Player1AiConnection.PlayerName == matchSimulator.Winner
-                        ? Players.FirstOrDefault(p => p.Player.Name == matchSimulator.Player2AiConnection.PlayerName)
-                        : Players.FirstOrDefault(p => p.Player.Name == matchSimulator.Player1AiConnection.PlayerName);
 
-                }
-                else
+                // get looser position number
+                var exp = 1;
+                while (exp*2 < Players.Count)
+                    exp *= 2;
+                var looserPos = exp + 1; // ex. from 8. (2^3) to 5. (2^2+1) player they will have position 5
+
+                foreach (var matchSimulator in matches)
                 {
-                    var p1 = Players.FirstOrDefault(p => p.Player.Name == matchSimulator.Player1AiConnection.PlayerName);
-                    var p2 = Players.FirstOrDefault(p => p.Player.Name == matchSimulator.Player2AiConnection.PlayerName);
-                    var rndWinner = MatchSimulator.Random.Next(2);
-                    winner = rndWinner == 0 ? p1 : p2;
-                    looser = rndWinner == 0 ? p2 : p1;
+                    TournamentPlayer winner, looser;
+
+                    if (matchSimulator.Winner != null)
+                    {
+                        winner = Players.FirstOrDefault(p => p.Player.Name == matchSimulator.Winner);
+                        looser = matchSimulator.Player1AiConnection.PlayerName == matchSimulator.Winner
+                            ? Players.FirstOrDefault(p => p.Player.Name == matchSimulator.Player2AiConnection.PlayerName)
+                            : Players.FirstOrDefault(p => p.Player.Name == matchSimulator.Player1AiConnection.PlayerName);
+
+                    }
+                    else
+                    {
+                        var p1 =
+                            Players.FirstOrDefault(p => p.Player.Name == matchSimulator.Player1AiConnection.PlayerName);
+                        var p2 =
+                            Players.FirstOrDefault(p => p.Player.Name == matchSimulator.Player2AiConnection.PlayerName);
+                        var rndWinner = MatchSimulator.Random.Next(2);
+                        winner = rndWinner == 0 ? p1 : p2;
+                        looser = rndWinner == 0 ? p2 : p1;
+                    }
+
+                    if (winner == null && looser != null)
+                    {
+                        winner = looser;
+                        looser = null;
+                    }
+
+                    if (winner != null)
+                        advancingPlayers.Add(winner);
+                    if (looser == null) continue;
+                    looser.PlayerPosition = looserPos;
+                    looser.Player.PlayerState = PlayerState.Idle;
                 }
 
-                if (winner == null && looser != null)
-                {
-                    winner = looser;
-                    looser = null;
-                }
-                
-                if (winner != null)
-                    advancingPlayers.Add(winner);
-                if (looser == null) continue;
-                looser.PlayerPosition = looserPos;
-                looser.Player.PlayerState = PlayerState.Idle;
+                SavePlayers(Players);
+                advancingPlayers.RemoveAll(p => !Players.Contains(p));
+                    // remove all skipping players that left during round
             }
 
-            SavePlayers(Players);
-            advancingPlayers.RemoveAll(p => !Players.Contains(p)); // remove all skipping players that left during round
             return advancingPlayers;
         }
 
@@ -272,11 +355,14 @@ namespace FootballAIGameServer
                     .Include(tp => tp.Player)
                     .Where(t => t.TournamentId == TournamentId);
 
-                foreach (var player in players)
+                lock (Players)
                 {
-                    var dbPlayer = dbPlayers.Single(p => p.UserId == player.UserId);
-                    dbPlayer.Player.PlayerState = player.Player.PlayerState;
-                    dbPlayer.PlayerPosition = player.PlayerPosition;
+                    foreach (var player in players)
+                    {
+                        var dbPlayer = dbPlayers.Single(p => p.UserId == player.UserId);
+                        dbPlayer.Player.PlayerState = player.Player.PlayerState;
+                        dbPlayer.PlayerPosition = player.PlayerPosition;
+                    }
                 }
                 context.SaveChanges();
             }
@@ -317,10 +403,15 @@ namespace FootballAIGameServer
 
         public static void CloseRunningTournaments(ApplicationDbContext context)
         {
-            var runningTournaments = context.Tournaments.Where(t => t.TournamentState == TournamentState.Running);
-            foreach (var runningTournament in runningTournaments)
+            lock (RunningTournaments)
             {
-                runningTournament.TournamentState = TournamentState.ErrorClosed;
+                var runningTournaments = context.Tournaments.Where(t => t.TournamentState == TournamentState.Running);
+                foreach (var runningTournament in runningTournaments)
+                {
+                    runningTournament.TournamentState = TournamentState.ErrorClosed;
+                    if (runningTournament.ReccuringTournament != null)
+                        CreateNextReccuring(runningTournament);
+                }
             }
         }
 
