@@ -777,6 +777,7 @@
     <None Include="Service References\GameServerService\service1.xsd">
       <SubType>Designer</SubType>
     </None>
+    <Content Include="Views\Projects\Java.cshtml" />
     <None Include="Web.Production.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

@@ -16,5 +16,14 @@ namespace FootballAIGameWeb.Controllers
         {
             return View();
         }
+
+        /// <summary>
+        /// Returns Java AI Project view.
+        /// </summary>
+        /// <returns>The Java AI Project view.</returns>
+        public ActionResult Java()
+        {
+            return View();
+        }
     }
 }

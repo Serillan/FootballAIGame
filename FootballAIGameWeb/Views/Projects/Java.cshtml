@@ -1,32 +1,31 @@
 ﻿@{
-    ViewBag.Title = "C# Project";
+    ViewBag.Title = "Java Project";
 }
 
 <h2>
-    C# Project
+    Java Project
 </h2>
 
 <section>
     <h3>Basic information</h3>
     <p>
-        To modify the AI behavior you need to customize AI class (in UserClasses/AI.cs file).
+        To modify the AI behavior you need to customize AI class (AI class in UserClasses package).
     </p>
     <p>
-        You need at least C# 3.0 compiler to compile the project. The default project target framework is
-        .NET 3.5 but you can change it to higher versions to use new .NET features.
+        Requires at minimum Java 6.
     </p>
-    <a href="https://github.com/Serillan/FootballAIGameClient" style="font-size: 1.1em">Get Project</a>
+    <a href="https://github.com/Serillan/FootballAIGameJavaClient" style="font-size: 1.1em">Get Project</a>
 </section>
 
 <section>
     <h3>AI Class Overview</h3>
     <p>
-        AI class implements IFootballAI interface. This interface contains methods that are
+        AI class implements FootballAI interface. This interface contains methods that are
         necessary to define the AI behavior. You can also create your AI by implementing this
         interface and configuring application to use your implementation instead of AI class
-        in the Main method located in Program class (in Program.cs file).
+        in the main method located in Application class (in Application.java file).
     </p>
-    <br/>
+    <br />
     <h4>Methods</h4>
     <section>
         <h5>Initialize</h5>
@@ -34,7 +33,7 @@
             This method is called every time the new match simulation with this AI starts.
             You can use this methods to initialize your AI behavior.
         </p>
-        <h5>GetParameters</h5>
+        <h5>getParameters</h5>
         <p>
             This method is used to set your football team parameters. You can customize football players
             speed, precision, kick power and possession abilities.
@@ -47,30 +46,30 @@
             they can have any roles in your AI.
             The method is called before the match starts.
         </p>
-        <h5>GetAction</h5>
+        <h5>getAction</h5>
         <p>
             This method is called every simulation step to get the football team actions.
             This method gets the Game State as parameter with the number of simulation step
             to which this state belongs as its property. In the game state we have all informations
             about players and ball positions and their current movement vectors. The first 11
-            players in the FootballPlayers array are current team players and the next 11 players are from
-            the opponent team. They are ordered in the same manner as in GetParamaters method.
+            players in the footballPlayers array are current team players and the next 11 players are from
+            the opponent team. They are ordered in the same manner as in getParamaters method.
             Important note: football players in the given game state don't have their ability properties set but
-            we know from our GetParameters method our team properties. As a result we need to
+            we know from our getParameters method our team properties. As a result we need to
             return PlayerAction instance with the actions of our players set. Every PlayerAction consists
             of the movement and kick vector. The movement vector describes how the position of the player
             should change during the current simulation step. The kick vector describes what would be the
             desired movement vector of the ball if the kick of the ball was successful and absolutely precise.
         </p>
         <p>
-            Beside player positions FootballPlayer entity has CurrentSpeed public property
-            that returns the current player speed in meters per second and MaxSpeed property which returns
+            Beside player positions FootballPlayer entity has currentSpeed method
+            that returns the current player speed in meters per second and maxSpeed method which returns
             the maximum speed of the player in meters per second if the speed parameter of the player is set
-            correctly. Also there is MaxAcceleration public constant which holds the maximum allowed acceleration
-            of the player. Similarly you can access CurrentSpeed and BallDeceralation in Ball class.
+            correctly. Also there is maxAcceleration public field which holds the maximum allowed acceleration
+            of the player. Similarly you can access currentSpeed and ballDeceralation in Ball class.
         </p>
         <p>
-            The last public constant that you can access is StepInterval in GameClient class. It holds the
+            The last public constant that you can access is stepInterval in GameClient class. It holds the
             time of one simulation step in milliseconds (200).
         </p>
     </section>
