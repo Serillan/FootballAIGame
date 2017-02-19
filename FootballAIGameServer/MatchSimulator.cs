@@ -63,6 +63,14 @@ namespace FootballAIGameServer
         /// </summary>
         public const int MaximumNumberOfSameKindErrorInLog = 5;
 
+        /// <summary>
+        /// Specifies how big the speed/acceleration correction needs to be
+        /// for it to be reported (because of rounding errors).
+        /// e.g. If max speed is 10 then the speed needs to be greater than 10 * AllowableRange
+        /// for it to be saved to the error log.
+        /// </summary>
+        public const double MinReportableCorrection = 1.01;
+
         #endregion
 
         /// <summary>
@@ -653,9 +661,9 @@ namespace FootballAIGameServer
                     var acceleration = new Vector(action.Movement.X - player.Movement.X,
                         action.Movement.Y - player.Movement.Y);
 
-                    var accelerationValue = acceleration.Length * 1000 / StepInterval; // [m/s]
+                    var accelerationValue = acceleration.Length * 1000.0 / StepInterval; // [m/s/s]
 
-                    if (accelerationValue > MaxAcceleration)
+                    if (accelerationValue > MaxAcceleration) 
                     {
                         var q = MaxAcceleration / accelerationValue;
                         var fixedAcceleration = new Vector(acceleration.X * q, acceleration.Y * q);
@@ -663,7 +671,8 @@ namespace FootballAIGameServer
                         action.Movement.X = (float)(player.Movement.X + fixedAcceleration.X);
                         action.Movement.Y = (float)(player.Movement.Y + fixedAcceleration.Y);
 
-                        if (NumberOfAccelerationCorrections1++ < MaximumNumberOfSameKindErrorInLog)
+                        if (accelerationValue > MaxAcceleration * MinReportableCorrection && 
+                            NumberOfAccelerationCorrections1++ < MaximumNumberOfSameKindErrorInLog)
                             Match.Player1ErrorLog += $"{CurrentTime} - Player{i} acceleration correction.;";
 
                     }
@@ -679,7 +688,8 @@ namespace FootballAIGameServer
                         player.Movement.X *= (float)(player.MaxSpeed / newSpeed);
                         player.Movement.Y *= (float)(player.MaxSpeed / newSpeed);
 
-                        if (NumberOfSpeedCorrections1++ < MaximumNumberOfSameKindErrorInLog)
+                        if (newSpeed > player.MaxSpeed * MinReportableCorrection &&
+                            NumberOfSpeedCorrections1++ < MaximumNumberOfSameKindErrorInLog)
                             Match.Player1ErrorLog += $"{CurrentTime} - Player{i} speed correction.;";
                     }
 
@@ -715,7 +725,8 @@ namespace FootballAIGameServer
                         action.Movement.X = (float)(player.Movement.X + fixedAcceleration.X);
                         action.Movement.Y = (float)(player.Movement.Y + fixedAcceleration.Y);
 
-                        if (NumberOfAccelerationCorrections2++ < MaximumNumberOfSameKindErrorInLog)
+                        if (accelerationValue > MaxAcceleration * MinReportableCorrection && 
+                            NumberOfAccelerationCorrections2++ < MaximumNumberOfSameKindErrorInLog)
                             Match.Player2ErrorLog += $"{CurrentTime} - Player{i} acceleration correction.;";
 
                     }
@@ -730,7 +741,8 @@ namespace FootballAIGameServer
                         player.Movement.X *= (float)(player.MaxSpeed / newSpeed);
                         player.Movement.Y *= (float)(player.MaxSpeed / newSpeed);
 
-                        if (NumberOfSpeedCorrections2++ < MaximumNumberOfSameKindErrorInLog)
+                        if (newSpeed > player.MaxSpeed * MinReportableCorrection && 
+                                NumberOfSpeedCorrections2++ < MaximumNumberOfSameKindErrorInLog)
                             Match.Player2ErrorLog += $"{CurrentTime} - Player{i} speed correction.;";
                     }
 

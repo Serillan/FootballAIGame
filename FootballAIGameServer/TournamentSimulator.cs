@@ -437,6 +437,7 @@ namespace FootballAIGameServer
                         var dbPlayer = dbPlayers.Single(p => p.UserId == player.UserId);
                         dbPlayer.Player.PlayerState = player.Player.PlayerState;
                         dbPlayer.PlayerPosition = player.PlayerPosition;
+                        dbPlayer.Player.WonTournaments = player.Player.WonTournaments;
                     }
                 }
                 context.SaveChanges();
