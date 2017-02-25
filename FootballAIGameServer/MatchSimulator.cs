@@ -71,6 +71,16 @@ namespace FootballAIGameServer
         /// </summary>
         public const double MinReportableCorrection = 1.01;
 
+        /// <summary>
+        /// The football field height in meters.
+        /// </summary>
+        public const double FieldHeight = 75; // [m]
+
+        /// <summary>
+        /// The football field width in meters.
+        /// </summary>
+        public const double FieldWidth = 110; // [m]
+
         #endregion
 
         /// <summary>
@@ -160,6 +170,10 @@ namespace FootballAIGameServer
         private int NumberOfAccelerationCorrections2 { get; set; }
         private int NumberOfSpeedCorrections1 { get; set; }
         private int NumberOfSpeedCorrections2 { get; set; }
+        private int NumberOfInvalidMovementActionValues1 { get; set; }
+        private int NumberOfInvalidMovementActionValues2 { get; set; }
+        private int NumberOfInvalidKickActionValues1 { get; set; }
+        private int NumberOfInvalidKickActionValues2 { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MatchSimulator"/> class.
@@ -348,7 +362,6 @@ namespace FootballAIGameServer
                 return;
             }
 
-
             UpdateMatch(actionMessage1, actionMessage2);
             SaveState();
         }
@@ -522,13 +535,13 @@ namespace FootballAIGameServer
             players[0].Position.Y = 75f / 2;
 
             // defenders positions
-            players[1].Position.X = 16.5f;
+            players[1].Position.X = 16.5;
             players[1].Position.Y = 15;
-            players[2].Position.X = 16.5f;
+            players[2].Position.X = 16.5;
             players[2].Position.Y = 75 / 2f - 12;
-            players[3].Position.X = 16.5f;
+            players[3].Position.X = 16.5;
             players[3].Position.Y = 75 / 2f + 12;
-            players[4].Position.X = 16.5f;
+            players[4].Position.X = 16.5;
             players[4].Position.Y = 60;
 
             // midfielders
@@ -539,7 +552,7 @@ namespace FootballAIGameServer
             players[7].Position.X = 33;
             players[7].Position.Y = 75 / 2f + 12;
             players[8].Position.X = 33;
-            players[8].Position.Y = 15;
+            players[8].Position.Y = 60;
 
             // forwards
             players[9].Position.X = 45;
@@ -658,18 +671,26 @@ namespace FootballAIGameServer
                     var player = GameState.FootballPlayers[i];
                     var action = player1Action.PlayersActions[i];
 
+                    if (double.IsNaN(action.Movement.X) || double.IsNaN(action.Movement.Y) ||
+                        double.IsInfinity(action.Movement.X) || double.IsInfinity(action.Movement.Y))
+                    {
+                        action.Movement = new Vector(0, 0);
+                        if (NumberOfInvalidMovementActionValues1++ < MaximumNumberOfSameKindErrorInLog)
+                            Match.Player1ErrorLog += $"{CurrentTime} - Player{i} invalid movement action value correction.;";
+                    }
+
                     var acceleration = new Vector(action.Movement.X - player.Movement.X,
                         action.Movement.Y - player.Movement.Y);
 
-                    var accelerationValue = acceleration.Length * 1000.0 / StepInterval; // [m/s/s]
+                    var accelerationValue = acceleration.Length * Math.Pow(1000.0 / StepInterval, 2); // [m/s/s]
 
                     if (accelerationValue > MaxAcceleration) 
                     {
                         var q = MaxAcceleration / accelerationValue;
                         var fixedAcceleration = new Vector(acceleration.X * q, acceleration.Y * q);
 
-                        action.Movement.X = (float)(player.Movement.X + fixedAcceleration.X);
-                        action.Movement.Y = (float)(player.Movement.Y + fixedAcceleration.Y);
+                        action.Movement.X = player.Movement.X + fixedAcceleration.X;
+                        action.Movement.Y = player.Movement.Y + fixedAcceleration.Y;
 
                         if (accelerationValue > MaxAcceleration * MinReportableCorrection && 
                             NumberOfAccelerationCorrections1++ < MaximumNumberOfSameKindErrorInLog)
@@ -685,13 +706,16 @@ namespace FootballAIGameServer
                     if (newSpeed > player.MaxSpeed)
                     {
                         // too high speed
-                        player.Movement.X *= (float)(player.MaxSpeed / newSpeed);
-                        player.Movement.Y *= (float)(player.MaxSpeed / newSpeed);
+                        player.Movement.X *= player.MaxSpeed / newSpeed;
+                        player.Movement.Y *= player.MaxSpeed / newSpeed;
 
                         if (newSpeed > player.MaxSpeed * MinReportableCorrection &&
                             NumberOfSpeedCorrections1++ < MaximumNumberOfSameKindErrorInLog)
                             Match.Player1ErrorLog += $"{CurrentTime} - Player{i} speed correction.;";
                     }
+
+                    // stop player from going too far from field
+                    StopPlayerFromGoingOutside(player);
 
                     // apply
                     player.Position.X += player.Movement.X;
@@ -712,10 +736,18 @@ namespace FootballAIGameServer
                     var player = GameState.FootballPlayers[i + 11];
                     var action = player2Action.PlayersActions[i];
 
+                    if (double.IsNaN(action.Movement.X) || double.IsNaN(action.Movement.Y) ||
+                      double.IsInfinity(action.Movement.X) || double.IsInfinity(action.Movement.Y))
+                    {
+                        action.Movement = new Vector(0, 0);
+                        if (NumberOfInvalidMovementActionValues2++ < MaximumNumberOfSameKindErrorInLog)
+                            Match.Player2ErrorLog += $"{CurrentTime} - Player{i} invalid movement action value correction.;";
+                    }
+
                     var acceleration = new Vector(action.Movement.X - player.Movement.X,
                         action.Movement.Y - player.Movement.Y);
 
-                    var accelerationValue = acceleration.Length * 1000 / StepInterval; // [m/s]
+                    var accelerationValue = acceleration.Length * Math.Pow(1000.0 / StepInterval, 2); // [m/s]
 
                     if (accelerationValue > MaxAcceleration)
                     {
@@ -746,6 +778,9 @@ namespace FootballAIGameServer
                             Match.Player2ErrorLog += $"{CurrentTime} - Player{i} speed correction.;";
                     }
 
+                    // stop player from going too far from field
+                    StopPlayerFromGoingOutside(player);
+
                     // apply
                     player.Position.X += player.Movement.X;
                     player.Position.Y += player.Movement.Y;
@@ -757,6 +792,27 @@ namespace FootballAIGameServer
                 // default (nothing for now)
                 Console.WriteLine(Player2AiConnection.PlayerName + " timeout.");
             }
+        }
+
+        private void StopPlayerFromGoingOutside(FootballPlayer player)
+        {
+            var y0 = player.Position.Y;
+            var y1 = player.Position.Y + player.Movement.Y;
+            var x0 = player.Position.X;
+            var x1 = player.Position.X + player.Movement.X;
+
+            var k = 1.0;
+
+            if (y1 < -5)
+                k = (-5 - y0)/y1;
+            if (y1 > FieldHeight + 5)
+                k = (FieldHeight + 5 - y0)/y1;
+            if (x1 < -5)
+                k = (-5 - x0)/x1;
+            if (x1 > FieldWidth + 5)
+                k = (FieldWidth + 5 - x0)/x1;
+
+            player.Movement = new Vector(player.Movement.X * k, player.Movement.Y * k);
         }
 
         /// <summary>
@@ -771,11 +827,35 @@ namespace FootballAIGameServer
             {
                 GameState.FootballPlayers[i].Kick.X = player1Action?.PlayersActions[i].Kick.X ?? 0;
                 GameState.FootballPlayers[i].Kick.Y = player1Action?.PlayersActions[i].Kick.Y ?? 0;
+
+                var kickX = GameState.FootballPlayers[i].Kick.X;
+                var kickY = GameState.FootballPlayers[i].Kick.Y;
+
+                if (double.IsNaN(kickX) || double.IsNaN(kickY) ||
+                      double.IsInfinity(kickX) || double.IsInfinity(kickY))
+                {
+                    GameState.FootballPlayers[i].Kick = new Vector(0, 0);
+                    if (NumberOfInvalidKickActionValues1++ < MaximumNumberOfSameKindErrorInLog)
+                        Match.Player1ErrorLog += $"{CurrentTime} - Player{i} invalid action value correction.;";
+                }
+
             }
             for (var i = 0; i < 11; i++)
             {
                 GameState.FootballPlayers[i + 11].Kick.X = player2Action?.PlayersActions[i].Kick.X ?? 0;
                 GameState.FootballPlayers[i + 11].Kick.Y = player2Action?.PlayersActions[i].Kick.Y ?? 0;
+
+
+                var kickX = GameState.FootballPlayers[i + 11].Kick.X;
+                var kickY = GameState.FootballPlayers[i + 11].Kick.Y;
+
+                if (double.IsNaN(kickX) || double.IsNaN(kickY) ||
+                      double.IsInfinity(kickX) || double.IsInfinity(kickY))
+                {
+                    GameState.FootballPlayers[i + 11].Kick = new Vector(0, 0);
+                    if (NumberOfInvalidKickActionValues2++ < MaximumNumberOfSameKindErrorInLog)
+                        Match.Player2ErrorLog += $"{CurrentTime} - Player{i} invalid action value correction.;";
+                }
             }
 
             var playersNearBallKicking = GameState.FootballPlayers.Where(
