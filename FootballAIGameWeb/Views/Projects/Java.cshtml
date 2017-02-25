@@ -58,7 +58,8 @@
             we know from our getParameters method our team properties. As a result we need to
             return PlayerAction instance with the actions of our players set. Every PlayerAction consists
             of the movement and kick vector. The movement vector describes how the position of the player
-            should change during the current simulation step. The kick vector describes what would be the
+            should change during the current simulation step. The acceleration is applied
+            instantaneously at the beginning of the step. The kick vector describes what would be the
             desired movement vector of the ball if the kick of the ball was successful and absolutely precise.
         </p>
         <p>
