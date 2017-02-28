@@ -207,11 +207,12 @@ namespace FootballAIGameServer
                 }
             }
 
-            var byteArray = new byte[data.Length * 4 + 4];
+            var byteArray = new byte[data.Length * 4 + 4 + 1];
             var numArray = new int[1] {gameState.Step};
 
             Buffer.BlockCopy(numArray, 0, byteArray, 0, 4);
-            Buffer.BlockCopy(data, 0, byteArray, 4, data.Length * 4);
+            byteArray[4] = gameState.KickOff ? (byte)1 : (byte)0;
+            Buffer.BlockCopy(data, 0, byteArray, 5, data.Length * 4);
             await SendAsync(byteArray);
         }
 

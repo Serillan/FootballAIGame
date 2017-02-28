@@ -33,5 +33,7 @@ namespace FootballAIGameServer.SimulationEntities
         /// Gets or sets the simulation step number from which this instance is.
         /// </summary>
         public int Step { get; set; }
+
+        public bool KickOff { get; set; }
     }
 }

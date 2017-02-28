@@ -44,14 +44,11 @@ namespace FootballAIGameServer
         public const double MaxAcceleration = 3; // [m/s/s]
 
         /// <summary>
-        /// The maximum ball speed in meters per second.
-        /// </summary>
-        public const double MaxBallSpeed = 15; // [m/s]
-
-        /// <summary>
         /// The ball deceleration in meters per second squared.
         /// </summary>
         public const double BallDecerelation = 1.5; // [m/s/s]
+
+        public const double BallMinDistanceForKick = 2; // [m]
 
         /// <summary>
         /// The minimal opponent length from kickoff in meters.
@@ -611,6 +608,8 @@ namespace FootballAIGameServer
         /// <param name="player2Action">The player2 action.</param>
         private void UpdateMatch(ActionMessage player1Action, ActionMessage player2Action)
         {
+            GameState.KickOff = GameState.Step == NumberOfSimulationSteps/2 || GameState.Step == 0;
+
             UpdatePlayers(player1Action, player2Action);
             UpdateBall(player1Action, player2Action);
             HandleOuts();
@@ -859,7 +858,7 @@ namespace FootballAIGameServer
             }
 
             var playersNearBallKicking = GameState.FootballPlayers.Where(
-                p => Vector.DistanceBetween(GameState.Ball.Position, p.Position) <= 2 && (p.Kick.X != 0 || p.Kick.Y != 0));
+                p => Vector.DistanceBetween(GameState.Ball.Position, p.Position) <= BallMinDistanceForKick && (p.Kick.X != 0 || p.Kick.Y != 0));
 
             var kickWinner = GetKickWinner(playersNearBallKicking.ToArray());
 
@@ -883,7 +882,7 @@ namespace FootballAIGameServer
                                                 Math.Cos(angleDevation) * GameState.Ball.Movement.Y);
 
                 var newSpeed = GameState.Ball.CurrentSpeed;
-                var maxAllowedSpeed = 15 + LastKicker.KickPower * 10;
+                var maxAllowedSpeed = LastKicker.MaxKickSpeed;
                 if (newSpeed > maxAllowedSpeed)
                 {
                     GameState.Ball.Movement.X *= (float)(maxAllowedSpeed / newSpeed);
@@ -922,6 +921,8 @@ namespace FootballAIGameServer
             {
                 if (GameState.Ball.Position.X > 110)
                 {
+                    GameState.KickOff = true;
+
                     if (WhoIsOnLeft == lastTeam)
                     {
                         var goalKeeper = lastTeam == 1 ? players[11] : players[0];
@@ -964,6 +965,8 @@ namespace FootballAIGameServer
 
                 if (GameState.Ball.Position.X < 0)
                 {
+                    GameState.KickOff = true;
+
                     if (WhoIsOnLeft != lastTeam)
                     {
                         var goalKeeper = lastTeam == 1 ? players[11] : players[0];
@@ -1009,6 +1012,8 @@ namespace FootballAIGameServer
             // touch lines
             if (ball.Position.Y < 0)
             {
+                GameState.KickOff = true;
+
                 ball.Position.Y = 1;
                 ball.Movement.X = 0f;
                 ball.Movement.Y = 0f;
@@ -1027,6 +1032,8 @@ namespace FootballAIGameServer
             }
             if (ball.Position.Y > 75)
             {
+                GameState.KickOff = true;
+
                 ball.Position.Y = 74;
                 ball.Movement.X = 0f;
                 ball.Movement.Y = 0f;
@@ -1059,6 +1066,8 @@ namespace FootballAIGameServer
 
             if (ball.Position.X < 0 && ball.Position.Y < 75f / 2 + 7.32 / 2 && ball.Position.Y > 75f / 2 - 7.32 / 2)
             {
+                GameState.KickOff = true;
+
                 var teamNameThatScored =
                     WhoIsOnLeft == 1 ? Player2AiConnection.PlayerName : Player1AiConnection.PlayerName;
 
@@ -1090,6 +1099,8 @@ namespace FootballAIGameServer
             }
             else if (ball.Position.X > 110 && ball.Position.Y < 75f / 2 + 7.32 / 2 && ball.Position.Y > 75f / 2 - 7.32 / 2)
             {
+                GameState.KickOff = true;
+
                 var teamNameThatScored =
                     WhoIsOnLeft == 2 ? Player2AiConnection.PlayerName : Player1AiConnection.PlayerName;
 
