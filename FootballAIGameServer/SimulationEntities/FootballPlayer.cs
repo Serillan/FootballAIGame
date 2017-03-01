@@ -97,9 +97,9 @@ namespace FootballAIGameServer.SimulationEntities
         /// The maximum speed in meters per second.
         /// </value>
         public double MaxSpeed =>
-             5 + Speed * 2.5 / 0.4;
+             4 + Speed * 2 / 0.4;
 
         public double MaxKickSpeed =>
-            15 + KickPower * 10;
+            10 + KickPower * 5;
     }
 }

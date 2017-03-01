@@ -41,7 +41,7 @@ namespace FootballAIGameServer
         /// <summary>
         /// The maximum allowed acceleration in meters per second squared of football player.
         /// </summary>
-        public const double MaxAcceleration = 3; // [m/s/s]
+        public const double MaxAcceleration = 5; // [m/s/s]
 
         /// <summary>
         /// The ball deceleration in meters per second squared.
@@ -873,14 +873,14 @@ namespace FootballAIGameServer
                 GameState.Ball.Movement.Y = kickWinner.Kick.Y;
 
                 // deviation of the kick
-                var angleDevation = 1 / 4f * (0.4 - kickWinner.Precision) * (Random.NextDouble() * 2 - 1);
+               /* var angleDevation = 1 / 4f * (0.4 - kickWinner.Precision) * (Random.NextDouble() * 2 - 1);
 
                 // rotation applied (deviation)
                 GameState.Ball.Movement.X = (float)(Math.Cos(angleDevation) * GameState.Ball.Movement.X -
                                                 Math.Sin(angleDevation) * GameState.Ball.Movement.Y);
                 GameState.Ball.Movement.Y = (float)(Math.Sin(angleDevation) * GameState.Ball.Movement.X +
                                                 Math.Cos(angleDevation) * GameState.Ball.Movement.Y);
-
+*/
                 var newSpeed = GameState.Ball.CurrentSpeed;
                 var maxAllowedSpeed = LastKicker.MaxKickSpeed;
                 if (newSpeed > maxAllowedSpeed)
