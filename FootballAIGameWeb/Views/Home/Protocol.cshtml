@@ -60,7 +60,7 @@
         After the parameters have been send there will be regular requests from the server for the action with the current game state in the following format:
     <p>
         <code>
-            GET ACTION[newLine][stepNumber][ballPositionX][ballPositionY][ballMovementX][ballMovementY][player1X][player1Y][player1MovementX][player1MovementY][player2X]...[player22MovementY]
+            GET ACTION[newLine][stepNumber][flagsByte][ballPositionX][ballPositionY][ballMovementX][ballMovementY][player1X][player1Y][player1MovementX][player1MovementY][player2X]...[player22MovementY]
         </code>
     </p>
     </p>
@@ -68,6 +68,7 @@
         The step number is signed 32-bit integer.
         All position and movement vector coordinates are float numbers in binary format (4B for each).
         First 11 players are your players and the second half are opponent players.
+        The least significant bit in flagsByte indicates whether a kick-off is happening.
     </p>
     <p>
         Server expects AI Action response in the following format:

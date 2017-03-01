@@ -25,10 +25,10 @@
 
     <h3>Football player movement</h3>
     <p>
-        The maximum player speed is 5 + speedParamaterValue * 6.25 meters per second.
+        The maximum player speed is 4 + speedParamaterValue * 5 meters per second.
         (there are properties in the prepared client applications to get current and the maximum speed of the player).
     </p>
-    <p>The maximum player acceleration is 3 meters per second squared.</p>
+    <p>The maximum player acceleration is 5 meters per second squared.</p>
     <p>
         If a football player accelerates faster than allowed or goes faster than his maximum speed,
         the movement vector is corrected with accordance to the maximum allowed values.
@@ -38,7 +38,7 @@
         If player is near the ball and successfully kicks the ball he transfers his kicking vector to the
         ball movement vector with certain modifications. The vector is deviated by the random angle with accordance
         to the player's precision parameter. With higher precision there is smaller maximum deviation angle.
-        The maximum allowed speed of the ball is 15 + kickPowerValue * 10 meters per second. As with players
+        The maximum allowed speed of the ball is 10 + kickPowerValue * 5 meters per second. As with players
         movement vector, the same correction is applied in this case.
     </p>
     <p>
