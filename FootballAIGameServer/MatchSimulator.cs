@@ -288,7 +288,8 @@ namespace FootballAIGameServer
             GameState = new GameState
             {
                 Ball = new Ball(),
-                FootballPlayers = new FootballPlayer[22]
+                FootballPlayers = new FootballPlayer[22],
+                KickOff = false
             };
 
             await ProcessGettingParameters();
@@ -308,6 +309,8 @@ namespace FootballAIGameServer
             ActionMessage actionMessage1 = null;
             ActionMessage actionMessage2 = null;
             GameState.Step = step;
+            GameState.KickOff = GameState.KickOff || GameState.Step == NumberOfSimulationSteps / 2 || 
+                GameState.Step == 0;
 
             try
             {
@@ -321,6 +324,8 @@ namespace FootballAIGameServer
                 await Player2AiConnection.SendAsync("GET ACTION");
                 await Player2AiConnection.SendAsync(GameState, 2);
                 //Console.WriteLine($"{GameState.Step} sent!");
+
+                GameState.KickOff = false; // reset for next step!
 
                 var getMessage1Task = Task.WhenAny(receiveActionMessage1, Task.Delay(Ping1 + PlayerTimeForOneStep));
                 var getMessage2Task = Task.WhenAny(receiveActionMessage2, Task.Delay(Ping2 + PlayerTimeForOneStep));
@@ -608,10 +613,8 @@ namespace FootballAIGameServer
         /// <param name="player2Action">The player2 action.</param>
         private void UpdateMatch(ActionMessage player1Action, ActionMessage player2Action)
         {
-            GameState.KickOff = GameState.Step == NumberOfSimulationSteps/2 || GameState.Step == 0;
-
-            UpdatePlayers(player1Action, player2Action);
             UpdateBall(player1Action, player2Action);
+            UpdatePlayers(player1Action, player2Action);
             HandleOuts();
             HandleGoals();
         }
@@ -873,14 +876,14 @@ namespace FootballAIGameServer
                 GameState.Ball.Movement.Y = kickWinner.Kick.Y;
 
                 // deviation of the kick
-               /* var angleDevation = 1 / 4f * (0.4 - kickWinner.Precision) * (Random.NextDouble() * 2 - 1);
+                var angleDevation = 1 / 4f * (0.4 - kickWinner.Precision) * (Random.NextDouble() * 2 - 1);
 
                 // rotation applied (deviation)
                 GameState.Ball.Movement.X = (float)(Math.Cos(angleDevation) * GameState.Ball.Movement.X -
                                                 Math.Sin(angleDevation) * GameState.Ball.Movement.Y);
                 GameState.Ball.Movement.Y = (float)(Math.Sin(angleDevation) * GameState.Ball.Movement.X +
                                                 Math.Cos(angleDevation) * GameState.Ball.Movement.Y);
-*/
+
                 var newSpeed = GameState.Ball.CurrentSpeed;
                 var maxAllowedSpeed = LastKicker.MaxKickSpeed;
                 if (newSpeed > maxAllowedSpeed)
@@ -890,6 +893,10 @@ namespace FootballAIGameServer
                 }
             }
 
+            // update ball position
+            GameState.Ball.Position.X += GameState.Ball.Movement.X;
+            GameState.Ball.Position.Y += GameState.Ball.Movement.Y;
+
             // ball deceleration
             var ratio = (GameState.Ball.CurrentSpeed - (BallDecerelation * StepInterval / 1000)) /
                 GameState.Ball.CurrentSpeed;
@@ -897,10 +904,6 @@ namespace FootballAIGameServer
                 ratio = 0;
             GameState.Ball.Movement.X *= (float)ratio;
             GameState.Ball.Movement.Y *= (float)ratio;
-
-            // update ball position
-            GameState.Ball.Position.X += GameState.Ball.Movement.X;
-            GameState.Ball.Position.Y += GameState.Ball.Movement.Y;
         }
 
         /// <summary>
