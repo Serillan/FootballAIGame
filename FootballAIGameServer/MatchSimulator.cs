@@ -48,7 +48,7 @@ namespace FootballAIGameServer
         /// </summary>
         public const double BallDecerelation = 1.5; // [m/s/s]
 
-        public const double BallMinDistanceForKick = 2; // [m]
+        public const double BallMinDistanceForKick = 1.5; // [m]
 
         /// <summary>
         /// The minimal opponent length from kickoff in meters.
@@ -464,7 +464,7 @@ namespace FootballAIGameServer
                     }
                     else // default parameters
                     {
-                        GameState.FootballPlayers[i] = new FootballPlayer()
+                        GameState.FootballPlayers[i] = new FootballPlayer(i)
                         {
                             Speed = 0.25f,
                             KickPower = 0.25f,
@@ -477,7 +477,7 @@ namespace FootballAIGameServer
             else // default parameters for all players
             {
                 for (var i = 0; i < 11; i++)
-                    GameState.FootballPlayers[i] = new FootballPlayer()
+                    GameState.FootballPlayers[i] = new FootballPlayer(i)
                     {
                         Speed = 0.25f,
                         KickPower = 0.25f,
@@ -497,10 +497,11 @@ namespace FootballAIGameServer
                         par.Speed + par.KickPower + par.Possession + par.Precision - 1 <= 0.01)
                     {
                         GameState.FootballPlayers[i + 11] = getParameters2.Result[i];
+                        GameState.FootballPlayers[i + 11].Id = i + 11; // parse message will assigns i !
                     }
                     else // default parameters
                     {
-                        GameState.FootballPlayers[i + 11] = new FootballPlayer()
+                        GameState.FootballPlayers[i + 11] = new FootballPlayer(i + 11)
                         {
                             Speed = 0.25f,
                             KickPower = 0.25f,
@@ -513,7 +514,7 @@ namespace FootballAIGameServer
             else // default parameters for all players
             {
                 for (var i = 0; i < 11; i++)
-                    GameState.FootballPlayers[i + 11] = new FootballPlayer()
+                    GameState.FootballPlayers[i + 11] = new FootballPlayer(i + 11)
                     {
                         Speed = 0.25f,
                         KickPower = 0.25f,
@@ -890,6 +891,19 @@ namespace FootballAIGameServer
                 {
                     GameState.Ball.Movement.X *= (float)(maxAllowedSpeed / newSpeed);
                     GameState.Ball.Movement.Y *= (float)(maxAllowedSpeed / newSpeed);
+
+                    if (kickWinner.Id < 11)
+                    {
+                        if (newSpeed > maxAllowedSpeed*MinReportableCorrection &&
+                            NumberOfSpeedCorrections1++ < MaximumNumberOfSameKindErrorInLog)
+                            Match.Player1ErrorLog += $"{CurrentTime} - Player{kickWinner.Id} kick correction.;";
+                    }
+                    else
+                    {
+                        if (newSpeed > maxAllowedSpeed * MinReportableCorrection &&
+                            NumberOfSpeedCorrections2++ < MaximumNumberOfSameKindErrorInLog)
+                            Match.Player2ErrorLog += $"{CurrentTime} - Player{kickWinner.Id - 11} kick correction.;";
+                    }
                 }
             }
 
@@ -897,7 +911,7 @@ namespace FootballAIGameServer
             GameState.Ball.Position.X += GameState.Ball.Movement.X;
             GameState.Ball.Position.Y += GameState.Ball.Movement.Y;
 
-            // ball deceleration
+            // ball deceleration (for the next step)
             var ratio = (GameState.Ball.CurrentSpeed - (BallDecerelation * StepInterval / 1000)) /
                 GameState.Ball.CurrentSpeed;
             if (ratio < 0)

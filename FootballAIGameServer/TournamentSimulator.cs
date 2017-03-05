@@ -115,7 +115,6 @@ namespace FootballAIGameServer
             Console.WriteLine($"Simulation of tournament {TournamentId} is being planned!");
             //await Task.Delay(10000);
 
-
             // sleep until 5 minutes before tournament
             if (TimeUntilStart.TotalMinutes > 5)
             {
@@ -289,6 +288,7 @@ namespace FootballAIGameServer
             Console.WriteLine($"Tournament {TournamentId} : Simulating round.");
 
             var advancingPlayers = new List<TournamentPlayer>();
+            var fightingPlayers = new List<TournamentPlayer>();
             var matches = new List<MatchSimulator>();
 
             lock (Players)
@@ -310,12 +310,13 @@ namespace FootballAIGameServer
                         .Take(numOfSkippingPlayers);
 
                     advancingPlayers.AddRange(skippingPlayers);
-                    Players.RemoveAll(p => advancingPlayers.Contains(p));
                 }
+
+                fightingPlayers.AddRange(Players.Where(p => !advancingPlayers.Contains(p)));
 
                 TournamentPlayer firstPlayer = null;
 
-                foreach (var tournamentPlayer in Players)
+                foreach (var tournamentPlayer in fightingPlayers)
                 {
                     if (firstPlayer == null)
                         firstPlayer = tournamentPlayer;
@@ -333,14 +334,13 @@ namespace FootballAIGameServer
                 }
             }
 
-            SavePlayers(Players); // update states
+            SavePlayers(fightingPlayers); // update states
 
             await Task.WhenAll(matches.Select(m => m.CurrentSimulationTask).ToArray());
 
             lock (Players)
             {
                 Players.ForEach(p => p.Player.PlayerState = PlayerState.PlayingTournamentWaiting);
-
 
                 // get looser position number
                 var exp = 1;
@@ -358,7 +358,6 @@ namespace FootballAIGameServer
                         looser = matchSimulator.Player1AiConnection.PlayerName == matchSimulator.Winner
                             ? Players.FirstOrDefault(p => p.Player.Name == matchSimulator.Player2AiConnection.PlayerName)
                             : Players.FirstOrDefault(p => p.Player.Name == matchSimulator.Player1AiConnection.PlayerName);
-
                     }
                     else
                     {
@@ -384,9 +383,11 @@ namespace FootballAIGameServer
                     looser.Player.PlayerState = PlayerState.Idle;
                 }
 
-                SavePlayers(Players);
-                advancingPlayers.RemoveAll(p => !Players.Contains(p));
+                fightingPlayers.RemoveAll(p => !Players.Contains(p)); // don't save those that have already left
+                SavePlayers(fightingPlayers);
+
                 // remove all skipping players that left during round
+                advancingPlayers.RemoveAll(p => !Players.Contains(p));
             }
 
             return advancingPlayers;

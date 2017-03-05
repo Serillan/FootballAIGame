@@ -36,7 +36,7 @@ namespace FootballAIGameServer.Messages
             var players = new FootballPlayer[11];
             for (var i = 0; i < 11; i++)
             {
-                players[i] = new FootballPlayer
+                players[i] = new FootballPlayer(i)
                 {
                     Speed = floatData[4*i + 0],
                     Precision = floatData[4*i + 1],

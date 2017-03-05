@@ -9,6 +9,8 @@ namespace FootballAIGameServer.SimulationEntities
 {
     public class FootballPlayer
     {
+        public int Id { get; set; }
+
         /// <summary>
         /// Gets or sets the speed parameter of the player. <para />
         /// The max value is 0.4.
@@ -74,8 +76,9 @@ namespace FootballAIGameServer.SimulationEntities
         /// <summary>
         /// Initializes a new instance of the <see cref="FootballPlayer"/> class.
         /// </summary>
-        public FootballPlayer()
+        public FootballPlayer(int id)
         {
+            Id = id;
             Position = new Vector();
             Movement = new Vector();
             Kick = new Vector();
@@ -100,6 +103,6 @@ namespace FootballAIGameServer.SimulationEntities
              4 + Speed * 2 / 0.4;
 
         public double MaxKickSpeed =>
-            10 + KickPower * 5;
+            15 + KickPower * 5;
     }
 }
