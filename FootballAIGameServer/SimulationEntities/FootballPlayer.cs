@@ -103,6 +103,6 @@ namespace FootballAIGameServer.SimulationEntities
              4 + Speed * 2 / 0.4;
 
         public double MaxKickSpeed =>
-            10 + KickPower * 5;
+            15 + KickPower * 5;
     }
 }
