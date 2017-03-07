@@ -31,7 +31,7 @@
     <p>The maximum player acceleration is 5 meters per second squared.</p>
     <p>
         If a football player accelerates faster than allowed or goes faster than his maximum speed,
-        the movement vector is corrected with accordance to the maximum allowed values.
+        the movement vector is corrected with accordance to the maximum allowed values. The acceleration is applied instantaneously at the beginning of the step.
     </p>
     <h3>Football player kicking</h3>
     <p>
@@ -39,7 +39,9 @@
         ball movement vector with certain modifications. The vector is deviated by the random angle with accordance
         to the player's precision parameter. With higher precision there is smaller maximum deviation angle.
         The maximum allowed speed of the ball is 10 + kickPowerValue * 5 meters per second. As with players
-        movement vector, the same correction is applied in this case.
+        movement vector, the same correction is applied in this case. The minimum distance from the ball for kicking
+        is 1.5 meters. Ball decelerates by 1.5 meters per second squared. The deceleration is applied instantaneously at the beginning of the step before
+        the kick is applied.
     </p>
     <p>
         If there are more players near ball kicking the ball, only one player kick will be

@@ -1,0 +1,85 @@
+﻿@{
+    ViewBag.Title = "C# FSM Project";
+}
+
+<h2>
+    C# Finite State Machine Project
+</h2>
+
+<section>
+    <h3>Basic information</h3>
+    <p>
+        
+    </p>
+    <p>
+        You need at least C# 3.0 compiler to compile the project. The default project target framework is
+        .NET 3.5 but you can change it to higher versions to use new .NET features.
+    </p>
+    <a href="https://github.com/Serillan/FootballAIGame.AI.FSM" style="font-size: 1.1em">Get Project</a>
+</section>
+
+<section>
+    
+    <h3>AI Architecture Overview</h3>
+    <p>
+        For basic overview of the Ai class visit
+        <a href="/Projects/CSharp">Basic C# project page</a>.
+    </p>
+
+    <p>
+        The AI specific classes are mainly located in the UserClasses folder.
+    </p>
+    <p>
+        <h5>Entities</h5>
+        The entities are the extensions of the basic simulation entities classes.
+        There is the team class which represents the team and abstract player class with
+        its subclasses that represent certain player roles. Every player and team has GetAction(s) method
+        that retrieve the player desired actions. Team's LoadState method is called every simulation step
+        before GetActions is called so that the team properties (players...) are correctly updated. Also
+        entities provide many useful utility functions and properties.
+
+        <h5>States</h5>
+        Every entity is always in one normal state that can be changed to other state during the execution.
+        Also every entity has its global state that never changes. States have methods for entering the
+        state, exiting the state and methods that will execute each simulation step while the player is
+        in the given state. State might have it's own local data.
+
+        <h5>FiniteStateMachine</h5>
+        Every entity owns an instance of this class. It keeps the entity current and global state and provides methods
+        for correct state transitions and updates. Update method is called each simulation step.
+
+        <h5>SteeringBehaviors</h5>
+        These classes define variety of movements that football player might do. They have methods for computing
+        the desired movement vector of the behavior.
+
+        <h5>SteeringBehaviorManager</h5>
+        Every player owns an instance of this class. It provides methods for adding and removing steering behavior
+        of the player. Its CalculateAccelerationVector is used every simulation step to get the player's movement action.
+
+        <h5>Messages</h5>
+        Messages are used for sending requests between entities. For example player might request pass from another player.
+        Messages are sent through MessageDispatcher. States have OnMessage method that handles these messages. Firstly
+        the current state OnMessage method is called and if it doesn't handle the message, then it is handled by the global
+        state OnMessage method (this is the main reason for global state hierarchy - goalkeepers might handle messages differently
+        than forwards etc.).
+
+        <h5>Region</h5>
+        This class is located in CustomDataTypes.  It is used for defining home regions of the players. Every player
+        has its home region (used by MoveToHomeRegion player state). Usually team states set the home region accordingly.
+        
+        <h5>SupportPositionManager</h5>
+        Located in Utilities (in UserClasses). Singleton class that is used for evaluating positions by certain criteria (safe pass/shot possible ...).
+        It is used by SupportControlling player state. Its update method is called every simulation step (from Ai class).
+        
+        <h5>Ai</h5>
+        On top of the basic Ai class responsibilities (from basic project) the main AI class is also responsible for holding team entities and calling appropriate entities methods to
+        get the correct AI action in every simulation step. It is implemented as singleton so that we can access from any method
+        the information about the current state and also all the created entities.
+        
+        <h5>Parameters</h5>
+        Holds all the AI constants that control the AI behavior.
+    </p>
+</section>
+
+
+

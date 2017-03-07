@@ -778,6 +778,8 @@
       <SubType>Designer</SubType>
     </None>
     <Content Include="Views\Projects\Java.cshtml" />
+    <Content Include="Views\Projects\CSharpFsm.cshtml" />
+    <Content Include="Views\Projects\JavaFsm.cshtml" />
     <None Include="Web.Production.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
