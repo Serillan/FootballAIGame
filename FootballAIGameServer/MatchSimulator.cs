@@ -48,7 +48,7 @@ namespace FootballAIGameServer
         /// </summary>
         public const double BallDecerelation = 1.5; // [m/s/s]
 
-        public const double BallMinDistanceForKick = 1.5; // [m]
+        public const double BallMaxDistanceForKick = 1.5; // [m]
 
         /// <summary>
         /// The minimal opponent length from kickoff in meters.
@@ -458,7 +458,7 @@ namespace FootballAIGameServer
                     var par = getParameters1.Result[i];
                     if (par.Speed <= 0.4001 && par.KickPower <= 0.4001 &&
                         par.Possession <= 0.4001 && par.Precision <= 0.4001 &&
-                        par.Speed + par.KickPower + par.Possession + par.Precision - 1 <= 0.01)
+                        par.Speed + par.KickPower + par.Possession + par.Precision - 1 <= 0.01) // todo improve
                     {
                         GameState.FootballPlayers[i] = getParameters1.Result[i];
                     }
@@ -862,7 +862,7 @@ namespace FootballAIGameServer
             }
 
             var playersNearBallKicking = GameState.FootballPlayers.Where(
-                p => Vector.DistanceBetween(GameState.Ball.Position, p.Position) <= BallMinDistanceForKick && (p.Kick.X != 0 || p.Kick.Y != 0));
+                p => Vector.DistanceBetween(GameState.Ball.Position, p.Position) <= BallMaxDistanceForKick && (p.Kick.X != 0 || p.Kick.Y != 0));
 
             var kickWinner = GetKickWinner(playersNearBallKicking.ToArray());
 
