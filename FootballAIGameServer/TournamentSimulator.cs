@@ -30,14 +30,6 @@ namespace FootballAIGameServer
         private ApplicationDbContext _context;
 
         /// <summary>
-        /// Gets or sets the connection manager.
-        /// </summary>
-        /// <value>
-        /// The connection manager.
-        /// </value>
-        private ConnectionManager ConnectionManager { get; set; }
-
-        /// <summary>
         /// Gets or sets the tournament identifier of the tournament that
         /// is simulated by this instance.
         /// </summary>
@@ -78,9 +70,8 @@ namespace FootballAIGameServer
         /// </summary>
         /// <param name="connectionManager">The connection manager.</param>
         /// <param name="tournament">The tournament for simulation.</param>
-        public TournamentSimulator(ConnectionManager connectionManager, Tournament tournament)
+        public TournamentSimulator(Tournament tournament)
         {
-            ConnectionManager = connectionManager;
             TournamentId = tournament.Id;
             StartTime = tournament.StartTime;
 
@@ -100,7 +91,7 @@ namespace FootballAIGameServer
 
                 foreach (var nextTournament in nextTournaments)
                 {
-                    var simulator = new TournamentSimulator(ConnectionManager.Instance, nextTournament);
+                    var simulator = new TournamentSimulator(nextTournament);
                     simulator.PlanSimulation();
                 }
             }
@@ -197,7 +188,7 @@ namespace FootballAIGameServer
                     if (tournament.RecurringTournament != null)
                     {
                         var nextTournament = CreateNextRecurring(tournament.RecurringTournament);
-                        var simulator = new TournamentSimulator(ConnectionManager.Instance, nextTournament);
+                        var simulator = new TournamentSimulator(nextTournament);
                         simulator.PlanSimulation();
                     }
                     context.SaveChanges();
@@ -273,7 +264,7 @@ namespace FootballAIGameServer
             if (tournament.RecurringTournament != null)
             {
                 var nextTournament = CreateNextRecurring(tournament.RecurringTournament);
-                var simulator = new TournamentSimulator(ConnectionManager.Instance, nextTournament);
+                var simulator = new TournamentSimulator(nextTournament);
                 simulator.PlanSimulation();
             }
         }
@@ -322,13 +313,13 @@ namespace FootballAIGameServer
                         firstPlayer = tournamentPlayer;
                     else // start new match
                     {
-                        SimulationManager.StartMatch(firstPlayer.Player.Name, firstPlayer.PlayerAi,
-                            tournamentPlayer.Player.Name, tournamentPlayer.PlayerAi, TournamentId);
+                        SimulationManager.Instance.StartMatch(firstPlayer.Player.Name, firstPlayer.PlayerAi,
+                            tournamentPlayer.Player.Name, tournamentPlayer.PlayerAi, tournament.Id);
                         // update player states
                         firstPlayer.Player.PlayerState = PlayerState.PlayingTournamentPlaying;
                         tournamentPlayer.Player.PlayerState = PlayerState.PlayingTournamentPlaying;
                         // add match to matches
-                        matches.Add(SimulationManager.GetMatchSimulator(firstPlayer.Player.Name));
+                        matches.Add(SimulationManager.Instance.GetMatchSimulator(firstPlayer.Player.Name));
                         firstPlayer = null;
                     }
                 }
@@ -352,10 +343,10 @@ namespace FootballAIGameServer
                 {
                     TournamentPlayer winner, looser;
 
-                    if (matchSimulator.Winner != null)
+                    if (matchSimulator.MatchInfo.Winner != null)
                     {
-                        winner = Players.FirstOrDefault(p => p.Player.Name == matchSimulator.Winner);
-                        looser = matchSimulator.Player1AiConnection.PlayerName == matchSimulator.Winner
+                        winner = Players.FirstOrDefault(p => p.Player.Name == matchSimulator.MatchInfo.Winner);
+                        looser = matchSimulator.Player1AiConnection.PlayerName == matchSimulator.MatchInfo.Winner
                             ? Players.FirstOrDefault(p => p.Player.Name == matchSimulator.Player2AiConnection.PlayerName)
                             : Players.FirstOrDefault(p => p.Player.Name == matchSimulator.Player1AiConnection.PlayerName);
                     }

@@ -1,17 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Entity.Core;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
-using System.ServiceModel.Channels;
-using System.ServiceModel.Configuration;
 using System.Text;
 using System.Threading.Tasks;
+using FootballAIGameMatchSimulator;
 using FootballAIGameServer.CustomDataTypes;
 using FootballAIGameServer.Messages;
-using FootballAIGameServer.Models;
 using FootballAIGameServer.SimulationEntities;
 
 namespace FootballAIGameServer
@@ -81,7 +78,7 @@ namespace FootballAIGameServer
         #endregion
 
         /// <summary>
-        /// Gets or sets the current simulation task.
+        /// Gets the current simulation task.
         /// </summary>
         /// <value>
         /// The current simulation task.
@@ -94,7 +91,7 @@ namespace FootballAIGameServer
         /// <value>
         /// The player1 AI connection.
         /// </value>
-        public ClientConnection Player1AiConnection { get; private set; }
+        public IClientCommunicator Player1AiConnection { get; private set; }
 
         /// <summary>
         /// Gets the second player AI <see cref="ClientConnection"/>.
@@ -102,7 +99,7 @@ namespace FootballAIGameServer
         /// <value>
         /// The player2 AI connection.
         /// </value>
-        public ClientConnection Player2AiConnection { get; private set; }
+        public IClientCommunicator Player2AiConnection { get; private set; }
 
         /// <summary>
         /// Gets or sets the current simulation step.
@@ -116,7 +113,7 @@ namespace FootballAIGameServer
         /// Gets or sets the winner. If the match has not yet ended or it ended
         /// in draw, returns null.
         /// </summary>
-        public string Winner { get; set; }
+        //public string Winner { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether first player has requested to cancel the match.
@@ -134,24 +131,27 @@ namespace FootballAIGameServer
         /// </value>
         public bool Player2CancelRequested { get; set; }
 
+        //public string Player1ErrorLog { get; set; }
+
+        //public string Player2ErrorLog { get; set; }
+
         /// <summary>
         /// Gets or sets the <see cref="System.Random"/> used for generating random numbers.
         /// </summary>
-        public static Random Random { get; set; }
+        public static Random Random { get; set; } = new Random();
 
-        private int? TournamentId { get; set; }
+        public MatchInfo MatchInfo { get; set; }
 
         private GameState GameState { get; set; }
-        private Match Match { get; set; }
         private int Ping1 { get; set; }
         private int Ping2 { get; set; }
-        private List<float> MatchData { get; set; }
         private Task<ClientMessage> Message1 { get; set; }
         private Task<ClientMessage> Message2 { get; set; }
         private FootballPlayer LastKicker { get; set; }
         private int WhoIsOnLeft { get; set; }
         
         private string CurrentTime
+
         {
             get
             {
@@ -161,8 +161,8 @@ namespace FootballAIGameServer
                 return $"{minutes}:{seconds}";
             }
         }
-        private int CurrentScore1 { get; set; }
-        private int CurrentScore2 { get; set; }
+        //private int CurrentScore1 { get; set; }
+        //private int CurrentScore2 { get; set; }
         private int NumberOfAccelerationCorrections1 { get; set; }
         private int NumberOfAccelerationCorrections2 { get; set; }
         private int NumberOfSpeedCorrections1 { get; set; }
@@ -177,12 +177,10 @@ namespace FootballAIGameServer
         /// </summary>
         /// <param name="player1AiConnection">The player1 AI connection that will play the match.</param>
         /// <param name="player2AiConnection">The player2 AI connection that will play the match.</param>
-        /// <param name="tournamentId">The tournament Id. (optional)</param>
-        public MatchSimulator(ClientConnection player1AiConnection, ClientConnection player2AiConnection, int? tournamentId)
+        public MatchSimulator(IClientCommunicator player1AiConnection, IClientCommunicator player2AiConnection)
         {
             this.Player1AiConnection = player1AiConnection;
             this.Player2AiConnection = player2AiConnection;
-            this.TournamentId = tournamentId;
         }
 
         /// <summary>
@@ -261,29 +259,16 @@ namespace FootballAIGameServer
         /// <returns></returns>
         private async Task ProcessSimulationStart()
         {
-            Player1AiConnection.IsInMatch = true;
-            Player2AiConnection.IsInMatch = true;
-
-            Console.WriteLine($"Starting simulation between {Player1AiConnection.PlayerName}:{Player1AiConnection.AiName} " +
-                              $"and {Player2AiConnection.PlayerName}:{Player2AiConnection.AiName}");
-
-            Match = new Match()
-            {
-                Time = DateTime.Now,
-                Player1Ai = Player1AiConnection.AiName,
-                Player2Ai = Player2AiConnection.AiName,
-                Player1ErrorLog = "",
-                Player2ErrorLog = "",
-                Goals = ""
-            };
+            Console.WriteLine($"Starting simulation between {Player1AiConnection.PlayerName} " +
+                              $"and {Player2AiConnection.PlayerName}");
 
             // 1. check pings
-            Ping1 = Player1AiConnection.PingTimeAverage();
-            Ping2 = Player2AiConnection.PingTimeAverage();
+            //Ping1 = Player1AiConnection.PingTimeAverage();
+            //Ping2 = Player2AiConnection.PingTimeAverage();
             //Console.WriteLine($"{Player1Connection.PlayerName} ping = {Ping1}\n" +
             //                  $"{Player2Connection.PlayerName} ping = {Ping2}");
 
-            MatchData = new List<float>();
+            MatchInfo = new MatchInfo();
 
             GameState = new GameState
             {
@@ -369,74 +354,35 @@ namespace FootballAIGameServer
         }
 
         /// <summary>
-        /// Processes the simulation end. The match is saved to the database.
+        /// Processes the simulation end.
         /// </summary>
         private void ProcessSimulationEnd()
         {
-            Console.WriteLine($"Ending simulation between {Player1AiConnection.PlayerName}:{Player1AiConnection.AiName} " +
-                             $"and {Player2AiConnection.PlayerName}:{Player2AiConnection.AiName}");
-            using (var context = new ApplicationDbContext())
+            //Console.WriteLine($"Ending simulation between {Player1AiConnection.PlayerName}:{Player1AiConnection.AiName} " +
+            //                 $"and {Player2AiConnection.PlayerName}:{Player2AiConnection.AiName}");
+
+            if (Message1.IsFaulted || !Player1AiConnection.IsActive)
             {
-                var player1 = context.Players.Single(p => p.Name == Player1AiConnection.PlayerName);
-                var player2 = context.Players.Single(p => p.Name == Player2AiConnection.PlayerName);
-
-                player1.PlayerState = player1.PlayerState == PlayerState.PlayingTournamentPlaying ? 
-                    PlayerState.PlayingTournamentWaiting : PlayerState.Idle;
-                player2.PlayerState = player2.PlayerState == PlayerState.PlayingTournamentPlaying? 
-                    PlayerState.PlayingTournamentWaiting : PlayerState.Idle;
-
-                Match.Player1 = player1;
-                Match.Player2 = player2;
-                Match.Score = $"{CurrentScore1}:{CurrentScore2}";
-                Match.Winner = CurrentScore1 > CurrentScore2 ? 1 : CurrentScore1 < CurrentScore2 ? 2 : 0;
-                Match.TournamentId = TournamentId;
-
-                if (Message1.IsFaulted || !Player1AiConnection.IsActive)
-                {
-                    Match.Winner = 2;
-                    Match.Player1ErrorLog += $"{CurrentTime} - Player AI has disconnected.;";
-                }
-                if (Message2.IsFaulted || !Player2AiConnection.IsActive)
-                {
-                    Match.Winner = 1;
-                    Match.Player2ErrorLog += $"{CurrentTime} - Player AI has disconnected.;";
-                }
-
-                if (Player1CancelRequested)
-                {
-                    Match.Winner = 2;
-                    Match.Player1ErrorLog += $"{CurrentTime} - Player has canceled the match.;";
-                }
-                if (Player2CancelRequested)
-                {
-                    Match.Winner = 1;
-                    Match.Player2ErrorLog += $"{CurrentTime} - Player has canceled the match.;";
-                }
-
-                switch (Match.Winner)
-                {
-                    case 1:
-                        player1.WonGames++;
-                        Winner = Player1AiConnection.PlayerName;
-                        break;
-                    case 2:
-                        player2.WonGames++;
-                        Winner = Player2AiConnection.PlayerName;
-                        break;
-                }
-
-                var matchByteData = new byte[MatchData.Count * 4];
-                Buffer.BlockCopy(MatchData.ToArray(), 0, matchByteData, 0, MatchData.Count * 4);
-                Match.MatchData = matchByteData;
-
-                context.Matches.Add(Match);
-
-                context.SaveChanges();
-
-                SimulationManager.RunningSimulations.Remove(this);
-                Player1AiConnection.IsInMatch = false;
-                Player2AiConnection.IsInMatch = false;
+                MatchInfo.Winner = Player2AiConnection.PlayerName;
+                MatchInfo.Player1ErrorLog += $"{CurrentTime} - Player AI has disconnected.;";
             }
+            if (Message2.IsFaulted || !Player2AiConnection.IsActive)
+            {
+                MatchInfo.Winner = Player1AiConnection.PlayerName;
+                MatchInfo.Player2ErrorLog += $"{CurrentTime} - Player AI has disconnected.;";
+            }
+
+            if (Player1CancelRequested)
+            {
+                MatchInfo.Winner = Player2AiConnection.PlayerName;
+                MatchInfo.Player1ErrorLog += $"{CurrentTime} - Player has canceled the match.;";
+            }
+            if (Player2CancelRequested)
+            {
+                MatchInfo.Winner = Player1AiConnection.PlayerName;
+                MatchInfo.Player2ErrorLog += $"{CurrentTime} - Player has canceled the match.;";
+            }
+
         }
 
         /// <summary>
@@ -621,7 +567,7 @@ namespace FootballAIGameServer
         }
 
         /// <summary>
-        /// Saves the current <see cref="GameState"/> to the <see cref="MatchData"/>.
+        /// Saves the current <see cref="GameState"/> to the <see cref="MatchInfo"/>.
         /// </summary>
         private void SaveState()
         {
@@ -636,7 +582,7 @@ namespace FootballAIGameServer
             }
 
             foreach (var num in currentStateData)
-                MatchData.Add(num);
+                MatchInfo.MatchData.Add(num);
         }
 
         /// <summary>
@@ -644,7 +590,7 @@ namespace FootballAIGameServer
         /// </summary>
         /// <param name="playerConnection">The player AI connection.</param>
         /// <returns>The array of football players with their parameters set accordingly.</returns>
-        private static async Task<FootballPlayer[]> GetPlayerParameters(ClientConnection playerConnection)
+        private static async Task<FootballPlayer[]> GetPlayerParameters(IClientCommunicator playerConnection)
         {
             ClientMessage message;
 
@@ -679,7 +625,7 @@ namespace FootballAIGameServer
                     {
                         action.Movement = new Vector(0, 0);
                         if (NumberOfInvalidMovementActionValues1++ < MaximumNumberOfSameKindErrorInLog)
-                            Match.Player1ErrorLog += $"{CurrentTime} - Player{i} invalid movement action value correction.;";
+                            MatchInfo.Player1ErrorLog += $"{CurrentTime} - Player{i} invalid movement action value correction.;";
                     }
 
                     var acceleration = new Vector(action.Movement.X - player.Movement.X,
@@ -697,7 +643,7 @@ namespace FootballAIGameServer
 
                         if (accelerationValue > MaxAcceleration * MinReportableCorrection && 
                             NumberOfAccelerationCorrections1++ < MaximumNumberOfSameKindErrorInLog)
-                            Match.Player1ErrorLog += $"{CurrentTime} - Player{i} acceleration correction.;";
+                            MatchInfo.Player1ErrorLog += $"{CurrentTime} - Player{i} acceleration correction.;";
 
                     }
 
@@ -714,7 +660,7 @@ namespace FootballAIGameServer
 
                         if (newSpeed > player.MaxSpeed * MinReportableCorrection &&
                             NumberOfSpeedCorrections1++ < MaximumNumberOfSameKindErrorInLog)
-                            Match.Player1ErrorLog += $"{CurrentTime} - Player{i} speed correction.;";
+                            MatchInfo.Player1ErrorLog += $"{CurrentTime} - Player{i} speed correction.;";
                     }
 
                     // stop player from going too far from field
@@ -744,7 +690,7 @@ namespace FootballAIGameServer
                     {
                         action.Movement = new Vector(0, 0);
                         if (NumberOfInvalidMovementActionValues2++ < MaximumNumberOfSameKindErrorInLog)
-                            Match.Player2ErrorLog += $"{CurrentTime} - Player{i} invalid movement action value correction.;";
+                            MatchInfo.Player2ErrorLog += $"{CurrentTime} - Player{i} invalid movement action value correction.;";
                     }
 
                     var acceleration = new Vector(action.Movement.X - player.Movement.X,
@@ -762,7 +708,7 @@ namespace FootballAIGameServer
 
                         if (accelerationValue > MaxAcceleration * MinReportableCorrection && 
                             NumberOfAccelerationCorrections2++ < MaximumNumberOfSameKindErrorInLog)
-                            Match.Player2ErrorLog += $"{CurrentTime} - Player{i} acceleration correction.;";
+                            MatchInfo.Player2ErrorLog += $"{CurrentTime} - Player{i} acceleration correction.;";
 
                     }
 
@@ -778,7 +724,7 @@ namespace FootballAIGameServer
 
                         if (newSpeed > player.MaxSpeed * MinReportableCorrection && 
                                 NumberOfSpeedCorrections2++ < MaximumNumberOfSameKindErrorInLog)
-                            Match.Player2ErrorLog += $"{CurrentTime} - Player{i} speed correction.;";
+                            MatchInfo.Player2ErrorLog += $"{CurrentTime} - Player{i} speed correction.;";
                     }
 
                     // stop player from going too far from field
@@ -839,7 +785,7 @@ namespace FootballAIGameServer
                 {
                     GameState.FootballPlayers[i].Kick = new Vector(0, 0);
                     if (NumberOfInvalidKickActionValues1++ < MaximumNumberOfSameKindErrorInLog)
-                        Match.Player1ErrorLog += $"{CurrentTime} - Player{i} invalid action value correction.;";
+                        MatchInfo.Player1ErrorLog += $"{CurrentTime} - Player{i} invalid action value correction.;";
                 }
 
             }
@@ -857,12 +803,13 @@ namespace FootballAIGameServer
                 {
                     GameState.FootballPlayers[i + 11].Kick = new Vector(0, 0);
                     if (NumberOfInvalidKickActionValues2++ < MaximumNumberOfSameKindErrorInLog)
-                        Match.Player2ErrorLog += $"{CurrentTime} - Player{i} invalid action value correction.;";
+                        MatchInfo.Player2ErrorLog += $"{CurrentTime} - Player{i} invalid action value correction.;";
                 }
             }
 
             var playersNearBallKicking = GameState.FootballPlayers.Where(
-                p => Vector.DistanceBetween(GameState.Ball.Position, p.Position) <= BallMaxDistanceForKick && (p.Kick.X != 0 || p.Kick.Y != 0));
+                p => Vector.DistanceBetween(GameState.Ball.Position, p.Position) <= BallMaxDistanceForKick && 
+                (p.Kick.X != 0 || p.Kick.Y != 0));
 
             var kickWinner = GetKickWinner(playersNearBallKicking.ToArray());
 
@@ -896,13 +843,13 @@ namespace FootballAIGameServer
                     {
                         if (newSpeed > maxAllowedSpeed*MinReportableCorrection &&
                             NumberOfSpeedCorrections1++ < MaximumNumberOfSameKindErrorInLog)
-                            Match.Player1ErrorLog += $"{CurrentTime} - Player{kickWinner.Id} kick correction.;";
+                            MatchInfo.Player1ErrorLog += $"{CurrentTime} - Player{kickWinner.Id} kick correction.;";
                     }
                     else
                     {
                         if (newSpeed > maxAllowedSpeed * MinReportableCorrection &&
                             NumberOfSpeedCorrections2++ < MaximumNumberOfSameKindErrorInLog)
-                            Match.Player2ErrorLog += $"{CurrentTime} - Player{kickWinner.Id - 11} kick correction.;";
+                            MatchInfo.Player2ErrorLog += $"{CurrentTime} - Player{kickWinner.Id - 11} kick correction.;";
                     }
                 }
             }
@@ -955,9 +902,9 @@ namespace FootballAIGameServer
                         ball.Movement.Y = 0f;
 
                         if (lastTeam == 1)
-                            Match.Shots1++;
+                            MatchInfo.Shots1++;
                         else
-                            Match.Shots2++;
+                            MatchInfo.Shots2++;
                     }
                     else
                     {
@@ -1000,9 +947,9 @@ namespace FootballAIGameServer
                         ball.Movement.Y = 0f;
 
                         if (lastTeam == 1)
-                            Match.Shots1++;
+                            MatchInfo.Shots1++;
                         else
-                            Match.Shots2++;
+                            MatchInfo.Shots2++;
                     }
                     else
                     {
@@ -1090,20 +1037,20 @@ namespace FootballAIGameServer
 
                 if (WhoIsOnLeft == 1)
                 {
-                    CurrentScore2++;
+                    MatchInfo.Goals1++;
                     if (lastTeam == 2)
                     {
-                        Match.ShotsOnTarget2++;
-                        Match.Shots2++;
+                        MatchInfo.ShotsOnTarget2++;
+                        MatchInfo.Shots2++;
                     }
                 }
                 if (WhoIsOnLeft == 2)
                 {
-                    CurrentScore1++;
+                    MatchInfo.Goals2++;
                     if (lastTeam == 1)
                     {
-                        Match.ShotsOnTarget2++;
-                        Match.Shots2++;
+                        MatchInfo.ShotsOnTarget2++;
+                        MatchInfo.Shots2++;
                     }
                 }
 
@@ -1111,7 +1058,7 @@ namespace FootballAIGameServer
                 for (var i = 0; i < 22; i++)
                     if (GameState.FootballPlayers[i] == LastKicker)
                         scoringPlayerNumber = i < 11 ? i : i - 11;
-                Match.Goals += $"{CurrentTime};{teamNameThatScored};Player{scoringPlayerNumber}|";
+                MatchInfo.Goals += $"{CurrentTime};{teamNameThatScored};Player{scoringPlayerNumber}|";
                 SetStartingPositions(WhoIsOnLeft);
             }
             else if (ball.Position.X > 110 && ball.Position.Y < 75f / 2 + 7.32 / 2 && ball.Position.Y > 75f / 2 - 7.32 / 2)
@@ -1123,20 +1070,20 @@ namespace FootballAIGameServer
 
                 if (WhoIsOnLeft == 1)
                 {
-                    CurrentScore1++;
+                    MatchInfo.Goals1++;
                     if (lastTeam == 1)
                     {
-                        Match.ShotsOnTarget1++;
-                        Match.Shots1++;
+                        MatchInfo.ShotsOnTarget1++;
+                        MatchInfo.Shots1++;
                     }
                 }
                 if (WhoIsOnLeft == 2)
                 {
-                    CurrentScore2++;
+                    MatchInfo.Goals2++;
                     if (lastTeam == 2)
                     {
-                        Match.ShotsOnTarget2++;
-                        Match.Shots2++;
+                        MatchInfo.ShotsOnTarget2++;
+                        MatchInfo.Shots2++;
                     }
                 }
 
@@ -1144,7 +1091,7 @@ namespace FootballAIGameServer
                 for (var i = 0; i < 22; i++)
                     if (GameState.FootballPlayers[i] == LastKicker)
                         scoringPlayerNumber = i < 11 ? i : i - 11;
-                Match.Goals += $"{CurrentTime};{teamNameThatScored};Player{scoringPlayerNumber}|";
+                MatchInfo.Goals += $"{CurrentTime};{teamNameThatScored};Player{scoringPlayerNumber}|";
                 SetStartingPositions(WhoIsOnLeft == 1 ? 2 : 1);
             }
         }
@@ -1187,31 +1134,31 @@ namespace FootballAIGameServer
             if (wasBallGoingToGoalLine1 && lastWinnerTeam != WhoIsOnLeft)
             {
                 if (lastWinnerTeam == 1)
-                    Match.Shots1++;
+                    MatchInfo.Shots1++;
                 else
-                    Match.Shots2++;
+                    MatchInfo.Shots2++;
                 if (wasBallGoingToGoalPost1)
                 {
                     if (lastWinnerTeam == 1)
-                        Match.ShotsOnTarget1++;
+                        MatchInfo.ShotsOnTarget1++;
                     else
-                        Match.ShotsOnTarget2++;
+                        MatchInfo.ShotsOnTarget2++;
                 }
             }
 
             if (wasBallGoingToGoalLine2 && lastWinnerTeam == WhoIsOnLeft)
             {
                 if (lastWinnerTeam == 1)
-                    Match.Shots1++;
+                    MatchInfo.Shots1++;
                 else
-                    Match.Shots2++;
+                    MatchInfo.Shots2++;
 
                 if (wasBallGoingToGoalPost1)
                 {
                     if (lastWinnerTeam == 1)
-                        Match.ShotsOnTarget1++;
+                        MatchInfo.ShotsOnTarget1++;
                     else
-                        Match.ShotsOnTarget2++;
+                        MatchInfo.ShotsOnTarget2++;
                 }
             }
 

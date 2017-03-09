@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Entity;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -8,10 +7,14 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using FootballAIGameServer.Messages;
-using FootballAIGameServer.Models;
 
 namespace FootballAIGameServer
 {
+
+    public delegate Task PlayerDisconectedHandler(ClientConnection connection);
+    public delegate Task<bool> AuthenticationHandler(LoginMessage message, ClientConnection connection);
+
+
     /// <summary>
     /// Responsible for keeping all the client connections.
     /// Provides method to start listening for new connections, and public properties
@@ -48,13 +51,9 @@ namespace FootballAIGameServer
         /// </value>
         public List<ClientConnection> ActiveConnections { get; set; }
 
-        /// <summary>
-        /// Gets or sets the wants to play connections.
-        /// </summary>
-        /// <value>
-        /// The wants to play connections.
-        /// </value>
-        public List<ClientConnection> WantsToPlayConnections { get; set; }
+        public AuthenticationHandler AuthenticationHandler { get; set; }
+
+        public PlayerDisconectedHandler PlayerDisconectedHandler { get; set; }
 
         /// <summary>
         /// Gets the singleton instance.
@@ -82,7 +81,7 @@ namespace FootballAIGameServer
             Listener = new TcpListener(IPAddress.Any, GameServerPort);
             Connections = new List<ClientConnection>();
             ActiveConnections = new List<ClientConnection>();
-            WantsToPlayConnections = new List<ClientConnection>();
+            AuthenticationHandler = DefaultAuthenticate;
         }
 
         /// <summary>
@@ -93,7 +92,6 @@ namespace FootballAIGameServer
         {
             Listener.Start();
             StartCheckingConnections();
-            Console.WriteLine("Listening has started.");
 
             while (true)
             {
@@ -132,6 +130,10 @@ namespace FootballAIGameServer
                                 Console.WriteLine($"Player {clientConnection.PlayerName} with AI " +
                                               $"{clientConnection.AiName} has disconnected.");
                             clientConnection.IsActive = false;
+
+                            // delegate call
+                            PlayerDisconectedHandler?.Invoke(clientConnection);
+
                             toBeRemovedConnections.Add(clientConnection);
                             
                         }
@@ -142,37 +144,10 @@ namespace FootballAIGameServer
                     }
 
                     // remove from db
-                    using (var context = new ApplicationDbContext())
-                    {
-                        foreach (var toBeRemovedConnection in toBeRemovedConnections)
-                        {
-                            var player =
-                                context.Players.SingleOrDefault(p => p.Name == toBeRemovedConnection.PlayerName);
+                    /*
+                    
+                    }*/
 
-                            if (player != null)
-                            {
-                                var newAis = player.ActiveAis.Split(';').Where(s => s != toBeRemovedConnection.AiName);
-                                player.ActiveAis = string.Join(";", newAis);
-
-                                lock (WantsToPlayConnections)
-                                {
-                                    WantsToPlayConnections.Remove(toBeRemovedConnection);
-                                }
-
-                                if (player.SelectedAi == toBeRemovedConnection.AiName)
-                                {
-                                    player.SelectedAi = "";
-                                    player.PlayerState = PlayerState.Idle; // todo error message
-                                }
-
-                                if (player.ActiveAis == "")
-                                    player.ActiveAis = null;
-                            }
-
-                            toBeRemovedConnection.Dispose();
-                        }
-                        context.SaveChanges();
-                    }
                     Connections.RemoveAll(c => toBeRemovedConnections.Contains(c));
                     lock (ActiveConnections)
                     {
@@ -198,7 +173,7 @@ namespace FootballAIGameServer
                 }
                 else
                 {
-                    if (await ProcessLoginMessageAsync((LoginMessage)clientMessage, connection))
+                    if (await AuthenticationHandler((LoginMessage)clientMessage, connection))
                     {
                         await connection.SendAsync("CONNECTED");
                         connection.IsActive = true;
@@ -219,34 +194,8 @@ namespace FootballAIGameServer
         /// <param name="message">The message.</param>
         /// <param name="connection">The connection.</param>
         /// <returns><c>true</c> if the client has log on successfully; otherwise <c>false</c></returns>
-        private static async Task<bool> ProcessLoginMessageAsync(LoginMessage message, ClientConnection connection)
+        private static async Task<bool> DefaultAuthenticate(LoginMessage message, ClientConnection connection)
         {
-            using (var context = new ApplicationDbContext())
-            {
-                var player = await context.Players
-                    .Include(u => u.User)
-                    .FirstOrDefaultAsync(p => p.Name == message.PlayerName);
-                if (player == null)
-                {
-                    connection.SendAsync("Invalid player name");
-                    return false;
-                }
-                if (player.ActiveAis == null)
-                    player.ActiveAis = message.AiName;
-                else
-                {
-                    if (player.ActiveAis.Split(';').Contains(message.AiName))
-                    {
-                        await connection.SendAsync("AI name is already being used.");
-                        return false;
-                    }
-                    player.ActiveAis += ";" + message.AiName;
-                }
-                connection.AiName = message.AiName;
-                connection.PlayerName = message.PlayerName;
-                context.SaveChanges();
-            }
-
             return true;
         }
 

@@ -25,28 +25,27 @@ namespace FootballAIGameServer.ApiForWeb
         /// </returns>
         public string WantsToPlay(string userName, string ai)
         {
-            var manager = ConnectionManager.Instance;
-
             ClientConnection connection;
-            lock (manager.ActiveConnections)
+
+            lock (ConnectionManager.Instance.ActiveConnections)
             {
-                connection = manager.ActiveConnections
+                connection = ConnectionManager.Instance.ActiveConnections
                     .FirstOrDefault(c => c.PlayerName == userName && c.AiName == ai);
             }
 
             if (connection == null)
                 return "AI is no longer active.";
 
-            lock (manager.WantsToPlayConnections)
+            lock (SimulationManager.Instance.WantsToPlayConnections)
             {
-                if (manager.WantsToPlayConnections.Count == 0)
+                if (SimulationManager.Instance.WantsToPlayConnections.Count == 0)
                 {
-                    manager.WantsToPlayConnections.Add(connection);
+                    SimulationManager.Instance.WantsToPlayConnections.Add(connection);
                 }
                 else // start match
                 {
-                    var otherPlayerConnection = manager.WantsToPlayConnections[0];
-                    manager.WantsToPlayConnections.Remove(otherPlayerConnection);
+                    var otherPlayerConnection = SimulationManager.Instance.WantsToPlayConnections[0];
+                    SimulationManager.Instance.WantsToPlayConnections.Remove(otherPlayerConnection);
 
                     using (var context = new ApplicationDbContext())
                     {
@@ -81,7 +80,7 @@ namespace FootballAIGameServer.ApiForWeb
         /// </returns>
         public string StartGame(string userName1, string ai1, string userName2, string ai2)
         {
-            return SimulationManager.StartMatch(userName1, ai1, userName2, ai2);
+            return SimulationManager.Instance.StartMatch(userName1, ai1, userName2, ai2);
         }
 
         /// <summary>
@@ -90,7 +89,7 @@ namespace FootballAIGameServer.ApiForWeb
         /// <param name="playerName">Name of the player.</param>
         public void CancelMatch(string playerName)
         {
-            SimulationManager.CancelMatch(playerName);
+            SimulationManager.Instance.CancelMatch(playerName);
         }
 
         /// <summary>
@@ -101,7 +100,7 @@ namespace FootballAIGameServer.ApiForWeb
         public void LeaveRunningTournament(string playerName)
         {
             // cancel tournament match if player is in it
-            SimulationManager.CancelMatch(playerName);
+            SimulationManager.Instance.CancelMatch(playerName);
             TournamentSimulator.LeaveRunningTournament(playerName);
         }
 
@@ -117,7 +116,7 @@ namespace FootballAIGameServer.ApiForWeb
                 if (tournament == null)
                     return;
 
-                var simulator = new TournamentSimulator(ConnectionManager.Instance, tournament);
+                var simulator = new TournamentSimulator(tournament);
                 simulator.PlanSimulation();
             }
         }
@@ -128,9 +127,9 @@ namespace FootballAIGameServer.ApiForWeb
         /// <param name="playerName">The player name.</param>
         public void CancelLooking(string playerName)
         {
-            lock (ConnectionManager.Instance.WantsToPlayConnections)
+            lock (SimulationManager.Instance.WantsToPlayConnections)
             {
-                ConnectionManager.Instance.WantsToPlayConnections.RemoveAll(p => p.PlayerName == playerName);
+                SimulationManager.Instance.WantsToPlayConnections.RemoveAll(p => p.PlayerName == playerName);
             }
         }
 
@@ -140,7 +139,7 @@ namespace FootballAIGameServer.ApiForWeb
         /// <param name="playerName">Name of the player.</param>
         public int GetCurrentMatchStep(string playerName)
         {
-            var match = SimulationManager.RunningSimulations
+            var match = SimulationManager.Instance.RunningSimulations
                 .FirstOrDefault(m => m.Player1AiConnection.PlayerName == playerName ||
                                      m.Player2AiConnection.PlayerName == playerName);
             return match?.CurrentStep ?? 1500;

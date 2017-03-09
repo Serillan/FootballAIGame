@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Data.Entity;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.ServiceModel;
 using System.Text;
 using System.Threading.Tasks;
 using FootballAIGameServer.ApiForWeb;
+using FootballAIGameServer.Messages;
 using FootballAIGameServer.Models;
 
 namespace FootballAIGameServer
@@ -25,37 +27,15 @@ namespace FootballAIGameServer
         {
             // start services
             var host = new ServiceHost(typeof(GameServerService));
-            host.Open(); 
+            host.Open();
             Console.WriteLine("Services have started.");
-
-            // reset player states on the start
-            using (var context = new ApplicationDbContext())
-            {
-                var players = context.Players.ToList();
-                foreach (var player in players)
-                {
-                    player.PlayerState = PlayerState.Idle;
-                    player.ActiveAis = null;
-                    player.SelectedAi = null;
-                }
-                context.SaveChanges();
-            }
 
             // set console exit handler
             _handler = ConsoleEventHandler;
             SetConsoleCtrlHandler(_handler, true);
 
-            // initialize random
-            MatchSimulator.Random = new Random();
-
-            // plan tournaments
-            TournamentSimulator.PlanUnstartedTournaments();
-            Console.WriteLine("Tournaments planned.");
-
-            // start listening
-            var manager = ConnectionManager.Instance;
-            manager.StartListening().Wait();
-
+            // start
+            SimulationManager.Instance.StartSimulatingAsync().Wait();
         }
 
         /// <summary>
@@ -81,7 +61,7 @@ namespace FootballAIGameServer
                 }
 
                 TournamentSimulator.CloseRunningTournaments(context);
-                
+
                 context.SaveChanges();
             }
             return false;
@@ -109,7 +89,6 @@ namespace FootballAIGameServer
         /// <returns></returns>
         [DllImport("kernel32.dll", SetLastError = true)]
         private static extern bool SetConsoleCtrlHandler(ConsoleEventDelegate handlerRoutine, bool add);
-
 
     }
 }

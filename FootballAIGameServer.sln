@@ -5,6 +5,8 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FootballAIGameServer", "FootballAIGameServer\FootballAIGameServer.csproj", "{00A3C78D-FC4C-4A73-BF17-FFCA2CD6DA3C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FootballAIGameMatchSimulator", "FootballAIGameMatchSimulator\FootballAIGameMatchSimulator.csproj", "{0FF41A2E-C156-4460-ADCF-BF4EF4E3D05C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,6 +20,12 @@ Global
 		{00A3C78D-FC4C-4A73-BF17-FFCA2CD6DA3C}.Production|Any CPU.Build.0 = Production|Any CPU
 		{00A3C78D-FC4C-4A73-BF17-FFCA2CD6DA3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{00A3C78D-FC4C-4A73-BF17-FFCA2CD6DA3C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0FF41A2E-C156-4460-ADCF-BF4EF4E3D05C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0FF41A2E-C156-4460-ADCF-BF4EF4E3D05C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0FF41A2E-C156-4460-ADCF-BF4EF4E3D05C}.Production|Any CPU.ActiveCfg = Release|Any CPU
+		{0FF41A2E-C156-4460-ADCF-BF4EF4E3D05C}.Production|Any CPU.Build.0 = Release|Any CPU
+		{0FF41A2E-C156-4460-ADCF-BF4EF4E3D05C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0FF41A2E-C156-4460-ADCF-BF4EF4E3D05C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

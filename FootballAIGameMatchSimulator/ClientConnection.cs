@@ -9,8 +9,8 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using FootballAIGameMatchSimulator;
 using FootballAIGameServer.Messages;
-using FootballAIGameServer.Models;
 using FootballAIGameServer.SimulationEntities;
 
 namespace FootballAIGameServer
@@ -20,7 +20,7 @@ namespace FootballAIGameServer
     /// Provides methods for communicating with the client.
     /// </summary>
     /// <seealso cref="System.IDisposable" />
-    public class ClientConnection : IDisposable
+    public class ClientConnection : IDisposable, IClientCommunicator
     {
         /// <summary>
         /// Gets or sets a value indicating whether the connection is active.
@@ -333,6 +333,13 @@ namespace FootballAIGameServer
             {
                 var message = await ReceiveClientMessageAsync();
                 var actionMessage = message as ActionMessage;
+
+                if (actionMessage == null)
+                {
+                    Console.WriteLine("Invalid message received.");
+                    continue;
+                }
+
                 if (actionMessage?.Step == step)
                     return actionMessage;
                 else if (actionMessage?.Step > step)
