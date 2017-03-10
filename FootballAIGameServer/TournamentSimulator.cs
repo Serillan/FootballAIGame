@@ -101,27 +101,29 @@ namespace FootballAIGameServer
         /// Plans the simulation.
         /// </summary>
         /// <returns></returns>
-        public async Task PlanSimulation()
+        public void PlanSimulation()
         {
             Console.WriteLine($"Simulation of tournament {TournamentId} is being planned!");
-            //await Task.Delay(10000);
 
-            // sleep until 5 minutes before tournament
-            if (TimeUntilStart.TotalMinutes > 5)
+            Task.Run(async () =>
             {
-                await Task.Delay(TimeUntilStart - TimeSpan.FromMinutes(5));
-                Console.WriteLine($"Simulation of tournament {TournamentId} is awaken 5 minutes before start!");
+                // sleep until 5 minutes before tournament
+                if (TimeUntilStart.TotalMinutes > 5)
+                {
+                    await Task.Delay(TimeUntilStart - TimeSpan.FromMinutes(5));
+                    Console.WriteLine($"Simulation of tournament {TournamentId} is awaken 5 minutes before start!");
+                    KickInactive();
+                }
+
+                // when tournament starts
+                if (TimeUntilStart.TotalSeconds > 0)
+                    await Task.Delay(TimeUntilStart);
+
+                Console.WriteLine($"Simulation of tournament {TournamentId} is being simulated!");
                 KickInactive();
-            }
-
-            // when tournament starts
-            if (TimeUntilStart.TotalSeconds > 0)
-                await Task.Delay(TimeUntilStart);
-
-            Console.WriteLine($"Simulation of tournament {TournamentId} is being simulated!");
-            KickInactive();
-            await Simulate();
-            Console.WriteLine($"Simulation of tournament {TournamentId} ends!");
+                await Simulate();
+                Console.WriteLine($"Simulation of tournament {TournamentId} ends!");
+            });
         }
 
         /// <summary>

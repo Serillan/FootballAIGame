@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using FootballAIGameMatchSimulator;
 using FootballAIGameServer.Messages;
@@ -52,7 +53,7 @@ namespace FootballAIGameServer
             TournamentSimulator.PlanUnstartedTournaments();
             Console.WriteLine("Tournaments planned.");
 
-            var listening = ConnectionManager.Instance.StartListening();
+            var listening = ConnectionManager.Instance.StartListeningAsync();
             Console.WriteLine("Listening has started.");
 
             await listening;
@@ -115,7 +116,7 @@ namespace FootballAIGameServer
 
                 var startTime = DateTime.Now;
 
-                matchSimulator.SimulateMatch().ContinueWith((task => OnSimulationEnd(startTime, matchSimulator, tournamentId)));
+                matchSimulator.SimulateMatchAsync().ContinueWith((task => OnSimulationEndAsync(startTime, matchSimulator, tournamentId)));
 
                 return "ok";
             }
@@ -159,26 +160,29 @@ namespace FootballAIGameServer
         private void SetSimulationHandlers()
         {
             ConnectionManager.Instance.AuthenticationHandler = ProcessLoginMessageAsync;
-            ConnectionManager.Instance.PlayerDisconectedHandler = ProcessClientDisconnection;
+            ConnectionManager.Instance.PlayerDisconectedHandler = ProcessClientDisconnectionAsync;
         }
 
-        private void OnSimulationEnd(DateTime startTime, MatchSimulator simulator, int? tournamentId)
+        private async Task OnSimulationEndAsync(DateTime startTime, MatchSimulator simulator, int? tournamentId)
         {
             var matchInfo = simulator.MatchInfo;
 
             var player1AiConnection = simulator.Player1AiConnection as ClientConnection;
             var player2AiConnection = simulator.Player2AiConnection as ClientConnection;
+            Debug.Assert(player1AiConnection != null, "player1AiConnection != null");
+            Debug.Assert(player2AiConnection != null, "player2AiConnection != null");
+
 
             using (var context = new ApplicationDbContext())
             {
-                var player1 = context.Players.Single(p => p.Name == player1AiConnection.PlayerName);
-                var player2 = context.Players.Single(p => p.Name == player2AiConnection.PlayerName);
+                var player1Retrieve = context.Players.SingleAsync(p => p.Name == player1AiConnection.PlayerName);
+                var player2 = await context.Players.SingleAsync(p => p.Name == player2AiConnection.PlayerName);
+                var player1 = await player1Retrieve;
 
                 player1.PlayerState = player1.PlayerState == PlayerState.PlayingTournamentPlaying ?
                     PlayerState.PlayingTournamentWaiting : PlayerState.Idle;
                 player2.PlayerState = player2.PlayerState == PlayerState.PlayingTournamentPlaying ?
                     PlayerState.PlayingTournamentWaiting : PlayerState.Idle;
-
 
                 var match = new Match
                 {
@@ -206,7 +210,7 @@ namespace FootballAIGameServer
 
                 context.Matches.Add(match);
 
-                context.SaveChanges();
+                await context.SaveChangesAsync();
 
                 RunningSimulations.Remove(simulator);
 
@@ -215,23 +219,23 @@ namespace FootballAIGameServer
             }
         }
 
-        private async Task ProcessClientDisconnection(ClientConnection connection)
+        private async Task ProcessClientDisconnectionAsync(ClientConnection connection)
         {
             using (var context = new ApplicationDbContext())
             {
                 var player =
-                    context.Players.SingleOrDefault(p => p.Name == connection.PlayerName);
+                    await context.Players.SingleOrDefaultAsync(p => p.Name == connection.PlayerName);
 
                 if (player != null)
                 {
                     var newAis = player.ActiveAis.Split(';').Where(s => s != connection.AiName);
                     player.ActiveAis = string.Join(";", newAis);
 
-                      lock (WantsToPlayConnections)
-                      {
-                          WantsToPlayConnections.Remove(connection);
-                      }
-                      
+                    lock (WantsToPlayConnections)
+                    {
+                        WantsToPlayConnections.Remove(connection);
+                    }
+
                     if (player.SelectedAi == connection.AiName)
                     {
                         player.SelectedAi = "";
@@ -240,9 +244,9 @@ namespace FootballAIGameServer
 
                     if (player.ActiveAis == "")
                         player.ActiveAis = null;
-                    //                    toBeRemovedConnection.Dispose();
+                    connection.Dispose();
                 }
-                context.SaveChanges();
+                await context.SaveChangesAsync();
             }
         }
 
@@ -261,7 +265,7 @@ namespace FootballAIGameServer
                     .FirstOrDefaultAsync(p => p.Name == message.PlayerName);
                 if (player == null)
                 {
-                    connection.SendAsync("Invalid player name");
+                    await connection.TrySendAsync("Invalid player name");
                     return false;
                 }
                 if (player.ActiveAis == null)
@@ -270,14 +274,14 @@ namespace FootballAIGameServer
                 {
                     if (player.ActiveAis.Split(';').Contains(message.AiName))
                     {
-                        connection.SendAsync("AI name is already being used.");
+                        await connection.TrySendAsync("AI name is already being used.");
                         return false;
                     }
                     player.ActiveAis += ";" + message.AiName;
                 }
                 connection.AiName = message.AiName;
                 connection.PlayerName = message.PlayerName;
-                context.SaveChanges();
+                await context.SaveChangesAsync();
             }
 
             return true;

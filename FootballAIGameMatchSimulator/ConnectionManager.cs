@@ -88,9 +88,10 @@ namespace FootballAIGameServer
         /// Starts the listening for new AI clients. After the client connects, he is added to
         /// the <see cref="Connections"/> collection and he remains there while the connection is opened.
         /// </summary>
-        public async Task StartListening()
+        public async Task StartListeningAsync()
         {
             Listener.Start();
+
             StartCheckingConnections();
 
             while (true)
@@ -112,15 +113,17 @@ namespace FootballAIGameServer
         /// The interval of doing it is specified by <see cref="CheckConnectionsInterval"/>.
         /// </summary>
         /// <returns></returns>
-        private async Task StartCheckingConnections()
+        public async void StartCheckingConnections()
         {
             while (true)
             {
                 await Task.Delay(CheckConnectionsInterval);
 
+                var runningTasks = new List<Task>();
+                var toBeRemovedConnections = new List<ClientConnection>();
+
                 lock (Connections)
                 {
-                    var toBeRemovedConnections = new List<ClientConnection>();
 
                     foreach (var clientConnection in Connections)
                     {
@@ -132,27 +135,29 @@ namespace FootballAIGameServer
                             clientConnection.IsActive = false;
 
                             // delegate call
-                            PlayerDisconectedHandler?.Invoke(clientConnection);
+                            runningTasks.Add(PlayerDisconectedHandler?.Invoke(clientConnection));
 
                             toBeRemovedConnections.Add(clientConnection);
-                            
+
                         }
-                        else if (!clientConnection.IsInMatch && clientConnection.IsActive)
+                       // else if (!clientConnection.IsInMatch && clientConnection.IsActive)
                         {
-                            clientConnection.SendAsync("keepalive");
+                            runningTasks.Add(clientConnection.TrySendAsync("keepalive"));
                         }
                     }
-
-                    // remove from db
-                    /*
-                    
-                    }*/
 
                     Connections.RemoveAll(c => toBeRemovedConnections.Contains(c));
-                    lock (ActiveConnections)
-                    {
-                        ActiveConnections.RemoveAll(c => c.IsActive == false);
-                    }
+
+                }
+
+                await Task.WhenAll(runningTasks);
+
+                toBeRemovedConnections.ForEach(c => c.Dispose());
+               
+
+                lock (ActiveConnections)
+                {
+                    ActiveConnections.RemoveAll(c => c.IsActive == false);
                 }
             }
         }
@@ -161,21 +166,24 @@ namespace FootballAIGameServer
         /// Asynchronously waits for the specified client to log in using player name and desired AI name.
         /// </summary>
         /// <param name="connection">The client connection.</param>
-        private async Task WaitForLogin(ClientConnection connection)
+        private async void WaitForLogin(ClientConnection connection)
         {
             while (true)
             {
+                if (!connection.IsConnected)
+                    return;
+
                 var clientMessage = await connection.ReceiveClientMessageAsync();
                 if (!(clientMessage is LoginMessage))
                 {
                     Console.WriteLine("Client has sent invalid message for connecting.");
-                    connection.SendAsync("FAIL invalid message format.");
+                    await connection.TrySendAsync("FAIL invalid message format.");
                 }
                 else
                 {
                     if (await AuthenticationHandler((LoginMessage)clientMessage, connection))
                     {
-                        await connection.SendAsync("CONNECTED");
+                        await connection.TrySendAsync("CONNECTED");
                         connection.IsActive = true;
                         lock (ActiveConnections)
                         {
@@ -194,9 +202,9 @@ namespace FootballAIGameServer
         /// <param name="message">The message.</param>
         /// <param name="connection">The connection.</param>
         /// <returns><c>true</c> if the client has log on successfully; otherwise <c>false</c></returns>
-        private static async Task<bool> DefaultAuthenticate(LoginMessage message, ClientConnection connection)
+        private Task<bool> DefaultAuthenticate(LoginMessage message, ClientConnection connection)
         {
-            return true;
+            return Task.FromResult(true);
         }
 
     }

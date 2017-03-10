@@ -14,9 +14,15 @@ namespace FootballAIGameMatchSimulator
 
         bool IsActive { get; set; }
 
+        bool IsConnected { get; }
+
         Task SendAsync(string message);
 
         Task SendAsync(GameState gameState, int playerNumber);
+
+        Task<bool> TrySendAsync(string message);
+
+        Task<bool> TrySendAsync(GameState gameState, int playerNumber);
 
         Task<ClientMessage> ReceiveClientMessageAsync();
 

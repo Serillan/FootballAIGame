@@ -163,6 +163,17 @@ namespace FootballAIGameServer
         }
 
         /// <summary>
+        /// Tries to send the message to the client asynchronously.
+        /// </summary>
+        /// <param name="message">The message.</param>
+        /// <returns>True if the sending was successful; otherwise returns false.</returns>
+        public async Task<bool> TrySendAsync(string message)
+        {
+            var bytes = Encoding.UTF8.GetBytes(message + "\n");
+            return await TrySendAsync(bytes);
+        }
+
+        /// <summary>
         /// Sends the specified game state to the client asynchronously.
         /// </summary>
         /// <param name="gameState">State of the game.</param>
@@ -208,12 +219,32 @@ namespace FootballAIGameServer
             }
 
             var byteArray = new byte[data.Length * 4 + 4 + 1];
-            var numArray = new int[1] {gameState.Step};
+            var numArray = new int[1] { gameState.Step };
 
             Buffer.BlockCopy(numArray, 0, byteArray, 0, 4);
             byteArray[4] = gameState.KickOff ? (byte)1 : (byte)0;
             Buffer.BlockCopy(data, 0, byteArray, 5, data.Length * 4);
             await SendAsync(byteArray);
+        }
+
+        /// <summary>
+        /// Tries to send the specified game state to the client asynchronously.
+        /// </summary>
+        /// <param name="gameState">State of the game.</param>
+        /// <param name="playerNumber">1 if first 11 players from the given game state are
+        /// client's players; otherwise 2 (seconds half are client's players)</param>
+        /// <returns>True if the sending was successful; otherwise returns false.</returns>
+        public async Task<bool> TrySendAsync(GameState gameState, int playerNumber)
+        {
+            try
+            {
+                await SendAsync(gameState, playerNumber);
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
 
         /// <summary>
@@ -223,6 +254,26 @@ namespace FootballAIGameServer
         public async Task SendAsync(byte[] data)
         {
             await NetworkStream.WriteAsync(data, 0, data.Length);
+        }
+
+        /// <summary>
+        /// Tries to send the specified data to the client asynchronously. Return true
+        /// if it was successful; otherwise returns false.
+        /// </summary>
+        /// <param name="data">The data.</param>
+        /// <returns>True if the sending was successful; otherwise returns false.</returns>
+        public async Task<bool> TrySendAsync(byte[] data)
+        {
+            try
+            {
+                await SendAsync(data);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -358,5 +409,6 @@ namespace FootballAIGameServer
                 }
             }
         }
+
     }
 }

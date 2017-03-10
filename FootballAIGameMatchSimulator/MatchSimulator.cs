@@ -187,19 +187,19 @@ namespace FootballAIGameServer
         /// Simulates the match.
         /// </summary>
         /// <returns>Task that will be completed with simulation.</returns>
-        public async Task SimulateMatch()
+        public async Task SimulateMatchAsync()
         {
-            CurrentSimulationTask = Simulate();
+            CurrentSimulationTask = SimulateAsync();
             await CurrentSimulationTask;
         }
 
         /// <summary>
-        /// Simulates the match. <see cref="SimulateMatch"/> is it's public wrapper, that is used to set 
+        /// Simulates the match. <see cref="SimulateMatchAsync"/> is it's public wrapper, that is used to set 
         /// <see cref="CurrentSimulationTask"/> property.
         /// </summary>
-        private async Task Simulate()
+        private async Task SimulateAsync()
         {
-            await ProcessSimulationStart();
+            await ProcessSimulationStartAsync();
 
             var firstBall = Random.Next(1, 3); // max is excluded
 
@@ -220,7 +220,7 @@ namespace FootballAIGameServer
                     }
 
                     CurrentStep = step;
-                    await ProcessSimulationStep(step);
+                    await ProcessSimulationStepAsync(step);
                     if (step % 100 == 0)
                         Console.WriteLine(step);
                 }
@@ -238,7 +238,7 @@ namespace FootballAIGameServer
                     }
 
                     CurrentStep = step;
-                    await ProcessSimulationStep(step);
+                    await ProcessSimulationStepAsync(step);
                     if (step % 100 == 0)
                         Console.WriteLine(step);
                 }
@@ -257,7 +257,7 @@ namespace FootballAIGameServer
         /// and ping are set.
         /// </summary>
         /// <returns></returns>
-        private async Task ProcessSimulationStart()
+        private async Task ProcessSimulationStartAsync()
         {
             Console.WriteLine($"Starting simulation between {Player1AiConnection.PlayerName} " +
                               $"and {Player2AiConnection.PlayerName}");
@@ -277,7 +277,7 @@ namespace FootballAIGameServer
                 KickOff = false
             };
 
-            await ProcessGettingParameters();
+            await ProcessGettingParametersAsync();
 
             Message1 = Player1AiConnection.ReceiveClientMessageAsync();
             Message2 = Player2AiConnection.ReceiveClientMessageAsync();
@@ -289,7 +289,7 @@ namespace FootballAIGameServer
         /// </summary>
         /// <param name="step">The step number.</param>
         /// <returns></returns>
-        private async Task ProcessSimulationStep(int step)
+        private async Task ProcessSimulationStepAsync(int step)
         {
             ActionMessage actionMessage1 = null;
             ActionMessage actionMessage2 = null;
@@ -303,11 +303,11 @@ namespace FootballAIGameServer
                 var receiveActionMessage1 = Player1AiConnection.ReceiveActionMessageAsync(step);
                 var receiveActionMessage2 = Player2AiConnection.ReceiveActionMessageAsync(step);
 
-                await Player1AiConnection.SendAsync("GET ACTION");
-                await Player1AiConnection.SendAsync(GameState, 1);
+                await Player1AiConnection.TrySendAsync("GET ACTION");
+                await Player1AiConnection.TrySendAsync(GameState, 1);
 
-                await Player2AiConnection.SendAsync("GET ACTION");
-                await Player2AiConnection.SendAsync(GameState, 2);
+                await Player2AiConnection.TrySendAsync("GET ACTION");
+                await Player2AiConnection.TrySendAsync(GameState, 2);
                 //Console.WriteLine($"{GameState.Step} sent!");
 
                 GameState.KickOff = false; // reset for next step!
@@ -389,7 +389,7 @@ namespace FootballAIGameServer
         /// Processes getting of the players parameters from both AIs.
         /// </summary>
         /// <returns></returns>
-        private async Task ProcessGettingParameters()
+        private async Task ProcessGettingParametersAsync()
         {
             var getParameters1 = GetPlayerParameters(Player1AiConnection);
             var getParameters2 = GetPlayerParameters(Player2AiConnection);
@@ -596,7 +596,7 @@ namespace FootballAIGameServer
 
             while (true)
             {
-                await playerConnection.SendAsync("GET PARAMETERS");
+                await playerConnection.TrySendAsync("GET PARAMETERS");
                 message = await playerConnection.ReceiveClientMessageAsync();
                 if (message is ParametersMessage)
                     break;
@@ -1103,7 +1103,6 @@ namespace FootballAIGameServer
         /// <param name="currentKickWinner">The current kick winner.</param>
         private void HandleStoppedShots(FootballPlayer currentKickWinner)
         {
-            var ball = GameState.Ball;
             var currentWinnerTeam = 0;
             var lastWinnerTeam = 0;
             for (var i = 0; i < 11; i++)
@@ -1203,8 +1202,6 @@ namespace FootballAIGameServer
                     player.Position.X = MinimalOpponentDirectionFromKickoff;
                 if (player.Position.Y < 0)
                     player.Position.Y = MinimalOpponentDirectionFromKickoff;
-
-
             }
 
         }
@@ -1250,7 +1247,7 @@ namespace FootballAIGameServer
         private Vector GetIntersectionWithGoalLine(Ball ball, int whichGoalLine)
         {
             double ballMovementToIntersectionVectorRatio;
-            if (ball.Movement.X == 0)
+            if (Math.Abs(ball.Movement.X) < 0.0001) // doesn't move
                 return null;
 
             if (whichGoalLine == 1)

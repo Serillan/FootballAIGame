@@ -36,35 +36,43 @@ namespace FootballAIGameServer.ApiForWeb
             if (connection == null)
                 return "AI is no longer active.";
 
+            ClientConnection otherPlayerConnection;
+
             lock (SimulationManager.Instance.WantsToPlayConnections)
             {
                 if (SimulationManager.Instance.WantsToPlayConnections.Count == 0)
                 {
                     SimulationManager.Instance.WantsToPlayConnections.Add(connection);
+                    return "ok";
                 }
-                else // start match
-                {
-                    var otherPlayerConnection = SimulationManager.Instance.WantsToPlayConnections[0];
-                    SimulationManager.Instance.WantsToPlayConnections.Remove(otherPlayerConnection);
 
-                    using (var context = new ApplicationDbContext())
-                    {
-                        var player1 = context.Players.FirstOrDefault(p => p.Name == connection.PlayerName);
-                        var player2 = context.Players.FirstOrDefault(p => p.Name == otherPlayerConnection.PlayerName);
-
-                        if (otherPlayerConnection == connection)
-                            return "Player is already looking for opponent.";
-
-                        player1.PlayerState = PlayerState.PlayingMatch;
-                        player2.PlayerState = PlayerState.PlayingMatch;
-
-                        context.SaveChanges();
-                    }
-
-                    StartGame(connection.PlayerName, connection.AiName,
-                        otherPlayerConnection.PlayerName, otherPlayerConnection.AiName);
-                }
+                otherPlayerConnection = SimulationManager.Instance.WantsToPlayConnections[0];
+                SimulationManager.Instance.WantsToPlayConnections.Remove(otherPlayerConnection);
             }
+
+            // start match
+            using (var context = new ApplicationDbContext())
+            {
+                var player1 = context.Players.FirstOrDefault(p => p.Name == connection.PlayerName);
+                var player2 = context.Players.FirstOrDefault(p => p.Name == otherPlayerConnection.PlayerName);
+
+                if (player1 == null)
+                    return $"{connection.PlayerName} is not valid name";
+                if (player2 == null)
+                    return $"{connection.PlayerName} is not valid name";
+
+                if (otherPlayerConnection == connection)
+                    return "Player is already looking for opponent.";
+
+                player1.PlayerState = PlayerState.PlayingMatch;
+                player2.PlayerState = PlayerState.PlayingMatch;
+
+                context.SaveChanges();
+            }
+
+            StartGame(connection.PlayerName, connection.AiName,
+                otherPlayerConnection.PlayerName, otherPlayerConnection.AiName);
+
             return "ok";
         }
 
