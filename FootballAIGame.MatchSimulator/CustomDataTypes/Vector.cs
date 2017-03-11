@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace FootballAIGame.MatchSimulator.CustomDataTypes
+namespace FootballAIGame.MatchSimulation.CustomDataTypes
 {
     /// <summary>
     /// The vector class used for representing two-dimensional vectors or points.

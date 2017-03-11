@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
-using FootballAIGame.MatchSimulator.Messages;
+using FootballAIGame.MatchSimulation.Messages;
 
-namespace FootballAIGame.MatchSimulator
+namespace FootballAIGame.MatchSimulation
 {
     public delegate Task<bool> AuthenticationHandler(LoginMessage message, ClientConnection connection);
 }

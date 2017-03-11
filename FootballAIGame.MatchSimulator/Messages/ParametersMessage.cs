@@ -1,7 +1,7 @@
 ﻿using System;
-using FootballAIGame.MatchSimulator.SimulationEntities;
+using FootballAIGame.MatchSimulation.SimulationEntities;
 
-namespace FootballAIGame.MatchSimulator.Messages
+namespace FootballAIGame.MatchSimulation.Messages
 {
     /// <summary>
     /// Represents a parameter message received from a client.

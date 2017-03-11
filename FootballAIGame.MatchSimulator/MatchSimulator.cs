@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using FootballAIGame.MatchSimulator.CustomDataTypes;
-using FootballAIGame.MatchSimulator.Messages;
-using FootballAIGame.MatchSimulator.SimulationEntities;
+using FootballAIGame.MatchSimulation.CustomDataTypes;
+using FootballAIGame.MatchSimulation.Messages;
+using FootballAIGame.MatchSimulation.SimulationEntities;
 
-namespace FootballAIGame.MatchSimulator
+namespace FootballAIGame.MatchSimulation
 {
     /// <summary>
     /// Responsible for simulating a football match between two AIs.

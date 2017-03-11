@@ -1,4 +1,4 @@
-﻿namespace FootballAIGame.MatchSimulator.Messages
+﻿namespace FootballAIGame.MatchSimulation.Messages
 {
     /// <summary>
     /// Represents a login message received from a client.

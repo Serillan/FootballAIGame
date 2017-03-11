@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace FootballAIGame.MatchSimulator
+namespace FootballAIGame.MatchSimulation
 {
     public class MatchInfo
     {

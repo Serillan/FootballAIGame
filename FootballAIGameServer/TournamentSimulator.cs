@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
+using FootballAIGame.MatchSimulation;
 using FootballAIGame.Server.Models;
 
 namespace FootballAIGame.Server
@@ -279,7 +280,7 @@ namespace FootballAIGame.Server
 
             var advancingPlayers = new List<TournamentPlayer>();
             var fightingPlayers = new List<TournamentPlayer>();
-            var matches = new List<MatchSimulator.MatchSimulator>();
+            var matches = new List<MatchSimulator>();
 
             lock (Players)
             {
@@ -355,7 +356,7 @@ namespace FootballAIGame.Server
                             Players.FirstOrDefault(p => p.Player.Name == matchSimulator.Player1AiConnection.PlayerName);
                         var p2 =
                             Players.FirstOrDefault(p => p.Player.Name == matchSimulator.Player2AiConnection.PlayerName);
-                        var rndWinner = MatchSimulator.MatchSimulator.Random.Next(2);
+                        var rndWinner = MatchSimulator.Random.Next(2);
                         winner = rndWinner == 0 ? p1 : p2;
                         looser = rndWinner == 0 ? p2 : p1;
                     }

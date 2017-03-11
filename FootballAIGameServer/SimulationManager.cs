@@ -4,8 +4,8 @@ using System.Data.Entity;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using FootballAIGame.MatchSimulator;
-using FootballAIGame.MatchSimulator.Messages;
+using FootballAIGame.MatchSimulation;
+using FootballAIGame.MatchSimulation.Messages;
 using FootballAIGame.Server.Models;
 
 namespace FootballAIGame.Server
@@ -23,7 +23,7 @@ namespace FootballAIGame.Server
         /// <value>
         /// The list of currently running simulations.
         /// </value>
-        public List<MatchSimulator.MatchSimulator> RunningSimulations { get; set; } = new List<MatchSimulator.MatchSimulator>();
+        public List<MatchSimulator> RunningSimulations { get; set; } = new List<MatchSimulator>();
 
         /// <summary>
         /// Gets or sets the wants to play connections.
@@ -106,7 +106,7 @@ namespace FootballAIGame.Server
                 if (userName1 == userName2)
                     Console.WriteLine("User cannot challenge himself.");
 
-                var matchSimulator = new MatchSimulator.MatchSimulator(connection1, connection2);
+                var matchSimulator = new MatchSimulator(connection1, connection2);
 
                 lock (RunningSimulations)
                 {
@@ -126,7 +126,7 @@ namespace FootballAIGame.Server
         /// </summary>
         /// <param name="userName">Name of the player.</param>
         /// <returns></returns>
-        public MatchSimulator.MatchSimulator GetMatchSimulator(string userName)
+        public MatchSimulator GetMatchSimulator(string userName)
         {
             return RunningSimulations
                 .FirstOrDefault(m => m.Player1AiConnection.PlayerName == userName ||
@@ -162,7 +162,7 @@ namespace FootballAIGame.Server
             ConnectionManager.Instance.PlayerDisconectedHandler = ProcessClientDisconnectionAsync;
         }
 
-        private async Task OnSimulationEndAsync(DateTime startTime, MatchSimulator.MatchSimulator simulator, int? tournamentId)
+        private async Task OnSimulationEndAsync(DateTime startTime, MatchSimulator simulator, int? tournamentId)
         {
             var matchInfo = simulator.MatchInfo;
 

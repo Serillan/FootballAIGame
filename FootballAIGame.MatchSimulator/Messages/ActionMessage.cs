@@ -1,8 +1,8 @@
 ﻿using System;
-using FootballAIGame.MatchSimulator.CustomDataTypes;
-using FootballAIGame.MatchSimulator.SimulationEntities;
+using FootballAIGame.MatchSimulation.CustomDataTypes;
+using FootballAIGame.MatchSimulation.SimulationEntities;
 
-namespace FootballAIGame.MatchSimulator.Messages
+namespace FootballAIGame.MatchSimulation.Messages
 {
     /// <summary>
     /// Represents an action message received from a client.

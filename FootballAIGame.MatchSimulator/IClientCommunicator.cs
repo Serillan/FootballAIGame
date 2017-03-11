@@ -1,8 +1,8 @@
 ﻿using System.Threading.Tasks;
-using FootballAIGame.MatchSimulator.Messages;
-using FootballAIGame.MatchSimulator.SimulationEntities;
+using FootballAIGame.MatchSimulation.Messages;
+using FootballAIGame.MatchSimulation.SimulationEntities;
 
-namespace FootballAIGame.MatchSimulator
+namespace FootballAIGame.MatchSimulation
 {
     public interface IClientCommunicator
     {

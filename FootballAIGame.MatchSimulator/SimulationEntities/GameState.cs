@@ -1,4 +1,4 @@
-﻿namespace FootballAIGame.MatchSimulator.SimulationEntities
+﻿namespace FootballAIGame.MatchSimulation.SimulationEntities
 {
     /// <summary>
     /// Represents the state of the football game that is sent

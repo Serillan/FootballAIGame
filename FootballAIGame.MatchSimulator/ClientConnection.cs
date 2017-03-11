@@ -5,10 +5,10 @@ using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
-using FootballAIGame.MatchSimulator.Messages;
-using FootballAIGame.MatchSimulator.SimulationEntities;
+using FootballAIGame.MatchSimulation.Messages;
+using FootballAIGame.MatchSimulation.SimulationEntities;
 
-namespace FootballAIGame.MatchSimulator
+namespace FootballAIGame.MatchSimulation
 {
     /// <summary>
     /// Responsible for keeping TCP connection to the connected client.

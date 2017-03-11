@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
-using FootballAIGame.MatchSimulator.Messages;
+using FootballAIGame.MatchSimulation.Messages;
 
-namespace FootballAIGame.MatchSimulator
+namespace FootballAIGame.MatchSimulation
 {
     /// <summary>
     /// Responsible for keeping all the client connections.

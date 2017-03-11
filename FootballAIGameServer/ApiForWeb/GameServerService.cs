@@ -1,5 +1,5 @@
 ﻿using System.Linq;
-using FootballAIGame.MatchSimulator;
+using FootballAIGame.MatchSimulation;
 using FootballAIGame.Server.Models;
 
 namespace FootballAIGame.Server.ApiForWeb

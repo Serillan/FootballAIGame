@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.ServiceModel;
-using FootballAIGame.MatchSimulator;
+using FootballAIGame.MatchSimulation;
 using FootballAIGame.Server.ApiForWeb;
 using FootballAIGame.Server.Models;
 
