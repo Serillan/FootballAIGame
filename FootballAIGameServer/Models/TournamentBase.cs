@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace FootballAIGameServer.Models
+namespace FootballAIGame.Server.Models
 {
     /// <summary>
     /// Represents the information about tournament that is shared between

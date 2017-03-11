@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Web;
 
-namespace FootballAIGameServer.Models
+namespace FootballAIGame.Server.Models
 {
     /// <summary>
     /// Represents the Tournament.
     /// </summary>
-    /// <seealso cref="FootballAIGameServer.Models.TournamentBase" />
+    /// <seealso cref="TournamentBase" />
     public class Tournament : TournamentBase
     {
 
@@ -64,29 +62,5 @@ namespace FootballAIGameServer.Models
             MaximumNumberOfPlayers = reccuringTournament.MaximumNumberOfPlayers;
             RecurringTournament = reccuringTournament;
         }
-    }
-
-    public enum TournamentState
-    {
-        /// <summary>
-        /// Tournament has not started yet.
-        /// </summary>
-        Unstarted,
-        /// <summary>
-        /// Tournament is currently being simulated.
-        /// </summary>
-        Running,
-        /// <summary>
-        /// Tournament has already finished.
-        /// </summary>
-        Finished,
-        /// <summary>
-        /// Tournament was closed because there were not enough players signed at start time.
-        /// </summary>
-        NotEnoughtPlayersClosed,
-        /// <summary>
-        /// Tournament was closed because there was an error during it's simulation.
-        /// </summary>
-        ErrorClosed
     }
 }

@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace FootballAIGameServer.Models
+namespace FootballAIGame.Server.Models
 {
     /// <summary>
     /// Represents the recurring tournament. It keeps references to all currently
     /// planned tournaments from this recurrence.
     /// </summary>
-    /// <seealso cref="FootballAIGameServer.Models.TournamentBase" />
+    /// <seealso cref="TournamentBase" />
     public class RecurringTournament : TournamentBase
     {
         /// <summary>

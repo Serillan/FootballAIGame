@@ -1,17 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data.Entity;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.ServiceModel;
-using System.Text;
-using System.Threading.Tasks;
-using FootballAIGameServer.ApiForWeb;
-using FootballAIGameServer.Messages;
-using FootballAIGameServer.Models;
+using FootballAIGame.MatchSimulator;
+using FootballAIGame.Server.ApiForWeb;
+using FootballAIGame.Server.Models;
 
-namespace FootballAIGameServer
+namespace FootballAIGame.Server
 {
     /// <summary>
     /// The class that contains the entry point of the application.

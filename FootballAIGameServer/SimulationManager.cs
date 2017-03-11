@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using FootballAIGameMatchSimulator;
-using FootballAIGameServer.Messages;
-using FootballAIGameServer.Models;
+using FootballAIGame.MatchSimulator;
+using FootballAIGame.MatchSimulator.Messages;
+using FootballAIGame.Server.Models;
 
-namespace FootballAIGameServer
+namespace FootballAIGame.Server
 {
     /// <summary>
     /// Responsible for managing <see cref="MatchSimulator"/> instances.
@@ -24,7 +23,7 @@ namespace FootballAIGameServer
         /// <value>
         /// The list of currently running simulations.
         /// </value>
-        public List<MatchSimulator> RunningSimulations { get; set; } = new List<MatchSimulator>();
+        public List<MatchSimulator.MatchSimulator> RunningSimulations { get; set; } = new List<MatchSimulator.MatchSimulator>();
 
         /// <summary>
         /// Gets or sets the wants to play connections.
@@ -107,7 +106,7 @@ namespace FootballAIGameServer
                 if (userName1 == userName2)
                     Console.WriteLine("User cannot challenge himself.");
 
-                var matchSimulator = new MatchSimulator(connection1, connection2);
+                var matchSimulator = new MatchSimulator.MatchSimulator(connection1, connection2);
 
                 lock (RunningSimulations)
                 {
@@ -127,7 +126,7 @@ namespace FootballAIGameServer
         /// </summary>
         /// <param name="userName">Name of the player.</param>
         /// <returns></returns>
-        public MatchSimulator GetMatchSimulator(string userName)
+        public MatchSimulator.MatchSimulator GetMatchSimulator(string userName)
         {
             return RunningSimulations
                 .FirstOrDefault(m => m.Player1AiConnection.PlayerName == userName ||
@@ -163,7 +162,7 @@ namespace FootballAIGameServer
             ConnectionManager.Instance.PlayerDisconectedHandler = ProcessClientDisconnectionAsync;
         }
 
-        private async Task OnSimulationEndAsync(DateTime startTime, MatchSimulator simulator, int? tournamentId)
+        private async Task OnSimulationEndAsync(DateTime startTime, MatchSimulator.MatchSimulator simulator, int? tournamentId)
         {
             var matchInfo = simulator.MatchInfo;
 

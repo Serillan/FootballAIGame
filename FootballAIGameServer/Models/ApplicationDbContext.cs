@@ -1,11 +1,7 @@
-﻿using System.Collections;
-using System.Data.Entity;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using Microsoft.AspNet.Identity;
+﻿using System.Data.Entity;
 using Microsoft.AspNet.Identity.EntityFramework;
 
-namespace FootballAIGameServer.Models
+namespace FootballAIGame.Server.Models
 {
     /// <summary>
     /// The entity framework db context for interacting with database data as objects.

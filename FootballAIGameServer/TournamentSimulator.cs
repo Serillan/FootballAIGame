@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Entity;
-using System.Data.Entity.Core.Objects;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using FootballAIGameServer.ApiForWeb;
-using FootballAIGameServer.Models;
+using FootballAIGame.Server.Models;
 
-namespace FootballAIGameServer
+namespace FootballAIGame.Server
 {
     /// <summary>
     /// Responsible for simulating a tournament.
@@ -282,7 +279,7 @@ namespace FootballAIGameServer
 
             var advancingPlayers = new List<TournamentPlayer>();
             var fightingPlayers = new List<TournamentPlayer>();
-            var matches = new List<MatchSimulator>();
+            var matches = new List<MatchSimulator.MatchSimulator>();
 
             lock (Players)
             {
@@ -358,7 +355,7 @@ namespace FootballAIGameServer
                             Players.FirstOrDefault(p => p.Player.Name == matchSimulator.Player1AiConnection.PlayerName);
                         var p2 =
                             Players.FirstOrDefault(p => p.Player.Name == matchSimulator.Player2AiConnection.PlayerName);
-                        var rndWinner = MatchSimulator.Random.Next(2);
+                        var rndWinner = MatchSimulator.MatchSimulator.Random.Next(2);
                         winner = rndWinner == 0 ? p1 : p2;
                         looser = rndWinner == 0 ? p2 : p1;
                     }

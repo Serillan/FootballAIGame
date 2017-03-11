@@ -1,18 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.Entity;
-using System.Linq;
-using System.Runtime.Serialization;
-using System.ServiceModel;
-using System.Text;
-using FootballAIGameServer.Models;
+﻿using System.Linq;
+using FootballAIGame.MatchSimulator;
+using FootballAIGame.Server.Models;
 
-namespace FootballAIGameServer.ApiForWeb
+namespace FootballAIGame.Server.ApiForWeb
 {
     /// <summary>
     /// WCF service for application web server.
     /// </summary>
-    /// <seealso cref="FootballAIGameServer.ApiForWeb.IGameServerService" />
+    /// <seealso cref="IGameServerService" />
     public class GameServerService : IGameServerService
     {
         /// <summary>
