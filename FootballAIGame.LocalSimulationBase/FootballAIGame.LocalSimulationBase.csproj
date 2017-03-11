@@ -32,6 +32,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -40,8 +41,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
+    <Compile Include="Models\Error.cs" />
+    <Compile Include="Models\Goal.cs" />
+    <Compile Include="Models\Match.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SimulationManager.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FootballAIGame.MatchSimulator\FootballAIGame.MatchSimulation.csproj">
+      <Project>{0FF41A2E-C156-4460-ADCF-BF4EF4E3D05C}</Project>
+      <Name>FootballAIGame.MatchSimulation</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

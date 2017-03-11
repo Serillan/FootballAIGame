@@ -7,6 +7,10 @@ using FootballAIGame.MatchSimulation.Messages;
 
 namespace FootballAIGame.MatchSimulation
 {
+    public delegate Task PlayerDisconectedHandler(ClientConnection connection);
+    public delegate Task PlayerConnectedHandler(ClientConnection connection);
+    public delegate Task<bool> AuthenticationHandler(LoginMessage message, ClientConnection connection);
+
     /// <summary>
     /// Responsible for keeping all the client connections.
     /// Provides method to start listening for new connections, and public properties
@@ -22,10 +26,10 @@ namespace FootballAIGame.MatchSimulation
         public const int GameServerPort = 50030;
 
         /// <summary>
-        /// The interval in milliseconds of checking that clients are still connected and also for sending keep alive
+        /// Gets or sets the interval in milliseconds of checking that clients are still connected and also for sending keep alive
         /// packets to clients that are not currently in a match.
         /// </summary>
-        public const int CheckConnectionsInterval = 5000; // [ms]
+        public int CheckConnectionsInterval { get; set; } = 5000; // [ms]
 
         /// <summary>
         /// Gets or sets the connected connections.
@@ -46,6 +50,8 @@ namespace FootballAIGame.MatchSimulation
         public AuthenticationHandler AuthenticationHandler { get; set; }
 
         public PlayerDisconectedHandler PlayerDisconectedHandler { get; set; }
+
+        public PlayerConnectedHandler PlayerConnectedHandler { get; set; }
 
         /// <summary>
         /// Gets the singleton instance.
@@ -126,13 +132,10 @@ namespace FootballAIGame.MatchSimulation
                                               $"{clientConnection.AiName} has disconnected.");
                             clientConnection.IsActive = false;
 
-                            // delegate call
-                            runningTasks.Add(PlayerDisconectedHandler?.Invoke(clientConnection));
-
                             toBeRemovedConnections.Add(clientConnection);
 
                         }
-                       // else if (!clientConnection.IsInMatch && clientConnection.IsActive)
+                        else if (!clientConnection.IsInMatch && clientConnection.IsActive)
                         {
                             runningTasks.Add(clientConnection.TrySendAsync("keepalive"));
                         }
@@ -142,15 +145,22 @@ namespace FootballAIGame.MatchSimulation
 
                 }
 
-                await Task.WhenAll(runningTasks);
-
-                toBeRemovedConnections.ForEach(c => c.Dispose());
-               
 
                 lock (ActiveConnections)
                 {
                     ActiveConnections.RemoveAll(c => c.IsActive == false);
                 }
+
+                foreach (var connection in toBeRemovedConnections)
+                {
+                    if (PlayerDisconectedHandler != null)
+                        runningTasks.Add(PlayerDisconectedHandler(connection));
+
+                }
+
+                await Task.WhenAll(runningTasks);
+
+                toBeRemovedConnections.ForEach(c => c.Dispose());
             }
         }
 
@@ -173,8 +183,12 @@ namespace FootballAIGame.MatchSimulation
                 }
                 else
                 {
-                    if (await AuthenticationHandler((LoginMessage)clientMessage, connection))
+                    var loginMessage = clientMessage as LoginMessage;
+                    if (await AuthenticationHandler(loginMessage, connection))
                     {
+                        connection.AiName = loginMessage.AiName;
+                        connection.PlayerName = loginMessage.PlayerName;
+
                         await connection.TrySendAsync("CONNECTED");
                         connection.IsActive = true;
                         lock (ActiveConnections)
@@ -182,6 +196,8 @@ namespace FootballAIGame.MatchSimulation
                             ActiveConnections.Add(connection);
                         }
                         Console.WriteLine($"Player {connection.PlayerName} with AI {connection.AiName} has log on.");
+                        if (PlayerConnectedHandler != null)
+                            await PlayerConnectedHandler(connection);
                         break;
                     }
                 }

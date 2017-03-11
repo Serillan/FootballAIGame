@@ -20,6 +20,9 @@ namespace FootballAIGame.Server
         /// </summary>
         public static void Main()
         {
+            // start simulating
+            var simulatingTask = SimulationManager.Instance.StartSimulatingAsync();
+
             // start services
             var host = new ServiceHost(typeof(GameServerService));
             host.Open();
@@ -29,8 +32,7 @@ namespace FootballAIGame.Server
             _handler = ConsoleEventHandler;
             SetConsoleCtrlHandler(_handler, true);
 
-            // start
-            SimulationManager.Instance.StartSimulatingAsync().Wait();
+            simulatingTask.Wait();
         }
 
         /// <summary>

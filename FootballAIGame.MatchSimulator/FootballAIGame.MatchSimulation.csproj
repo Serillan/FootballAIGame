@@ -40,7 +40,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AuthenticationHandler.cs" />
     <Compile Include="ClientConnection.cs" />
     <Compile Include="ConnectionManager.cs" />
     <Compile Include="CustomDataTypes\Vector.cs" />
@@ -51,7 +50,6 @@
     <Compile Include="Messages\ClientMessage.cs" />
     <Compile Include="Messages\LoginMessage.cs" />
     <Compile Include="Messages\ParametersMessage.cs" />
-    <Compile Include="PlayerDisconectedHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SimulationEntities\Ball.cs" />
     <Compile Include="SimulationEntities\FootballPlayer.cs" />

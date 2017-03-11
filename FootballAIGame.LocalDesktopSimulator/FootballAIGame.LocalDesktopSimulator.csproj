@@ -89,6 +89,16 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FootballAIGame.LocalSimulationBase\FootballAIGame.LocalSimulationBase.csproj">
+      <Project>{EA9A68AF-9A17-42D7-A322-0A55194E3D35}</Project>
+      <Name>FootballAIGame.LocalSimulationBase</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\FootballAIGame.MatchSimulator\FootballAIGame.MatchSimulation.csproj">
+      <Project>{0FF41A2E-C156-4460-ADCF-BF4EF4E3D05C}</Project>
+      <Name>FootballAIGame.MatchSimulation</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

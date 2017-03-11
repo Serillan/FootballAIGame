@@ -278,14 +278,10 @@ namespace FootballAIGame.Server
                     }
                     player.ActiveAis += ";" + message.AiName;
                 }
-                connection.AiName = message.AiName;
-                connection.PlayerName = message.PlayerName;
                 await context.SaveChangesAsync();
             }
 
             return true;
         }
-
-
     }
 }

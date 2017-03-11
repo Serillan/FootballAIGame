@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Threading.Tasks;
 using System.Windows.Forms;
+using FootballAIGame.LocalSimulationBase;
+using FootballAIGame.MatchSimulation;
 
 namespace FootballAIGame.LocalDesktopSimulator
 {
@@ -11,9 +14,12 @@ namespace FootballAIGame.LocalDesktopSimulator
         [STAThread]
         static void Main()
         {
+            Task.Run(() => SimulationManager.Instance.StartSimulating());
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new SimulatorForm());
+
         }
     }
 }
