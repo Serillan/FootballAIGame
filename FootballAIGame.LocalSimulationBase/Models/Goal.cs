@@ -14,9 +14,12 @@ namespace FootballAIGame.LocalSimulationBase.Models
         public string AiName { get; set; }
 
         [DataMember]
-        public DateTime Time { get; set; }
+        public string Time { get; set; }
 
+        /// <summary>
+        /// Gets or sets the name of the football player who scored.
+        /// </summary>
         [DataMember]
-        public int PlayerNumber { get; set; }
+        public string PlayerName { get; set; }
     }
 }

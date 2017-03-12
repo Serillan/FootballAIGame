@@ -20,10 +20,45 @@ namespace FootballAIGame.LocalSimulationBase.Models
         public List<Goal> Goals { get; set; }
 
         [DataMember]
-        public List<Error> Errors { get; set; }
+        public List<string> Ai1Errors { get; set; }
+
+        [DataMember]
+        public List<string> Ai2Errors { get; set; }
 
         [DataMember]
         public List<float> MatchData { get; set; }
+
+        /// <summary>
+        /// Gets or sets the number of player1 team shots.
+        /// </summary>
+        /// <value>
+        /// The number of player1 team shots.
+        /// </value>
+        public int Shots1 { get; set; }
+
+        /// <summary>
+        /// Gets or sets the number of player2 team shots.
+        /// </summary>
+        /// <value>
+        /// The number of player2 team shots.
+        /// </value>
+        public int Shots2 { get; set; }
+
+        /// <summary>
+        /// Gets or sets the number of player1 team shots on target.
+        /// </summary>
+        /// <value>
+        /// The number of player1 team shots on target.
+        /// </value>
+        public int ShotsOnTarget1 { get; set; }
+
+        /// <summary>
+        /// Gets or sets the number of player2 team shots on target.
+        /// </summary>
+        /// <value>
+        /// The number of player2 team shots on target.
+        /// </value>
+        public int ShotsOnTarget2 { get; set; }
 
     }
 }

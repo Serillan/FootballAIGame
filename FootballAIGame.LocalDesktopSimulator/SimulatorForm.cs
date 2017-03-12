@@ -3,12 +3,15 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using FootballAIGame.LocalSimulationBase;
+using FootballAIGame.LocalSimulationBase.Models;
 using FootballAIGame.MatchSimulation;
 
 namespace FootballAIGame.LocalDesktopSimulator
 {
     public partial class SimulatorForm : Form
     {
+        public Match LoadedMatch { get; set; }
+
         public SimulatorForm()
         {
             InitializeComponent();
@@ -54,7 +57,7 @@ namespace FootballAIGame.LocalDesktopSimulator
         {
             if (AiListBox.SelectedItems.Count != 2)
             {
-                MessageBox.Show(this, "Invalid number of AI selected. Select 2 AI.");
+                MessageBox.Show(this, "Invalid number of AI selected. Select 2 AI.", "Error");
                 return;
             }
 
@@ -72,17 +75,39 @@ namespace FootballAIGame.LocalDesktopSimulator
             StartMatchButton.Click -= StartMatchButtonClick;
             StartMatchButton.Invalidate();
 
-            var match = await SimulationManager.Instance.Simulate(ai1, ai2);
+            try
+            {
+                var match = await SimulationManager.Instance.Simulate(ai1, ai2);
+
+                // todo prepare match for watching
+                LoadMatch(match);
+            }
+            catch (Exception ex) when (ex is ArgumentException || ex is InvalidOperationException)
+            {
+                MessageBox.Show(this, ex.Message, "Error");
+            }
 
             StartMatchButton.Text = "Start match";
             StartMatchButton.Click += StopMatchButtonClick;
             StartMatchButton.Click -= StartMatchButtonClick;
 
-            PlayButton.Enabled = true;
-            RestartButton.Enabled = true;
+            if (LoadedMatch != null)
+            {
+                PlayButton.Enabled = true;
+                RestartButton.Enabled = true;
+            }
 
             SimulationLabel.Visible = false;
             SimulationProgress.Visible = false;
+        }
+
+        private void LoadMatch(Match match)
+        {
+            FinalScoreLabel.Text = $"{match.}
+
+
+
+
         }
 
         private async void StopMatchButtonClick(object sender, EventArgs e)

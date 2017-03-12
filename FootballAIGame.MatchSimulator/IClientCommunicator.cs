@@ -8,6 +8,8 @@ namespace FootballAIGame.MatchSimulation
     {
         string PlayerName { get; set; }
 
+        string AiName { get; set; }
+
         bool IsActive { get; set; }
 
         bool IsConnected { get; }
