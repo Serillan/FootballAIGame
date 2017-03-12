@@ -1,6 +1,6 @@
 ﻿using System;
 using FootballAIGame.MatchSimulation.CustomDataTypes;
-using FootballAIGame.MatchSimulation.SimulationEntities;
+using FootballAIGame.MatchSimulation.Models;
 
 namespace FootballAIGame.MatchSimulation.Messages
 {

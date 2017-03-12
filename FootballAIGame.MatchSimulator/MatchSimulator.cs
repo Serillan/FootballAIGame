@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using FootballAIGame.MatchSimulation.CustomDataTypes;
 using FootballAIGame.MatchSimulation.Messages;
-using FootballAIGame.MatchSimulation.SimulationEntities;
+using FootballAIGame.MatchSimulation.Models;
 
 namespace FootballAIGame.MatchSimulation
 {
@@ -144,8 +145,8 @@ namespace FootballAIGame.MatchSimulation
         private Task<ClientMessage> Message1 { get; set; }
         private Task<ClientMessage> Message2 { get; set; }
         private FootballPlayer LastKicker { get; set; }
-        private int WhoIsOnLeft { get; set; }
-        
+        private Team WhoIsOnLeft { get; set; }
+
         private string CurrentTime
 
         {
@@ -159,14 +160,8 @@ namespace FootballAIGame.MatchSimulation
         }
         //private int CurrentScore1 { get; set; }
         //private int CurrentScore2 { get; set; }
-        private int NumberOfAccelerationCorrections1 { get; set; }
-        private int NumberOfAccelerationCorrections2 { get; set; }
-        private int NumberOfSpeedCorrections1 { get; set; }
-        private int NumberOfSpeedCorrections2 { get; set; }
-        private int NumberOfInvalidMovementActionValues1 { get; set; }
-        private int NumberOfInvalidMovementActionValues2 { get; set; }
-        private int NumberOfInvalidKickActionValues1 { get; set; }
-        private int NumberOfInvalidKickActionValues2 { get; set; }
+        private Dictionary<SimulationError.ErrorType, int> NumberOfPlayer1Errors { get; set; }
+        private Dictionary<SimulationError.ErrorType, int> NumberOfPlayer2Errors { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MatchSimulator"/> class.
@@ -177,6 +172,15 @@ namespace FootballAIGame.MatchSimulation
         {
             this.Player1AiConnection = player1AiConnection;
             this.Player2AiConnection = player2AiConnection;
+
+            NumberOfPlayer1Errors = new Dictionary<SimulationError.ErrorType, int>();
+            NumberOfPlayer2Errors = new Dictionary<SimulationError.ErrorType, int>();
+
+            foreach (SimulationError.ErrorType value in Enum.GetValues(typeof(SimulationError.ErrorType)))
+            {
+                NumberOfPlayer1Errors.Add(value, 0);
+                NumberOfPlayer2Errors.Add(value, 0);
+            }
         }
 
         /// <summary>
@@ -202,8 +206,8 @@ namespace FootballAIGame.MatchSimulation
             try
             {
                 // first half
-                WhoIsOnLeft = 1;
-                SetStartingPositions(firstBall);
+                WhoIsOnLeft = Team.FirstPlayer;
+                SetStartingPositions(firstBall == 1 ? Team.FirstPlayer : Team.SecondPlayer);
                 SaveState(); // save starting state
 
                 for (var step = 0; step < NumberOfSimulationSteps / 2; step++)
@@ -222,8 +226,8 @@ namespace FootballAIGame.MatchSimulation
                 }
 
                 // second half
-                WhoIsOnLeft = 2;
-                SetStartingPositions(firstBall == 1 ? 2 : 1);
+                WhoIsOnLeft = Team.SecondPlayer;
+                SetStartingPositions(firstBall == 1 ? Team.SecondPlayer : Team.FirstPlayer);
                 for (var step = NumberOfSimulationSteps / 2; step < NumberOfSimulationSteps; step++)
                 {
                     if (Player1CancelRequested || Player2CancelRequested || !Player1AiConnection.IsActive ||
@@ -290,7 +294,7 @@ namespace FootballAIGame.MatchSimulation
             ActionMessage actionMessage1 = null;
             ActionMessage actionMessage2 = null;
             GameState.Step = step;
-            GameState.KickOff = GameState.KickOff || GameState.Step == NumberOfSimulationSteps / 2 || 
+            GameState.KickOff = GameState.KickOff || GameState.Step == NumberOfSimulationSteps / 2 ||
                 GameState.Step == 0;
 
             try
@@ -357,26 +361,51 @@ namespace FootballAIGame.MatchSimulation
             //Console.WriteLine($"Ending simulation between {Player1AiConnection.PlayerName}:{Player1AiConnection.AiName} " +
             //                 $"and {Player2AiConnection.PlayerName}:{Player2AiConnection.AiName}");
 
+            // default winner
+            MatchInfo.Winner = MatchInfo.Team1Statistics.Goals > MatchInfo.Team2Statistics.Goals
+                ? Team.FirstPlayer
+                : MatchInfo.Team2Statistics.Goals > MatchInfo.Team1Statistics.Goals ? Team.SecondPlayer : (Team?)null;
+
             if (Message1.IsFaulted || !Player1AiConnection.IsActive)
             {
-                MatchInfo.Winner = Player2AiConnection.PlayerName;
-                MatchInfo.Player1ErrorLog += $"{CurrentTime} - Player AI has disconnected.;";
+                MatchInfo.Winner = Team.SecondPlayer;
+                MatchInfo.Errors.Add(new SimulationError()
+                {
+                    Team = Team.FirstPlayer,
+                    Time = CurrentTime,
+                    Type = SimulationError.ErrorType.Disconnection
+                });
             }
             if (Message2.IsFaulted || !Player2AiConnection.IsActive)
             {
-                MatchInfo.Winner = Player1AiConnection.PlayerName;
-                MatchInfo.Player2ErrorLog += $"{CurrentTime} - Player AI has disconnected.;";
+                MatchInfo.Winner = Team.FirstPlayer;
+                MatchInfo.Errors.Add(new SimulationError()
+                {
+                    Team = Team.SecondPlayer,
+                    Time = CurrentTime,
+                    Type = SimulationError.ErrorType.Disconnection
+                });
             }
 
             if (Player1CancelRequested)
             {
-                MatchInfo.Winner = Player2AiConnection.PlayerName;
-                MatchInfo.Player1ErrorLog += $"{CurrentTime} - Player has canceled the match.;";
+                MatchInfo.Winner = Team.SecondPlayer;
+                MatchInfo.Errors.Add(new SimulationError()
+                {
+                    Team = Team.FirstPlayer,
+                    Time = CurrentTime,
+                    Type = SimulationError.ErrorType.Cancel
+                });
             }
             if (Player2CancelRequested)
             {
-                MatchInfo.Winner = Player1AiConnection.PlayerName;
-                MatchInfo.Player2ErrorLog += $"{CurrentTime} - Player has canceled the match.;";
+                MatchInfo.Winner = Team.FirstPlayer;
+                MatchInfo.Errors.Add(new SimulationError()
+                {
+                    Team = Team.SecondPlayer,
+                    Time = CurrentTime,
+                    Type = SimulationError.ErrorType.Disconnection
+                });
             }
 
         }
@@ -470,7 +499,7 @@ namespace FootballAIGame.MatchSimulation
         /// Sets the starting positions.
         /// </summary>
         /// <param name="whoHasBall">The number indicating whether player1 (1) or player2 (2) has the ball.</param>
-        private void SetStartingPositions(int whoHasBall)
+        private void SetStartingPositions(Team whoHasBall)
         {
             var players = GameState.FootballPlayers;
 
@@ -523,7 +552,8 @@ namespace FootballAIGame.MatchSimulation
             GameState.Ball.Movement.Y = 0f;
 
             /* ball winner */
-            if ((whoHasBall == 1 && WhoIsOnLeft == 1) || (whoHasBall == 2 && WhoIsOnLeft == 2))
+            if ((whoHasBall == Team.FirstPlayer && WhoIsOnLeft == Team.FirstPlayer) ||
+                (whoHasBall == Team.SecondPlayer && WhoIsOnLeft == Team.SecondPlayer))
             {
                 players[10].Position.X = 54;
                 players[10].Position.Y = 75 / 2f;
@@ -534,7 +564,7 @@ namespace FootballAIGame.MatchSimulation
                 players[21].Position.Y = 75 / 2f;
             }
 
-            if (WhoIsOnLeft == 2)
+            if (WhoIsOnLeft == Team.SecondPlayer)
             {
                 // switch
                 for (var i = 0; i < 11; i++)
@@ -620,8 +650,14 @@ namespace FootballAIGame.MatchSimulation
                         double.IsInfinity(action.Movement.X) || double.IsInfinity(action.Movement.Y))
                     {
                         action.Movement = new Vector(0, 0);
-                        if (NumberOfInvalidMovementActionValues1++ < MaximumNumberOfSameKindErrorInLog)
-                            MatchInfo.Player1ErrorLog += $"{CurrentTime} - Player{i} invalid movement action value correction.;";
+                        if (NumberOfPlayer1Errors[SimulationError.ErrorType.InvalidMovementVector]++ < MaximumNumberOfSameKindErrorInLog)
+                            MatchInfo.Errors.Add(new SimulationError()
+                            {
+                                Time = CurrentTime,
+                                Team = Team.FirstPlayer,
+                                AffectedPlayerNumber = i,
+                                Type = SimulationError.ErrorType.InvalidMovementVector
+                            });
                     }
 
                     var acceleration = new Vector(action.Movement.X - player.Movement.X,
@@ -629,7 +665,7 @@ namespace FootballAIGame.MatchSimulation
 
                     var accelerationValue = acceleration.Length * Math.Pow(1000.0 / StepInterval, 2); // [m/s/s]
 
-                    if (accelerationValue > MaxAcceleration) 
+                    if (accelerationValue > MaxAcceleration)
                     {
                         var q = MaxAcceleration / accelerationValue;
                         var fixedAcceleration = new Vector(acceleration.X * q, acceleration.Y * q);
@@ -637,9 +673,15 @@ namespace FootballAIGame.MatchSimulation
                         action.Movement.X = player.Movement.X + fixedAcceleration.X;
                         action.Movement.Y = player.Movement.Y + fixedAcceleration.Y;
 
-                        if (accelerationValue > MaxAcceleration * MinReportableCorrection && 
-                            NumberOfAccelerationCorrections1++ < MaximumNumberOfSameKindErrorInLog)
-                            MatchInfo.Player1ErrorLog += $"{CurrentTime} - Player{i} acceleration correction.;";
+                        if (accelerationValue > MaxAcceleration * MinReportableCorrection &&
+                            NumberOfPlayer1Errors[SimulationError.ErrorType.TooHighAcceleration]++ < MaximumNumberOfSameKindErrorInLog)
+                            MatchInfo.Errors.Add(new SimulationError()
+                            {
+                                Time = CurrentTime,
+                                Team = Team.FirstPlayer,
+                                AffectedPlayerNumber = i,
+                                Type = SimulationError.ErrorType.TooHighAcceleration
+                            });
 
                     }
 
@@ -655,8 +697,14 @@ namespace FootballAIGame.MatchSimulation
                         player.Movement.Y *= player.MaxSpeed / newSpeed;
 
                         if (newSpeed > player.MaxSpeed * MinReportableCorrection &&
-                            NumberOfSpeedCorrections1++ < MaximumNumberOfSameKindErrorInLog)
-                            MatchInfo.Player1ErrorLog += $"{CurrentTime} - Player{i} speed correction.;";
+                            NumberOfPlayer1Errors[SimulationError.ErrorType.TooHighSpeed]++ < MaximumNumberOfSameKindErrorInLog)
+                            MatchInfo.Errors.Add(new SimulationError()
+                            {
+                                Time = CurrentTime,
+                                Team = Team.FirstPlayer,
+                                AffectedPlayerNumber = i,
+                                Type = SimulationError.ErrorType.TooHighSpeed
+                            });
                     }
 
                     // stop player from going too far from field
@@ -670,6 +718,7 @@ namespace FootballAIGame.MatchSimulation
             else
             {
                 // default (nothing for now)
+                // todo add error message
                 Console.WriteLine(Player1AiConnection.PlayerName + " timeout.");
             }
 
@@ -685,8 +734,14 @@ namespace FootballAIGame.MatchSimulation
                       double.IsInfinity(action.Movement.X) || double.IsInfinity(action.Movement.Y))
                     {
                         action.Movement = new Vector(0, 0);
-                        if (NumberOfInvalidMovementActionValues2++ < MaximumNumberOfSameKindErrorInLog)
-                            MatchInfo.Player2ErrorLog += $"{CurrentTime} - Player{i} invalid movement action value correction.;";
+                        if (NumberOfPlayer2Errors[SimulationError.ErrorType.InvalidMovementVector]++ < MaximumNumberOfSameKindErrorInLog)
+                            MatchInfo.Errors.Add(new SimulationError()
+                            {
+                                Time = CurrentTime,
+                                Team = Team.SecondPlayer,
+                                AffectedPlayerNumber = i,
+                                Type = SimulationError.ErrorType.InvalidMovementVector
+                            });
                     }
 
                     var acceleration = new Vector(action.Movement.X - player.Movement.X,
@@ -702,10 +757,15 @@ namespace FootballAIGame.MatchSimulation
                         action.Movement.X = (float)(player.Movement.X + fixedAcceleration.X);
                         action.Movement.Y = (float)(player.Movement.Y + fixedAcceleration.Y);
 
-                        if (accelerationValue > MaxAcceleration * MinReportableCorrection && 
-                            NumberOfAccelerationCorrections2++ < MaximumNumberOfSameKindErrorInLog)
-                            MatchInfo.Player2ErrorLog += $"{CurrentTime} - Player{i} acceleration correction.;";
-
+                        if (accelerationValue > MaxAcceleration * MinReportableCorrection &&
+                            NumberOfPlayer2Errors[SimulationError.ErrorType.TooHighAcceleration]++ < MaximumNumberOfSameKindErrorInLog)
+                            MatchInfo.Errors.Add(new SimulationError()
+                            {
+                                Time = CurrentTime,
+                                Team = Team.SecondPlayer,
+                                AffectedPlayerNumber = i,
+                                Type = SimulationError.ErrorType.TooHighAcceleration
+                            });
                     }
 
 
@@ -718,9 +778,15 @@ namespace FootballAIGame.MatchSimulation
                         player.Movement.X *= (float)(player.MaxSpeed / newSpeed);
                         player.Movement.Y *= (float)(player.MaxSpeed / newSpeed);
 
-                        if (newSpeed > player.MaxSpeed * MinReportableCorrection && 
-                                NumberOfSpeedCorrections2++ < MaximumNumberOfSameKindErrorInLog)
-                            MatchInfo.Player2ErrorLog += $"{CurrentTime} - Player{i} speed correction.;";
+                        if (newSpeed > player.MaxSpeed * MinReportableCorrection &&
+                            NumberOfPlayer2Errors[SimulationError.ErrorType.TooHighSpeed]++ < MaximumNumberOfSameKindErrorInLog)
+                            MatchInfo.Errors.Add(new SimulationError()
+                            {
+                                Time = CurrentTime,
+                                Team = Team.SecondPlayer,
+                                AffectedPlayerNumber = i,
+                                Type = SimulationError.ErrorType.TooHighSpeed
+                            });
                     }
 
                     // stop player from going too far from field
@@ -735,6 +801,7 @@ namespace FootballAIGame.MatchSimulation
             else
             {
                 // default (nothing for now)
+                // todo add error message
                 Console.WriteLine(Player2AiConnection.PlayerName + " timeout.");
             }
         }
@@ -749,13 +816,13 @@ namespace FootballAIGame.MatchSimulation
             var k = 1.0;
 
             if (y1 < -5)
-                k = (-5 - y0)/y1;
+                k = (-5 - y0) / y1;
             if (y1 > FieldHeight + 5)
-                k = (FieldHeight + 5 - y0)/y1;
+                k = (FieldHeight + 5 - y0) / y1;
             if (x1 < -5)
-                k = (-5 - x0)/x1;
+                k = (-5 - x0) / x1;
             if (x1 > FieldWidth + 5)
-                k = (FieldWidth + 5 - x0)/x1;
+                k = (FieldWidth + 5 - x0) / x1;
 
             player.Movement = new Vector(player.Movement.X * k, player.Movement.Y * k);
         }
@@ -780,8 +847,14 @@ namespace FootballAIGame.MatchSimulation
                       double.IsInfinity(kickX) || double.IsInfinity(kickY))
                 {
                     GameState.FootballPlayers[i].Kick = new Vector(0, 0);
-                    if (NumberOfInvalidKickActionValues1++ < MaximumNumberOfSameKindErrorInLog)
-                        MatchInfo.Player1ErrorLog += $"{CurrentTime} - Player{i} invalid action value correction.;";
+                    if (NumberOfPlayer1Errors[SimulationError.ErrorType.InvalidKickVector]++ < MaximumNumberOfSameKindErrorInLog)
+                        MatchInfo.Errors.Add(new SimulationError()
+                        {
+                            Team = Team.FirstPlayer,
+                            Time = CurrentTime,
+                            AffectedPlayerNumber = i,
+                            Type = SimulationError.ErrorType.InvalidKickVector
+                        });
                 }
 
             }
@@ -798,13 +871,19 @@ namespace FootballAIGame.MatchSimulation
                       double.IsInfinity(kickX) || double.IsInfinity(kickY))
                 {
                     GameState.FootballPlayers[i + 11].Kick = new Vector(0, 0);
-                    if (NumberOfInvalidKickActionValues2++ < MaximumNumberOfSameKindErrorInLog)
-                        MatchInfo.Player2ErrorLog += $"{CurrentTime} - Player{i} invalid action value correction.;";
+                    if (NumberOfPlayer2Errors[SimulationError.ErrorType.InvalidKickVector]++ < MaximumNumberOfSameKindErrorInLog)
+                        MatchInfo.Errors.Add(new SimulationError()
+                        {
+                            Team = Team.SecondPlayer,
+                            Time = CurrentTime,
+                            AffectedPlayerNumber = i,
+                            Type = SimulationError.ErrorType.InvalidKickVector
+                        });
                 }
             }
 
             var playersNearBallKicking = GameState.FootballPlayers.Where(
-                p => Vector.DistanceBetween(GameState.Ball.Position, p.Position) <= BallMaxDistanceForKick && 
+                p => Vector.DistanceBetween(GameState.Ball.Position, p.Position) <= BallMaxDistanceForKick &&
                 (p.Kick.X != 0 || p.Kick.Y != 0));
 
             var kickWinner = GetKickWinner(playersNearBallKicking.ToArray());
@@ -837,15 +916,27 @@ namespace FootballAIGame.MatchSimulation
 
                     if (kickWinner.Id < 11)
                     {
-                        if (newSpeed > maxAllowedSpeed*MinReportableCorrection &&
-                            NumberOfSpeedCorrections1++ < MaximumNumberOfSameKindErrorInLog)
-                            MatchInfo.Player1ErrorLog += $"{CurrentTime} - Player{kickWinner.Id} kick correction.;";
+                        if (newSpeed > maxAllowedSpeed * MinReportableCorrection &&
+                            NumberOfPlayer1Errors[SimulationError.ErrorType.TooStrongKick]++ < MaximumNumberOfSameKindErrorInLog)
+                            MatchInfo.Errors.Add(new SimulationError()
+                            {
+                                Team = Team.FirstPlayer,
+                                Time = CurrentTime,
+                                AffectedPlayerNumber = kickWinner.Id,
+                                Type = SimulationError.ErrorType.TooStrongKick
+                            });
                     }
                     else
                     {
                         if (newSpeed > maxAllowedSpeed * MinReportableCorrection &&
-                            NumberOfSpeedCorrections2++ < MaximumNumberOfSameKindErrorInLog)
-                            MatchInfo.Player2ErrorLog += $"{CurrentTime} - Player{kickWinner.Id - 11} kick correction.;";
+                            NumberOfPlayer2Errors[SimulationError.ErrorType.TooStrongKick]++ < MaximumNumberOfSameKindErrorInLog)
+                            MatchInfo.Errors.Add(new SimulationError()
+                            {
+                                Team = Team.SecondPlayer,
+                                Time = CurrentTime,
+                                AffectedPlayerNumber = kickWinner.Id - 11,
+                                Type = SimulationError.ErrorType.TooStrongKick
+                            });
                     }
                 }
             }
@@ -868,13 +959,13 @@ namespace FootballAIGame.MatchSimulation
         /// </summary>
         private void HandleOuts()
         {
-            var lastTeam = 0;
+            var lastTeam = Team.FirstPlayer; // default (will be set correctly)
             var players = GameState.FootballPlayers;
             var ball = GameState.Ball;
 
             for (var i = 0; i < 22; i++)
                 if (LastKicker == GameState.FootballPlayers[i])
-                    lastTeam = i < 11 ? 1 : 2;
+                    lastTeam = i < 11 ? Team.FirstPlayer : Team.SecondPlayer;
 
             // corner kicks or goal kicks (goal line crossed)
             if (ball.Position.Y > 75f / 2 + 7.32 / 2 || ball.Position.Y < 75f / 2 - 7.32 / 2) // not goals
@@ -885,7 +976,7 @@ namespace FootballAIGame.MatchSimulation
 
                     if (WhoIsOnLeft == lastTeam)
                     {
-                        var goalKeeper = lastTeam == 1 ? players[11] : players[0];
+                        var goalKeeper = lastTeam == Team.FirstPlayer ? players[11] : players[0];
                         // goal kick
                         goalKeeper.Position.X = 110 - 16.5f;
                         goalKeeper.Position.Y = 75 / 2f;
@@ -897,10 +988,10 @@ namespace FootballAIGame.MatchSimulation
                         ball.Movement.X = 0f;
                         ball.Movement.Y = 0f;
 
-                        if (lastTeam == 1)
-                            MatchInfo.Shots1++;
+                        if (lastTeam == Team.FirstPlayer)
+                            MatchInfo.Team1Statistics.Shots++;
                         else
-                            MatchInfo.Shots2++;
+                            MatchInfo.Team2Statistics.Shots++;
                     }
                     else
                     {
@@ -911,7 +1002,7 @@ namespace FootballAIGame.MatchSimulation
                         ball.Movement.Y = 0f;
 
                         var nearestPlayerFromOppositeTeam =
-                            GetNearestPlayerToBall(lastTeam == 1 ? 2 : 1);
+                            GetNearestPlayerToBall(lastTeam == Team.FirstPlayer ? 2 : 1);
 
                         nearestPlayerFromOppositeTeam.Movement.X = 0;
                         nearestPlayerFromOppositeTeam.Movement.Y = 0;
@@ -929,7 +1020,7 @@ namespace FootballAIGame.MatchSimulation
 
                     if (WhoIsOnLeft != lastTeam)
                     {
-                        var goalKeeper = lastTeam == 1 ? players[11] : players[0];
+                        var goalKeeper = lastTeam == Team.FirstPlayer ? players[11] : players[0];
 
                         // goal kick
                         goalKeeper.Position.X = 16.5f;
@@ -942,10 +1033,10 @@ namespace FootballAIGame.MatchSimulation
                         ball.Movement.X = 0f;
                         ball.Movement.Y = 0f;
 
-                        if (lastTeam == 1)
-                            MatchInfo.Shots1++;
+                        if (lastTeam == Team.FirstPlayer)
+                            MatchInfo.Team1Statistics.Shots++;
                         else
-                            MatchInfo.Shots2++;
+                            MatchInfo.Team2Statistics.Shots++;
                     }
                     else
                     {
@@ -956,7 +1047,7 @@ namespace FootballAIGame.MatchSimulation
                         ball.Movement.Y = 0f;
 
                         var nearestPlayerFromOppositeTeam =
-                           GetNearestPlayerToBall(lastTeam == 1 ? 2 : 1);
+                           GetNearestPlayerToBall(lastTeam == Team.FirstPlayer ? 2 : 1);
 
                         nearestPlayerFromOppositeTeam.Position.X = 0;
                         nearestPlayerFromOppositeTeam.Position.Y = ball.Position.Y < 75 / 2f ? 0 : 75;
@@ -979,7 +1070,7 @@ namespace FootballAIGame.MatchSimulation
                 ball.Movement.Y = 0f;
 
                 var nearestPlayerFromOppositeTeam =
-                          GetNearestPlayerToBall(lastTeam == 1 ? 2 : 1);
+                          GetNearestPlayerToBall(lastTeam == Team.FirstPlayer ? 2 : 1);
 
                 nearestPlayerFromOppositeTeam.Position.X = ball.Position.X;
                 nearestPlayerFromOppositeTeam.Position.Y = 0;
@@ -999,7 +1090,7 @@ namespace FootballAIGame.MatchSimulation
                 ball.Movement.Y = 0f;
 
                 var nearestPlayerFromOppositeTeam =
-                    GetNearestPlayerToBall(lastTeam == 1 ? 2 : 1);
+                    GetNearestPlayerToBall(lastTeam == Team.FirstPlayer ? 2 : 1);
 
                 nearestPlayerFromOppositeTeam.Position.X = ball.Position.X;
                 nearestPlayerFromOppositeTeam.Position.Y = 75;
@@ -1017,36 +1108,35 @@ namespace FootballAIGame.MatchSimulation
         /// </summary>
         private void HandleGoals()
         {
-            var lastTeam = 0;
+            var lastTeam = Team.FirstPlayer; // default (will be set correctly)
             var ball = GameState.Ball;
 
             for (var i = 0; i < 22; i++)
                 if (LastKicker == GameState.FootballPlayers[i])
-                    lastTeam = i < 11 ? 1 : 2;
+                    lastTeam = i < 11 ? Team.FirstPlayer : Team.SecondPlayer;
 
             if (ball.Position.X < 0 && ball.Position.Y < 75f / 2 + 7.32 / 2 && ball.Position.Y > 75f / 2 - 7.32 / 2)
             {
                 GameState.KickOff = true;
 
-                var teamNameThatScored =
-                    WhoIsOnLeft == 1 ? Player2AiConnection.PlayerName : Player1AiConnection.PlayerName;
+                var teamThatScored = WhoIsOnLeft == Team.FirstPlayer ? Team.SecondPlayer : Team.FirstPlayer;
 
-                if (WhoIsOnLeft == 1)
+                if (WhoIsOnLeft == Team.FirstPlayer)
                 {
-                    MatchInfo.Goals1++;
-                    if (lastTeam == 2)
+                    MatchInfo.Team2Statistics.Goals++;
+                    if (lastTeam == Team.SecondPlayer)
                     {
-                        MatchInfo.ShotsOnTarget2++;
-                        MatchInfo.Shots2++;
+                        MatchInfo.Team2Statistics.ShotsOnTarget++;
+                        MatchInfo.Team2Statistics.Shots++;
                     }
                 }
-                if (WhoIsOnLeft == 2)
+                if (WhoIsOnLeft == Team.SecondPlayer)
                 {
-                    MatchInfo.Goals2++;
-                    if (lastTeam == 1)
+                    MatchInfo.Team1Statistics.Goals++;
+                    if (lastTeam == Team.FirstPlayer)
                     {
-                        MatchInfo.ShotsOnTarget2++;
-                        MatchInfo.Shots2++;
+                        MatchInfo.Team1Statistics.ShotsOnTarget++;
+                        MatchInfo.Team1Statistics.Shots++;
                     }
                 }
 
@@ -1054,32 +1144,38 @@ namespace FootballAIGame.MatchSimulation
                 for (var i = 0; i < 22; i++)
                     if (GameState.FootballPlayers[i] == LastKicker)
                         scoringPlayerNumber = i < 11 ? i : i - 11;
-                MatchInfo.Goals += $"{CurrentTime};{teamNameThatScored};Player{scoringPlayerNumber}|";
+
+                MatchInfo.Goals.Add(new Goal()
+                {
+                    ScoreTime = CurrentTime,
+                    TeamThatScored = teamThatScored,
+                    ScorerNumber = scoringPlayerNumber
+                });
+
                 SetStartingPositions(WhoIsOnLeft);
             }
             else if (ball.Position.X > 110 && ball.Position.Y < 75f / 2 + 7.32 / 2 && ball.Position.Y > 75f / 2 - 7.32 / 2)
             {
                 GameState.KickOff = true;
 
-                var teamNameThatScored =
-                    WhoIsOnLeft == 2 ? Player2AiConnection.PlayerName : Player1AiConnection.PlayerName;
+                var teamThatScored = WhoIsOnLeft == Team.SecondPlayer ? Team.SecondPlayer : Team.FirstPlayer;
 
-                if (WhoIsOnLeft == 1)
+                if (WhoIsOnLeft == Team.FirstPlayer)
                 {
-                    MatchInfo.Goals1++;
-                    if (lastTeam == 1)
+                    MatchInfo.Team1Statistics.Goals++;
+                    if (lastTeam == Team.FirstPlayer)
                     {
-                        MatchInfo.ShotsOnTarget1++;
-                        MatchInfo.Shots1++;
+                        MatchInfo.Team1Statistics.ShotsOnTarget++;
+                        MatchInfo.Team1Statistics.Shots++;
                     }
                 }
-                if (WhoIsOnLeft == 2)
+                if (WhoIsOnLeft == Team.SecondPlayer)
                 {
-                    MatchInfo.Goals2++;
-                    if (lastTeam == 2)
+                    MatchInfo.Team2Statistics.Goals++;
+                    if (lastTeam == Team.SecondPlayer)
                     {
-                        MatchInfo.ShotsOnTarget2++;
-                        MatchInfo.Shots2++;
+                        MatchInfo.Team2Statistics.ShotsOnTarget++;
+                        MatchInfo.Team2Statistics.Shots++;
                     }
                 }
 
@@ -1087,8 +1183,15 @@ namespace FootballAIGame.MatchSimulation
                 for (var i = 0; i < 22; i++)
                     if (GameState.FootballPlayers[i] == LastKicker)
                         scoringPlayerNumber = i < 11 ? i : i - 11;
-                MatchInfo.Goals += $"{CurrentTime};{teamNameThatScored};Player{scoringPlayerNumber}|";
-                SetStartingPositions(WhoIsOnLeft == 1 ? 2 : 1);
+
+                MatchInfo.Goals.Add(new Goal()
+                {
+                    ScoreTime = CurrentTime,
+                    TeamThatScored = teamThatScored,
+                    ScorerNumber = scoringPlayerNumber
+                });
+
+                SetStartingPositions(WhoIsOnLeft == Team.FirstPlayer ? Team.SecondPlayer : Team.FirstPlayer);
             }
         }
 
@@ -1099,14 +1202,15 @@ namespace FootballAIGame.MatchSimulation
         /// <param name="currentKickWinner">The current kick winner.</param>
         private void HandleStoppedShots(FootballPlayer currentKickWinner)
         {
-            var currentWinnerTeam = 0;
-            var lastWinnerTeam = 0;
+            var currentWinnerTeam = Team.FirstPlayer; // default (will be set correctly)
+            var lastWinnerTeam = Team.FirstPlayer; // default (will be set correctly)
+
             for (var i = 0; i < 11; i++)
             {
                 if (GameState.FootballPlayers[i] == currentKickWinner)
-                    currentWinnerTeam = i < 11 ? 1 : 2;
+                    currentWinnerTeam = i < 11 ? Team.FirstPlayer : Team.SecondPlayer;
                 if (GameState.FootballPlayers[i] == LastKicker)
-                    lastWinnerTeam = i < 11 ? 1 : 2;
+                    lastWinnerTeam = i < 11 ? Team.FirstPlayer : Team.SecondPlayer;
             }
 
             if (lastWinnerTeam == currentWinnerTeam)
@@ -1124,36 +1228,35 @@ namespace FootballAIGame.MatchSimulation
                                           && intersectionWithGoalLine2.Y > 75f / 2 - 7.32 &&
                                           intersectionWithGoalLine2.Y < 75f / 2 + 7.32;
 
-
             // process result
             if (wasBallGoingToGoalLine1 && lastWinnerTeam != WhoIsOnLeft)
             {
-                if (lastWinnerTeam == 1)
-                    MatchInfo.Shots1++;
+                if (lastWinnerTeam == Team.FirstPlayer)
+                    MatchInfo.Team1Statistics.Shots++;
                 else
-                    MatchInfo.Shots2++;
+                    MatchInfo.Team2Statistics.Shots++;
                 if (wasBallGoingToGoalPost1)
                 {
-                    if (lastWinnerTeam == 1)
-                        MatchInfo.ShotsOnTarget1++;
+                    if (lastWinnerTeam == Team.FirstPlayer)
+                        MatchInfo.Team1Statistics.ShotsOnTarget++;
                     else
-                        MatchInfo.ShotsOnTarget2++;
+                        MatchInfo.Team2Statistics.ShotsOnTarget++;
                 }
             }
 
             if (wasBallGoingToGoalLine2 && lastWinnerTeam == WhoIsOnLeft)
             {
-                if (lastWinnerTeam == 1)
-                    MatchInfo.Shots1++;
+                if (lastWinnerTeam == Team.FirstPlayer)
+                    MatchInfo.Team1Statistics.Shots++;
                 else
-                    MatchInfo.Shots2++;
+                    MatchInfo.Team2Statistics.Shots++;
 
                 if (wasBallGoingToGoalPost1)
                 {
-                    if (lastWinnerTeam == 1)
-                        MatchInfo.ShotsOnTarget1++;
+                    if (lastWinnerTeam == Team.FirstPlayer)
+                        MatchInfo.Team1Statistics.ShotsOnTarget++;
                     else
-                        MatchInfo.ShotsOnTarget2++;
+                        MatchInfo.Team2Statistics.ShotsOnTarget++;
                 }
             }
 
@@ -1165,15 +1268,15 @@ namespace FootballAIGame.MatchSimulation
         /// accordance to the <see cref="MinimalOpponentDirectionFromKickoff"/>.
         /// Used for pushing opponent players from kickoffs.
         /// </summary>
-        /// <param name="teamToBePushedNumber">The team to be pushed number.</param>
+        /// <param name="teamToBePushed">The team to be pushed.</param>
         /// <param name="position">The position from which the players will be pushed aways.</param>
-        private void PushPlayersFromPosition(int teamToBePushedNumber, Vector position)
+        private void PushPlayersFromPosition(Team teamToBePushed, Vector position)
         {
             var toBePushedPlayers = new List<FootballPlayer>();
 
             for (var i = 0; i < 11; i++)
             {
-                var player = GameState.FootballPlayers[teamToBePushedNumber == 1 ? i : i + 11];
+                var player = GameState.FootballPlayers[teamToBePushed == Team.FirstPlayer ? i : i + 11];
                 if (Vector.DistanceBetween(player.Position, position) < MinimalOpponentDirectionFromKickoff)
                     toBePushedPlayers.Add(player);
             }

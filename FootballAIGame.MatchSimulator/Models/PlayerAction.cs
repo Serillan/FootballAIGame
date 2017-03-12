@@ -1,6 +1,6 @@
 ﻿using FootballAIGame.MatchSimulation.CustomDataTypes;
 
-namespace FootballAIGame.MatchSimulation.SimulationEntities
+namespace FootballAIGame.MatchSimulation.Models
 {
     /// <summary>
     /// Represents football player action that is received from the AI application.

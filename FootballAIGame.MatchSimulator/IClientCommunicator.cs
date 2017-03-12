@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 using FootballAIGame.MatchSimulation.Messages;
-using FootballAIGame.MatchSimulation.SimulationEntities;
+using FootballAIGame.MatchSimulation.Models;
 
 namespace FootballAIGame.MatchSimulation
 {

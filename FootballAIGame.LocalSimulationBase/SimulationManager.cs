@@ -4,9 +4,9 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using FootballAIGame.LocalSimulationBase.Models;
 using FootballAIGame.MatchSimulation;
 using FootballAIGame.MatchSimulation.Messages;
+using FootballAIGame.MatchSimulation.Models;
 
 namespace FootballAIGame.LocalSimulationBase
 {
@@ -31,7 +31,7 @@ namespace FootballAIGame.LocalSimulationBase
             Initialize();
         }
 
-        public async Task<Match> Simulate(string ai1, string ai2)
+        public async Task<MatchInfo> Simulate(string ai1, string ai2)
         {
             if (ai1 == ai2)
                 throw new InvalidOperationException("AIs must be different.");
@@ -72,29 +72,7 @@ namespace FootballAIGame.LocalSimulationBase
                 RunningSimulations.Remove(simulation);
             }
 
-            var goals = from goalInfo in simulation.MatchInfo.Goals.Split('|')
-                let splitGoalInfo = goalInfo.Split(';')
-                let aiName = splitGoalInfo[2]
-                let time = splitGoalInfo[0]
-                let playerName = splitGoalInfo[1]
-                select new Goal() {AiName = aiName, Time = time, PlayerName = playerName};
-
-
-            return new Match()
-            {
-                Ai1Name = ai1,
-                Ai2Name = ai2,
-                Winner = simulation.MatchInfo.Winner,
-                MatchData = simulation.MatchInfo.MatchData,
-                Ai1Errors = simulation.MatchInfo.Player1ErrorLog.Split(';').ToList(),
-                Ai2Errors = simulation.MatchInfo.Player2ErrorLog.Split(';').ToList(),
-                Goals = goals.ToList(),
-                Shots1 = simulation.MatchInfo.Shots1,
-                Shots2 = simulation.MatchInfo.Shots2,
-                ShotsOnTarget1 = simulation.MatchInfo.ShotsOnTarget1,
-                ShotsOnTarget2 = simulation.MatchInfo.ShotsOnTarget2
-            };
-
+            return simulation.MatchInfo;
         }
 
         public async Task StartSimulating()

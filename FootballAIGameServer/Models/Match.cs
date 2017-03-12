@@ -1,4 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using FootballAIGame.MatchSimulation;
+using FootballAIGame.MatchSimulation.Models;
 
 namespace FootballAIGame.Server.Models
 {
@@ -143,5 +148,76 @@ namespace FootballAIGame.Server.Models
         /// If the match is not part of a tournament it is equal to null.
         /// </summary>
         public Tournament Tournament { get; set; }
+
+        public Match() { }
+
+        public Match(MatchInfo matchInfo, string player1Name, string player2Name)
+        {
+
+            Shots1 = matchInfo.Team1Statistics.Shots;
+            Shots2 = matchInfo.Team2Statistics.Shots;
+            ShotsOnTarget1 = matchInfo.Team1Statistics.ShotsOnTarget;
+            ShotsOnTarget2 = matchInfo.Team2Statistics.ShotsOnTarget;
+            Score = $"{matchInfo.Team1Statistics.Goals}:{matchInfo.Team2Statistics.Goals}";
+            Winner = matchInfo.Winner == Team.FirstPlayer ? 1 : matchInfo.Winner == Team.SecondPlayer ? 2 : 0;
+
+            var goalsEnumerable = from goal in matchInfo.Goals
+                                  let userName = goal.TeamThatScored == Team.FirstPlayer ? player1Name : player2Name
+                                  select $"{goal.ScoreTime};{userName};player{goal.ScorerNumber}";
+            Goals = string.Join("|", goalsEnumerable);
+
+            SetErrorsLogs(matchInfo.Errors);
+
+            // convert match data to byte array
+            var matchByteData = new byte[matchInfo.MatchData.Count * 4];
+            Buffer.BlockCopy(matchInfo.MatchData.ToArray(), 0, matchByteData, 0, matchInfo.MatchData.Count * 4);
+            MatchData = matchByteData;
+        }
+
+        private void SetErrorsLogs(IEnumerable<SimulationError> errors)
+        {
+            var player1Errors = new List<string>();
+            var player2Errors = new List<string>();
+
+            foreach (var error in errors)
+            {
+                string errorMessage;
+
+                switch (error.Type)
+                {
+                    case SimulationError.ErrorType.TooHighSpeed:
+                        errorMessage = $"{error.Time} - Player{error.AffectedPlayerNumber} has too high speed.";
+                        break;
+                    case SimulationError.ErrorType.TooHighAcceleration:
+                        errorMessage = $"{error.Time} - Player{error.AffectedPlayerNumber} has too high acceleration.";
+                        break;
+                    case SimulationError.ErrorType.TooStrongKick:
+                        errorMessage = $"{error.Time} - Player{error.AffectedPlayerNumber} has made too strong kick.";
+                        break;
+                    case SimulationError.ErrorType.InvalidMovementVector:
+                        errorMessage = $"{error.Time} - Player{error.AffectedPlayerNumber} has invalid movement vector set.";
+                        break;
+                    case SimulationError.ErrorType.InvalidKickVector:
+                        errorMessage = $"{error.Time} - Player{error.AffectedPlayerNumber} has invalid kick vector set.";
+                        break;
+                    case SimulationError.ErrorType.Disconnection:
+                        errorMessage = $"{error.Time} - Player has disconnected.";
+                        break;
+                    case SimulationError.ErrorType.Cancel:
+                        errorMessage = $"{error.Time} - Player has left the match.";
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+
+                if (error.Team == Team.FirstPlayer)
+                    player1Errors.Add(errorMessage);
+                else
+                    player2Errors.Add(errorMessage);
+            }
+
+            Player1ErrorLog = string.Join(";", player1Errors);
+            Player2ErrorLog = string.Join(";", player2Errors);
+        }
     }
 }

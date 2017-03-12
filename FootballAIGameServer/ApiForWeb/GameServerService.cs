@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.ServiceModel.Channels;
 using FootballAIGame.MatchSimulation;
 using FootballAIGame.Server.Models;
 
@@ -142,10 +143,13 @@ namespace FootballAIGame.Server.ApiForWeb
         /// <param name="playerName">Name of the player.</param>
         public int GetCurrentMatchStep(string playerName)
         {
-            var match = SimulationManager.Instance.RunningSimulations
-                .FirstOrDefault(m => m.Player1AiConnection.PlayerName == playerName ||
-                                     m.Player2AiConnection.PlayerName == playerName);
-            return match?.CurrentStep ?? 1500;
+            lock (SimulationManager.Instance.RunningSimulations)
+            {
+                var match = SimulationManager.Instance.RunningSimulations
+                    .FirstOrDefault(m => m.Player1AiConnection.PlayerName == playerName ||
+                                         m.Player2AiConnection.PlayerName == playerName);
+                return match?.CurrentStep ?? 1500;
+            }
         }
     }
 }

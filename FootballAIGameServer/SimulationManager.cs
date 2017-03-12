@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using FootballAIGame.MatchSimulation;
 using FootballAIGame.MatchSimulation.Messages;
+using FootballAIGame.MatchSimulation.Models;
 using FootballAIGame.Server.Models;
 
 namespace FootballAIGame.Server
@@ -83,13 +84,17 @@ namespace FootballAIGame.Server
         /// <param name="ai1">The player1 AI name.</param>
         /// <param name="userName2">The player2 name.</param>
         /// <param name="ai2">The player2 AI name.</param>
+        /// <param name="simulationTask">The task that is completed after both <see cref="MatchSimulator"/> simulation and
+        /// <see cref="OnSimulationEndAsync"/> have completed.</param>
         /// <param name="tournamentId">The tournament Id. (optional)</param>
         /// <returns>
         /// "ok" if operation was successful; otherwise, error message
         /// </returns>
-        public string StartMatch(string userName1, string ai1, string userName2, string ai2, int? tournamentId = null)
+        public string StartMatch(string userName1, string ai1, string userName2, string ai2, out Task<MatchSimulator> simulationTask, int? tournamentId = null)
         {
             var manager = ConnectionManager.Instance;
+            simulationTask = null;
+
             lock (manager.ActiveConnections)
             {
                 var connection1 = manager.ActiveConnections
@@ -115,10 +120,31 @@ namespace FootballAIGame.Server
 
                 var startTime = DateTime.Now;
 
-                matchSimulator.SimulateMatchAsync().ContinueWith((task => OnSimulationEndAsync(startTime, matchSimulator, tournamentId)));
+                simulationTask = Task.Run(async () =>
+                {
+                    await matchSimulator.SimulateMatchAsync();
+                    await OnSimulationEndAsync(startTime, matchSimulator, tournamentId);
+                    return matchSimulator;
+                });
 
                 return "ok";
             }
+        }
+
+        /// <summary>
+        /// Starts the game between the given players AIs.
+        /// </summary>
+        /// <param name="userName1">The player1 name.</param>
+        /// <param name="ai1">The player1 AI name.</param>
+        /// <param name="userName2">The player2 name.</param>
+        /// <param name="ai2">The player2 AI name.</param>
+        /// <returns>
+        /// "ok" if operation was successful; otherwise, error message
+        /// </returns>
+        public string StartMatch(string userName1, string ai1, string userName2, string ai2)
+        {
+            Task<MatchSimulator> task;
+            return StartMatch(userName1, ai1, userName2, ai2, out task);
         }
 
         /// <summary>
@@ -162,7 +188,7 @@ namespace FootballAIGame.Server
             ConnectionManager.Instance.PlayerDisconectedHandler = ProcessClientDisconnectionAsync;
         }
 
-        private async Task OnSimulationEndAsync(DateTime startTime, MatchSimulator simulator, int? tournamentId)
+        private async Task<MatchSimulator> OnSimulationEndAsync(DateTime startTime, MatchSimulator simulator, int? tournamentId)
         {
             var matchInfo = simulator.MatchInfo;
 
@@ -171,41 +197,45 @@ namespace FootballAIGame.Server
             Debug.Assert(player1AiConnection != null, "player1AiConnection != null");
             Debug.Assert(player2AiConnection != null, "player2AiConnection != null");
 
-
             using (var context = new ApplicationDbContext())
             {
-                var player1Retrieve = context.Players.SingleAsync(p => p.Name == player1AiConnection.PlayerName);
-                var player2 = await context.Players.SingleAsync(p => p.Name == player2AiConnection.PlayerName);
-                var player1 = await player1Retrieve;
+                var players = await context.Players.Where(
+                        p => p.Name == player1AiConnection.PlayerName || p.Name == player2AiConnection.PlayerName).ToListAsync();
+
+                var player1 = players.First(p => p.Name == player1AiConnection.PlayerName);
+                var player2 = players.First(p => p.Name == player2AiConnection.PlayerName);
 
                 player1.PlayerState = player1.PlayerState == PlayerState.PlayingTournamentPlaying ?
                     PlayerState.PlayingTournamentWaiting : PlayerState.Idle;
+
                 player2.PlayerState = player2.PlayerState == PlayerState.PlayingTournamentPlaying ?
                     PlayerState.PlayingTournamentWaiting : PlayerState.Idle;
 
-                var match = new Match
+                var match = new Match(matchInfo, player1AiConnection.PlayerName, player2AiConnection.PlayerName)
                 {
                     Time = startTime,
                     Player1 = player1,
                     Player2 = player2,
                     Player1Ai = player1AiConnection.AiName,
                     Player2Ai = player2AiConnection.AiName,
-                    Score = $"{simulator.MatchInfo.Goals1}:{simulator.MatchInfo.Goals2}",
-                    Winner = matchInfo.Goals1 > matchInfo.Goals2 ? 1 : matchInfo.Goals1 < matchInfo.Goals2 ? 2 : 0,
-                    Goals = matchInfo.Goals,
-                    TournamentId = tournamentId
                 };
 
+                if (tournamentId != null)
+                {
+                    var tournament = context.Tournaments.FirstOrDefault(t => t.Id == tournamentId);
+                    if (tournament != null)
+                        match.Tournament = tournament;
+                }
 
-                if (matchInfo.Winner == player1AiConnection.PlayerName)
-                    player1.WonGames++;
-                else if (matchInfo.Winner == player2AiConnection.PlayerName)
-                    player2.WonGames++;
-
-                // convert match data to byte array
-                var matchByteData = new byte[matchInfo.MatchData.Count * 4];
-                Buffer.BlockCopy(matchInfo.MatchData.ToArray(), 0, matchByteData, 0, matchInfo.MatchData.Count * 4);
-                match.MatchData = matchByteData;
+                switch (matchInfo.Winner)
+                {
+                    case Team.FirstPlayer:
+                        player1.WonGames++;
+                        break;
+                    case Team.SecondPlayer:
+                        player2.WonGames++;
+                        break;
+                }
 
                 context.Matches.Add(match);
 
@@ -216,6 +246,8 @@ namespace FootballAIGame.Server
                 player1AiConnection.IsInMatch = false;
                 player2AiConnection.IsInMatch = false;
             }
+
+            return simulator;
         }
 
         private async Task ProcessClientDisconnectionAsync(ClientConnection connection)

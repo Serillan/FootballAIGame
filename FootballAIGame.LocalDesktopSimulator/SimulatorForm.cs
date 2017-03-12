@@ -3,14 +3,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using FootballAIGame.LocalSimulationBase;
-using FootballAIGame.LocalSimulationBase.Models;
 using FootballAIGame.MatchSimulation;
+using FootballAIGame.MatchSimulation.Models;
 
 namespace FootballAIGame.LocalDesktopSimulator
 {
     public partial class SimulatorForm : Form
     {
-        public Match LoadedMatch { get; set; }
+        public MatchInfo LoadedMatch { get; set; }
 
         public SimulatorForm()
         {
@@ -101,13 +101,18 @@ namespace FootballAIGame.LocalDesktopSimulator
             SimulationProgress.Visible = false;
         }
 
-        private void LoadMatch(Match match)
+        private void LoadMatch(MatchInfo match)
         {
-            FinalScoreLabel.Text = $"{match.}
+            
 
 
 
 
+        }
+
+        private void SaveMatch(MatchInfo match)
+        {
+            
         }
 
         private async void StopMatchButtonClick(object sender, EventArgs e)

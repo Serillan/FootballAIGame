@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using FootballAIGame.MatchSimulation;
+using FootballAIGame.MatchSimulation.Models;
 using FootballAIGame.Server.Models;
 
 namespace FootballAIGame.Server
@@ -170,7 +172,7 @@ namespace FootballAIGame.Server
             using (var context = new ApplicationDbContext())
             {
                 // get tournament
-                tournament = context.Tournaments
+                 tournament = context.Tournaments
                     .Include(t => t.Players.Select(tp => tp.Player))
                     .Include(t => t.RecurringTournament)
                     .SingleOrDefault(t => t.Id == TournamentId);
@@ -247,7 +249,7 @@ namespace FootballAIGame.Server
                     player.Player.PlayerState = PlayerState.Idle;
                 }
 
-                SavePlayers(Players);
+                await SavePlayersAsync(Players);
             }
 
             // set state to finished
@@ -280,7 +282,7 @@ namespace FootballAIGame.Server
 
             var advancingPlayers = new List<TournamentPlayer>();
             var fightingPlayers = new List<TournamentPlayer>();
-            var matches = new List<MatchSimulator>();
+            var simulationTasks = new List<Task<MatchSimulator>>();
 
             lock (Players)
             {
@@ -313,21 +315,31 @@ namespace FootballAIGame.Server
                         firstPlayer = tournamentPlayer;
                     else // start new match
                     {
+                        Task<MatchSimulator> simulationTask;
+
                         SimulationManager.Instance.StartMatch(firstPlayer.Player.Name, firstPlayer.PlayerAi,
-                            tournamentPlayer.Player.Name, tournamentPlayer.PlayerAi, tournament.Id);
+                            tournamentPlayer.Player.Name, tournamentPlayer.PlayerAi, out simulationTask, tournament.Id);
+                        
                         // update player states
                         firstPlayer.Player.PlayerState = PlayerState.PlayingTournamentPlaying;
                         tournamentPlayer.Player.PlayerState = PlayerState.PlayingTournamentPlaying;
+                        
                         // add match to matches
-                        matches.Add(SimulationManager.Instance.GetMatchSimulator(firstPlayer.Player.Name));
+                        simulationTasks.Add(simulationTask);
                         firstPlayer = null;
                     }
                 }
             }
 
-            SavePlayers(fightingPlayers); // update states
+            await SavePlayersAsync(fightingPlayers); // update states
 
-            await Task.WhenAll(matches.Select(m => m.CurrentSimulationTask).ToArray());
+            await Task.WhenAll(simulationTasks);
+
+            var matches = new List<MatchSimulator>();
+            foreach (var simulationTask in simulationTasks)
+            {
+                matches.Add(await simulationTask);
+            }
 
             lock (Players)
             {
@@ -335,7 +347,7 @@ namespace FootballAIGame.Server
 
                 // get looser position number
                 var exp = 1;
-                while (exp * 2 < Players.Count)
+                while (exp*2 < Players.Count)
                     exp *= 2;
                 var looserPos = exp + 1; // ex. from 8. (2^3) to 5. (2^2+1) player they will have position 5
 
@@ -345,20 +357,35 @@ namespace FootballAIGame.Server
 
                     if (matchSimulator.MatchInfo.Winner != null)
                     {
-                        winner = Players.FirstOrDefault(p => p.Player.Name == matchSimulator.MatchInfo.Winner);
-                        looser = matchSimulator.Player1AiConnection.PlayerName == matchSimulator.MatchInfo.Winner
-                            ? Players.FirstOrDefault(p => p.Player.Name == matchSimulator.Player2AiConnection.PlayerName)
-                            : Players.FirstOrDefault(p => p.Player.Name == matchSimulator.Player1AiConnection.PlayerName);
+                        string winnerPlayerName;
+                        string looserPlayerName;
+
+                        if (matchSimulator.MatchInfo.Winner == Team.FirstPlayer)
+                        {
+                            winnerPlayerName = matchSimulator.Player1AiConnection.PlayerName;
+                            looserPlayerName = matchSimulator.Player2AiConnection.PlayerName;
+                        }
+                        else
+                        {
+                            winnerPlayerName = matchSimulator.Player2AiConnection.PlayerName;
+                            looserPlayerName = matchSimulator.Player1AiConnection.PlayerName;
+                        }
+
+
+                        winner = Players.FirstOrDefault(p => p.Player.Name == winnerPlayerName);
+                        looser = Players.FirstOrDefault(p => p.Player.Name == looserPlayerName);
                     }
                     else
                     {
-                        var p1 =
+                        var player1 =
                             Players.FirstOrDefault(p => p.Player.Name == matchSimulator.Player1AiConnection.PlayerName);
-                        var p2 =
+                        var player2 =
                             Players.FirstOrDefault(p => p.Player.Name == matchSimulator.Player2AiConnection.PlayerName);
                         var rndWinner = MatchSimulator.Random.Next(2);
-                        winner = rndWinner == 0 ? p1 : p2;
-                        looser = rndWinner == 0 ? p2 : p1;
+
+                        // in tournament winner is chosen randomly in case of draw !
+                        winner = rndWinner == 0 ? player1 : player2;
+                        looser = rndWinner == 0 ? player2 : player1;
                     }
 
                     if (winner == null && looser != null)
@@ -369,17 +396,18 @@ namespace FootballAIGame.Server
 
                     if (winner != null)
                         advancingPlayers.Add(winner);
-                    if (looser == null) continue;
+                    if (looser == null)
+                        continue;
                     looser.PlayerPosition = looserPos;
                     looser.Player.PlayerState = PlayerState.Idle;
                 }
 
-                fightingPlayers.RemoveAll(p => !Players.Contains(p)); // don't save those that have already left
-                SavePlayers(fightingPlayers);
-
                 // remove all skipping players that left during round
-                advancingPlayers.RemoveAll(p => !Players.Contains(p));
+                // don't save those that have already left
+                fightingPlayers.RemoveAll(p => !Players.Contains(p));
             }
+
+            await SavePlayersAsync(fightingPlayers);
 
             return advancingPlayers;
         }
@@ -414,13 +442,13 @@ namespace FootballAIGame.Server
         /// Saves players states and tournament positions.
         /// </summary>
         /// <param name="players">The players.</param>
-        private void SavePlayers(IEnumerable<TournamentPlayer> players)
+        private async Task SavePlayersAsync(IEnumerable<TournamentPlayer> players)
         {
             using (var context = new ApplicationDbContext())
             {
-                var dbPlayers = context.TournamentPlayers
+                var dbPlayers = await context.TournamentPlayers
                     .Include(tp => tp.Player)
-                    .Where(t => t.TournamentId == TournamentId);
+                    .Where(t => t.TournamentId == TournamentId).ToListAsync();
 
                 lock (Players)
                 {
@@ -432,7 +460,8 @@ namespace FootballAIGame.Server
                         dbPlayer.Player.WonTournaments = player.Player.WonTournaments;
                     }
                 }
-                context.SaveChanges();
+
+                await context.SaveChangesAsync();
             }
         }
 

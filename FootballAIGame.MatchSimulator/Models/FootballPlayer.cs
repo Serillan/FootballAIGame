@@ -1,6 +1,6 @@
 ﻿using FootballAIGame.MatchSimulation.CustomDataTypes;
 
-namespace FootballAIGame.MatchSimulation.SimulationEntities
+namespace FootballAIGame.MatchSimulation.Models
 {
     public class FootballPlayer
     {
