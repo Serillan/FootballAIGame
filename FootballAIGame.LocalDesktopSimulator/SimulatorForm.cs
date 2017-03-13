@@ -74,7 +74,6 @@ namespace FootballAIGame.LocalDesktopSimulator
             StartMatchButton.Text = "Stop match";
             StartMatchButton.Click += StopMatchButtonClick;
             StartMatchButton.Click -= StartMatchButtonClick;
-            StartMatchButton.Invalidate();
 
             try
             {
@@ -127,8 +126,6 @@ namespace FootballAIGame.LocalDesktopSimulator
             CurrentScoreLabel.Text = "0:0";
             CurrentTimeLabel.Text = "0:0";
             WatchSlider.Value = 0;
-
-            Invalidate();
 
             LoadedMatch = match;
         }

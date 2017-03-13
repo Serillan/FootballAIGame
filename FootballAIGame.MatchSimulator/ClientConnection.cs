@@ -272,7 +272,7 @@ namespace FootballAIGame.MatchSimulation
         }
 
         /// <summary>
-        /// Receives the client message asynchronously.
+        /// Receives the client message asynchronously. Returns null if the connection was dropped.
         /// </summary>
         /// <returns>The next received client message.</returns>
         public async Task<ClientMessage> ReceiveClientMessageAsync()
@@ -281,11 +281,18 @@ namespace FootballAIGame.MatchSimulation
                 CurrentReceiveTask.IsFaulted)
                 CurrentReceiveTask = ReceiveClientMessageAsyncTask();
 
-            return await CurrentReceiveTask;
+            try
+            {
+                return await CurrentReceiveTask;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
         }
 
         /// <summary>
-        /// Reads the next line asynchronously.
+        /// Reads the next line asynchronously. Returns null if the connection was dropped.
         /// </summary>
         /// <returns>The read line.</returns>
         public async Task<string> ReadLineAsync()
@@ -295,7 +302,15 @@ namespace FootballAIGame.MatchSimulation
 
             while (true)
             {
-                await NetworkStream.ReadAsync(buffer, 0, 1);
+                try
+                {
+                    await NetworkStream.ReadAsync(buffer, 0, 1);
+                }
+                catch (Exception)
+                {
+                    return null;
+                }
+
                 if (buffer[0] == (int)'\n')
                     break;
                 bytes.Add(buffer[0]);
@@ -369,7 +384,7 @@ namespace FootballAIGame.MatchSimulation
         }
 
         /// <summary>
-        /// Receives the action message asynchronously.
+        /// Receives the action message asynchronously. Returns null if the connection was dropped.
         /// </summary>
         /// <param name="step">The expected simulation step of the action message.</param>
         /// <returns>The next received action client message with the specified step.</returns>
@@ -378,6 +393,10 @@ namespace FootballAIGame.MatchSimulation
             while (true)
             {
                 var message = await ReceiveClientMessageAsync();
+
+                if (message == null) //connection dropped
+                    return null;
+
                 var actionMessage = message as ActionMessage;
 
                 if (actionMessage == null)

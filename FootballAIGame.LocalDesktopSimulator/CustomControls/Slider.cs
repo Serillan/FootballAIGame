@@ -7,17 +7,33 @@ namespace FootballAIGame.LocalDesktopSimulator.CustomControls
 {
     public partial class Slider : UserControl
     {
-        [Category("Slider")]
-        [DefaultValue(0)]
-        public int Value { get; set; } = 0;
+        private int _value = 0;
+        private int _min = 0;
+        private int _max = 100;
 
         [Category("Slider")]
         [DefaultValue(0)]
-        public int Min { get; set; } = 0;
+        public int Value    
+        {
+            get { return _value; }
+            set { _value = value; Invalidate(); }
+        }
+
+        [Category("Slider")]
+        [DefaultValue(0)]
+        public int Min
+        {
+            get { return _min; }
+            set { _min = value; Invalidate(); }
+        }
 
         [Category("Slider")]
         [DefaultValue(100)]
-        public int Max { get; set; } = 100;
+        public int Max
+        {
+            get { return _max; }
+            set { _max = value; Invalidate(); }
+        }
 
         public Slider()
         {
@@ -38,11 +54,13 @@ namespace FootballAIGame.LocalDesktopSimulator.CustomControls
             if (Max-Min == 0)
                 return;
 
-            var percentage = (float)Value/(Max - Min);
+            var radius = ClientRectangle.Height / 2f;
 
-            var centerX = percentage*ClientRectangle.Width;
+            var percentage = (float)Value/(Max - Min);
+            var usableWidth = ClientRectangle.Width - 2*radius;
+
+            var centerX = percentage*usableWidth + radius;
             var centerY = ClientRectangle.Height/2f;
-            var radius = ClientRectangle.Height/2f;
 
             g.FillEllipse(new SolidBrush(ForeColor), centerX - radius, centerY - radius, 2*radius, 2*radius);
         }

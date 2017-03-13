@@ -328,6 +328,7 @@ namespace FootballAIGame.MatchSimulation
                 if (getMessage1Result == receiveActionMessage1 && !receiveActionMessage1.IsFaulted)
                 {
                     actionMessage1 = Message1.Result as ActionMessage;
+
                     if (step < NumberOfSimulationSteps - 1)
                     {
                         Message1 = Player1AiConnection.ReceiveClientMessageAsync();
@@ -337,6 +338,7 @@ namespace FootballAIGame.MatchSimulation
                 if (getMessage2Result == receiveActionMessage2 && !receiveActionMessage2.IsFaulted)
                 {
                     actionMessage2 = Message2.Result as ActionMessage;
+
                     if (step < NumberOfSimulationSteps - 1)
                     {
                         Message2 = Player2AiConnection.ReceiveClientMessageAsync();
@@ -345,7 +347,7 @@ namespace FootballAIGame.MatchSimulation
             }
             catch (IOException) // if player1 or player2 has disconnected
             {
-                //Console.WriteLine("step exception");
+                Console.WriteLine("step exception");
                 return;
             }
 

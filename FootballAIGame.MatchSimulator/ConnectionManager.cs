@@ -176,7 +176,12 @@ namespace FootballAIGame.MatchSimulation
                     return;
 
                 var clientMessage = await connection.ReceiveClientMessageAsync();
-                if (!(clientMessage is LoginMessage))
+                if (clientMessage == null)
+                {
+                    Console.WriteLine("Unauthenticated client has disconnected.");
+                    break; // connection dropped
+                }
+                else if (!(clientMessage is LoginMessage))
                 {
                     Console.WriteLine("Client has sent invalid message for connecting.");
                     await connection.TrySendAsync("FAIL invalid message format.");

@@ -156,8 +156,6 @@ namespace FootballAIGame.LocalDesktopSimulator
             this.GoalsListBox.FormattingEnabled = true;
             this.GoalsListBox.HorizontalScrollbar = true;
             this.GoalsListBox.ItemHeight = 16;
-            this.GoalsListBox.Items.AddRange(new object[] {
-            "2:41 Serisaasasasasllan - Player2"});
             this.GoalsListBox.Location = new System.Drawing.Point(16, 172);
             this.GoalsListBox.Name = "GoalsListBox";
             this.GoalsListBox.SelectionMode = System.Windows.Forms.SelectionMode.None;

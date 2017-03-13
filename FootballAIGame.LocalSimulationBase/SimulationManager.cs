@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using FootballAIGame.LocalSimulationBase.Models;
 using FootballAIGame.MatchSimulation;
@@ -41,28 +42,28 @@ namespace FootballAIGame.LocalSimulationBase
             ClientConnection connection2;
 
             var activeConnection = ConnectionManager.Instance.ActiveConnections;
+
             lock (activeConnection)
             {
                 connection1 = activeConnection.FirstOrDefault(c => c.AiName == ai1);
                 connection2 = activeConnection.FirstOrDefault(c => c.AiName == ai2);
+
+                if (connection1 == null) throw new ArgumentException($"{ai1} is not active.");
+                if (connection2 == null) throw new ArgumentException($"{ai2} is not active");
+
+                if (connection1.IsInMatch)
+                    throw new InvalidOperationException($"{ai1} is already in a match");
+                if (connection2.IsInMatch)
+                    throw new InvalidOperationException($"{ai2} is already in a match");
+
+                connection1.IsInMatch = true;
+                connection2.IsInMatch = true;
             }
 
-            if (connection1 == null) throw new ArgumentException($"{ai1} is not active.");
-            if (connection2 == null) throw new ArgumentException($"{ai2} is not active");
-
-
-            MatchSimulator simulation;
+            var simulation = new MatchSimulator(connection1, connection2);
 
             lock (RunningSimulations)
             {
-
-                if (RunningSimulations.Any(rs => rs.Player1AiConnection == connection1 || rs.Player2AiConnection == connection1))
-                    throw new InvalidOperationException($"{ai1} is currently in a running simulation.");
-
-                if (RunningSimulations.Any(rs => rs.Player1AiConnection == connection2 || rs.Player2AiConnection == connection2))
-                    throw new InvalidOperationException($"{ai2} is currently in a running simulation.");
-
-                simulation = new MatchSimulator(connection1, connection2);
                 RunningSimulations.Add(simulation);
             }
 
@@ -73,11 +74,14 @@ namespace FootballAIGame.LocalSimulationBase
                 RunningSimulations.Remove(simulation);
             }
 
+            connection1.IsInMatch = false;
+            connection2.IsInMatch = false;
+
             var match = new Match()
             {
-               MatchInfo = simulation.MatchInfo,
-               Ai1Name = ai1,
-               Ai2Name = ai2
+                MatchInfo = simulation.MatchInfo,
+                Ai1Name = ai1,
+                Ai2Name = ai2
             };
 
             return match;
@@ -121,7 +125,7 @@ namespace FootballAIGame.LocalSimulationBase
             await Task.Yield();
 
             // player name is ignored! (AiName is used instead for differentiation)
-            message.PlayerName = message.AiName; 
+            message.PlayerName = message.AiName;
 
             bool isNameUnused;
 

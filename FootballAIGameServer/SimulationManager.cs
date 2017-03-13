@@ -111,6 +111,9 @@ namespace FootballAIGame.Server
                 if (userName1 == userName2)
                     Console.WriteLine("User cannot challenge himself.");
 
+                connection1.IsInMatch = true;
+                connection2.IsInMatch = true;
+
                 var matchSimulator = new MatchSimulator(connection1, connection2);
 
                 lock (RunningSimulations)
