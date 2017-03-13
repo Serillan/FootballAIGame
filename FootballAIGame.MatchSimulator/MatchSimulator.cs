@@ -297,58 +297,50 @@ namespace FootballAIGame.MatchSimulation
             GameState.KickOff = GameState.KickOff || GameState.Step == NumberOfSimulationSteps / 2 ||
                 GameState.Step == 0;
 
-            try
+            //await Task.Delay(20); // wait TODO delete
+            var receiveActionMessage1 = Player1AiConnection.ReceiveActionMessageAsync(step);
+            var receiveActionMessage2 = Player2AiConnection.ReceiveActionMessageAsync(step);
+
+            await Player1AiConnection.TrySendAsync("GET ACTION");
+            await Player1AiConnection.TrySendAsync(GameState, 1);
+
+            await Player2AiConnection.TrySendAsync("GET ACTION");
+            await Player2AiConnection.TrySendAsync(GameState, 2);
+            //Console.WriteLine($"{GameState.Step} sent!");
+
+            GameState.KickOff = false; // reset for next step!
+
+            var getMessage1Task = Task.WhenAny(receiveActionMessage1, Task.Delay(Ping1 + PlayerTimeForOneStep));
+            var getMessage2Task = Task.WhenAny(receiveActionMessage2, Task.Delay(Ping2 + PlayerTimeForOneStep));
+
+            var getMessage1Result = await getMessage1Task;
+            var getMessage2Result = await getMessage2Task;
+            //Console.WriteLine($"{GameState.Step} received actions.");
+
+            if (Message1.IsFaulted || !Player1AiConnection.IsActive || Message2.IsFaulted ||
+                !Player2AiConnection.IsActive)
             {
-                //await Task.Delay(20); // wait TODO delete
-                var receiveActionMessage1 = Player1AiConnection.ReceiveActionMessageAsync(step);
-                var receiveActionMessage2 = Player2AiConnection.ReceiveActionMessageAsync(step);
+                return;
+            }
 
-                await Player1AiConnection.TrySendAsync("GET ACTION");
-                await Player1AiConnection.TrySendAsync(GameState, 1);
+            if (getMessage1Result == receiveActionMessage1 && !receiveActionMessage1.IsFaulted)
+            {
+                actionMessage1 = Message1.Result as ActionMessage;
 
-                await Player2AiConnection.TrySendAsync("GET ACTION");
-                await Player2AiConnection.TrySendAsync(GameState, 2);
-                //Console.WriteLine($"{GameState.Step} sent!");
-
-                GameState.KickOff = false; // reset for next step!
-
-                var getMessage1Task = Task.WhenAny(receiveActionMessage1, Task.Delay(Ping1 + PlayerTimeForOneStep));
-                var getMessage2Task = Task.WhenAny(receiveActionMessage2, Task.Delay(Ping2 + PlayerTimeForOneStep));
-
-                var getMessage1Result = await getMessage1Task;
-                var getMessage2Result = await getMessage2Task;
-                //Console.WriteLine($"{GameState.Step} received actions.");
-
-                if (Message1.IsFaulted || !Player1AiConnection.IsActive || Message2.IsFaulted ||
-                    !Player2AiConnection.IsActive)
+                if (step < NumberOfSimulationSteps - 1)
                 {
-                    return;
-                }
-
-                if (getMessage1Result == receiveActionMessage1 && !receiveActionMessage1.IsFaulted)
-                {
-                    actionMessage1 = Message1.Result as ActionMessage;
-
-                    if (step < NumberOfSimulationSteps - 1)
-                    {
-                        Message1 = Player1AiConnection.ReceiveClientMessageAsync();
-                    }
-                }
-
-                if (getMessage2Result == receiveActionMessage2 && !receiveActionMessage2.IsFaulted)
-                {
-                    actionMessage2 = Message2.Result as ActionMessage;
-
-                    if (step < NumberOfSimulationSteps - 1)
-                    {
-                        Message2 = Player2AiConnection.ReceiveClientMessageAsync();
-                    }
+                    Message1 = Player1AiConnection.ReceiveClientMessageAsync();
                 }
             }
-            catch (IOException) // if player1 or player2 has disconnected
+
+            if (getMessage2Result == receiveActionMessage2 && !receiveActionMessage2.IsFaulted)
             {
-                Console.WriteLine("step exception");
-                return;
+                actionMessage2 = Message2.Result as ActionMessage;
+
+                if (step < NumberOfSimulationSteps - 1)
+                {
+                    Message2 = Player2AiConnection.ReceiveClientMessageAsync();
+                }
             }
 
             UpdateMatch(actionMessage1, actionMessage2);

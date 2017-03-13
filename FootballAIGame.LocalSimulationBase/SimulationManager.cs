@@ -87,7 +87,7 @@ namespace FootballAIGame.LocalSimulationBase
             return match;
         }
 
-        public async Task StartSimulating()
+        public async Task StartAcceptingConnections()
         {
             await ConnectionManager.Instance.StartListeningAsync();
         }
@@ -111,7 +111,10 @@ namespace FootballAIGame.LocalSimulationBase
         {
             await Task.Yield();
 
-            ConnectedAiNames.Remove(connection.AiName);
+            lock (ConnectedAiNames)
+            {
+                ConnectedAiNames.Remove(connection.AiName);
+            }
         }
 
         /// <summary>

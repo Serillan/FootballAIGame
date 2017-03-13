@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -58,7 +59,8 @@ namespace FootballAIGame.LocalDesktopSimulator
         {
             if (AiListBox.SelectedItems.Count != 2)
             {
-                MessageBox.Show(this, "Invalid number of AI selected. Select 2 AI.", "Error");
+                MessageBox.Show(this, "Invalid number of AI selected. Select 2 AI.", "Error", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
@@ -67,6 +69,8 @@ namespace FootballAIGame.LocalDesktopSimulator
 
             PlayButton.Enabled = false;
             RestartButton.Enabled = false;
+            SaveMatchToolStripMenuItem.Enabled = false;
+            LoadMatchToolStripMenuItem.Enabled = false;
 
             SimulationLabel.Visible = true;
             SimulationProgress.Visible = true;
@@ -84,7 +88,7 @@ namespace FootballAIGame.LocalDesktopSimulator
             }
             catch (Exception ex) when (ex is ArgumentException || ex is InvalidOperationException)
             {
-                MessageBox.Show(this, ex.Message, "Error");
+                MessageBox.Show(this, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
             StartMatchButton.Text = "Start match";
@@ -96,6 +100,9 @@ namespace FootballAIGame.LocalDesktopSimulator
                 PlayButton.Enabled = true;
                 RestartButton.Enabled = true;
             }
+
+            LoadMatchToolStripMenuItem.Enabled = true;
+            SaveMatchToolStripMenuItem.Enabled = true;
 
             SimulationLabel.Visible = false;
             SimulationProgress.Visible = false;
@@ -128,6 +135,10 @@ namespace FootballAIGame.LocalDesktopSimulator
             WatchSlider.Value = 0;
 
             LoadedMatch = match;
+
+            PlayButton.Enabled = true;
+            RestartButton.Enabled = true;
+            WatchSlider.Value = 0;
         }
 
         private static string GetErrorMessage(SimulationError error, string ai1, string ai2)
@@ -156,15 +167,69 @@ namespace FootballAIGame.LocalDesktopSimulator
 
         }
 
-        private void SaveMatch(MatchInfo match)
-        {
-
-        }
-
         private async void StopMatchButtonClick(object sender, EventArgs e)
         {
             await Task.Yield();
         }
 
+        private void SaveMatchToolStripMenuItemClick(object sender, EventArgs e)
+        {
+            if (LoadedMatch == null)
+            {
+                MessageBox.Show(this, "There is no loaded match.", "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            var dialog = new SaveFileDialog();
+
+            dialog.ShowDialog(this);
+
+            Stream fileStream;
+
+            try
+            {
+                fileStream = dialog.OpenFile();
+            }
+            catch (Exception)
+            {
+                return;
+            }
+
+            LoadedMatch.Save(fileStream);
+
+            fileStream.Close();
+        }
+
+        private void LoadMatchToolStripMenuItemClick(object sender, EventArgs e)
+        {
+            var dialog = new OpenFileDialog();
+
+            dialog.ShowDialog(this);
+
+            Stream fileStream = null;
+
+            try
+            {
+                fileStream = dialog.OpenFile();
+            }
+            catch (Exception)
+            {
+                return;
+            }
+
+            try
+            {
+                var match = Match.Load(fileStream);
+                LoadMatch(match);
+            }
+            catch (Exception)
+            {
+                MessageBox.Show(this, "Couldn't load the match.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
+
+            fileStream?.Close();
+        }
     }
 }

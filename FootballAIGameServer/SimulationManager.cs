@@ -169,7 +169,7 @@ namespace FootballAIGame.Server
             SetSimulationHandlers();
         }
 
-        private void ResetPlayers()
+        private static void ResetPlayers()
         {
             // reset player states on the start
             using (var context = new ApplicationDbContext())
@@ -255,6 +255,8 @@ namespace FootballAIGame.Server
 
         private async Task ProcessClientDisconnectionAsync(ClientConnection connection)
         {
+            Debug.Assert(connection != null, "connection != null");
+
             using (var context = new ApplicationDbContext())
             {
                 var player =
@@ -290,18 +292,20 @@ namespace FootballAIGame.Server
         /// <param name="message">The message.</param>
         /// <param name="connection">The connection.</param>
         /// <returns><c>true</c> if the client has log on successfully; otherwise <c>false</c></returns>
-        private async Task<bool> ProcessLoginMessageAsync(LoginMessage message, ClientConnection connection)
+        private static async Task<bool> ProcessLoginMessageAsync(LoginMessage message, ClientConnection connection)
         {
             using (var context = new ApplicationDbContext())
             {
                 var player = await context.Players
                     .Include(u => u.User)
                     .FirstOrDefaultAsync(p => p.Name == message.PlayerName);
+
                 if (player == null)
                 {
                     await connection.TrySendAsync("Invalid player name");
                     return false;
                 }
+
                 if (player.ActiveAis == null)
                     player.ActiveAis = message.AiName;
                 else
@@ -311,8 +315,10 @@ namespace FootballAIGame.Server
                         await connection.TrySendAsync("AI name is already being used.");
                         return false;
                     }
+
                     player.ActiveAis += ";" + message.AiName;
                 }
+
                 await context.SaveChangesAsync();
             }
 

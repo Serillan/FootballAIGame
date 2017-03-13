@@ -51,8 +51,8 @@ namespace FootballAIGame.LocalDesktopSimulator
             this.FinalScoreLabel = new System.Windows.Forms.Label();
             this.panel2 = new System.Windows.Forms.Panel();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
-            this.loadMatchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.saveMatchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.LoadMatchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.SaveMatchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panel3 = new System.Windows.Forms.Panel();
             this.label7 = new System.Windows.Forms.Label();
             this.PlayButton = new System.Windows.Forms.Button();
@@ -289,25 +289,27 @@ namespace FootballAIGame.LocalDesktopSimulator
             this.menuStrip1.BackColor = System.Drawing.SystemColors.Control;
             this.menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.loadMatchToolStripMenuItem,
-            this.saveMatchToolStripMenuItem});
+            this.LoadMatchToolStripMenuItem,
+            this.SaveMatchToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(1118, 28);
             this.menuStrip1.TabIndex = 4;
             this.menuStrip1.Text = "menuStrip1";
             // 
-            // loadMatchToolStripMenuItem
+            // LoadMatchToolStripMenuItem
             // 
-            this.loadMatchToolStripMenuItem.Name = "loadMatchToolStripMenuItem";
-            this.loadMatchToolStripMenuItem.Size = new System.Drawing.Size(99, 24);
-            this.loadMatchToolStripMenuItem.Text = "Load Match";
+            this.LoadMatchToolStripMenuItem.Name = "LoadMatchToolStripMenuItem";
+            this.LoadMatchToolStripMenuItem.Size = new System.Drawing.Size(99, 24);
+            this.LoadMatchToolStripMenuItem.Text = "Load Match";
+            this.LoadMatchToolStripMenuItem.Click += new System.EventHandler(this.LoadMatchToolStripMenuItemClick);
             // 
-            // saveMatchToolStripMenuItem
+            // SaveMatchToolStripMenuItem
             // 
-            this.saveMatchToolStripMenuItem.Name = "saveMatchToolStripMenuItem";
-            this.saveMatchToolStripMenuItem.Size = new System.Drawing.Size(97, 24);
-            this.saveMatchToolStripMenuItem.Text = "Save Match";
+            this.SaveMatchToolStripMenuItem.Name = "SaveMatchToolStripMenuItem";
+            this.SaveMatchToolStripMenuItem.Size = new System.Drawing.Size(97, 24);
+            this.SaveMatchToolStripMenuItem.Text = "Save Match";
+            this.SaveMatchToolStripMenuItem.Click += new System.EventHandler(this.SaveMatchToolStripMenuItemClick);
             // 
             // panel3
             // 
@@ -477,8 +479,8 @@ namespace FootballAIGame.LocalDesktopSimulator
         private System.Windows.Forms.Panel panel3;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.MenuStrip menuStrip1;
-        private System.Windows.Forms.ToolStripMenuItem loadMatchToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem saveMatchToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem LoadMatchToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem SaveMatchToolStripMenuItem;
         private System.Windows.Forms.Button PlayButton;
         private System.Windows.Forms.Button RestartButton;
         private System.Windows.Forms.ComboBox SpeedDropDownList;

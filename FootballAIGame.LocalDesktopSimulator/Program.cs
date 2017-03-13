@@ -14,7 +14,7 @@ namespace FootballAIGame.LocalDesktopSimulator
         [STAThread]
         static void Main()
         {
-            Task.Run(() => SimulationManager.Instance.StartSimulating());
+            Task.Run(() => SimulationManager.Instance.StartAcceptingConnections());
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
