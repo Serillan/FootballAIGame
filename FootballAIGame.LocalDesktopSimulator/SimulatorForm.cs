@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using FootballAIGame.LocalSimulationBase;
+using FootballAIGame.LocalSimulationBase.Models;
 using FootballAIGame.MatchSimulation;
 using FootballAIGame.MatchSimulation.Models;
 
@@ -10,7 +11,7 @@ namespace FootballAIGame.LocalDesktopSimulator
 {
     public partial class SimulatorForm : Form
     {
-        public MatchInfo LoadedMatch { get; set; }
+        public Match LoadedMatch { get; set; }
 
         public SimulatorForm()
         {
@@ -88,8 +89,8 @@ namespace FootballAIGame.LocalDesktopSimulator
             }
 
             StartMatchButton.Text = "Start match";
-            StartMatchButton.Click += StopMatchButtonClick;
-            StartMatchButton.Click -= StartMatchButtonClick;
+            StartMatchButton.Click += StartMatchButtonClick;
+            StartMatchButton.Click -= StopMatchButtonClick;
 
             if (LoadedMatch != null)
             {
@@ -101,18 +102,66 @@ namespace FootballAIGame.LocalDesktopSimulator
             SimulationProgress.Visible = false;
         }
 
-        private void LoadMatch(MatchInfo match)
+        private void LoadMatch(Match match)
         {
-            
+            var matchInfo = match.MatchInfo;
 
+            FinalShotsLabel.Text = $"{matchInfo.Team1Statistics.Shots} / {matchInfo.Team2Statistics.Shots}";
+            FinalScoreLabel.Text = $"{matchInfo.Team1Statistics.Goals} - {matchInfo.Team2Statistics.Goals}";
+            FinalShotsOnTargetLabel.Text =
+                $"{matchInfo.Team1Statistics.ShotsOnTarget} / {matchInfo.Team2Statistics.ShotsOnTarget}";
 
+            var goalsEnumerable = from goal in matchInfo.Goals
+                                  let aiName = goal.TeamThatScored == Team.FirstPlayer ? match.Ai1Name : match.Ai2Name
+                                  select $"{goal.ScoreTime} : {aiName} - Player{goal.ScorerNumber}";
 
+            GoalsListBox.Items.Clear();
+            GoalsListBox.Items.AddRange(goalsEnumerable.Cast<object>().ToArray());
+
+            ErrorsListBox.Items.Clear();
+            ErrorsListBox.Items.AddRange(matchInfo.Errors
+                .Select(e => GetErrorMessage(e, match.Ai1Name, match.Ai2Name))
+                .Cast<object>()
+                .ToArray());
+
+            CurrentScoreLabel.Text = "0:0";
+            CurrentTimeLabel.Text = "0:0";
+            WatchSlider.Value = 0;
+
+            Invalidate();
+
+            LoadedMatch = match;
+        }
+
+        private static string GetErrorMessage(SimulationError error, string ai1, string ai2)
+        {
+            var ai = error.Team == Team.FirstPlayer ? ai1 : ai2;
+
+            switch (error.Type)
+            {
+                case SimulationError.ErrorType.TooHighSpeed:
+                    return $"{error.Time} : {ai} - Player{error.AffectedPlayerNumber} has too high speed.";
+                case SimulationError.ErrorType.TooHighAcceleration:
+                    return $"{error.Time} : {ai} - Player{error.AffectedPlayerNumber} has too high acceleration.";
+                case SimulationError.ErrorType.TooStrongKick:
+                    return $"{error.Time} : {ai} - Player{error.AffectedPlayerNumber} has made too strong kick.";
+                case SimulationError.ErrorType.InvalidMovementVector:
+                    return $"{error.Time} : {ai} - Player{error.AffectedPlayerNumber} has invalid movement vector set.";
+                case SimulationError.ErrorType.InvalidKickVector:
+                    return $"{error.Time} : {ai} - Player{error.AffectedPlayerNumber} has invalid kick vector set.";
+                case SimulationError.ErrorType.Disconnection:
+                    return $"{error.Time} : {ai} - Player has disconnected.";
+                case SimulationError.ErrorType.Cancel:
+                    return $"{error.Time} : {ai} - Player has left the match.";
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
 
         }
 
         private void SaveMatch(MatchInfo match)
         {
-            
+
         }
 
         private async void StopMatchButtonClick(object sender, EventArgs e)

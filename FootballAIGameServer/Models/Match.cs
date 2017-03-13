@@ -62,7 +62,7 @@ namespace FootballAIGame.Server.Models
 
         /// <summary>
         /// Gets or sets the goals that were scored in the match. <para/>
-        /// Format: "goalTime;userName;playerK|...", where K is number of player from userName team who scored
+        /// Format: "GoalTime;UserName;PlayerK|...", where K is number of player from userName team who scored
         /// and '|' is the separator between goals.
         /// </summary>
         /// <value>
@@ -163,7 +163,7 @@ namespace FootballAIGame.Server.Models
 
             var goalsEnumerable = from goal in matchInfo.Goals
                                   let userName = goal.TeamThatScored == Team.FirstPlayer ? player1Name : player2Name
-                                  select $"{goal.ScoreTime};{userName};player{goal.ScorerNumber}";
+                                  select $"{goal.ScoreTime};{userName};Player{goal.ScorerNumber}";
             Goals = string.Join("|", goalsEnumerable);
 
             SetErrorsLogs(matchInfo.Errors);

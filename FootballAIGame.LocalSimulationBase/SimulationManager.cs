@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FootballAIGame.LocalSimulationBase.Models;
 using FootballAIGame.MatchSimulation;
 using FootballAIGame.MatchSimulation.Messages;
 using FootballAIGame.MatchSimulation.Models;
@@ -31,7 +32,7 @@ namespace FootballAIGame.LocalSimulationBase
             Initialize();
         }
 
-        public async Task<MatchInfo> Simulate(string ai1, string ai2)
+        public async Task<Match> Simulate(string ai1, string ai2)
         {
             if (ai1 == ai2)
                 throw new InvalidOperationException("AIs must be different.");
@@ -72,7 +73,14 @@ namespace FootballAIGame.LocalSimulationBase
                 RunningSimulations.Remove(simulation);
             }
 
-            return simulation.MatchInfo;
+            var match = new Match()
+            {
+               MatchInfo = simulation.MatchInfo,
+               Ai1Name = ai1,
+               Ai2Name = ai2
+            };
+
+            return match;
         }
 
         public async Task StartSimulating()
