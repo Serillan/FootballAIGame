@@ -32,16 +32,6 @@ namespace FootballAIGame.LocalDesktopSimulator
             ConnectionManager.Instance.PlayerConnectedHandler += PlayerConnectedHandler;
             ConnectionManager.Instance.PlayerDisconectedHandler += PlayerDisconectedHandler;
 
-            /*
-            var w = Screen.FromControl(this).Bounds;
-
-            var widthRatio = Screen.FromControl(this).Bounds.Width/1600f;
-            var heightRatio = Screen.FromControl(this).Bounds.Height/900f;
-
-            this.Scale(new SizeF(widthRatio, heightRatio));
-            this.Refresh();
-            */
-
         }
 
         private async Task PlayerConnectedHandler(ClientConnection connection)
@@ -270,5 +260,14 @@ namespace FootballAIGame.LocalDesktopSimulator
             PlaySlider.Value = 0;
         }
 
+        private void label12_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void tableLayoutPanel1_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
     }
 }
