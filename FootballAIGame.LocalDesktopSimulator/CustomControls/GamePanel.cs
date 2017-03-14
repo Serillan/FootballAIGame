@@ -8,11 +8,12 @@ using System.Windows.Forms;
 
 namespace FootballAIGame.LocalDesktopSimulator.CustomControls
 {
-    sealed class DoubleBufferedPanel : Panel
+    sealed class GamePanel : Panel
     {
-        public DoubleBufferedPanel()
+        public GamePanel()
         {
             DoubleBuffered = true;
+            ResizeRedraw = true;
         }
 
 

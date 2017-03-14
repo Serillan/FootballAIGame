@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using FootballAIGame.LocalSimulationBase;
@@ -13,10 +14,11 @@ namespace FootballAIGame.LocalDesktopSimulator
 {
     public partial class SimulatorForm : Form
     {
+        private const int ProgressBarUpdateInterval = 100;
+
         private Match LoadedMatch { get; set; }
 
         private MatchPlayer MatchPlayer { get; set; }
-
 
         public SimulatorForm()
         {
@@ -48,7 +50,7 @@ namespace FootballAIGame.LocalDesktopSimulator
 
         private void UpdateAiList()
         {
-            AiListBox.BeginInvoke((MethodInvoker)(() =>
+            AiListBox.BeginInvoke((MethodInvoker) (() =>
             {
                 lock (ConnectionManager.Instance.ActiveConnections)
                 {
@@ -64,7 +66,7 @@ namespace FootballAIGame.LocalDesktopSimulator
         {
             if (AiListBox.SelectedItems.Count != 2)
             {
-                MessageBox.Show(this, "Invalid number of AI selected. Select 2 AI.", "Error", 
+                MessageBox.Show(this, "Invalid number of AI selected. Select 2 AI.", "Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
@@ -87,7 +89,15 @@ namespace FootballAIGame.LocalDesktopSimulator
 
             try
             {
-                var match = await SimulationManager.Instance.Simulate(ai1, ai2);
+                var simulationTask = SimulationManager.Instance.Simulate(ai1, ai2);
+
+                var progressBarUpdateCancelleration = new CancellationTokenSource();
+                var progressBarUpdatingTask = StartUpdatingProgressBarAsync(ai1, ai2, progressBarUpdateCancelleration.Token);
+
+                var match = await simulationTask;
+
+                progressBarUpdateCancelleration.Cancel();
+                await progressBarUpdatingTask;
 
                 // todo prepare match for watching
                 LoadMatch(match);
@@ -114,6 +124,21 @@ namespace FootballAIGame.LocalDesktopSimulator
             SimulationProgress.Visible = false;
         }
 
+        private async Task StartUpdatingProgressBarAsync(string ai1, string ai2, CancellationToken cancellationToken)
+        {
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                var step = 0;
+
+                if (SimulationManager.Instance.TryGetSimulationStep(ai1, ai2, out step))
+                {
+                    SimulationProgress.Value = step;
+                }
+
+                await Task.Delay(ProgressBarUpdateInterval);
+            }
+        }
+
         private void LoadMatch(Match match)
         {
             var matchInfo = match.MatchInfo;
@@ -124,8 +149,8 @@ namespace FootballAIGame.LocalDesktopSimulator
                 $"{matchInfo.Team1Statistics.ShotsOnTarget} / {matchInfo.Team2Statistics.ShotsOnTarget}";
 
             var goalsEnumerable = from goal in matchInfo.Goals
-                                  let aiName = goal.TeamThatScored == Team.FirstPlayer ? match.Ai1Name : match.Ai2Name
-                                  select $"{goal.ScoreTime} : {aiName} - Player{goal.ScorerNumber}";
+                let aiName = goal.TeamThatScored == Team.FirstPlayer ? match.Ai1Name : match.Ai2Name
+                select $"{goal.ScoreTime} : {aiName} - Player{goal.ScorerNumber}";
 
             GoalsListBox.Items.Clear();
             GoalsListBox.Items.AddRange(goalsEnumerable.Cast<object>().ToArray());
@@ -260,14 +285,5 @@ namespace FootballAIGame.LocalDesktopSimulator
             PlaySlider.Value = 0;
         }
 
-        private void label12_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void tableLayoutPanel1_Paint(object sender, PaintEventArgs e)
-        {
-
-        }
     }
 }

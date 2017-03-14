@@ -46,7 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CustomControls\DoubleBufferedPanel.cs">
+    <Compile Include="CustomControls\GamePanel.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="CustomControls\Slider.cs">

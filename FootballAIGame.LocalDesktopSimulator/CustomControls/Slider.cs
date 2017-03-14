@@ -52,6 +52,8 @@ namespace FootballAIGame.LocalDesktopSimulator.CustomControls
             // designer
             InitializeComponent();
 
+            ResizeRedraw = true;
+
             MouseDown += OnMouseDown;
             MouseUp += OnMouseUp;
             MouseMove += OnMouseMove;

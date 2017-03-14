@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,7 +17,7 @@ namespace FootballAIGame.LocalSimulationBase
     {
         private ISet<string> ConnectedAiNames { get; set; }
 
-        public List<MatchSimulator> RunningSimulations { get; set; } = new List<MatchSimulator>();
+        private List<MatchSimulator> RunningSimulations { get; set; } = new List<MatchSimulator>();
 
         /// <summary>
         /// Gets the singleton instance.
@@ -90,6 +91,22 @@ namespace FootballAIGame.LocalSimulationBase
         public async Task StartAcceptingConnections()
         {
             await ConnectionManager.Instance.StartListeningAsync();
+        }
+
+        public bool TryGetSimulationStep(string ai1, string ai2, out int step)
+        {
+            var simulation = RunningSimulations.FirstOrDefault(s =>
+                (s.Player1AiConnection.PlayerName == ai1 && s.Player2AiConnection.PlayerName == ai2) ||
+                (s.Player1AiConnection.PlayerName == ai2 && s.Player2AiConnection.PlayerName == ai1));
+
+            if (simulation == null)
+            {
+                step = 0;
+                return false;
+            }
+
+            step = simulation.CurrentStep;
+            return true;
         }
 
         private void Initialize()

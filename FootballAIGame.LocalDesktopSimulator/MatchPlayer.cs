@@ -16,7 +16,6 @@ namespace FootballAIGame.LocalDesktopSimulator
 {
     class MatchPlayer
     {
-
         private Match Match { get; set; }
 
         private Panel GamePanel { get; set; }
