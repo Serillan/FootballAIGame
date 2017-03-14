@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -45,6 +46,8 @@ namespace FootballAIGame.LocalDesktopSimulator
         private void GamePanelOnPaint(object sender, PaintEventArgs paintEventArgs)
         {
             var graphics = paintEventArgs.Graphics;
+            graphics.SmoothingMode = SmoothingMode.AntiAlias;
+
             graphics.ScaleTransform(GamePanel.Width / 120f, GamePanel.Height / 85f);
             graphics.TranslateTransform(5, 5);
             // todo line width

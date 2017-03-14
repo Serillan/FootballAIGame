@@ -33,9 +33,6 @@ namespace FootballAIGame.LocalDesktopSimulator
         {
             this.StartMatchButton = new System.Windows.Forms.Button();
             this.AiListBox = new System.Windows.Forms.ListBox();
-            this.SimulationPanel = new System.Windows.Forms.Panel();
-            this.SimulationLabel = new System.Windows.Forms.Label();
-            this.SimulationProgress = new System.Windows.Forms.ProgressBar();
             this.HeadingLabel = new System.Windows.Forms.Label();
             this.ErrorsListBox = new System.Windows.Forms.ListBox();
             this.GoalsListBox = new System.Windows.Forms.ListBox();
@@ -63,19 +60,22 @@ namespace FootballAIGame.LocalDesktopSimulator
             this.CurrentScoreHeadingLabel = new System.Windows.Forms.Label();
             this.CurrentScoreLabel = new System.Windows.Forms.Label();
             this.PlaySlider = new FootballAIGame.LocalDesktopSimulator.CustomControls.Slider();
-            this.SimulationPanel.SuspendLayout();
+            this.SimulationPanel = new FootballAIGame.LocalDesktopSimulator.CustomControls.DoubleBufferedPanel();
+            this.SimulationLabel = new System.Windows.Forms.Label();
+            this.SimulationProgress = new System.Windows.Forms.ProgressBar();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.panel3.SuspendLayout();
+            this.SimulationPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // StartMatchButton
             // 
             this.StartMatchButton.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.StartMatchButton.Location = new System.Drawing.Point(38, 12);
+            this.StartMatchButton.Location = new System.Drawing.Point(19, 20);
             this.StartMatchButton.Name = "StartMatchButton";
-            this.StartMatchButton.Size = new System.Drawing.Size(138, 60);
+            this.StartMatchButton.Size = new System.Drawing.Size(122, 60);
             this.StartMatchButton.TabIndex = 0;
             this.StartMatchButton.Text = "Start match";
             this.StartMatchButton.UseVisualStyleBackColor = true;
@@ -89,41 +89,11 @@ namespace FootballAIGame.LocalDesktopSimulator
             this.AiListBox.HorizontalScrollbar = true;
             this.AiListBox.IntegralHeight = false;
             this.AiListBox.ItemHeight = 16;
-            this.AiListBox.Location = new System.Drawing.Point(38, 106);
+            this.AiListBox.Location = new System.Drawing.Point(19, 114);
             this.AiListBox.Name = "AiListBox";
             this.AiListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiSimple;
-            this.AiListBox.Size = new System.Drawing.Size(138, 413);
+            this.AiListBox.Size = new System.Drawing.Size(122, 413);
             this.AiListBox.TabIndex = 1;
-            // 
-            // SimulationPanel
-            // 
-            this.SimulationPanel.BackColor = System.Drawing.SystemColors.ActiveCaption;
-            this.SimulationPanel.Controls.Add(this.SimulationLabel);
-            this.SimulationPanel.Controls.Add(this.SimulationProgress);
-            this.SimulationPanel.Location = new System.Drawing.Point(279, 126);
-            this.SimulationPanel.Margin = new System.Windows.Forms.Padding(0);
-            this.SimulationPanel.Name = "SimulationPanel";
-            this.SimulationPanel.Size = new System.Drawing.Size(784, 555);
-            this.SimulationPanel.TabIndex = 2;
-            // 
-            // SimulationLabel
-            // 
-            this.SimulationLabel.AutoSize = true;
-            this.SimulationLabel.Font = new System.Drawing.Font("Tahoma", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.SimulationLabel.Location = new System.Drawing.Point(322, 198);
-            this.SimulationLabel.Name = "SimulationLabel";
-            this.SimulationLabel.Size = new System.Drawing.Size(141, 29);
-            this.SimulationLabel.TabIndex = 1;
-            this.SimulationLabel.Text = "Simulating";
-            this.SimulationLabel.Visible = false;
-            // 
-            // SimulationProgress
-            // 
-            this.SimulationProgress.Location = new System.Drawing.Point(0, 240);
-            this.SimulationProgress.Name = "SimulationProgress";
-            this.SimulationProgress.Size = new System.Drawing.Size(785, 36);
-            this.SimulationProgress.TabIndex = 0;
-            this.SimulationProgress.Visible = false;
             // 
             // HeadingLabel
             // 
@@ -143,9 +113,9 @@ namespace FootballAIGame.LocalDesktopSimulator
             this.ErrorsListBox.FormattingEnabled = true;
             this.ErrorsListBox.HorizontalScrollbar = true;
             this.ErrorsListBox.ItemHeight = 16;
-            this.ErrorsListBox.Location = new System.Drawing.Point(16, 371);
+            this.ErrorsListBox.Location = new System.Drawing.Point(18, 359);
             this.ErrorsListBox.Name = "ErrorsListBox";
-            this.ErrorsListBox.Size = new System.Drawing.Size(238, 196);
+            this.ErrorsListBox.Size = new System.Drawing.Size(215, 196);
             this.ErrorsListBox.TabIndex = 4;
             // 
             // GoalsListBox
@@ -157,29 +127,30 @@ namespace FootballAIGame.LocalDesktopSimulator
             this.GoalsListBox.FormattingEnabled = true;
             this.GoalsListBox.HorizontalScrollbar = true;
             this.GoalsListBox.ItemHeight = 16;
-            this.GoalsListBox.Location = new System.Drawing.Point(16, 172);
+            this.GoalsListBox.Location = new System.Drawing.Point(14, 188);
             this.GoalsListBox.Name = "GoalsListBox";
             this.GoalsListBox.SelectionMode = System.Windows.Forms.SelectionMode.None;
-            this.GoalsListBox.Size = new System.Drawing.Size(238, 164);
+            this.GoalsListBox.Size = new System.Drawing.Size(219, 148);
             this.GoalsListBox.TabIndex = 5;
             // 
             // label1
             // 
-            this.label1.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.label1.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Tahoma", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.label1.Location = new System.Drawing.Point(112, 152);
+            this.label1.Location = new System.Drawing.Point(102, 168);
             this.label1.Name = "label1";
+            this.label1.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.label1.Size = new System.Drawing.Size(45, 17);
             this.label1.TabIndex = 6;
             this.label1.Text = "Goals";
             // 
             // label2
             // 
-            this.label2.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.label2.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Tahoma", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.label2.Location = new System.Drawing.Point(105, 351);
+            this.label2.Location = new System.Drawing.Point(99, 339);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(51, 17);
             this.label2.TabIndex = 7;
@@ -187,10 +158,12 @@ namespace FootballAIGame.LocalDesktopSimulator
             // 
             // label4
             // 
-            this.label4.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.label4.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.label4.AutoSize = true;
             this.label4.Font = new System.Drawing.Font("Tahoma", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.label4.Location = new System.Drawing.Point(109, 70);
+            this.label4.Location = new System.Drawing.Point(100, 90);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(48, 17);
             this.label4.TabIndex = 9;
@@ -198,10 +171,12 @@ namespace FootballAIGame.LocalDesktopSimulator
             // 
             // label5
             // 
-            this.label5.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.label5.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.label5.AutoSize = true;
             this.label5.Font = new System.Drawing.Font("Tahoma", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.label5.Location = new System.Drawing.Point(77, 104);
+            this.label5.Location = new System.Drawing.Point(65, 124);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(117, 17);
             this.label5.TabIndex = 10;
@@ -209,9 +184,11 @@ namespace FootballAIGame.LocalDesktopSimulator
             // 
             // FinalShotsOnTargetLabel
             // 
-            this.FinalShotsOnTargetLabel.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.FinalShotsOnTargetLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.FinalShotsOnTargetLabel.AutoSize = true;
-            this.FinalShotsOnTargetLabel.Location = new System.Drawing.Point(116, 121);
+            this.FinalShotsOnTargetLabel.Location = new System.Drawing.Point(106, 141);
             this.FinalShotsOnTargetLabel.Name = "FinalShotsOnTargetLabel";
             this.FinalShotsOnTargetLabel.Size = new System.Drawing.Size(36, 17);
             this.FinalShotsOnTargetLabel.TabIndex = 11;
@@ -219,9 +196,11 @@ namespace FootballAIGame.LocalDesktopSimulator
             // 
             // FinalShotsLabel
             // 
-            this.FinalShotsLabel.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.FinalShotsLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.FinalShotsLabel.AutoSize = true;
-            this.FinalShotsLabel.Location = new System.Drawing.Point(116, 87);
+            this.FinalShotsLabel.Location = new System.Drawing.Point(106, 107);
             this.FinalShotsLabel.Name = "FinalShotsLabel";
             this.FinalShotsLabel.Size = new System.Drawing.Size(36, 17);
             this.FinalShotsLabel.TabIndex = 12;
@@ -229,27 +208,34 @@ namespace FootballAIGame.LocalDesktopSimulator
             // 
             // panel1
             // 
-            this.panel1.Controls.Add(this.label12);
-            this.panel1.Controls.Add(this.label10);
-            this.panel1.Controls.Add(this.FinalScoreLabel);
-            this.panel1.Controls.Add(this.ErrorsListBox);
-            this.panel1.Controls.Add(this.label4);
-            this.panel1.Controls.Add(this.label2);
+            this.panel1.AutoSize = true;
+            this.panel1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.panel1.Controls.Add(this.FinalShotsOnTargetLabel);
-            this.panel1.Controls.Add(this.GoalsListBox);
-            this.panel1.Controls.Add(this.label1);
-            this.panel1.Controls.Add(this.FinalShotsLabel);
+            this.panel1.Controls.Add(this.label4);
             this.panel1.Controls.Add(this.label5);
-            this.panel1.Location = new System.Drawing.Point(2, 97);
+            this.panel1.Controls.Add(this.FinalShotsLabel);
+            this.panel1.Controls.Add(this.label10);
+            this.panel1.Controls.Add(this.ErrorsListBox);
+            this.panel1.Controls.Add(this.label2);
+            this.panel1.Controls.Add(this.GoalsListBox);
+            this.panel1.Controls.Add(this.FinalScoreLabel);
+            this.panel1.Controls.Add(this.label1);
+            this.panel1.Controls.Add(this.label12);
+            this.panel1.Location = new System.Drawing.Point(0, 126);
+            this.panel1.MaximumSize = new System.Drawing.Size(248, 2000);
+            this.panel1.MinimumSize = new System.Drawing.Size(140, 0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(271, 584);
+            this.panel1.Size = new System.Drawing.Size(248, 567);
             this.panel1.TabIndex = 13;
             // 
             // label12
             // 
+            this.label12.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.label12.AutoSize = true;
             this.label12.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.label12.Location = new System.Drawing.Point(93, 0);
+            this.label12.Location = new System.Drawing.Point(81, 12);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(87, 20);
             this.label12.TabIndex = 22;
@@ -257,10 +243,12 @@ namespace FootballAIGame.LocalDesktopSimulator
             // 
             // label10
             // 
-            this.label10.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.label10.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.label10.AutoSize = true;
             this.label10.Font = new System.Drawing.Font("Tahoma", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.label10.Location = new System.Drawing.Point(112, 35);
+            this.label10.Location = new System.Drawing.Point(101, 42);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(47, 17);
             this.label10.TabIndex = 13;
@@ -268,9 +256,11 @@ namespace FootballAIGame.LocalDesktopSimulator
             // 
             // FinalScoreLabel
             // 
-            this.FinalScoreLabel.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.FinalScoreLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.FinalScoreLabel.AutoSize = true;
-            this.FinalScoreLabel.Location = new System.Drawing.Point(117, 52);
+            this.FinalScoreLabel.Location = new System.Drawing.Point(106, 59);
             this.FinalScoreLabel.Name = "FinalScoreLabel";
             this.FinalScoreLabel.Size = new System.Drawing.Size(37, 17);
             this.FinalScoreLabel.TabIndex = 13;
@@ -280,21 +270,25 @@ namespace FootballAIGame.LocalDesktopSimulator
             // 
             this.panel2.Controls.Add(this.HeadingLabel);
             this.panel2.Controls.Add(this.menuStrip1);
-            this.panel2.Location = new System.Drawing.Point(0, 2);
+            this.panel2.Location = new System.Drawing.Point(0, 0);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(1118, 34);
+            this.panel2.Size = new System.Drawing.Size(1203, 34);
             this.panel2.TabIndex = 14;
             // 
             // menuStrip1
             // 
+            this.menuStrip1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.menuStrip1.BackColor = System.Drawing.SystemColors.Control;
+            this.menuStrip1.Dock = System.Windows.Forms.DockStyle.None;
             this.menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.LoadMatchToolStripMenuItem,
             this.SaveMatchToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(1118, 28);
+            this.menuStrip1.Size = new System.Drawing.Size(123, 28);
             this.menuStrip1.TabIndex = 4;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -314,15 +308,15 @@ namespace FootballAIGame.LocalDesktopSimulator
             // 
             // panel3
             // 
-            this.panel3.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.panel3.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panel3.Controls.Add(this.label7);
             this.panel3.Controls.Add(this.StartMatchButton);
             this.panel3.Controls.Add(this.AiListBox);
-            this.panel3.Location = new System.Drawing.Point(1069, 126);
+            this.panel3.Location = new System.Drawing.Point(1042, 126);
+            this.panel3.MaximumSize = new System.Drawing.Size(215, 2000);
             this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(215, 538);
+            this.panel3.Size = new System.Drawing.Size(161, 555);
             this.panel3.TabIndex = 3;
             // 
             // label7
@@ -330,7 +324,7 @@ namespace FootballAIGame.LocalDesktopSimulator
             this.label7.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.label7.AutoSize = true;
             this.label7.Font = new System.Drawing.Font("Tahoma", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.label7.Location = new System.Drawing.Point(54, 83);
+            this.label7.Location = new System.Drawing.Point(35, 91);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(104, 17);
             this.label7.TabIndex = 2;
@@ -338,6 +332,9 @@ namespace FootballAIGame.LocalDesktopSimulator
             // 
             // PlayButton
             // 
+            this.PlayButton.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.PlayButton.Enabled = false;
             this.PlayButton.Location = new System.Drawing.Point(436, 53);
             this.PlayButton.Name = "PlayButton";
@@ -349,10 +346,13 @@ namespace FootballAIGame.LocalDesktopSimulator
             // 
             // RestartButton
             // 
+            this.RestartButton.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.RestartButton.Enabled = false;
             this.RestartButton.Location = new System.Drawing.Point(593, 53);
             this.RestartButton.Name = "RestartButton";
-            this.RestartButton.Size = new System.Drawing.Size(151, 33);
+            this.RestartButton.Size = new System.Drawing.Size(129, 33);
             this.RestartButton.TabIndex = 16;
             this.RestartButton.Text = "Restart";
             this.RestartButton.UseVisualStyleBackColor = true;
@@ -360,6 +360,9 @@ namespace FootballAIGame.LocalDesktopSimulator
             // 
             // SpeedDropDownList
             // 
+            this.SpeedDropDownList.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.SpeedDropDownList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.SpeedDropDownList.FormattingEnabled = true;
             this.SpeedDropDownList.Items.AddRange(new object[] {
@@ -367,15 +370,17 @@ namespace FootballAIGame.LocalDesktopSimulator
             "2x",
             "3x",
             "4x"});
-            this.SpeedDropDownList.Location = new System.Drawing.Point(761, 59);
+            this.SpeedDropDownList.Location = new System.Drawing.Point(728, 59);
             this.SpeedDropDownList.Name = "SpeedDropDownList";
-            this.SpeedDropDownList.Size = new System.Drawing.Size(87, 24);
+            this.SpeedDropDownList.Size = new System.Drawing.Size(89, 24);
             this.SpeedDropDownList.TabIndex = 17;
             this.SpeedDropDownList.SelectedIndexChanged += new System.EventHandler(this.SpeedDropDownListSelectedIndexChanged);
             // 
             // CurrentTimeLabel
             // 
-            this.CurrentTimeLabel.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.CurrentTimeLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.CurrentTimeLabel.AutoSize = true;
             this.CurrentTimeLabel.Font = new System.Drawing.Font("Tahoma", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.CurrentTimeLabel.Location = new System.Drawing.Point(367, 62);
@@ -386,7 +391,9 @@ namespace FootballAIGame.LocalDesktopSimulator
             // 
             // CurrentTimeHeadingLabel
             // 
-            this.CurrentTimeHeadingLabel.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.CurrentTimeHeadingLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.CurrentTimeHeadingLabel.AutoSize = true;
             this.CurrentTimeHeadingLabel.Font = new System.Drawing.Font("Tahoma", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.CurrentTimeHeadingLabel.Location = new System.Drawing.Point(304, 62);
@@ -397,10 +404,12 @@ namespace FootballAIGame.LocalDesktopSimulator
             // 
             // CurrentScoreHeadingLabel
             // 
-            this.CurrentScoreHeadingLabel.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.CurrentScoreHeadingLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.CurrentScoreHeadingLabel.AutoSize = true;
             this.CurrentScoreHeadingLabel.Font = new System.Drawing.Font("Tahoma", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.CurrentScoreHeadingLabel.Location = new System.Drawing.Point(884, 62);
+            this.CurrentScoreHeadingLabel.Location = new System.Drawing.Point(839, 62);
             this.CurrentScoreHeadingLabel.Name = "CurrentScoreHeadingLabel";
             this.CurrentScoreHeadingLabel.Size = new System.Drawing.Size(133, 21);
             this.CurrentScoreHeadingLabel.TabIndex = 22;
@@ -408,10 +417,12 @@ namespace FootballAIGame.LocalDesktopSimulator
             // 
             // CurrentScoreLabel
             // 
-            this.CurrentScoreLabel.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.CurrentScoreLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.CurrentScoreLabel.AutoSize = true;
             this.CurrentScoreLabel.Font = new System.Drawing.Font("Tahoma", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.CurrentScoreLabel.Location = new System.Drawing.Point(1023, 62);
+            this.CurrentScoreLabel.Location = new System.Drawing.Point(978, 62);
             this.CurrentScoreLabel.Name = "CurrentScoreLabel";
             this.CurrentScoreLabel.Size = new System.Drawing.Size(34, 21);
             this.CurrentScoreLabel.TabIndex = 23;
@@ -419,19 +430,60 @@ namespace FootballAIGame.LocalDesktopSimulator
             // 
             // PlaySlider
             // 
+            this.PlaySlider.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.PlaySlider.BackColor = System.Drawing.SystemColors.ControlDarkDark;
             this.PlaySlider.ForeColor = System.Drawing.SystemColors.ActiveCaption;
-            this.PlaySlider.Location = new System.Drawing.Point(279, 97);
+            this.PlaySlider.Location = new System.Drawing.Point(251, 97);
             this.PlaySlider.Max = 1500;
             this.PlaySlider.Name = "PlaySlider";
             this.PlaySlider.Size = new System.Drawing.Size(784, 23);
             this.PlaySlider.TabIndex = 20;
             // 
+            // SimulationPanel
+            // 
+            this.SimulationPanel.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.SimulationPanel.BackColor = System.Drawing.SystemColors.ActiveCaption;
+            this.SimulationPanel.Controls.Add(this.SimulationLabel);
+            this.SimulationPanel.Controls.Add(this.SimulationProgress);
+            this.SimulationPanel.Location = new System.Drawing.Point(251, 126);
+            this.SimulationPanel.Margin = new System.Windows.Forms.Padding(0);
+            this.SimulationPanel.Name = "SimulationPanel";
+            this.SimulationPanel.Size = new System.Drawing.Size(784, 555);
+            this.SimulationPanel.TabIndex = 2;
+            // 
+            // SimulationLabel
+            // 
+            this.SimulationLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.SimulationLabel.AutoSize = true;
+            this.SimulationLabel.Font = new System.Drawing.Font("Tahoma", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.SimulationLabel.Location = new System.Drawing.Point(322, 198);
+            this.SimulationLabel.Name = "SimulationLabel";
+            this.SimulationLabel.Size = new System.Drawing.Size(141, 29);
+            this.SimulationLabel.TabIndex = 1;
+            this.SimulationLabel.Text = "Simulating";
+            this.SimulationLabel.Visible = false;
+            // 
+            // SimulationProgress
+            // 
+            this.SimulationProgress.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.SimulationProgress.Location = new System.Drawing.Point(0, 240);
+            this.SimulationProgress.Name = "SimulationProgress";
+            this.SimulationProgress.Size = new System.Drawing.Size(785, 36);
+            this.SimulationProgress.TabIndex = 0;
+            this.SimulationProgress.Visible = false;
+            // 
             // SimulatorForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1284, 693);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(120F, 120F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
+            this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.ClientSize = new System.Drawing.Size(1203, 693);
             this.Controls.Add(this.CurrentScoreLabel);
             this.Controls.Add(this.CurrentScoreHeadingLabel);
             this.Controls.Add(this.CurrentTimeHeadingLabel);
@@ -447,10 +499,9 @@ namespace FootballAIGame.LocalDesktopSimulator
             this.DoubleBuffered = true;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MainMenuStrip = this.menuStrip1;
+            this.MaximizeBox = false;
             this.Name = "SimulatorForm";
             this.Text = "Football AI Game";
-            this.SimulationPanel.ResumeLayout(false);
-            this.SimulationPanel.PerformLayout();
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             this.panel2.ResumeLayout(false);
@@ -459,6 +510,8 @@ namespace FootballAIGame.LocalDesktopSimulator
             this.menuStrip1.PerformLayout();
             this.panel3.ResumeLayout(false);
             this.panel3.PerformLayout();
+            this.SimulationPanel.ResumeLayout(false);
+            this.SimulationPanel.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -468,7 +521,6 @@ namespace FootballAIGame.LocalDesktopSimulator
 
         private System.Windows.Forms.Button StartMatchButton;
         private System.Windows.Forms.ListBox AiListBox;
-        private System.Windows.Forms.Panel SimulationPanel;
         private System.Windows.Forms.Label HeadingLabel;
         private System.Windows.Forms.ListBox ErrorsListBox;
         private System.Windows.Forms.ListBox GoalsListBox;
@@ -498,6 +550,7 @@ namespace FootballAIGame.LocalDesktopSimulator
         private Label label12;
         private Label CurrentScoreHeadingLabel;
         private Label CurrentScoreLabel;
+        private DoubleBufferedPanel SimulationPanel;
     }
 }
 
