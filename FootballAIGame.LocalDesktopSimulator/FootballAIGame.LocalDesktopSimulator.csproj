@@ -52,6 +52,7 @@
     <Compile Include="CustomControls\Slider.Designer.cs">
       <DependentUpon>Slider.cs</DependentUpon>
     </Compile>
+    <Compile Include="MatchPlayer.cs" />
     <Compile Include="SimulatorForm.cs">
       <SubType>Form</SubType>
     </Compile>

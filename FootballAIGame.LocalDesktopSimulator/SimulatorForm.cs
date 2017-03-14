@@ -12,7 +12,10 @@ namespace FootballAIGame.LocalDesktopSimulator
 {
     public partial class SimulatorForm : Form
     {
-        public Match LoadedMatch { get; set; }
+        private Match LoadedMatch { get; set; }
+
+        private MatchPlayer MatchPlayer { get; set; }
+
 
         public SimulatorForm()
         {
@@ -23,6 +26,7 @@ namespace FootballAIGame.LocalDesktopSimulator
         private void DoCustomInitialization()
         {
             SpeedDropDownList.SelectedItem = SpeedDropDownList.Items[0];
+            MatchPlayer = new MatchPlayer(SimulationPanel, CurrentScoreLabel, CurrentTimeLabel, PlaySlider);
 
             ConnectionManager.Instance.PlayerConnectedHandler += PlayerConnectedHandler;
             ConnectionManager.Instance.PlayerDisconectedHandler += PlayerDisconectedHandler;
@@ -71,6 +75,7 @@ namespace FootballAIGame.LocalDesktopSimulator
             RestartButton.Enabled = false;
             SaveMatchToolStripMenuItem.Enabled = false;
             LoadMatchToolStripMenuItem.Enabled = false;
+            MatchPlayer.StopPlaying();
 
             SimulationLabel.Visible = true;
             SimulationProgress.Visible = true;
@@ -132,13 +137,13 @@ namespace FootballAIGame.LocalDesktopSimulator
 
             CurrentScoreLabel.Text = "0:0";
             CurrentTimeLabel.Text = "0:0";
-            WatchSlider.Value = 0;
+            PlaySlider.Value = 0;
 
             LoadedMatch = match;
 
             PlayButton.Enabled = true;
             RestartButton.Enabled = true;
-            WatchSlider.Value = 0;
+            PlaySlider.Value = 0;
         }
 
         private static string GetErrorMessage(SimulationError error, string ai1, string ai2)
@@ -221,6 +226,7 @@ namespace FootballAIGame.LocalDesktopSimulator
             try
             {
                 var match = Match.Load(fileStream);
+                MatchPlayer.StopPlaying();
                 LoadMatch(match);
             }
             catch (Exception)
@@ -230,6 +236,27 @@ namespace FootballAIGame.LocalDesktopSimulator
 
 
             fileStream?.Close();
+        }
+
+        private void PlayButtonClick(object sender, EventArgs e)
+        {
+            if (!MatchPlayer.IsPlaying)
+                MatchPlayer.StartPlaying(LoadedMatch);
+            else
+                MatchPlayer.StopPlaying();
+        }
+
+        private void SpeedDropDownListSelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (MatchPlayer != null)
+            {
+                MatchPlayer.Speed = Convert.ToDouble(((string) SpeedDropDownList.SelectedItem).Substring(0, 1));
+            }
+        }
+
+        private void RestartButtonClick(object sender, EventArgs e)
+        {
+            PlaySlider.Value = 0;
         }
     }
 }

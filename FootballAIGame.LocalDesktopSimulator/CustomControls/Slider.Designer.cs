@@ -32,6 +32,7 @@
             // 
             // Slider
             // 
+            this.DoubleBuffered = true;
             this.Name = "Slider";
             this.Size = new System.Drawing.Size(100, 20);
             this.ResumeLayout(false);

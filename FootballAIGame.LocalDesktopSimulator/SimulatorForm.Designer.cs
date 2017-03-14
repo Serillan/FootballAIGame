@@ -62,7 +62,7 @@ namespace FootballAIGame.LocalDesktopSimulator
             this.CurrentTimeHeadingLabel = new System.Windows.Forms.Label();
             this.CurrentScoreHeadingLabel = new System.Windows.Forms.Label();
             this.CurrentScoreLabel = new System.Windows.Forms.Label();
-            this.WatchSlider = new FootballAIGame.LocalDesktopSimulator.CustomControls.Slider();
+            this.PlaySlider = new FootballAIGame.LocalDesktopSimulator.CustomControls.Slider();
             this.SimulationPanel.SuspendLayout();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
@@ -101,6 +101,7 @@ namespace FootballAIGame.LocalDesktopSimulator
             this.SimulationPanel.Controls.Add(this.SimulationLabel);
             this.SimulationPanel.Controls.Add(this.SimulationProgress);
             this.SimulationPanel.Location = new System.Drawing.Point(279, 126);
+            this.SimulationPanel.Margin = new System.Windows.Forms.Padding(0);
             this.SimulationPanel.Name = "SimulationPanel";
             this.SimulationPanel.Size = new System.Drawing.Size(784, 555);
             this.SimulationPanel.TabIndex = 2;
@@ -344,16 +345,18 @@ namespace FootballAIGame.LocalDesktopSimulator
             this.PlayButton.TabIndex = 15;
             this.PlayButton.Text = "Play / Pause";
             this.PlayButton.UseVisualStyleBackColor = true;
+            this.PlayButton.Click += new System.EventHandler(this.PlayButtonClick);
             // 
             // RestartButton
             // 
             this.RestartButton.Enabled = false;
-            this.RestartButton.Location = new System.Drawing.Point(606, 57);
+            this.RestartButton.Location = new System.Drawing.Point(593, 53);
             this.RestartButton.Name = "RestartButton";
             this.RestartButton.Size = new System.Drawing.Size(151, 33);
             this.RestartButton.TabIndex = 16;
             this.RestartButton.Text = "Restart";
             this.RestartButton.UseVisualStyleBackColor = true;
+            this.RestartButton.Click += new System.EventHandler(this.RestartButtonClick);
             // 
             // SpeedDropDownList
             // 
@@ -364,10 +367,11 @@ namespace FootballAIGame.LocalDesktopSimulator
             "2x",
             "3x",
             "4x"});
-            this.SpeedDropDownList.Location = new System.Drawing.Point(768, 62);
+            this.SpeedDropDownList.Location = new System.Drawing.Point(761, 59);
             this.SpeedDropDownList.Name = "SpeedDropDownList";
             this.SpeedDropDownList.Size = new System.Drawing.Size(87, 24);
             this.SpeedDropDownList.TabIndex = 17;
+            this.SpeedDropDownList.SelectedIndexChanged += new System.EventHandler(this.SpeedDropDownListSelectedIndexChanged);
             // 
             // CurrentTimeLabel
             // 
@@ -413,15 +417,15 @@ namespace FootballAIGame.LocalDesktopSimulator
             this.CurrentScoreLabel.TabIndex = 23;
             this.CurrentScoreLabel.Text = "0:0";
             // 
-            // WatchSlider
+            // PlaySlider
             // 
-            this.WatchSlider.BackColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.WatchSlider.ForeColor = System.Drawing.SystemColors.ActiveCaption;
-            this.WatchSlider.Location = new System.Drawing.Point(279, 97);
-            this.WatchSlider.Name = "WatchSlider";
-            this.WatchSlider.Size = new System.Drawing.Size(784, 23);
-            this.WatchSlider.TabIndex = 20;
-            this.WatchSlider.Value = 20;
+            this.PlaySlider.BackColor = System.Drawing.SystemColors.ControlDarkDark;
+            this.PlaySlider.ForeColor = System.Drawing.SystemColors.ActiveCaption;
+            this.PlaySlider.Location = new System.Drawing.Point(279, 97);
+            this.PlaySlider.Max = 1500;
+            this.PlaySlider.Name = "PlaySlider";
+            this.PlaySlider.Size = new System.Drawing.Size(784, 23);
+            this.PlaySlider.TabIndex = 20;
             // 
             // SimulatorForm
             // 
@@ -432,7 +436,7 @@ namespace FootballAIGame.LocalDesktopSimulator
             this.Controls.Add(this.CurrentScoreHeadingLabel);
             this.Controls.Add(this.CurrentTimeHeadingLabel);
             this.Controls.Add(this.CurrentTimeLabel);
-            this.Controls.Add(this.WatchSlider);
+            this.Controls.Add(this.PlaySlider);
             this.Controls.Add(this.SpeedDropDownList);
             this.Controls.Add(this.RestartButton);
             this.Controls.Add(this.PlayButton);
@@ -484,7 +488,7 @@ namespace FootballAIGame.LocalDesktopSimulator
         private System.Windows.Forms.Button PlayButton;
         private System.Windows.Forms.Button RestartButton;
         private System.Windows.Forms.ComboBox SpeedDropDownList;
-        private Slider WatchSlider;
+        private Slider PlaySlider;
         private Label label10;
         private Label FinalScoreLabel;
         private Label CurrentTimeLabel;

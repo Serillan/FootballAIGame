@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
@@ -10,6 +11,17 @@ namespace FootballAIGame.LocalDesktopSimulator.CustomControls
         private int _value = 0;
         private int _min = 0;
         private int _max = 100;
+
+        private bool IsDragging { get; set; }
+
+        private float Percentage => (float)Value / (Max - Min);
+
+        private float CircleRadius => ClientRectangle.Height / 2.0f;
+
+        private float CircleCenterX => Percentage * UsableWidth + CircleRadius;
+        private float CircleCenterY => ClientRectangle.Height / 2.0f;
+
+        private float UsableWidth => ClientRectangle.Width - 2 * CircleRadius;
 
         [Category("Slider")]
         [DefaultValue(0)]
@@ -39,6 +51,44 @@ namespace FootballAIGame.LocalDesktopSimulator.CustomControls
         {
             // designer
             InitializeComponent();
+
+            MouseDown += OnMouseDown;
+            MouseUp += OnMouseUp;
+            MouseMove += OnMouseMove;
+        }
+
+        private void OnMouseUp(object sender, MouseEventArgs mouseEventArgs)
+        {
+            IsDragging = false;
+        }
+
+        private void OnMouseMove(object sender, MouseEventArgs mouseEventArgs)
+        {
+            if (IsDragging)
+                AdjustValue(mouseEventArgs.X);
+        }
+
+        private void OnMouseDown(object sender, MouseEventArgs mouseEventArgs)
+        {
+            IsDragging = true;
+
+            if (!IsInCircle(mouseEventArgs.X, mouseEventArgs.Y))
+            {
+                AdjustValue(mouseEventArgs.X);
+            }
+        }
+
+        private void AdjustValue(int mouseX)
+        {
+            var xInUsableArea = Math.Min(Math.Max(0, mouseX - CircleRadius), UsableWidth);
+            var newPercentage = xInUsableArea/UsableWidth;
+
+            Value = Min + (int)Math.Round(newPercentage*(Max - Min));
+        }
+
+        private bool IsInCircle(int x, int y)
+        {
+            return Math.Sqrt(Math.Pow(x - CircleCenterX, 2) + Math.Pow(y - CircleCenterY, 2)) <= CircleRadius;
         }
 
         protected override void OnPaint(PaintEventArgs e)
@@ -54,15 +104,8 @@ namespace FootballAIGame.LocalDesktopSimulator.CustomControls
             if (Max-Min == 0)
                 return;
 
-            var radius = ClientRectangle.Height / 2f;
-
-            var percentage = (float)Value/(Max - Min);
-            var usableWidth = ClientRectangle.Width - 2*radius;
-
-            var centerX = percentage*usableWidth + radius;
-            var centerY = ClientRectangle.Height/2f;
-
-            g.FillEllipse(new SolidBrush(ForeColor), centerX - radius, centerY - radius, 2*radius, 2*radius);
+            g.FillEllipse(new SolidBrush(ForeColor), CircleCenterX - CircleRadius, 
+                CircleCenterY - CircleRadius, 2*CircleRadius, 2*CircleRadius);
         }
 
     }
