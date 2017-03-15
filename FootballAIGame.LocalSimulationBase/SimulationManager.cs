@@ -95,9 +95,7 @@ namespace FootballAIGame.LocalSimulationBase
 
         public bool TryGetSimulationStep(string ai1, string ai2, out int step)
         {
-            var simulation = RunningSimulations.FirstOrDefault(s =>
-                (s.Player1AiConnection.PlayerName == ai1 && s.Player2AiConnection.PlayerName == ai2) ||
-                (s.Player1AiConnection.PlayerName == ai2 && s.Player2AiConnection.PlayerName == ai1));
+            var simulation = GetRunningSimulation(ai1, ai2);
 
             if (simulation == null)
             {
@@ -160,6 +158,25 @@ namespace FootballAIGame.LocalSimulationBase
                 await connection.TrySendAsync("AI name is already being used.");
 
             return isNameUnused;
+        }
+
+        private MatchSimulator GetRunningSimulation(string ai1, string ai2)
+        {
+            lock (RunningSimulations)
+            {
+                return RunningSimulations.FirstOrDefault(s =>
+                    (s.Player1AiConnection.PlayerName == ai1 && s.Player2AiConnection.PlayerName == ai2) ||
+                    (s.Player1AiConnection.PlayerName == ai2 && s.Player2AiConnection.PlayerName == ai1));
+            }
+        }
+
+        public void StopSimulation(string ai1, string ai2)
+        {
+            var simulation = GetRunningSimulation(ai1, ai2);
+            if (simulation == null)
+                return;
+
+            simulation.Player1CancelRequested = true;
         }
     }
 }

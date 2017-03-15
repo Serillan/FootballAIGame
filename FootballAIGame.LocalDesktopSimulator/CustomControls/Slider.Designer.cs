@@ -32,6 +32,7 @@
             // 
             // Slider
             // 
+            this.Cursor = System.Windows.Forms.Cursors.Hand;
             this.DoubleBuffered = true;
             this.Name = "Slider";
             this.Size = new System.Drawing.Size(100, 20);

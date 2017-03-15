@@ -16,6 +16,8 @@ namespace FootballAIGame.LocalDesktopSimulator
     {
         private const int ProgressBarUpdateInterval = 100;
 
+        private bool WasPlayingBeforeMouseDownOnSlider { get; set; }
+
         private Match LoadedMatch { get; set; }
 
         private MatchPlayer MatchPlayer { get; set; }
@@ -29,11 +31,28 @@ namespace FootballAIGame.LocalDesktopSimulator
         private void DoCustomInitialization()
         {
             SpeedDropDownList.SelectedItem = SpeedDropDownList.Items[0];
-            MatchPlayer = new MatchPlayer(SimulationPanel, CurrentScoreLabel, CurrentTimeLabel, PlaySlider);
+            MatchPlayer = new MatchPlayer(MatchPanel, CurrentScoreLabel, CurrentTimeLabel, PlaySlider);
 
             ConnectionManager.Instance.PlayerConnectedHandler += PlayerConnectedHandler;
             ConnectionManager.Instance.PlayerDisconectedHandler += PlayerDisconectedHandler;
 
+            PlaySlider.MouseDown += PlaySliderOnMouseDown;
+            PlaySlider.MouseUp += PlaySliderOnMouseUp;
+        }
+
+        private void PlaySliderOnMouseUp(object sender, MouseEventArgs mouseEventArgs)
+        {
+            MatchPlayer.RenderCurrentState();
+
+            if (WasPlayingBeforeMouseDownOnSlider)
+                MatchPlayer.StartPlaying();
+        }
+
+        private void PlaySliderOnMouseDown(object sender, MouseEventArgs mouseEventArgs)
+        {
+            WasPlayingBeforeMouseDownOnSlider = MatchPlayer.IsPlaying;
+            if (MatchPlayer.IsPlaying)
+                MatchPlayer.StopPlaying();
         }
 
         private async Task PlayerConnectedHandler(ClientConnection connection)
@@ -82,6 +101,12 @@ namespace FootballAIGame.LocalDesktopSimulator
 
             SimulationLabel.Visible = true;
             SimulationProgress.Visible = true;
+            FirstAiLabel.Visible = true;
+            SecondAiLabel.Visible = true;
+            VsLabel.Visible = true;
+
+            FirstAiLabel.Text = ai1;
+            SecondAiLabel.Text = ai2;
 
             StartMatchButton.Text = "Stop match";
             StartMatchButton.Click += StopMatchButtonClick;
@@ -143,9 +168,9 @@ namespace FootballAIGame.LocalDesktopSimulator
         {
             var matchInfo = match.MatchInfo;
 
-            FinalShotsLabel.Text = $"{matchInfo.Team1Statistics.Shots} / {matchInfo.Team2Statistics.Shots}";
-            FinalScoreLabel.Text = $"{matchInfo.Team1Statistics.Goals} - {matchInfo.Team2Statistics.Goals}";
-            FinalShotsOnTargetLabel.Text =
+            ShotsLabel.Text = $"{matchInfo.Team1Statistics.Shots} / {matchInfo.Team2Statistics.Shots}";
+            ScoreLabel.Text = $"{matchInfo.Team1Statistics.Goals} - {matchInfo.Team2Statistics.Goals}";
+            ShotsOnTargetLabel.Text =
                 $"{matchInfo.Team1Statistics.ShotsOnTarget} / {matchInfo.Team2Statistics.ShotsOnTarget}";
 
             var goalsEnumerable = from goal in matchInfo.Goals
@@ -165,10 +190,17 @@ namespace FootballAIGame.LocalDesktopSimulator
             CurrentTimeLabel.Text = "0:0";
             PlaySlider.Value = 0;
 
+            FirstAiLabel.Text = match.Ai1Name;
+            SecondAiLabel.Text = match.Ai2Name;
+
             LoadedMatch = match;
+            MatchPlayer.LoadMatch(match);
 
             PlayButton.Enabled = true;
             RestartButton.Enabled = true;
+            FirstAiLabel.Visible = true;
+            SecondAiLabel.Visible = true;
+            VsLabel.Visible = true;
             PlaySlider.Value = 0;
         }
 
@@ -198,9 +230,12 @@ namespace FootballAIGame.LocalDesktopSimulator
 
         }
 
-        private async void StopMatchButtonClick(object sender, EventArgs e)
+        private void StopMatchButtonClick(object sender, EventArgs e)
         {
-            await Task.Yield();
+            var ai1 = AiListBox.Items[0].ToString();
+            var ai2 = AiListBox.Items[1].ToString();
+
+            SimulationManager.Instance.StopSimulation(ai1, ai2);
         }
 
         private void SaveMatchToolStripMenuItemClick(object sender, EventArgs e)
@@ -267,7 +302,7 @@ namespace FootballAIGame.LocalDesktopSimulator
         private void PlayButtonClick(object sender, EventArgs e)
         {
             if (!MatchPlayer.IsPlaying)
-                MatchPlayer.StartPlaying(LoadedMatch);
+                MatchPlayer.StartPlaying();
             else
                 MatchPlayer.StopPlaying();
         }

@@ -35,20 +35,16 @@ namespace FootballAIGame.LocalDesktopSimulator
             this.AiListBox = new System.Windows.Forms.ListBox();
             this.ErrorsListBox = new System.Windows.Forms.ListBox();
             this.GoalsListBox = new System.Windows.Forms.ListBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.label4 = new System.Windows.Forms.Label();
-            this.label5 = new System.Windows.Forms.Label();
-            this.FinalShotsOnTargetLabel = new System.Windows.Forms.Label();
-            this.FinalShotsLabel = new System.Windows.Forms.Label();
-            this.panel1 = new System.Windows.Forms.Panel();
-            this.label12 = new System.Windows.Forms.Label();
-            this.label10 = new System.Windows.Forms.Label();
-            this.FinalScoreLabel = new System.Windows.Forms.Label();
-            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
-            this.LoadMatchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.SaveMatchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.label7 = new System.Windows.Forms.Label();
+            this.GoalsHeadingLabel = new System.Windows.Forms.Label();
+            this.ErrorsHeadingLabel = new System.Windows.Forms.Label();
+            this.ShotsHeadingLabel = new System.Windows.Forms.Label();
+            this.ShotsOnTargetHeadingLabel = new System.Windows.Forms.Label();
+            this.ShotsOnTargetLabel = new System.Windows.Forms.Label();
+            this.ShotsLabel = new System.Windows.Forms.Label();
+            this.FinalInfoHeadingLabel = new System.Windows.Forms.Label();
+            this.ScoreHeadingLabel = new System.Windows.Forms.Label();
+            this.ScoreLabel = new System.Windows.Forms.Label();
+            this.ConnectedAiHeadingLabel = new System.Windows.Forms.Label();
             this.PlayButton = new System.Windows.Forms.Button();
             this.RestartButton = new System.Windows.Forms.Button();
             this.SpeedDropDownList = new System.Windows.Forms.ComboBox();
@@ -56,23 +52,30 @@ namespace FootballAIGame.LocalDesktopSimulator
             this.CurrentTimeHeadingLabel = new System.Windows.Forms.Label();
             this.CurrentScoreHeadingLabel = new System.Windows.Forms.Label();
             this.CurrentScoreLabel = new System.Windows.Forms.Label();
-            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.SimulationPanel = new FootballAIGame.LocalDesktopSimulator.CustomControls.GamePanel();
+            this.MainTableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
+            this.MatchDetailsTableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
+            this.StartNewMatchTableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
+            this.MenuPanel = new System.Windows.Forms.Panel();
+            this.MainMenu = new System.Windows.Forms.MenuStrip();
+            this.LoadMatchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.SaveMatchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.TopTableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
+            this.SecondAiLabel = new System.Windows.Forms.Label();
+            this.VsLabel = new System.Windows.Forms.Label();
+            this.FirstAiLabel = new System.Windows.Forms.Label();
+            this.WatchMatchTableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
+            this.MatchPanel = new FootballAIGame.LocalDesktopSimulator.CustomControls.GamePanel();
             this.SimulationLabel = new System.Windows.Forms.Label();
             this.SimulationProgress = new System.Windows.Forms.ProgressBar();
             this.PlaySlider = new FootballAIGame.LocalDesktopSimulator.CustomControls.Slider();
-            this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
-            this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
-            this.panel2 = new System.Windows.Forms.Panel();
-            this.HeadingLabel = new System.Windows.Forms.Label();
-            this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
-            this.menuStrip1.SuspendLayout();
-            this.tableLayoutPanel1.SuspendLayout();
-            this.SimulationPanel.SuspendLayout();
-            this.tableLayoutPanel3.SuspendLayout();
-            this.tableLayoutPanel4.SuspendLayout();
-            this.panel2.SuspendLayout();
-            this.tableLayoutPanel2.SuspendLayout();
+            this.MainTableLayoutPanel.SuspendLayout();
+            this.MatchDetailsTableLayoutPanel.SuspendLayout();
+            this.StartNewMatchTableLayoutPanel.SuspendLayout();
+            this.MenuPanel.SuspendLayout();
+            this.MainMenu.SuspendLayout();
+            this.TopTableLayoutPanel.SuspendLayout();
+            this.WatchMatchTableLayoutPanel.SuspendLayout();
+            this.MatchPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // StartMatchButton
@@ -88,208 +91,167 @@ namespace FootballAIGame.LocalDesktopSimulator
             // 
             // AiListBox
             // 
+            this.AiListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)));
             this.AiListBox.BackColor = System.Drawing.SystemColors.ControlLight;
-            this.AiListBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.AiListBox.FormattingEnabled = true;
             this.AiListBox.HorizontalScrollbar = true;
             this.AiListBox.IntegralHeight = false;
             this.AiListBox.ItemHeight = 16;
-            this.AiListBox.Location = new System.Drawing.Point(3, 84);
+            this.AiListBox.Location = new System.Drawing.Point(12, 84);
             this.AiListBox.Name = "AiListBox";
             this.AiListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiSimple;
-            this.AiListBox.Size = new System.Drawing.Size(178, 458);
+            this.AiListBox.Size = new System.Drawing.Size(160, 458);
             this.AiListBox.TabIndex = 1;
             // 
             // ErrorsListBox
             // 
+            this.ErrorsListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)));
             this.ErrorsListBox.BackColor = System.Drawing.SystemColors.Control;
-            this.ErrorsListBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.ErrorsListBox.FormattingEnabled = true;
             this.ErrorsListBox.HorizontalScrollbar = true;
             this.ErrorsListBox.ItemHeight = 16;
-            this.ErrorsListBox.Location = new System.Drawing.Point(3, 379);
+            this.ErrorsListBox.Location = new System.Drawing.Point(30, 379);
             this.ErrorsListBox.Name = "ErrorsListBox";
-            this.ErrorsListBox.Size = new System.Drawing.Size(240, 163);
+            this.ErrorsListBox.Size = new System.Drawing.Size(186, 148);
             this.ErrorsListBox.TabIndex = 4;
             // 
             // GoalsListBox
             // 
+            this.GoalsListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)));
             this.GoalsListBox.BackColor = System.Drawing.SystemColors.Control;
-            this.GoalsListBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.GoalsListBox.FormattingEnabled = true;
             this.GoalsListBox.HorizontalScrollbar = true;
             this.GoalsListBox.ItemHeight = 16;
-            this.GoalsListBox.Location = new System.Drawing.Point(3, 208);
+            this.GoalsListBox.Location = new System.Drawing.Point(30, 208);
             this.GoalsListBox.Name = "GoalsListBox";
             this.GoalsListBox.SelectionMode = System.Windows.Forms.SelectionMode.None;
-            this.GoalsListBox.Size = new System.Drawing.Size(240, 136);
+            this.GoalsListBox.Size = new System.Drawing.Size(186, 132);
             this.GoalsListBox.TabIndex = 5;
             // 
-            // label1
+            // GoalsHeadingLabel
             // 
-            this.label1.AutoSize = true;
-            this.label1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label1.Font = new System.Drawing.Font("Tahoma", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.label1.Location = new System.Drawing.Point(3, 181);
-            this.label1.Name = "label1";
-            this.label1.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.label1.Size = new System.Drawing.Size(240, 24);
-            this.label1.TabIndex = 6;
-            this.label1.Text = "Goals";
-            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.GoalsHeadingLabel.AutoSize = true;
+            this.GoalsHeadingLabel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.GoalsHeadingLabel.Font = new System.Drawing.Font("Tahoma", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.GoalsHeadingLabel.Location = new System.Drawing.Point(3, 181);
+            this.GoalsHeadingLabel.Name = "GoalsHeadingLabel";
+            this.GoalsHeadingLabel.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.GoalsHeadingLabel.Size = new System.Drawing.Size(240, 24);
+            this.GoalsHeadingLabel.TabIndex = 6;
+            this.GoalsHeadingLabel.Text = "Goals";
+            this.GoalsHeadingLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // label2
+            // ErrorsHeadingLabel
             // 
-            this.label2.AutoSize = true;
-            this.label2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label2.Font = new System.Drawing.Font("Tahoma", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.label2.Location = new System.Drawing.Point(3, 347);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(240, 29);
-            this.label2.TabIndex = 7;
-            this.label2.Text = "Errors";
-            this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.ErrorsHeadingLabel.AutoSize = true;
+            this.ErrorsHeadingLabel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.ErrorsHeadingLabel.Font = new System.Drawing.Font("Tahoma", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.ErrorsHeadingLabel.Location = new System.Drawing.Point(3, 347);
+            this.ErrorsHeadingLabel.Name = "ErrorsHeadingLabel";
+            this.ErrorsHeadingLabel.Size = new System.Drawing.Size(240, 29);
+            this.ErrorsHeadingLabel.TabIndex = 7;
+            this.ErrorsHeadingLabel.Text = "Errors";
+            this.ErrorsHeadingLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // label4
+            // ShotsHeadingLabel
             // 
-            this.label4.AutoSize = true;
-            this.label4.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label4.Font = new System.Drawing.Font("Tahoma", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.label4.Location = new System.Drawing.Point(3, 76);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(240, 27);
-            this.label4.TabIndex = 9;
-            this.label4.Text = "Shots";
-            this.label4.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.ShotsHeadingLabel.AutoSize = true;
+            this.ShotsHeadingLabel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.ShotsHeadingLabel.Font = new System.Drawing.Font("Tahoma", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.ShotsHeadingLabel.Location = new System.Drawing.Point(3, 76);
+            this.ShotsHeadingLabel.Name = "ShotsHeadingLabel";
+            this.ShotsHeadingLabel.Size = new System.Drawing.Size(240, 27);
+            this.ShotsHeadingLabel.TabIndex = 9;
+            this.ShotsHeadingLabel.Text = "Shots";
+            this.ShotsHeadingLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // label5
+            // ShotsOnTargetHeadingLabel
             // 
-            this.label5.AutoSize = true;
-            this.label5.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label5.Font = new System.Drawing.Font("Tahoma", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.label5.Location = new System.Drawing.Point(3, 128);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(240, 25);
-            this.label5.TabIndex = 10;
-            this.label5.Text = "Shots on target";
-            this.label5.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.ShotsOnTargetHeadingLabel.AutoSize = true;
+            this.ShotsOnTargetHeadingLabel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.ShotsOnTargetHeadingLabel.Font = new System.Drawing.Font("Tahoma", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.ShotsOnTargetHeadingLabel.Location = new System.Drawing.Point(3, 128);
+            this.ShotsOnTargetHeadingLabel.Name = "ShotsOnTargetHeadingLabel";
+            this.ShotsOnTargetHeadingLabel.Size = new System.Drawing.Size(240, 25);
+            this.ShotsOnTargetHeadingLabel.TabIndex = 10;
+            this.ShotsOnTargetHeadingLabel.Text = "Shots on target";
+            this.ShotsOnTargetHeadingLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // FinalShotsOnTargetLabel
+            // ShotsOnTargetLabel
             // 
-            this.FinalShotsOnTargetLabel.AutoSize = true;
-            this.FinalShotsOnTargetLabel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.FinalShotsOnTargetLabel.Location = new System.Drawing.Point(3, 153);
-            this.FinalShotsOnTargetLabel.Name = "FinalShotsOnTargetLabel";
-            this.FinalShotsOnTargetLabel.Size = new System.Drawing.Size(240, 28);
-            this.FinalShotsOnTargetLabel.TabIndex = 11;
-            this.FinalShotsOnTargetLabel.Text = "0 / 0";
-            this.FinalShotsOnTargetLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.ShotsOnTargetLabel.AutoSize = true;
+            this.ShotsOnTargetLabel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.ShotsOnTargetLabel.Location = new System.Drawing.Point(3, 153);
+            this.ShotsOnTargetLabel.Name = "ShotsOnTargetLabel";
+            this.ShotsOnTargetLabel.Size = new System.Drawing.Size(240, 28);
+            this.ShotsOnTargetLabel.TabIndex = 11;
+            this.ShotsOnTargetLabel.Text = "0 / 0";
+            this.ShotsOnTargetLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // FinalShotsLabel
+            // ShotsLabel
             // 
-            this.FinalShotsLabel.AutoSize = true;
-            this.FinalShotsLabel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.FinalShotsLabel.Location = new System.Drawing.Point(3, 103);
-            this.FinalShotsLabel.Name = "FinalShotsLabel";
-            this.FinalShotsLabel.Size = new System.Drawing.Size(240, 25);
-            this.FinalShotsLabel.TabIndex = 12;
-            this.FinalShotsLabel.Text = "0 / 0";
-            this.FinalShotsLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.ShotsLabel.AutoSize = true;
+            this.ShotsLabel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.ShotsLabel.Location = new System.Drawing.Point(3, 103);
+            this.ShotsLabel.Name = "ShotsLabel";
+            this.ShotsLabel.Size = new System.Drawing.Size(240, 25);
+            this.ShotsLabel.TabIndex = 12;
+            this.ShotsLabel.Text = "0 / 0";
+            this.ShotsLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // panel1
+            // FinalInfoHeadingLabel
             // 
-            this.panel1.AutoSize = true;
-            this.panel1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.panel1.Location = new System.Drawing.Point(13, 114);
-            this.panel1.MaximumSize = new System.Drawing.Size(248, 2000);
-            this.panel1.MinimumSize = new System.Drawing.Size(140, 0);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(140, 0);
-            this.panel1.TabIndex = 13;
+            this.FinalInfoHeadingLabel.Dock = System.Windows.Forms.DockStyle.Top;
+            this.FinalInfoHeadingLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.FinalInfoHeadingLabel.Location = new System.Drawing.Point(3, 0);
+            this.FinalInfoHeadingLabel.Name = "FinalInfoHeadingLabel";
+            this.FinalInfoHeadingLabel.Size = new System.Drawing.Size(240, 22);
+            this.FinalInfoHeadingLabel.TabIndex = 22;
+            this.FinalInfoHeadingLabel.Text = "Final Info";
+            this.FinalInfoHeadingLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // label12
+            // ScoreHeadingLabel
             // 
-            this.label12.Dock = System.Windows.Forms.DockStyle.Top;
-            this.label12.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.label12.Location = new System.Drawing.Point(3, 0);
-            this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(240, 22);
-            this.label12.TabIndex = 22;
-            this.label12.Text = "Final Info";
-            this.label12.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.ScoreHeadingLabel.AutoSize = true;
+            this.ScoreHeadingLabel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.ScoreHeadingLabel.Font = new System.Drawing.Font("Tahoma", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.ScoreHeadingLabel.Location = new System.Drawing.Point(3, 24);
+            this.ScoreHeadingLabel.Name = "ScoreHeadingLabel";
+            this.ScoreHeadingLabel.Size = new System.Drawing.Size(240, 26);
+            this.ScoreHeadingLabel.TabIndex = 13;
+            this.ScoreHeadingLabel.Text = "Score";
+            this.ScoreHeadingLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // label10
+            // ScoreLabel
             // 
-            this.label10.AutoSize = true;
-            this.label10.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label10.Font = new System.Drawing.Font("Tahoma", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.label10.Location = new System.Drawing.Point(3, 24);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(240, 26);
-            this.label10.TabIndex = 13;
-            this.label10.Text = "Score";
-            this.label10.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.ScoreLabel.AutoSize = true;
+            this.ScoreLabel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.ScoreLabel.Location = new System.Drawing.Point(3, 50);
+            this.ScoreLabel.Name = "ScoreLabel";
+            this.ScoreLabel.Size = new System.Drawing.Size(240, 26);
+            this.ScoreLabel.TabIndex = 13;
+            this.ScoreLabel.Text = "0 - 0";
+            this.ScoreLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // FinalScoreLabel
+            // ConnectedAiHeadingLabel
             // 
-            this.FinalScoreLabel.AutoSize = true;
-            this.FinalScoreLabel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.FinalScoreLabel.Location = new System.Drawing.Point(3, 50);
-            this.FinalScoreLabel.Name = "FinalScoreLabel";
-            this.FinalScoreLabel.Size = new System.Drawing.Size(240, 26);
-            this.FinalScoreLabel.TabIndex = 13;
-            this.FinalScoreLabel.Text = "0 - 0";
-            this.FinalScoreLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // menuStrip1
-            // 
-            this.menuStrip1.BackColor = System.Drawing.SystemColors.Control;
-            this.menuStrip1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.menuStrip1.GripMargin = new System.Windows.Forms.Padding(0);
-            this.menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.LoadMatchToolStripMenuItem,
-            this.SaveMatchToolStripMenuItem});
-            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
-            this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Padding = new System.Windows.Forms.Padding(0);
-            this.menuStrip1.Size = new System.Drawing.Size(1181, 22);
-            this.menuStrip1.TabIndex = 4;
-            this.menuStrip1.Text = "menuStrip1";
-            // 
-            // LoadMatchToolStripMenuItem
-            // 
-            this.LoadMatchToolStripMenuItem.Name = "LoadMatchToolStripMenuItem";
-            this.LoadMatchToolStripMenuItem.Size = new System.Drawing.Size(99, 22);
-            this.LoadMatchToolStripMenuItem.Text = "Load Match";
-            this.LoadMatchToolStripMenuItem.Click += new System.EventHandler(this.LoadMatchToolStripMenuItemClick);
-            // 
-            // SaveMatchToolStripMenuItem
-            // 
-            this.SaveMatchToolStripMenuItem.Name = "SaveMatchToolStripMenuItem";
-            this.SaveMatchToolStripMenuItem.Size = new System.Drawing.Size(97, 22);
-            this.SaveMatchToolStripMenuItem.Text = "Save Match";
-            this.SaveMatchToolStripMenuItem.Click += new System.EventHandler(this.SaveMatchToolStripMenuItemClick);
-            // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label7.Font = new System.Drawing.Font("Tahoma", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.label7.Location = new System.Drawing.Point(3, 54);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(178, 27);
-            this.label7.TabIndex = 2;
-            this.label7.Text = "Connected AI";
-            this.label7.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.ConnectedAiHeadingLabel.AutoSize = true;
+            this.ConnectedAiHeadingLabel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.ConnectedAiHeadingLabel.Font = new System.Drawing.Font("Tahoma", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.ConnectedAiHeadingLabel.Location = new System.Drawing.Point(3, 54);
+            this.ConnectedAiHeadingLabel.Name = "ConnectedAiHeadingLabel";
+            this.ConnectedAiHeadingLabel.Size = new System.Drawing.Size(178, 27);
+            this.ConnectedAiHeadingLabel.TabIndex = 2;
+            this.ConnectedAiHeadingLabel.Text = "Connected AI";
+            this.ConnectedAiHeadingLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // PlayButton
             // 
             this.PlayButton.Dock = System.Windows.Forms.DockStyle.Fill;
             this.PlayButton.Enabled = false;
-            this.PlayButton.Location = new System.Drawing.Point(203, 3);
+            this.PlayButton.Location = new System.Drawing.Point(221, 3);
             this.PlayButton.Name = "PlayButton";
-            this.PlayButton.Size = new System.Drawing.Size(163, 35);
+            this.PlayButton.Size = new System.Drawing.Size(181, 35);
             this.PlayButton.TabIndex = 15;
             this.PlayButton.Text = "Play / Pause";
             this.PlayButton.UseVisualStyleBackColor = true;
@@ -299,9 +261,9 @@ namespace FootballAIGame.LocalDesktopSimulator
             // 
             this.RestartButton.Dock = System.Windows.Forms.DockStyle.Fill;
             this.RestartButton.Enabled = false;
-            this.RestartButton.Location = new System.Drawing.Point(372, 3);
+            this.RestartButton.Location = new System.Drawing.Point(408, 3);
             this.RestartButton.Name = "RestartButton";
-            this.RestartButton.Size = new System.Drawing.Size(131, 35);
+            this.RestartButton.Size = new System.Drawing.Size(124, 35);
             this.RestartButton.TabIndex = 16;
             this.RestartButton.Text = "Restart";
             this.RestartButton.UseVisualStyleBackColor = true;
@@ -317,9 +279,10 @@ namespace FootballAIGame.LocalDesktopSimulator
             "2x",
             "3x",
             "4x"});
-            this.SpeedDropDownList.Location = new System.Drawing.Point(511, 8);
+            this.SpeedDropDownList.Location = new System.Drawing.Point(546, 8);
+            this.SpeedDropDownList.Margin = new System.Windows.Forms.Padding(0);
             this.SpeedDropDownList.Name = "SpeedDropDownList";
-            this.SpeedDropDownList.Size = new System.Drawing.Size(52, 24);
+            this.SpeedDropDownList.Size = new System.Drawing.Size(51, 24);
             this.SpeedDropDownList.TabIndex = 17;
             this.SpeedDropDownList.SelectedIndexChanged += new System.EventHandler(this.SpeedDropDownListSelectedIndexChanged);
             // 
@@ -328,7 +291,7 @@ namespace FootballAIGame.LocalDesktopSimulator
             this.CurrentTimeLabel.AutoSize = true;
             this.CurrentTimeLabel.Dock = System.Windows.Forms.DockStyle.Left;
             this.CurrentTimeLabel.Font = new System.Drawing.Font("Tahoma", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.CurrentTimeLabel.Location = new System.Drawing.Point(111, 0);
+            this.CurrentTimeLabel.Location = new System.Drawing.Point(116, 0);
             this.CurrentTimeLabel.Name = "CurrentTimeLabel";
             this.CurrentTimeLabel.Size = new System.Drawing.Size(34, 41);
             this.CurrentTimeLabel.TabIndex = 14;
@@ -340,7 +303,7 @@ namespace FootballAIGame.LocalDesktopSimulator
             this.CurrentTimeHeadingLabel.AutoSize = true;
             this.CurrentTimeHeadingLabel.Dock = System.Windows.Forms.DockStyle.Right;
             this.CurrentTimeHeadingLabel.Font = new System.Drawing.Font("Tahoma", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.CurrentTimeHeadingLabel.Location = new System.Drawing.Point(59, 0);
+            this.CurrentTimeHeadingLabel.Location = new System.Drawing.Point(64, 0);
             this.CurrentTimeHeadingLabel.Name = "CurrentTimeHeadingLabel";
             this.CurrentTimeHeadingLabel.Size = new System.Drawing.Size(46, 41);
             this.CurrentTimeHeadingLabel.TabIndex = 21;
@@ -352,7 +315,7 @@ namespace FootballAIGame.LocalDesktopSimulator
             this.CurrentScoreHeadingLabel.AutoSize = true;
             this.CurrentScoreHeadingLabel.Dock = System.Windows.Forms.DockStyle.Right;
             this.CurrentScoreHeadingLabel.Font = new System.Drawing.Font("Tahoma", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.CurrentScoreHeadingLabel.Location = new System.Drawing.Point(644, 0);
+            this.CurrentScoreHeadingLabel.Location = new System.Drawing.Point(658, 0);
             this.CurrentScoreHeadingLabel.Name = "CurrentScoreHeadingLabel";
             this.CurrentScoreHeadingLabel.Size = new System.Drawing.Size(52, 41);
             this.CurrentScoreHeadingLabel.TabIndex = 22;
@@ -364,49 +327,227 @@ namespace FootballAIGame.LocalDesktopSimulator
             this.CurrentScoreLabel.AutoSize = true;
             this.CurrentScoreLabel.Dock = System.Windows.Forms.DockStyle.Left;
             this.CurrentScoreLabel.Font = new System.Drawing.Font("Tahoma", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.CurrentScoreLabel.Location = new System.Drawing.Point(702, 0);
+            this.CurrentScoreLabel.Location = new System.Drawing.Point(716, 0);
             this.CurrentScoreLabel.Name = "CurrentScoreLabel";
             this.CurrentScoreLabel.Size = new System.Drawing.Size(34, 41);
             this.CurrentScoreLabel.TabIndex = 23;
             this.CurrentScoreLabel.Text = "0:0";
             this.CurrentScoreLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // tableLayoutPanel1
+            // MainTableLayoutPanel
             // 
-            this.tableLayoutPanel1.ColumnCount = 3;
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 20F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 65F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 15F));
-            this.tableLayoutPanel1.Controls.Add(this.SimulationPanel, 1, 3);
-            this.tableLayoutPanel1.Controls.Add(this.PlaySlider, 1, 2);
-            this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel3, 0, 3);
-            this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel4, 2, 3);
-            this.tableLayoutPanel1.Controls.Add(this.panel2, 0, 0);
-            this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel2, 1, 1);
-            this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
-            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 5;
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 5F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 7F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 5F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 82F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 1F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(1262, 673);
-            this.tableLayoutPanel1.TabIndex = 24;
+            this.MainTableLayoutPanel.ColumnCount = 3;
+            this.MainTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 20F));
+            this.MainTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 65F));
+            this.MainTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 15F));
+            this.MainTableLayoutPanel.Controls.Add(this.MatchPanel, 1, 3);
+            this.MainTableLayoutPanel.Controls.Add(this.PlaySlider, 1, 2);
+            this.MainTableLayoutPanel.Controls.Add(this.MatchDetailsTableLayoutPanel, 0, 3);
+            this.MainTableLayoutPanel.Controls.Add(this.StartNewMatchTableLayoutPanel, 2, 3);
+            this.MainTableLayoutPanel.Controls.Add(this.MenuPanel, 0, 0);
+            this.MainTableLayoutPanel.Controls.Add(this.WatchMatchTableLayoutPanel, 1, 1);
+            this.MainTableLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.MainTableLayoutPanel.Location = new System.Drawing.Point(0, 0);
+            this.MainTableLayoutPanel.Name = "MainTableLayoutPanel";
+            this.MainTableLayoutPanel.RowCount = 5;
+            this.MainTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 5F));
+            this.MainTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 7F));
+            this.MainTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 5F));
+            this.MainTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 82F));
+            this.MainTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 1F));
+            this.MainTableLayoutPanel.Size = new System.Drawing.Size(1262, 673);
+            this.MainTableLayoutPanel.TabIndex = 24;
             // 
-            // SimulationPanel
+            // MatchDetailsTableLayoutPanel
             // 
-            this.SimulationPanel.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.SimulationPanel.BackColor = System.Drawing.SystemColors.ActiveCaption;
-            this.SimulationPanel.Controls.Add(this.SimulationLabel);
-            this.SimulationPanel.Controls.Add(this.SimulationProgress);
-            this.SimulationPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.SimulationPanel.Location = new System.Drawing.Point(252, 113);
-            this.SimulationPanel.Margin = new System.Windows.Forms.Padding(0);
-            this.SimulationPanel.Name = "SimulationPanel";
-            this.SimulationPanel.Size = new System.Drawing.Size(820, 551);
-            this.SimulationPanel.TabIndex = 2;
+            this.MatchDetailsTableLayoutPanel.ColumnCount = 1;
+            this.MatchDetailsTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.MatchDetailsTableLayoutPanel.Controls.Add(this.ErrorsListBox, 0, 10);
+            this.MatchDetailsTableLayoutPanel.Controls.Add(this.ShotsOnTargetLabel, 0, 6);
+            this.MatchDetailsTableLayoutPanel.Controls.Add(this.ErrorsHeadingLabel, 0, 9);
+            this.MatchDetailsTableLayoutPanel.Controls.Add(this.FinalInfoHeadingLabel, 0, 0);
+            this.MatchDetailsTableLayoutPanel.Controls.Add(this.GoalsListBox, 0, 8);
+            this.MatchDetailsTableLayoutPanel.Controls.Add(this.ShotsOnTargetHeadingLabel, 0, 5);
+            this.MatchDetailsTableLayoutPanel.Controls.Add(this.GoalsHeadingLabel, 0, 7);
+            this.MatchDetailsTableLayoutPanel.Controls.Add(this.ShotsHeadingLabel, 0, 3);
+            this.MatchDetailsTableLayoutPanel.Controls.Add(this.ShotsLabel, 0, 4);
+            this.MatchDetailsTableLayoutPanel.Controls.Add(this.ScoreHeadingLabel, 0, 1);
+            this.MatchDetailsTableLayoutPanel.Controls.Add(this.ScoreLabel, 0, 2);
+            this.MatchDetailsTableLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.MatchDetailsTableLayoutPanel.Location = new System.Drawing.Point(3, 116);
+            this.MatchDetailsTableLayoutPanel.Name = "MatchDetailsTableLayoutPanel";
+            this.MatchDetailsTableLayoutPanel.RowCount = 11;
+            this.MatchDetailsTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 4.48505F));
+            this.MatchDetailsTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 4.817276F));
+            this.MatchDetailsTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 4.817276F));
+            this.MatchDetailsTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 5.149502F));
+            this.MatchDetailsTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 4.651163F));
+            this.MatchDetailsTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 4.651163F));
+            this.MatchDetailsTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 5.315615F));
+            this.MatchDetailsTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 4.48505F));
+            this.MatchDetailsTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 26.24585F));
+            this.MatchDetailsTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 5.481728F));
+            this.MatchDetailsTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 30.39867F));
+            this.MatchDetailsTableLayoutPanel.Size = new System.Drawing.Size(246, 545);
+            this.MatchDetailsTableLayoutPanel.TabIndex = 16;
+            // 
+            // StartNewMatchTableLayoutPanel
+            // 
+            this.StartNewMatchTableLayoutPanel.ColumnCount = 1;
+            this.StartNewMatchTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.StartNewMatchTableLayoutPanel.Controls.Add(this.AiListBox, 0, 2);
+            this.StartNewMatchTableLayoutPanel.Controls.Add(this.ConnectedAiHeadingLabel, 0, 1);
+            this.StartNewMatchTableLayoutPanel.Controls.Add(this.StartMatchButton, 0, 0);
+            this.StartNewMatchTableLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.StartNewMatchTableLayoutPanel.Location = new System.Drawing.Point(1075, 116);
+            this.StartNewMatchTableLayoutPanel.Name = "StartNewMatchTableLayoutPanel";
+            this.StartNewMatchTableLayoutPanel.RowCount = 3;
+            this.StartNewMatchTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 10F));
+            this.StartNewMatchTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 5F));
+            this.StartNewMatchTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 85F));
+            this.StartNewMatchTableLayoutPanel.Size = new System.Drawing.Size(184, 545);
+            this.StartNewMatchTableLayoutPanel.TabIndex = 17;
+            // 
+            // MenuPanel
+            // 
+            this.MainTableLayoutPanel.SetColumnSpan(this.MenuPanel, 3);
+            this.MenuPanel.Controls.Add(this.MainMenu);
+            this.MenuPanel.Controls.Add(this.TopTableLayoutPanel);
+            this.MenuPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.MenuPanel.Location = new System.Drawing.Point(3, 3);
+            this.MenuPanel.Name = "MenuPanel";
+            this.MenuPanel.Size = new System.Drawing.Size(1256, 27);
+            this.MenuPanel.TabIndex = 14;
+            // 
+            // MainMenu
+            // 
+            this.MainMenu.BackColor = System.Drawing.SystemColors.Control;
+            this.MainMenu.Dock = System.Windows.Forms.DockStyle.Left;
+            this.MainMenu.GripMargin = new System.Windows.Forms.Padding(0);
+            this.MainMenu.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.MainMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.LoadMatchToolStripMenuItem,
+            this.SaveMatchToolStripMenuItem});
+            this.MainMenu.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.HorizontalStackWithOverflow;
+            this.MainMenu.Location = new System.Drawing.Point(0, 0);
+            this.MainMenu.Name = "MainMenu";
+            this.MainMenu.Padding = new System.Windows.Forms.Padding(0);
+            this.MainMenu.Size = new System.Drawing.Size(198, 27);
+            this.MainMenu.TabIndex = 4;
+            this.MainMenu.Text = "menuStrip1";
+            // 
+            // LoadMatchToolStripMenuItem
+            // 
+            this.LoadMatchToolStripMenuItem.Name = "LoadMatchToolStripMenuItem";
+            this.LoadMatchToolStripMenuItem.Size = new System.Drawing.Size(99, 27);
+            this.LoadMatchToolStripMenuItem.Text = "Load Match";
+            this.LoadMatchToolStripMenuItem.Click += new System.EventHandler(this.LoadMatchToolStripMenuItemClick);
+            // 
+            // SaveMatchToolStripMenuItem
+            // 
+            this.SaveMatchToolStripMenuItem.Name = "SaveMatchToolStripMenuItem";
+            this.SaveMatchToolStripMenuItem.Size = new System.Drawing.Size(97, 27);
+            this.SaveMatchToolStripMenuItem.Text = "Save Match";
+            this.SaveMatchToolStripMenuItem.Click += new System.EventHandler(this.SaveMatchToolStripMenuItemClick);
+            // 
+            // TopTableLayoutPanel
+            // 
+            this.TopTableLayoutPanel.ColumnCount = 5;
+            this.TopTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 20F));
+            this.TopTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 30.5F));
+            this.TopTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 4F));
+            this.TopTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 30.5F));
+            this.TopTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 15F));
+            this.TopTableLayoutPanel.Controls.Add(this.SecondAiLabel, 3, 0);
+            this.TopTableLayoutPanel.Controls.Add(this.VsLabel, 2, 0);
+            this.TopTableLayoutPanel.Controls.Add(this.FirstAiLabel, 1, 0);
+            this.TopTableLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.TopTableLayoutPanel.Location = new System.Drawing.Point(0, 0);
+            this.TopTableLayoutPanel.Name = "TopTableLayoutPanel";
+            this.TopTableLayoutPanel.RowCount = 1;
+            this.TopTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.TopTableLayoutPanel.Size = new System.Drawing.Size(1256, 27);
+            this.TopTableLayoutPanel.TabIndex = 2;
+            // 
+            // SecondAiLabel
+            // 
+            this.SecondAiLabel.AutoSize = true;
+            this.SecondAiLabel.Dock = System.Windows.Forms.DockStyle.Left;
+            this.SecondAiLabel.Font = new System.Drawing.Font("Tahoma", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.SecondAiLabel.Location = new System.Drawing.Point(684, 0);
+            this.SecondAiLabel.Margin = new System.Windows.Forms.Padding(0);
+            this.SecondAiLabel.Name = "SecondAiLabel";
+            this.SecondAiLabel.Size = new System.Drawing.Size(93, 27);
+            this.SecondAiLabel.TabIndex = 5;
+            this.SecondAiLabel.Text = "SecondAI";
+            this.SecondAiLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.SecondAiLabel.Visible = false;
+            // 
+            // VsLabel
+            // 
+            this.VsLabel.AutoSize = true;
+            this.VsLabel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.VsLabel.Font = new System.Drawing.Font("Tahoma", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.VsLabel.Location = new System.Drawing.Point(634, 0);
+            this.VsLabel.Margin = new System.Windows.Forms.Padding(0);
+            this.VsLabel.Name = "VsLabel";
+            this.VsLabel.Size = new System.Drawing.Size(50, 27);
+            this.VsLabel.TabIndex = 3;
+            this.VsLabel.Text = "vs";
+            this.VsLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.VsLabel.Visible = false;
+            // 
+            // FirstAiLabel
+            // 
+            this.FirstAiLabel.AutoSize = true;
+            this.FirstAiLabel.Dock = System.Windows.Forms.DockStyle.Right;
+            this.FirstAiLabel.Font = new System.Drawing.Font("Tahoma", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.FirstAiLabel.Location = new System.Drawing.Point(566, 0);
+            this.FirstAiLabel.Margin = new System.Windows.Forms.Padding(0);
+            this.FirstAiLabel.Name = "FirstAiLabel";
+            this.FirstAiLabel.Size = new System.Drawing.Size(68, 27);
+            this.FirstAiLabel.TabIndex = 4;
+            this.FirstAiLabel.Text = "FirstAI";
+            this.FirstAiLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.FirstAiLabel.Visible = false;
+            // 
+            // WatchMatchTableLayoutPanel
+            // 
+            this.WatchMatchTableLayoutPanel.ColumnCount = 7;
+            this.WatchMatchTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 14F));
+            this.WatchMatchTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 13F));
+            this.WatchMatchTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 23F));
+            this.WatchMatchTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 16F));
+            this.WatchMatchTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 9F));
+            this.WatchMatchTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 13F));
+            this.WatchMatchTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12F));
+            this.WatchMatchTableLayoutPanel.Controls.Add(this.CurrentScoreLabel, 6, 0);
+            this.WatchMatchTableLayoutPanel.Controls.Add(this.CurrentTimeLabel, 1, 0);
+            this.WatchMatchTableLayoutPanel.Controls.Add(this.CurrentScoreHeadingLabel, 5, 0);
+            this.WatchMatchTableLayoutPanel.Controls.Add(this.PlayButton, 2, 0);
+            this.WatchMatchTableLayoutPanel.Controls.Add(this.RestartButton, 3, 0);
+            this.WatchMatchTableLayoutPanel.Controls.Add(this.CurrentTimeHeadingLabel, 0, 0);
+            this.WatchMatchTableLayoutPanel.Controls.Add(this.SpeedDropDownList, 4, 0);
+            this.WatchMatchTableLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.WatchMatchTableLayoutPanel.Location = new System.Drawing.Point(255, 36);
+            this.WatchMatchTableLayoutPanel.Name = "WatchMatchTableLayoutPanel";
+            this.WatchMatchTableLayoutPanel.RowCount = 1;
+            this.WatchMatchTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.WatchMatchTableLayoutPanel.Size = new System.Drawing.Size(814, 41);
+            this.WatchMatchTableLayoutPanel.TabIndex = 15;
+            // 
+            // MatchPanel
+            // 
+            this.MatchPanel.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.MatchPanel.BackColor = System.Drawing.SystemColors.ActiveCaption;
+            this.MatchPanel.Controls.Add(this.SimulationLabel);
+            this.MatchPanel.Controls.Add(this.SimulationProgress);
+            this.MatchPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.MatchPanel.Location = new System.Drawing.Point(252, 113);
+            this.MatchPanel.Margin = new System.Windows.Forms.Padding(0);
+            this.MatchPanel.Name = "MatchPanel";
+            this.MatchPanel.Size = new System.Drawing.Size(820, 551);
+            this.MatchPanel.TabIndex = 2;
             // 
             // SimulationLabel
             // 
@@ -425,147 +566,54 @@ namespace FootballAIGame.LocalDesktopSimulator
             // SimulationProgress
             // 
             this.SimulationProgress.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.SimulationProgress.Location = new System.Drawing.Point(0, 224);
+            this.SimulationProgress.Location = new System.Drawing.Point(0, 242);
             this.SimulationProgress.Maximum = 1500;
             this.SimulationProgress.Name = "SimulationProgress";
-            this.SimulationProgress.Size = new System.Drawing.Size(821, 64);
+            this.SimulationProgress.Size = new System.Drawing.Size(820, 64);
             this.SimulationProgress.TabIndex = 0;
             this.SimulationProgress.Visible = false;
             // 
             // PlaySlider
             // 
-            this.PlaySlider.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.PlaySlider.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.PlaySlider.BackColor = System.Drawing.SystemColors.ControlDarkDark;
+            this.PlaySlider.Cursor = System.Windows.Forms.Cursors.Hand;
             this.PlaySlider.ForeColor = System.Drawing.SystemColors.ActiveCaption;
-            this.PlaySlider.Location = new System.Drawing.Point(255, 83);
+            this.PlaySlider.Location = new System.Drawing.Point(252, 81);
+            this.PlaySlider.Margin = new System.Windows.Forms.Padding(0, 1, 0, 1);
             this.PlaySlider.Max = 1500;
             this.PlaySlider.Name = "PlaySlider";
-            this.PlaySlider.Size = new System.Drawing.Size(814, 27);
+            this.PlaySlider.Size = new System.Drawing.Size(820, 31);
             this.PlaySlider.TabIndex = 20;
-            // 
-            // tableLayoutPanel3
-            // 
-            this.tableLayoutPanel3.ColumnCount = 1;
-            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel3.Controls.Add(this.ErrorsListBox, 0, 10);
-            this.tableLayoutPanel3.Controls.Add(this.FinalShotsOnTargetLabel, 0, 6);
-            this.tableLayoutPanel3.Controls.Add(this.label2, 0, 9);
-            this.tableLayoutPanel3.Controls.Add(this.label12, 0, 0);
-            this.tableLayoutPanel3.Controls.Add(this.GoalsListBox, 0, 8);
-            this.tableLayoutPanel3.Controls.Add(this.label5, 0, 5);
-            this.tableLayoutPanel3.Controls.Add(this.label1, 0, 7);
-            this.tableLayoutPanel3.Controls.Add(this.label4, 0, 3);
-            this.tableLayoutPanel3.Controls.Add(this.FinalShotsLabel, 0, 4);
-            this.tableLayoutPanel3.Controls.Add(this.label10, 0, 1);
-            this.tableLayoutPanel3.Controls.Add(this.FinalScoreLabel, 0, 2);
-            this.tableLayoutPanel3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel3.Location = new System.Drawing.Point(3, 116);
-            this.tableLayoutPanel3.Name = "tableLayoutPanel3";
-            this.tableLayoutPanel3.RowCount = 11;
-            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 4.48505F));
-            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 4.817276F));
-            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 4.817276F));
-            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 5.149502F));
-            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 4.651163F));
-            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 4.651163F));
-            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 5.315615F));
-            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 4.48505F));
-            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 26.24585F));
-            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 5.481728F));
-            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 30.39867F));
-            this.tableLayoutPanel3.Size = new System.Drawing.Size(246, 545);
-            this.tableLayoutPanel3.TabIndex = 16;
-            // 
-            // tableLayoutPanel4
-            // 
-            this.tableLayoutPanel4.ColumnCount = 1;
-            this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel4.Controls.Add(this.AiListBox, 0, 2);
-            this.tableLayoutPanel4.Controls.Add(this.label7, 0, 1);
-            this.tableLayoutPanel4.Controls.Add(this.StartMatchButton, 0, 0);
-            this.tableLayoutPanel4.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel4.Location = new System.Drawing.Point(1075, 116);
-            this.tableLayoutPanel4.Name = "tableLayoutPanel4";
-            this.tableLayoutPanel4.RowCount = 3;
-            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 10F));
-            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 5F));
-            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 85F));
-            this.tableLayoutPanel4.Size = new System.Drawing.Size(184, 545);
-            this.tableLayoutPanel4.TabIndex = 17;
-            // 
-            // panel2
-            // 
-            this.tableLayoutPanel1.SetColumnSpan(this.panel2, 3);
-            this.panel2.Controls.Add(this.HeadingLabel);
-            this.panel2.Controls.Add(this.menuStrip1);
-            this.panel2.Location = new System.Drawing.Point(3, 3);
-            this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(1181, 22);
-            this.panel2.TabIndex = 14;
-            // 
-            // HeadingLabel
-            // 
-            this.HeadingLabel.AutoSize = true;
-            this.HeadingLabel.Font = new System.Drawing.Font("Tahoma", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.HeadingLabel.Location = new System.Drawing.Point(602, 13);
-            this.HeadingLabel.Name = "HeadingLabel";
-            this.HeadingLabel.Size = new System.Drawing.Size(0, 21);
-            this.HeadingLabel.TabIndex = 3;
-            // 
-            // tableLayoutPanel2
-            // 
-            this.tableLayoutPanel2.ColumnCount = 7;
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 13.39066F));
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 11.42506F));
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 21.00737F));
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 17.07617F));
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 7.739558F));
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 16.33907F));
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 13.88206F));
-            this.tableLayoutPanel2.Controls.Add(this.CurrentScoreLabel, 6, 0);
-            this.tableLayoutPanel2.Controls.Add(this.CurrentTimeLabel, 1, 0);
-            this.tableLayoutPanel2.Controls.Add(this.CurrentScoreHeadingLabel, 5, 0);
-            this.tableLayoutPanel2.Controls.Add(this.PlayButton, 2, 0);
-            this.tableLayoutPanel2.Controls.Add(this.RestartButton, 3, 0);
-            this.tableLayoutPanel2.Controls.Add(this.CurrentTimeHeadingLabel, 0, 0);
-            this.tableLayoutPanel2.Controls.Add(this.SpeedDropDownList, 4, 0);
-            this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel2.Location = new System.Drawing.Point(255, 36);
-            this.tableLayoutPanel2.Name = "tableLayoutPanel2";
-            this.tableLayoutPanel2.RowCount = 1;
-            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(814, 41);
-            this.tableLayoutPanel2.TabIndex = 15;
             // 
             // SimulatorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(120F, 120F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new System.Drawing.Size(1262, 673);
-            this.Controls.Add(this.tableLayoutPanel1);
-            this.Controls.Add(this.panel1);
+            this.Controls.Add(this.MainTableLayoutPanel);
             this.DoubleBuffered = true;
-            this.MainMenuStrip = this.menuStrip1;
+            this.MainMenuStrip = this.MainMenu;
             this.MinimumSize = new System.Drawing.Size(960, 540);
             this.Name = "SimulatorForm";
             this.Text = "Football AI Game";
-            this.menuStrip1.ResumeLayout(false);
-            this.menuStrip1.PerformLayout();
-            this.tableLayoutPanel1.ResumeLayout(false);
-            this.SimulationPanel.ResumeLayout(false);
-            this.SimulationPanel.PerformLayout();
-            this.tableLayoutPanel3.ResumeLayout(false);
-            this.tableLayoutPanel3.PerformLayout();
-            this.tableLayoutPanel4.ResumeLayout(false);
-            this.tableLayoutPanel4.PerformLayout();
-            this.panel2.ResumeLayout(false);
-            this.panel2.PerformLayout();
-            this.tableLayoutPanel2.ResumeLayout(false);
-            this.tableLayoutPanel2.PerformLayout();
+            this.MainTableLayoutPanel.ResumeLayout(false);
+            this.MatchDetailsTableLayoutPanel.ResumeLayout(false);
+            this.MatchDetailsTableLayoutPanel.PerformLayout();
+            this.StartNewMatchTableLayoutPanel.ResumeLayout(false);
+            this.StartNewMatchTableLayoutPanel.PerformLayout();
+            this.MenuPanel.ResumeLayout(false);
+            this.MenuPanel.PerformLayout();
+            this.MainMenu.ResumeLayout(false);
+            this.MainMenu.PerformLayout();
+            this.TopTableLayoutPanel.ResumeLayout(false);
+            this.TopTableLayoutPanel.PerformLayout();
+            this.WatchMatchTableLayoutPanel.ResumeLayout(false);
+            this.WatchMatchTableLayoutPanel.PerformLayout();
+            this.MatchPanel.ResumeLayout(false);
+            this.MatchPanel.PerformLayout();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -575,37 +623,39 @@ namespace FootballAIGame.LocalDesktopSimulator
         private System.Windows.Forms.ListBox AiListBox;
         private System.Windows.Forms.ListBox ErrorsListBox;
         private System.Windows.Forms.ListBox GoalsListBox;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.Label FinalShotsOnTargetLabel;
-        private System.Windows.Forms.Label FinalShotsLabel;
-        private System.Windows.Forms.Panel panel1;
-        private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.MenuStrip menuStrip1;
-        private System.Windows.Forms.ToolStripMenuItem LoadMatchToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem SaveMatchToolStripMenuItem;
+        private System.Windows.Forms.Label GoalsHeadingLabel;
+        private System.Windows.Forms.Label ErrorsHeadingLabel;
+        private System.Windows.Forms.Label ShotsHeadingLabel;
+        private System.Windows.Forms.Label ShotsOnTargetHeadingLabel;
+        private System.Windows.Forms.Label ShotsOnTargetLabel;
+        private System.Windows.Forms.Label ShotsLabel;
+        private System.Windows.Forms.Label ConnectedAiHeadingLabel;
         private System.Windows.Forms.Button PlayButton;
         private System.Windows.Forms.Button RestartButton;
         private System.Windows.Forms.ComboBox SpeedDropDownList;
         private Slider PlaySlider;
-        private Label label10;
-        private Label FinalScoreLabel;
+        private Label ScoreHeadingLabel;
+        private Label ScoreLabel;
         private Label CurrentTimeLabel;
         private Label CurrentTimeHeadingLabel;
         private Label SimulationLabel;
         private ProgressBar SimulationProgress;
-        private Label label12;
+        private Label FinalInfoHeadingLabel;
         private Label CurrentScoreHeadingLabel;
         private Label CurrentScoreLabel;
-        private GamePanel SimulationPanel;
-        private TableLayoutPanel tableLayoutPanel1;
-        private TableLayoutPanel tableLayoutPanel2;
-        private TableLayoutPanel tableLayoutPanel3;
-        private TableLayoutPanel tableLayoutPanel4;
-        private Panel panel2;
-        private Label HeadingLabel;
+        private GamePanel MatchPanel;
+        private TableLayoutPanel MainTableLayoutPanel;
+        private TableLayoutPanel WatchMatchTableLayoutPanel;
+        private TableLayoutPanel MatchDetailsTableLayoutPanel;
+        private TableLayoutPanel StartNewMatchTableLayoutPanel;
+        private MenuStrip MainMenu;
+        private ToolStripMenuItem LoadMatchToolStripMenuItem;
+        private ToolStripMenuItem SaveMatchToolStripMenuItem;
+        private Panel MenuPanel;
+        private Label VsLabel;
+        private TableLayoutPanel TopTableLayoutPanel;
+        private Label SecondAiLabel;
+        private Label FirstAiLabel;
     }
 }
 

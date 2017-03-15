@@ -148,7 +148,6 @@ namespace FootballAIGame.MatchSimulation
         private Team WhoIsOnLeft { get; set; }
 
         private string CurrentTime
-
         {
             get
             {
