@@ -10,7 +10,7 @@ namespace FootballAIGame.MatchSimulation.Models
         public string Time { get; set; }
 
         [DataMember]
-        public ErrorType Type { get; set; }
+        public SimulationErrorReason Reason { get; set; }
 
         [DataMember]
         public Team Team { get; set; }
@@ -18,26 +18,5 @@ namespace FootballAIGame.MatchSimulation.Models
         [DataMember]
         public int? AffectedPlayerNumber { get; set; }
 
-        [DataContract]
-        public enum ErrorType
-        {
-            [EnumMember]
-            TooHighSpeed,
-
-            [EnumMember]
-            TooHighAcceleration,
-
-            [EnumMember]
-            TooStrongKick,
-
-            [EnumMember]
-            InvalidMovementVector,
-
-            [EnumMember]
-            InvalidKickVector,
-
-            [EnumMember]
-            Disconnection, Cancel
-        }
     }
 }

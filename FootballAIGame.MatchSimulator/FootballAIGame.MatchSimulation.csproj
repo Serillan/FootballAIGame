@@ -45,6 +45,7 @@
     <Compile Include="ConnectionManager.cs" />
     <Compile Include="CustomDataTypes\Vector.cs" />
     <Compile Include="IClientCommunicator.cs" />
+    <Compile Include="Models\SimulationErrorReason.cs" />
     <Compile Include="Models\Goal.cs" />
     <Compile Include="Models\MatchInfo.cs" />
     <Compile Include="MatchSimulator.cs" />

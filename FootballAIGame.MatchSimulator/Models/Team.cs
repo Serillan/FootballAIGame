@@ -15,5 +15,6 @@ namespace FootballAIGame.MatchSimulation.Models
 
         [EnumMember]
         SecondPlayer
+
     }
 }

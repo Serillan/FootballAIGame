@@ -208,21 +208,21 @@ namespace FootballAIGame.LocalDesktopSimulator
         {
             var ai = error.Team == Team.FirstPlayer ? ai1 : ai2;
 
-            switch (error.Type)
+            switch (error.Reason)
             {
-                case SimulationError.ErrorType.TooHighSpeed:
+                case SimulationErrorReason.TooHighSpeed:
                     return $"{error.Time} : {ai} - Player{error.AffectedPlayerNumber} has too high speed.";
-                case SimulationError.ErrorType.TooHighAcceleration:
+                case SimulationErrorReason.TooHighAcceleration:
                     return $"{error.Time} : {ai} - Player{error.AffectedPlayerNumber} has too high acceleration.";
-                case SimulationError.ErrorType.TooStrongKick:
+                case SimulationErrorReason.TooStrongKick:
                     return $"{error.Time} : {ai} - Player{error.AffectedPlayerNumber} has made too strong kick.";
-                case SimulationError.ErrorType.InvalidMovementVector:
+                case SimulationErrorReason.InvalidMovementVector:
                     return $"{error.Time} : {ai} - Player{error.AffectedPlayerNumber} has invalid movement vector set.";
-                case SimulationError.ErrorType.InvalidKickVector:
+                case SimulationErrorReason.InvalidKickVector:
                     return $"{error.Time} : {ai} - Player{error.AffectedPlayerNumber} has invalid kick vector set.";
-                case SimulationError.ErrorType.Disconnection:
+                case SimulationErrorReason.Disconnection:
                     return $"{error.Time} : {ai} - Player has disconnected.";
-                case SimulationError.ErrorType.Cancel:
+                case SimulationErrorReason.Cancellation:
                     return $"{error.Time} : {ai} - Player has left the match.";
                 default:
                     throw new ArgumentOutOfRangeException();

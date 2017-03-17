@@ -159,8 +159,8 @@ namespace FootballAIGame.MatchSimulation
         }
         //private int CurrentScore1 { get; set; }
         //private int CurrentScore2 { get; set; }
-        private Dictionary<SimulationError.ErrorType, int> NumberOfPlayer1Errors { get; set; }
-        private Dictionary<SimulationError.ErrorType, int> NumberOfPlayer2Errors { get; set; }
+        private Dictionary<SimulationErrorReason, int> NumberOfPlayer1Errors { get; set; }
+        private Dictionary<SimulationErrorReason, int> NumberOfPlayer2Errors { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MatchSimulator"/> class.
@@ -172,10 +172,10 @@ namespace FootballAIGame.MatchSimulation
             this.Player1AiConnection = player1AiConnection;
             this.Player2AiConnection = player2AiConnection;
 
-            NumberOfPlayer1Errors = new Dictionary<SimulationError.ErrorType, int>();
-            NumberOfPlayer2Errors = new Dictionary<SimulationError.ErrorType, int>();
+            NumberOfPlayer1Errors = new Dictionary<SimulationErrorReason, int>();
+            NumberOfPlayer2Errors = new Dictionary<SimulationErrorReason, int>();
 
-            foreach (SimulationError.ErrorType value in Enum.GetValues(typeof(SimulationError.ErrorType)))
+            foreach (SimulationErrorReason value in Enum.GetValues(typeof(SimulationErrorReason)))
             {
                 NumberOfPlayer1Errors.Add(value, 0);
                 NumberOfPlayer2Errors.Add(value, 0);
@@ -366,7 +366,7 @@ namespace FootballAIGame.MatchSimulation
                 {
                     Team = Team.FirstPlayer,
                     Time = CurrentTime,
-                    Type = SimulationError.ErrorType.Disconnection
+                    Reason = SimulationErrorReason.Disconnection
                 });
             }
             if (Message2.IsFaulted || !Player2AiConnection.IsActive)
@@ -376,7 +376,7 @@ namespace FootballAIGame.MatchSimulation
                 {
                     Team = Team.SecondPlayer,
                     Time = CurrentTime,
-                    Type = SimulationError.ErrorType.Disconnection
+                    Reason = SimulationErrorReason.Disconnection
                 });
             }
 
@@ -387,7 +387,7 @@ namespace FootballAIGame.MatchSimulation
                 {
                     Team = Team.FirstPlayer,
                     Time = CurrentTime,
-                    Type = SimulationError.ErrorType.Cancel
+                    Reason = SimulationErrorReason.Cancellation
                 });
             }
             if (Player2CancelRequested)
@@ -397,7 +397,7 @@ namespace FootballAIGame.MatchSimulation
                 {
                     Team = Team.SecondPlayer,
                     Time = CurrentTime,
-                    Type = SimulationError.ErrorType.Disconnection
+                    Reason = SimulationErrorReason.Disconnection
                 });
             }
 
@@ -643,13 +643,13 @@ namespace FootballAIGame.MatchSimulation
                         double.IsInfinity(action.Movement.X) || double.IsInfinity(action.Movement.Y))
                     {
                         action.Movement = new Vector(0, 0);
-                        if (NumberOfPlayer1Errors[SimulationError.ErrorType.InvalidMovementVector]++ < MaximumNumberOfSameKindErrorInLog)
+                        if (NumberOfPlayer1Errors[SimulationErrorReason.InvalidMovementVector]++ < MaximumNumberOfSameKindErrorInLog)
                             MatchInfo.Errors.Add(new SimulationError()
                             {
                                 Time = CurrentTime,
                                 Team = Team.FirstPlayer,
                                 AffectedPlayerNumber = i,
-                                Type = SimulationError.ErrorType.InvalidMovementVector
+                                Reason = SimulationErrorReason.InvalidMovementVector
                             });
                     }
 
@@ -667,13 +667,13 @@ namespace FootballAIGame.MatchSimulation
                         action.Movement.Y = player.Movement.Y + fixedAcceleration.Y;
 
                         if (accelerationValue > MaxAcceleration * MinReportableCorrection &&
-                            NumberOfPlayer1Errors[SimulationError.ErrorType.TooHighAcceleration]++ < MaximumNumberOfSameKindErrorInLog)
+                            NumberOfPlayer1Errors[SimulationErrorReason.TooHighAcceleration]++ < MaximumNumberOfSameKindErrorInLog)
                             MatchInfo.Errors.Add(new SimulationError()
                             {
                                 Time = CurrentTime,
                                 Team = Team.FirstPlayer,
                                 AffectedPlayerNumber = i,
-                                Type = SimulationError.ErrorType.TooHighAcceleration
+                                Reason = SimulationErrorReason.TooHighAcceleration
                             });
 
                     }
@@ -690,13 +690,13 @@ namespace FootballAIGame.MatchSimulation
                         player.Movement.Y *= player.MaxSpeed / newSpeed;
 
                         if (newSpeed > player.MaxSpeed * MinReportableCorrection &&
-                            NumberOfPlayer1Errors[SimulationError.ErrorType.TooHighSpeed]++ < MaximumNumberOfSameKindErrorInLog)
+                            NumberOfPlayer1Errors[SimulationErrorReason.TooHighSpeed]++ < MaximumNumberOfSameKindErrorInLog)
                             MatchInfo.Errors.Add(new SimulationError()
                             {
                                 Time = CurrentTime,
                                 Team = Team.FirstPlayer,
                                 AffectedPlayerNumber = i,
-                                Type = SimulationError.ErrorType.TooHighSpeed
+                                Reason = SimulationErrorReason.TooHighSpeed
                             });
                     }
 
@@ -727,13 +727,13 @@ namespace FootballAIGame.MatchSimulation
                       double.IsInfinity(action.Movement.X) || double.IsInfinity(action.Movement.Y))
                     {
                         action.Movement = new Vector(0, 0);
-                        if (NumberOfPlayer2Errors[SimulationError.ErrorType.InvalidMovementVector]++ < MaximumNumberOfSameKindErrorInLog)
+                        if (NumberOfPlayer2Errors[SimulationErrorReason.InvalidMovementVector]++ < MaximumNumberOfSameKindErrorInLog)
                             MatchInfo.Errors.Add(new SimulationError()
                             {
                                 Time = CurrentTime,
                                 Team = Team.SecondPlayer,
                                 AffectedPlayerNumber = i,
-                                Type = SimulationError.ErrorType.InvalidMovementVector
+                                Reason = SimulationErrorReason.InvalidMovementVector
                             });
                     }
 
@@ -751,13 +751,13 @@ namespace FootballAIGame.MatchSimulation
                         action.Movement.Y = (float)(player.Movement.Y + fixedAcceleration.Y);
 
                         if (accelerationValue > MaxAcceleration * MinReportableCorrection &&
-                            NumberOfPlayer2Errors[SimulationError.ErrorType.TooHighAcceleration]++ < MaximumNumberOfSameKindErrorInLog)
+                            NumberOfPlayer2Errors[SimulationErrorReason.TooHighAcceleration]++ < MaximumNumberOfSameKindErrorInLog)
                             MatchInfo.Errors.Add(new SimulationError()
                             {
                                 Time = CurrentTime,
                                 Team = Team.SecondPlayer,
                                 AffectedPlayerNumber = i,
-                                Type = SimulationError.ErrorType.TooHighAcceleration
+                                Reason = SimulationErrorReason.TooHighAcceleration
                             });
                     }
 
@@ -772,13 +772,13 @@ namespace FootballAIGame.MatchSimulation
                         player.Movement.Y *= (float)(player.MaxSpeed / newSpeed);
 
                         if (newSpeed > player.MaxSpeed * MinReportableCorrection &&
-                            NumberOfPlayer2Errors[SimulationError.ErrorType.TooHighSpeed]++ < MaximumNumberOfSameKindErrorInLog)
+                            NumberOfPlayer2Errors[SimulationErrorReason.TooHighSpeed]++ < MaximumNumberOfSameKindErrorInLog)
                             MatchInfo.Errors.Add(new SimulationError()
                             {
                                 Time = CurrentTime,
                                 Team = Team.SecondPlayer,
                                 AffectedPlayerNumber = i,
-                                Type = SimulationError.ErrorType.TooHighSpeed
+                                Reason = SimulationErrorReason.TooHighSpeed
                             });
                     }
 
@@ -840,13 +840,13 @@ namespace FootballAIGame.MatchSimulation
                       double.IsInfinity(kickX) || double.IsInfinity(kickY))
                 {
                     GameState.FootballPlayers[i].Kick = new Vector(0, 0);
-                    if (NumberOfPlayer1Errors[SimulationError.ErrorType.InvalidKickVector]++ < MaximumNumberOfSameKindErrorInLog)
+                    if (NumberOfPlayer1Errors[SimulationErrorReason.InvalidKickVector]++ < MaximumNumberOfSameKindErrorInLog)
                         MatchInfo.Errors.Add(new SimulationError()
                         {
                             Team = Team.FirstPlayer,
                             Time = CurrentTime,
                             AffectedPlayerNumber = i,
-                            Type = SimulationError.ErrorType.InvalidKickVector
+                            Reason = SimulationErrorReason.InvalidKickVector
                         });
                 }
 
@@ -864,13 +864,13 @@ namespace FootballAIGame.MatchSimulation
                       double.IsInfinity(kickX) || double.IsInfinity(kickY))
                 {
                     GameState.FootballPlayers[i + 11].Kick = new Vector(0, 0);
-                    if (NumberOfPlayer2Errors[SimulationError.ErrorType.InvalidKickVector]++ < MaximumNumberOfSameKindErrorInLog)
+                    if (NumberOfPlayer2Errors[SimulationErrorReason.InvalidKickVector]++ < MaximumNumberOfSameKindErrorInLog)
                         MatchInfo.Errors.Add(new SimulationError()
                         {
                             Team = Team.SecondPlayer,
                             Time = CurrentTime,
                             AffectedPlayerNumber = i,
-                            Type = SimulationError.ErrorType.InvalidKickVector
+                            Reason = SimulationErrorReason.InvalidKickVector
                         });
                 }
             }
@@ -910,25 +910,25 @@ namespace FootballAIGame.MatchSimulation
                     if (kickWinner.Id < 11)
                     {
                         if (newSpeed > maxAllowedSpeed * MinReportableCorrection &&
-                            NumberOfPlayer1Errors[SimulationError.ErrorType.TooStrongKick]++ < MaximumNumberOfSameKindErrorInLog)
+                            NumberOfPlayer1Errors[SimulationErrorReason.TooStrongKick]++ < MaximumNumberOfSameKindErrorInLog)
                             MatchInfo.Errors.Add(new SimulationError()
                             {
                                 Team = Team.FirstPlayer,
                                 Time = CurrentTime,
                                 AffectedPlayerNumber = kickWinner.Id,
-                                Type = SimulationError.ErrorType.TooStrongKick
+                                Reason = SimulationErrorReason.TooStrongKick
                             });
                     }
                     else
                     {
                         if (newSpeed > maxAllowedSpeed * MinReportableCorrection &&
-                            NumberOfPlayer2Errors[SimulationError.ErrorType.TooStrongKick]++ < MaximumNumberOfSameKindErrorInLog)
+                            NumberOfPlayer2Errors[SimulationErrorReason.TooStrongKick]++ < MaximumNumberOfSameKindErrorInLog)
                             MatchInfo.Errors.Add(new SimulationError()
                             {
                                 Team = Team.SecondPlayer,
                                 Time = CurrentTime,
                                 AffectedPlayerNumber = kickWinner.Id - 11,
-                                Type = SimulationError.ErrorType.TooStrongKick
+                                Reason = SimulationErrorReason.TooStrongKick
                             });
                     }
                 }

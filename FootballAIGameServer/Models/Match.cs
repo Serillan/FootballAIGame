@@ -183,27 +183,27 @@ namespace FootballAIGame.Server.Models
             {
                 string errorMessage;
 
-                switch (error.Type)
+                switch (error.Reason)
                 {
-                    case SimulationError.ErrorType.TooHighSpeed:
+                    case SimulationErrorReason.TooHighSpeed:
                         errorMessage = $"{error.Time} - Player{error.AffectedPlayerNumber} has too high speed.";
                         break;
-                    case SimulationError.ErrorType.TooHighAcceleration:
+                    case SimulationErrorReason.TooHighAcceleration:
                         errorMessage = $"{error.Time} - Player{error.AffectedPlayerNumber} has too high acceleration.";
                         break;
-                    case SimulationError.ErrorType.TooStrongKick:
+                    case SimulationErrorReason.TooStrongKick:
                         errorMessage = $"{error.Time} - Player{error.AffectedPlayerNumber} has made too strong kick.";
                         break;
-                    case SimulationError.ErrorType.InvalidMovementVector:
+                    case SimulationErrorReason.InvalidMovementVector:
                         errorMessage = $"{error.Time} - Player{error.AffectedPlayerNumber} has invalid movement vector set.";
                         break;
-                    case SimulationError.ErrorType.InvalidKickVector:
+                    case SimulationErrorReason.InvalidKickVector:
                         errorMessage = $"{error.Time} - Player{error.AffectedPlayerNumber} has invalid kick vector set.";
                         break;
-                    case SimulationError.ErrorType.Disconnection:
+                    case SimulationErrorReason.Disconnection:
                         errorMessage = $"{error.Time} - Player has disconnected.";
                         break;
-                    case SimulationError.ErrorType.Cancel:
+                    case SimulationErrorReason.Cancellation:
                         errorMessage = $"{error.Time} - Player has left the match.";
                         break;
                     default:

@@ -43,11 +43,32 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CommandParsing\CommandParser.cs" />
+    <Compile Include="CommandParsing\Errors\InvalidNumberOfAi.cs" />
+    <Compile Include="CommandParsing\Errors\MissingAIs.cs" />
+    <Compile Include="CommandParsing\Errors\PathTooLong.cs" />
+    <Compile Include="CommandParsing\Errors\PermissionDenied.cs" />
+    <Compile Include="CommandParsing\Errors\InvalidCommandName.cs" />
+    <Compile Include="CommandParsing\Errors\InvalidPath.cs" />
+    <Compile Include="CommandParsing\Errors\MissingCommand.cs" />
+    <Compile Include="CommandParsing\Errors\MissingOptions.cs" />
+    <Compile Include="CommandParsing\Errors\NullInput.cs" />
+    <Compile Include="CommandParsing\ParseResult.cs" />
+    <Compile Include="Commands\ICommand.cs" />
+    <Compile Include="Commands\SimulateMatchesCommand.cs" />
+    <Compile Include="CommandParsing\Errors\IParsingError.cs" />
+    <Compile Include="CommandParsing\Errors\UnknownOption.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FootballAIGame.LocalSimulationBase\FootballAIGame.LocalSimulationBase.csproj">
+      <Project>{EA9A68AF-9A17-42D7-A322-0A55194E3D35}</Project>
+      <Name>FootballAIGame.LocalSimulationBase</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
