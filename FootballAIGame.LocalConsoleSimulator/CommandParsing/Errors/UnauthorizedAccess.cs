@@ -6,16 +6,16 @@ using System.Threading.Tasks;
 
 namespace FootballAIGame.LocalConsoleSimulator.CommandParsing.Errors
 {
-    class PermissionDenied : IParsingError
+    class UnauthorizedAccess : IParsingError
     {
         public string ErrorMessage { get; }
 
         public string Path { get; }
 
-        public PermissionDenied(string path)
+        public UnauthorizedAccess(string path)
         {
             Path = path;
-            ErrorMessage = $"Missing permission to use - {path}";
+            ErrorMessage = $"Unauthorized access - {path}";
         }
     }
 }

@@ -53,6 +53,8 @@ namespace FootballAIGame.MatchSimulation
 
         public PlayerConnectedHandler PlayerConnectedHandler { get; set; }
 
+        public bool IsVerbose { get; set; }
+
         /// <summary>
         /// Gets the singleton instance.
         /// </summary>
@@ -100,7 +102,9 @@ namespace FootballAIGame.MatchSimulation
                 {
                     Connections.Add(connection);
                 }
-                Console.WriteLine("New client connection established.");
+
+                if (IsVerbose)
+                    Console.WriteLine("New client connection established.");
                 WaitForLogin(connection);
             }
         }
@@ -127,9 +131,10 @@ namespace FootballAIGame.MatchSimulation
                     {
                         if (!clientConnection.IsConnected)
                         {
-                            if (clientConnection.IsActive)
+                            if (clientConnection.IsActive && IsVerbose)
                                 Console.WriteLine($"Player {clientConnection.PlayerName} with AI " +
                                               $"{clientConnection.AiName} has disconnected.");
+
                             clientConnection.IsActive = false;
 
                             toBeRemovedConnections.Add(clientConnection);
@@ -179,12 +184,14 @@ namespace FootballAIGame.MatchSimulation
 
                 if (clientMessage == null) // connection has dropped
                 {
-                    Console.WriteLine("Unauthenticated client has disconnected.");
+                    if (IsVerbose)
+                        Console.WriteLine("Unauthenticated client has disconnected.");
                     break; 
                 }
                 else if (!(clientMessage is LoginMessage))
                 {
-                    Console.WriteLine("Client has sent invalid message for connecting.");
+                    if (IsVerbose)
+                        Console.WriteLine("Client has sent invalid message for connecting.");
                     await connection.TrySendAsync("FAIL invalid message format.");
                 }
                 else
@@ -201,7 +208,9 @@ namespace FootballAIGame.MatchSimulation
                         {
                             ActiveConnections.Add(connection);
                         }
-                        Console.WriteLine($"Player {connection.PlayerName} with AI {connection.AiName} has log on.");
+
+                        if (IsVerbose)
+                            Console.WriteLine($"Player {connection.PlayerName} with AI {connection.AiName} has log on.");
                         if (PlayerConnectedHandler != null)
                             await PlayerConnectedHandler(connection);
                         break;

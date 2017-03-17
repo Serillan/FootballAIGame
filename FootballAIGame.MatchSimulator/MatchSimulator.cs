@@ -128,6 +128,8 @@ namespace FootballAIGame.MatchSimulation
         /// </value>
         public bool Player2CancelRequested { get; set; }
 
+        public bool IsVerbose { get; set; }
+
         //public string Player1ErrorLog { get; set; }
 
         //public string Player2ErrorLog { get; set; }
@@ -220,8 +222,8 @@ namespace FootballAIGame.MatchSimulation
 
                     CurrentStep = step;
                     await ProcessSimulationStepAsync(step);
-                    if (step % 100 == 0)
-                        Console.WriteLine(step);
+                    //if (step % 100 == 0)
+                    //    Console.WriteLine(step);
                 }
 
                 // second half
@@ -238,16 +240,19 @@ namespace FootballAIGame.MatchSimulation
 
                     CurrentStep = step;
                     await ProcessSimulationStepAsync(step);
-                    if (step % 100 == 0)
-                        Console.WriteLine(step);
+                    //if (step % 100 == 0)
+                    //    Console.WriteLine(step);
                 }
 
                 ProcessSimulationEnd();
             }
             catch (Exception ex)
             {
-                Console.WriteLine("simulation exception");
-                Console.WriteLine(ex.Message);
+                if (IsVerbose)
+                {
+                    Console.WriteLine("simulation exception");
+                    Console.WriteLine(ex.Message);
+                }
             }
         }
 
@@ -258,8 +263,11 @@ namespace FootballAIGame.MatchSimulation
         /// <returns></returns>
         private async Task ProcessSimulationStartAsync()
         {
-            Console.WriteLine($"Starting simulation between {Player1AiConnection.PlayerName} " +
-                              $"and {Player2AiConnection.PlayerName}");
+            if (IsVerbose)
+            {
+                Console.WriteLine($"Starting simulation between {Player1AiConnection.PlayerName} " +
+                                  $"and {Player2AiConnection.PlayerName}");
+            }
 
             // 1. check pings
             //Ping1 = Player1AiConnection.PingTimeAverage();

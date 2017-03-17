@@ -68,7 +68,6 @@ namespace FootballAIGame.Server
         /// <summary>
         /// Initializes a new instance of the <see cref="TournamentSimulator"/> class.
         /// </summary>
-        /// <param name="connectionManager">The connection manager.</param>
         /// <param name="tournament">The tournament for simulation.</param>
         public TournamentSimulator(Tournament tournament)
         {

@@ -11,7 +11,7 @@ namespace FootballAIGame.Server
     /// <summary>
     /// The class that contains the entry point of the application.
     /// </summary>
-    public class Program
+    public static class Program
     {
         /// <summary>
         /// The entry point of the application. Starts the <see cref="GameServerService"/> and

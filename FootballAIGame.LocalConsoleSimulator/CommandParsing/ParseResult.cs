@@ -12,7 +12,7 @@ namespace FootballAIGame.LocalConsoleSimulator.CommandParsing
     {
         public ICommand Command { get; set; }
 
-        public bool IsSuccessfull { get; set; }
+        public bool IsSuccessful { get; set; }
 
         public IParsingError Error { get; set; }
     }

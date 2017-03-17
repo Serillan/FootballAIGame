@@ -53,6 +53,7 @@ namespace FootballAIGame.Server
             TournamentSimulator.PlanUnstartedTournaments();
             Console.WriteLine("Tournaments planned.");
 
+            ConnectionManager.Instance.IsVerbose = true;
             var listening = ConnectionManager.Instance.StartListeningAsync();
             Console.WriteLine("Listening has started.");
 
@@ -114,7 +115,7 @@ namespace FootballAIGame.Server
                 connection1.IsInMatch = true;
                 connection2.IsInMatch = true;
 
-                var matchSimulator = new MatchSimulator(connection1, connection2);
+                var matchSimulator = new MatchSimulator(connection1, connection2) { IsVerbose = true };
 
                 lock (RunningSimulations)
                 {

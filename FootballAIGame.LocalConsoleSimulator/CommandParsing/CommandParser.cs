@@ -23,11 +23,9 @@ namespace FootballAIGame.LocalConsoleSimulator.CommandParsing
             line = line.Trim();
 
             if (line.Length == 0)
-            {
                 return new ParseResult() { Error = new MissingCommand() };
-            }
 
-            if (line.StartsWith("simulate", StringComparison.InvariantCultureIgnoreCase))
+            if (Regex.IsMatch(line, @"^simulate(\s|\s*$)"))
                 return TryParseSimulate(line);
 
 
@@ -36,7 +34,7 @@ namespace FootballAIGame.LocalConsoleSimulator.CommandParsing
 
         private static ParseResult TryParseSimulate(string line)
         {
-            Debug.Assert(line != null && line.StartsWith("simulate"));
+            Debug.Assert(line != null && Regex.IsMatch(line, @"^simulate(\s|\s*$)"));
 
             var regex = new Regex($@"^(?i)simulate(?-i)\s*\[(?<options>[^\]]*)\](?<body>.*)$");
 
@@ -52,8 +50,8 @@ namespace FootballAIGame.LocalConsoleSimulator.CommandParsing
             var command = new SimulateMatchesCommand();
 
             // parse options
-            var saveToDirectoryRegex = new Regex(@"^sd\((?<directory>.?)$");
-            var saveToFilesRegex = new Regex(@"^sf\((?<files>)\)");
+            var saveToDirectoryRegex = new Regex(@"^sd\((?<directory>.*?)\)$|^sd$");
+            var saveToFilesRegex = new Regex(@"^sf\((?<files>.*?)\)$|^sf$");
 
             foreach (var option in options)
             {
@@ -63,10 +61,13 @@ namespace FootballAIGame.LocalConsoleSimulator.CommandParsing
                 }
                 else if ((match = saveToDirectoryRegex.Match(option)).Success)
                 {
+                    if (!match.Groups["directory"].Success)
+                        return new ParseResult() { Error = new UnspecifiedSavePath() };
+
                     var directoryPath = match.Groups["directory"].Value;
                     DirectoryInfo directoryInfo;
 
-                    var parsingError = TryParseDirectory(directoryPath, out directoryInfo);
+                    var parsingError = TryParseSaveDirectory(directoryPath, out directoryInfo);
                     if (parsingError != null)
                         return new ParseResult { Error = parsingError };
 
@@ -75,7 +76,10 @@ namespace FootballAIGame.LocalConsoleSimulator.CommandParsing
                 }
                 else if ((match = saveToFilesRegex.Match(option)).Success)
                 {
-                    var filePaths = Regex.Split(match.Groups["files"].Value, @"\s*,\s*");
+                    if (!match.Groups["files"].Success)
+                        return new ParseResult() {Error = new UnspecifiedSavePath()};
+
+                    var filePaths = Regex.Split(match.Groups["files"].Value, @"\s*;\s*");
 
                     var files = new FileInfo[filePaths.Count()];
 
@@ -83,7 +87,7 @@ namespace FootballAIGame.LocalConsoleSimulator.CommandParsing
                     {
                         FileInfo fileInfo;
 
-                        var parsingError = TryParseFile(filePaths[i], out fileInfo);
+                        var parsingError = TryParseSaveFile(filePaths[i], out fileInfo);
                         if (parsingError != null)
                             return new ParseResult { Error = parsingError };
 
@@ -119,57 +123,68 @@ namespace FootballAIGame.LocalConsoleSimulator.CommandParsing
                 }
             }
 
-            return new ParseResult() { Command = command, IsSuccessfull = true };
+            return new ParseResult() { Command = command, IsSuccessful = true };
         }
 
-        private static IParsingError TryParseDirectory(string directoryPath, out DirectoryInfo directoryInfo)
+        private static IParsingError TryParseSaveDirectory(string directoryPath, out DirectoryInfo directoryInfo)
         {
             directoryInfo = null;
 
             Debug.Assert(directoryPath != null);
 
+            if (directoryPath.Length == 0)
+                return new EmptySavePath();
+
             try
             {
                 directoryInfo = new DirectoryInfo(directoryPath);
+
+                if (!directoryInfo.Exists)
+                    directoryInfo.Create();
+
             }
-            catch (SecurityException)
+            catch (Exception ex) when (ex is UnauthorizedAccessException || ex is SecurityException)
             {
-                return new PermissionDenied(directoryPath);
-            }
-            catch (ArgumentException)
-            {
-                return new InvalidPath(directoryPath);
+                return new UnauthorizedAccess(directoryPath);
             }
             catch (PathTooLongException)
             {
                 return new PathTooLong(directoryPath);
             }
-
-            if (!directoryInfo.Exists)
-                directoryInfo.Create();
+            catch (Exception) // rest
+            {
+                return new InvalidPath(directoryPath);
+            }
+           
 
             return null;
         }
 
-        private static IParsingError TryParseFile(string filePath, out FileInfo fileInfo)
+        private static IParsingError TryParseSaveFile(string filePath, out FileInfo fileInfo)
         {
             fileInfo = null;
+
+            Debug.Assert(filePath != null);
+
+            if (filePath.Length == 0)
+                return new EmptySavePath();
 
             try
             {
                 fileInfo = new FileInfo(filePath);
+
             }
-            catch (SecurityException)
+            catch (Exception ex) when(ex is SecurityException || ex is UnauthorizedAccessException)
             {
-                return new PermissionDenied(filePath);
-            }
-            catch (ArgumentException)
-            {
-                return new InvalidPath(filePath);
+                return new UnauthorizedAccess(filePath);
             }
             catch (PathTooLongException)
             {
                 return new PathTooLong(filePath);
+            }
+            catch (Exception) // rest
+            {
+                return new InvalidPath(filePath);
             }
 
 

@@ -296,7 +296,7 @@ namespace FootballAIGame.LocalDesktopSimulator
             }
 
 
-            fileStream?.Close();
+            fileStream.Close();
         }
 
         private void PlayButtonClick(object sender, EventArgs e)
