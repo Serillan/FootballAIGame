@@ -19,7 +19,7 @@
 </section>
 
 <section>
-    
+
     <h3>AI Architecture Overview</h3>
     <p>
         For basic overview of the Ai class visit
@@ -66,16 +66,16 @@
         <h5>Region</h5>
         This class is located in CustomDataTypes.  It is used for defining home regions of the players. Every player
         has its home region (used by MoveToHomeRegion player state). Usually team states set the home region accordingly.
-        
+
         <h5>SupportPositionManager</h5>
-        Located in Utilities (in UserClasses). Singleton class that is used for evaluating positions by certain criteria (safe pass/shot possible ...).
-        It is used by SupportControlling player state. Its update method is called every simulation step (from Ai class).
-        
+        Located in Utilities (in UserClasses). It is Ai class property that is used for evaluating positions by certain criteria (safe pass/shot possible ...).
+        It is used by SupportControlling player state. Its update method is called every simulation step.
+
         <h5>Ai</h5>
         On top of the basic Ai class responsibilities (from basic project) the main AI class is also responsible for holding team entities and calling appropriate entities methods to
-        get the correct AI action in every simulation step. It is implemented as singleton so that we can access from any method
-        the information about the current state and also all the created entities.
-        
+        get the correct AI action in every simulation step. Every state has reference on this class so that it can access
+        the information about the current state and all the created entities.
+
         <h5>Parameters</h5>
         Holds all the AI constants that control the AI behavior.
     </p>
