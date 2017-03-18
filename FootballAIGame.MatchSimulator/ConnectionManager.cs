@@ -7,7 +7,7 @@ using FootballAIGame.MatchSimulation.Messages;
 
 namespace FootballAIGame.MatchSimulation
 {
-    public delegate Task PlayerDisconectedHandler(ClientConnection connection);
+    public delegate Task PlayerDisconnectedHandler(ClientConnection connection);
     public delegate Task PlayerConnectedHandler(ClientConnection connection);
     public delegate Task<bool> AuthenticationHandler(LoginMessage message, ClientConnection connection);
 
@@ -49,7 +49,7 @@ namespace FootballAIGame.MatchSimulation
 
         public AuthenticationHandler AuthenticationHandler { get; set; }
 
-        public PlayerDisconectedHandler PlayerDisconectedHandler { get; set; }
+        public PlayerDisconnectedHandler PlayerDisconnectedHandler { get; set; }
 
         public PlayerConnectedHandler PlayerConnectedHandler { get; set; }
 
@@ -81,7 +81,7 @@ namespace FootballAIGame.MatchSimulation
             Listener = new TcpListener(IPAddress.Any, GameServerPort);
             Connections = new List<ClientConnection>();
             ActiveConnections = new List<ClientConnection>();
-            AuthenticationHandler = DefaultAuthenticate;
+            AuthenticationHandler = DoDefaultAuthenticationAsync;
         }
 
         /// <summary>
@@ -158,8 +158,8 @@ namespace FootballAIGame.MatchSimulation
 
                 foreach (var connection in toBeRemovedConnections)
                 {
-                    if (PlayerDisconectedHandler != null)
-                        runningTasks.Add(PlayerDisconectedHandler(connection));
+                    if (PlayerDisconnectedHandler != null)
+                        runningTasks.Add(PlayerDisconnectedHandler(connection));
 
                 }
 
@@ -225,7 +225,7 @@ namespace FootballAIGame.MatchSimulation
         /// <param name="message">The message.</param>
         /// <param name="connection">The connection.</param>
         /// <returns><c>true</c> if the client has log on successfully; otherwise <c>false</c></returns>
-        private Task<bool> DefaultAuthenticate(LoginMessage message, ClientConnection connection)
+        private Task<bool> DoDefaultAuthenticationAsync(LoginMessage message, ClientConnection connection)
         {
             return Task.FromResult(true);
         }

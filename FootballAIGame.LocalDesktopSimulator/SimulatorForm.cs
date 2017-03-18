@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -34,7 +33,7 @@ namespace FootballAIGame.LocalDesktopSimulator
             MatchPlayer = new MatchPlayer(MatchPanel, CurrentScoreLabel, CurrentTimeLabel, PlaySlider);
 
             ConnectionManager.Instance.PlayerConnectedHandler += HandlePlayerConnectionAsync;
-            ConnectionManager.Instance.PlayerDisconectedHandler += HandlePlayerDisconnectionAsync;
+            ConnectionManager.Instance.PlayerDisconnectedHandler += HandlePlayerDisconnectionAsync;
 
             PlaySlider.MouseDown += PlaySliderOnMouseDown;
             PlaySlider.MouseUp += PlaySliderOnMouseUp;
@@ -114,7 +113,7 @@ namespace FootballAIGame.LocalDesktopSimulator
 
             try
             {
-                var simulationTask = SimulationManager.Instance.Simulate(ai1, ai2);
+                var simulationTask = SimulationManager.Instance.SimulateAsync(ai1, ai2);
 
                 var progressBarUpdateCancelleration = new CancellationTokenSource();
                 var progressBarUpdatingTask = StartUpdatingProgressBarAsync(ai1, ai2, progressBarUpdateCancelleration.Token);
@@ -273,7 +272,7 @@ namespace FootballAIGame.LocalDesktopSimulator
 
             dialog.ShowDialog(this);
 
-            Stream fileStream = null;
+            Stream fileStream;
 
             try
             {

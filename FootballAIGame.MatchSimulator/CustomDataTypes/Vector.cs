@@ -35,8 +35,8 @@ namespace FootballAIGame.MatchSimulation.CustomDataTypes
         /// <param name="y">The y.</param>
         public Vector(double x, double y)
         {
-            this.X = x;
-            this.Y = y;
+            X = x;
+            Y = y;
         }
 
         /// <summary>

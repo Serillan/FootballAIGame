@@ -1,9 +1,7 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using FootballAIGame.LocalConsoleSimulator.CommandParsing;
-using FootballAIGame.LocalConsoleSimulator.Commands;
 using FootballAIGame.LocalSimulationBase;
 using FootballAIGame.MatchSimulation;
 
@@ -21,7 +19,7 @@ namespace FootballAIGame.LocalConsoleSimulator
                 ConnectionManager.Instance.IsVerbose = true;
             }
 
-            Task.Run(() => SimulationManager.Instance.StartAcceptingConnections());
+            Task.Run(() => SimulationManager.Instance.StartAcceptingConnectionsAsync());
 
             if (IsVerbose)
                 Console.WriteLine("Listening has started.");

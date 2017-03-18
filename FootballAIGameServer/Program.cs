@@ -45,7 +45,6 @@ namespace FootballAIGame.Server
         {
             if (eventType != 2 && eventType != 4) return false; // if application is not being closed
 
-            var manager = ConnectionManager.Instance;
             using (var context = new ApplicationDbContext())
             {
                 var players = context.Players.ToList();

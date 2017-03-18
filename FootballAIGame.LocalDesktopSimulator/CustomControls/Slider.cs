@@ -8,8 +8,8 @@ namespace FootballAIGame.LocalDesktopSimulator.CustomControls
 {
     public partial class Slider : UserControl
     {
-        private int _value = 0;
-        private int _min = 0;
+        private int _value;
+        private int _min;
         private int _max = 100;
 
         private bool IsDragging { get; set; }

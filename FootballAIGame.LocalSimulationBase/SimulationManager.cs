@@ -1,15 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using FootballAIGame.LocalSimulationBase.Models;
 using FootballAIGame.MatchSimulation;
 using FootballAIGame.MatchSimulation.Messages;
-using FootballAIGame.MatchSimulation.Models;
 
 namespace FootballAIGame.LocalSimulationBase
 {
@@ -34,7 +29,7 @@ namespace FootballAIGame.LocalSimulationBase
             Initialize();
         }
 
-        public async Task<Match> Simulate(string ai1, string ai2)
+        public async Task<Match> SimulateAsync(string ai1, string ai2)
         {
             if (ai1 == ai2)
                 throw new InvalidOperationException("AIs must be different.");
@@ -88,7 +83,7 @@ namespace FootballAIGame.LocalSimulationBase
             return match;
         }
 
-        public async Task StartAcceptingConnections()
+        public async Task StartAcceptingConnectionsAsync()
         {
             await ConnectionManager.Instance.StartListeningAsync();
         }
@@ -119,10 +114,10 @@ namespace FootballAIGame.LocalSimulationBase
         private void SetSimulationHandlers()
         {
             ConnectionManager.Instance.AuthenticationHandler = ProcessLoginMessageAsync;
-            ConnectionManager.Instance.PlayerDisconectedHandler += PlayerDisconectedHandler;
+            ConnectionManager.Instance.PlayerDisconnectedHandler += HandlePlayerDisconnectionAsync;
         }
 
-        private async Task PlayerDisconectedHandler(ClientConnection connection)
+        private async Task HandlePlayerDisconnectionAsync(ClientConnection connection)
         {
             await Task.Yield();
 

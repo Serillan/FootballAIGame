@@ -1,9 +1,7 @@
 ﻿using System;
-using System.CodeDom;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using FootballAIGame.LocalSimulationBase;
 using FootballAIGame.LocalSimulationBase.Models;
@@ -36,7 +34,7 @@ namespace FootballAIGame.LocalConsoleSimulator.Commands
             if (Program.IsVerbose)
                 Console.WriteLine("Starting simulations.");
 
-            var simulations = Opponents.Select(pair => manager.Simulate(pair.Item1, pair.Item2)).ToList();
+            var simulations = Opponents.Select(pair => manager.SimulateAsync(pair.Item1, pair.Item2)).ToList();
 
             if (Program.IsVerbose)
                 Console.WriteLine("Simulating...");

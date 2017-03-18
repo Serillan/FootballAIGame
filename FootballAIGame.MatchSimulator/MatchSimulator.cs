@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using FootballAIGame.MatchSimulation.CustomDataTypes;
@@ -40,7 +38,7 @@ namespace FootballAIGame.MatchSimulation
         /// <summary>
         /// The ball deceleration in meters per second squared.
         /// </summary>
-        public const double BallDecerelation = 1.5; // [m/s/s]
+        public const double BallDeceleration = 1.5; // [m/s/s]
 
         public const double BallMaxDistanceForKick = 2; // [m]
 
@@ -171,8 +169,8 @@ namespace FootballAIGame.MatchSimulation
         /// <param name="player2AiConnection">The player2 AI connection that will play the match.</param>
         public MatchSimulator(IClientCommunicator player1AiConnection, IClientCommunicator player2AiConnection)
         {
-            this.Player1AiConnection = player1AiConnection;
-            this.Player2AiConnection = player2AiConnection;
+            Player1AiConnection = player1AiConnection;
+            Player2AiConnection = player2AiConnection;
 
             NumberOfPlayer1Errors = new Dictionary<SimulationErrorReason, int>();
             NumberOfPlayer2Errors = new Dictionary<SimulationErrorReason, int>();
@@ -885,7 +883,7 @@ namespace FootballAIGame.MatchSimulation
 
             var playersNearBallKicking = GameState.FootballPlayers.Where(
                 p => Vector.DistanceBetween(GameState.Ball.Position, p.Position) <= BallMaxDistanceForKick &&
-                (p.Kick.X != 0 || p.Kick.Y != 0));
+                (Math.Abs(p.Kick.X) > 0.00000001 || Math.Abs(p.Kick.Y) > 0.00000001));
 
             var kickWinner = GetKickWinner(playersNearBallKicking.ToArray());
 
@@ -947,7 +945,7 @@ namespace FootballAIGame.MatchSimulation
             GameState.Ball.Position.Y += GameState.Ball.Movement.Y;
 
             // ball deceleration (for the next step)
-            var ratio = (GameState.Ball.CurrentSpeed - (BallDecerelation * StepInterval / 1000)) /
+            var ratio = (GameState.Ball.CurrentSpeed - (BallDeceleration * StepInterval / 1000)) /
                 GameState.Ball.CurrentSpeed;
             if (ratio < 0)
                 ratio = 0;
@@ -1370,14 +1368,14 @@ namespace FootballAIGame.MatchSimulation
 
             // at^2 + 2(v_0)t -s = 0, where v_0 = start ball speed, a = acceleration, s = distance, t = time
             // from that equation we calculate t
-            var discriminant = 4 * Math.Pow(ball.CurrentSpeed, 2) - 8 * BallDecerelation * distanceFromIntersection;
+            var discriminant = 4 * Math.Pow(ball.CurrentSpeed, 2) - 8 * BallDeceleration * distanceFromIntersection;
             if (discriminant < 0)
                 return null; // ball will stop -> no intersection reached
 
-            var time = (ball.CurrentSpeed - Math.Sqrt(discriminant)) / BallDecerelation;
+            var time = (ball.CurrentSpeed - Math.Sqrt(discriminant)) / BallDeceleration;
 
             // final speed = v + a * t
-            var speedAtIntersection = ball.CurrentSpeed + BallDecerelation * time;
+            var speedAtIntersection = ball.CurrentSpeed + BallDeceleration * time;
 
             // is speed higher than minimal shot speed (4 for now)
             if (speedAtIntersection <= 4)

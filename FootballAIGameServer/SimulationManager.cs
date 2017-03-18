@@ -189,7 +189,7 @@ namespace FootballAIGame.Server
         private void SetSimulationHandlers()
         {
             ConnectionManager.Instance.AuthenticationHandler = ProcessLoginMessageAsync;
-            ConnectionManager.Instance.PlayerDisconectedHandler = ProcessClientDisconnectionAsync;
+            ConnectionManager.Instance.PlayerDisconnectedHandler = ProcessClientDisconnectionAsync;
         }
 
         private async Task<MatchSimulator> OnSimulationEndAsync(DateTime startTime, MatchSimulator simulator, int? tournamentId)

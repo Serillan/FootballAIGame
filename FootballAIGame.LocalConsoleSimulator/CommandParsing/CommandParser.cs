@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Security;
 using System.Text.RegularExpressions;
 using FootballAIGame.LocalConsoleSimulator.CommandParsing.Errors;
@@ -36,7 +35,7 @@ namespace FootballAIGame.LocalConsoleSimulator.CommandParsing
         {
             Debug.Assert(line != null && Regex.IsMatch(line, @"^simulate(\s|\s*$)"));
 
-            var regex = new Regex($@"^(?i)simulate(?-i)\s*\[(?<options>[^\]]*)\](?<body>.*)$");
+            var regex = new Regex(@"^(?i)simulate(?-i)\s*\[(?<options>[^\]]*)\](?<body>.*)$");
 
             var match = regex.Match(line);
             if (!match.Success)
@@ -81,9 +80,9 @@ namespace FootballAIGame.LocalConsoleSimulator.CommandParsing
 
                     var filePaths = Regex.Split(match.Groups["files"].Value, @"\s*;\s*");
 
-                    var files = new FileInfo[filePaths.Count()];
+                    var files = new FileInfo[filePaths.Length];
 
-                    for (var i = 0; i < filePaths.Count(); i++)
+                    for (var i = 0; i < filePaths.Length; i++)
                     {
                         FileInfo fileInfo;
 

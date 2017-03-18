@@ -136,7 +136,7 @@ namespace FootballAIGame.MatchSimulation
             for (int i = 0; i < echoNum; i++)
             {
                 var reply = pingSender.Send(((IPEndPoint)TcpClient.Client.RemoteEndPoint).Address, timeout);
-                if (reply.Status != IPStatus.BadDestination && reply.Status != IPStatus.TimedOut)
+                if (reply != null && reply.Status != IPStatus.BadDestination && reply.Status != IPStatus.TimedOut)
                 {
                     succNum++;
                     totalTime += reply.RoundtripTime;
@@ -214,7 +214,7 @@ namespace FootballAIGame.MatchSimulation
             }
 
             var byteArray = new byte[data.Length * 4 + 4 + 1];
-            var numArray = new int[1] { gameState.Step };
+            var numArray = new[] { gameState.Step };
 
             Buffer.BlockCopy(numArray, 0, byteArray, 0, 4);
             byteArray[4] = gameState.KickOff ? (byte)1 : (byte)0;
@@ -311,7 +311,7 @@ namespace FootballAIGame.MatchSimulation
                     return null;
                 }
 
-                if (buffer[0] == (int)'\n')
+                if (buffer[0] == '\n')
                     break;
                 bytes.Add(buffer[0]);
             }
@@ -405,14 +405,14 @@ namespace FootballAIGame.MatchSimulation
                     continue;
                 }
 
-                if (actionMessage?.Step == step)
+                if (actionMessage.Step == step)
                     return actionMessage;
-                else if (actionMessage?.Step > step)
+                else if (actionMessage.Step > step)
                 {
                     Console.WriteLine($"Wrong action received! Received {actionMessage.Step} instead of {step}");
                     return null;
                 }
-                else if (actionMessage?.Step < step)
+                else if (actionMessage.Step < step)
                 {
                     Console.WriteLine($"Wrong action received! Received {actionMessage.Step} instead of {step}");
                     return null;

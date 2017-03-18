@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 using FootballAIGame.MatchSimulation;
 using FootballAIGame.MatchSimulation.Models;
@@ -23,11 +22,6 @@ namespace FootballAIGame.Server
         /// </value>
         public static List<TournamentSimulator> RunningTournaments { get; set; } 
             = new List<TournamentSimulator>();
-
-        /// <summary>
-        /// The application database context used for accessing database using entity framework.
-        /// </summary>
-        private ApplicationDbContext _context;
 
         /// <summary>
         /// Gets or sets the tournament identifier of the tournament that
@@ -73,8 +67,6 @@ namespace FootballAIGame.Server
         {
             TournamentId = tournament.Id;
             StartTime = tournament.StartTime;
-
-            _context = new ApplicationDbContext();
         }
 
         /// <summary>
@@ -218,7 +210,7 @@ namespace FootballAIGame.Server
             }
 
             // while there is more than 1 player -> round simulation
-            var n = 0;
+            int n;
             lock (Players)
             {
                 n = Players.Count;
@@ -412,7 +404,7 @@ namespace FootballAIGame.Server
         }
 
         /// <summary>
-        /// Creates the next tournament from the specified ReccuringTournament.
+        /// Creates the next tournament from the specified <see cref="RecurringTournament"/>.
         /// </summary>
         /// <param name="tournament">The recurring tournament.</param>
         /// <returns>The created tournament.</returns>
