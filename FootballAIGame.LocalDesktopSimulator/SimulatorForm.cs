@@ -33,8 +33,8 @@ namespace FootballAIGame.LocalDesktopSimulator
             SpeedDropDownList.SelectedItem = SpeedDropDownList.Items[0];
             MatchPlayer = new MatchPlayer(MatchPanel, CurrentScoreLabel, CurrentTimeLabel, PlaySlider);
 
-            ConnectionManager.Instance.PlayerConnectedHandler += PlayerConnectedHandler;
-            ConnectionManager.Instance.PlayerDisconectedHandler += PlayerDisconectedHandler;
+            ConnectionManager.Instance.PlayerConnectedHandler += HandlePlayerConnectionAsync;
+            ConnectionManager.Instance.PlayerDisconectedHandler += HandlePlayerDisconnectionAsync;
 
             PlaySlider.MouseDown += PlaySliderOnMouseDown;
             PlaySlider.MouseUp += PlaySliderOnMouseUp;
@@ -55,13 +55,13 @@ namespace FootballAIGame.LocalDesktopSimulator
                 MatchPlayer.StopPlaying();
         }
 
-        private async Task PlayerConnectedHandler(ClientConnection connection)
+        private async Task HandlePlayerConnectionAsync(ClientConnection connection)
         {
             await Task.Yield();
             UpdateAiList();
         }
 
-        private async Task PlayerDisconectedHandler(ClientConnection connection)
+        private async Task HandlePlayerDisconnectionAsync(ClientConnection connection)
         {
             await Task.Yield();
             UpdateAiList();
@@ -153,7 +153,7 @@ namespace FootballAIGame.LocalDesktopSimulator
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                var step = 0;
+                int step;
 
                 if (SimulationManager.Instance.TryGetSimulationStep(ai1, ai2, out step))
                 {

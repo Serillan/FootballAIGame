@@ -144,8 +144,8 @@ namespace FootballAIGame.MatchSimulation
         private GameState GameState { get; set; }
         private int Ping1 { get; set; }
         private int Ping2 { get; set; }
-        private Task<ClientMessage> Message1 { get; set; }
-        private Task<ClientMessage> Message2 { get; set; }
+        private Task<IClientMessage> Message1 { get; set; }
+        private Task<IClientMessage> Message2 { get; set; }
         private FootballPlayer LastKicker { get; set; }
         private Team WhoIsOnLeft { get; set; }
 
@@ -417,8 +417,8 @@ namespace FootballAIGame.MatchSimulation
         /// <returns></returns>
         private async Task ProcessGettingParametersAsync()
         {
-            var getParameters1 = GetPlayerParameters(Player1AiConnection);
-            var getParameters2 = GetPlayerParameters(Player2AiConnection);
+            var getParameters1 = GetPlayerParametersAsync(Player1AiConnection);
+            var getParameters2 = GetPlayerParametersAsync(Player2AiConnection);
             var result1 = await Task.WhenAny(getParameters1, Task.Delay(500 + Ping1));
             var result2 = await Task.WhenAny(getParameters2, Task.Delay(500 + Ping2));
 
@@ -617,9 +617,9 @@ namespace FootballAIGame.MatchSimulation
         /// </summary>
         /// <param name="playerConnection">The player AI connection.</param>
         /// <returns>The array of football players with their parameters set accordingly.</returns>
-        private static async Task<FootballPlayer[]> GetPlayerParameters(IClientCommunicator playerConnection)
+        private static async Task<FootballPlayer[]> GetPlayerParametersAsync(IClientCommunicator playerConnection)
         {
-            ClientMessage message;
+            IClientMessage message;
 
             while (true)
             {

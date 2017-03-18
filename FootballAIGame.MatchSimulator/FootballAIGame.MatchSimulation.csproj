@@ -50,7 +50,7 @@
     <Compile Include="Models\MatchInfo.cs" />
     <Compile Include="MatchSimulator.cs" />
     <Compile Include="Messages\ActionMessage.cs" />
-    <Compile Include="Messages\ClientMessage.cs" />
+    <Compile Include="Messages\IClientMessage.cs" />
     <Compile Include="Messages\LoginMessage.cs" />
     <Compile Include="Messages\ParametersMessage.cs" />
     <Compile Include="Models\Team.cs" />

@@ -105,7 +105,7 @@ namespace FootballAIGame.MatchSimulation
         /// <value>
         /// The current receive task.
         /// </value>
-        private Task<ClientMessage> CurrentReceiveTask { get; set; }
+        private Task<IClientMessage> CurrentReceiveTask { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ClientConnection"/> class.
@@ -275,11 +275,11 @@ namespace FootballAIGame.MatchSimulation
         /// Receives the client message asynchronously. Returns null if the connection was dropped.
         /// </summary>
         /// <returns>The next received client message.</returns>
-        public async Task<ClientMessage> ReceiveClientMessageAsync()
+        public async Task<IClientMessage> ReceiveClientMessageAsync()
         {
             if (CurrentReceiveTask == null || CurrentReceiveTask.IsCanceled || CurrentReceiveTask.IsCompleted ||
                 CurrentReceiveTask.IsFaulted)
-                CurrentReceiveTask = ReceiveClientMessageAsyncTask();
+                CurrentReceiveTask = StartReceivingClientMessageAsync();
 
             try
             {
@@ -324,9 +324,9 @@ namespace FootballAIGame.MatchSimulation
         /// one receiving at any moment.
         /// </summary>
         /// <returns>The next received client message.</returns>
-        private async Task<ClientMessage> ReceiveClientMessageAsyncTask()
+        private async Task<IClientMessage> StartReceivingClientMessageAsync()
         {
-            ClientMessage message;
+            IClientMessage message;
 
             while (true) // while correct message is not received
             {

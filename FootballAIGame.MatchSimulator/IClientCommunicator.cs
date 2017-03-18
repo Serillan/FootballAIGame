@@ -22,7 +22,7 @@ namespace FootballAIGame.MatchSimulation
 
         Task<bool> TrySendAsync(GameState gameState, int playerNumber);
 
-        Task<ClientMessage> ReceiveClientMessageAsync();
+        Task<IClientMessage> ReceiveClientMessageAsync();
 
         Task<ActionMessage> ReceiveActionMessageAsync(int step);
     }

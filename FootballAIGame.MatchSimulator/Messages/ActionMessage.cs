@@ -7,8 +7,8 @@ namespace FootballAIGame.MatchSimulation.Messages
     /// <summary>
     /// Represents an action message received from a client.
     /// </summary>
-    /// <seealso cref="ClientMessage" />
-    public class ActionMessage : ClientMessage
+    /// <seealso cref="IClientMessage" />
+    public class ActionMessage : IClientMessage
     {
         /// <summary>
         /// Gets or sets the players actions.

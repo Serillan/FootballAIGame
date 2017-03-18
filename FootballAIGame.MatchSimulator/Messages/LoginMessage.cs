@@ -3,8 +3,8 @@
     /// <summary>
     /// Represents a login message received from a client.
     /// </summary>
-    /// <seealso cref="ClientMessage" />
-    public class LoginMessage : ClientMessage
+    /// <seealso cref="IClientMessage" />
+    public class LoginMessage : IClientMessage
     {
         /// <summary>
         /// Gets or sets the name of the player.

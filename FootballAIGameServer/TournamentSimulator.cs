@@ -120,7 +120,7 @@ namespace FootballAIGame.Server
 
                 Console.WriteLine($"Simulation of tournament {TournamentId} is being simulated!");
                 KickInactive();
-                await Simulate();
+                await SimulateAsync();
                 Console.WriteLine($"Simulation of tournament {TournamentId} ends!");
             });
         }
@@ -164,7 +164,7 @@ namespace FootballAIGame.Server
         /// <summary>
         /// Starts the tournament simulation.
         /// </summary>
-        private async Task Simulate()
+        private async Task SimulateAsync()
         {
             Tournament tournament;
 
@@ -226,7 +226,7 @@ namespace FootballAIGame.Server
 
             while (n > 1)
             {
-                Players = await SimulateRound(tournament);
+                Players = await SimulateRoundAsync(tournament);
                 lock (Players)
                 {
                     n = Players.Count;
@@ -275,7 +275,7 @@ namespace FootballAIGame.Server
         /// </summary>
         /// <param name="tournament">The tournament.</param>
         /// <returns>The list of advancing players.</returns>
-        private async Task<List<TournamentPlayer>> SimulateRound(Tournament tournament)
+        private async Task<List<TournamentPlayer>> SimulateRoundAsync(Tournament tournament)
         {
             Console.WriteLine($"Tournament {TournamentId} : Simulating round.");
 

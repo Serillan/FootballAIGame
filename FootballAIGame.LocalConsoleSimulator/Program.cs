@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using FootballAIGame.LocalConsoleSimulator.CommandParsing;
 using FootballAIGame.LocalConsoleSimulator.Commands;
 using FootballAIGame.LocalSimulationBase;
+using FootballAIGame.MatchSimulation;
 
 namespace FootballAIGame.LocalConsoleSimulator
 {
@@ -14,7 +15,11 @@ namespace FootballAIGame.LocalConsoleSimulator
 
         private static void Main(string[] args)
         {
-            IsVerbose = args.Contains("-v");
+            if (args.Contains("-v"))
+            {
+                IsVerbose = true;
+                ConnectionManager.Instance.IsVerbose = true;
+            }
 
             Task.Run(() => SimulationManager.Instance.StartAcceptingConnections());
 

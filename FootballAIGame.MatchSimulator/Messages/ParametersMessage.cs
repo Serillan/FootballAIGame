@@ -6,8 +6,8 @@ namespace FootballAIGame.MatchSimulation.Messages
     /// <summary>
     /// Represents a parameter message received from a client.
     /// </summary>
-    /// <seealso cref="ClientMessage" />
-    public class ParametersMessage : ClientMessage
+    /// <seealso cref="IClientMessage" />
+    public class ParametersMessage : IClientMessage
     {
         /// <summary>
         /// Gets or sets the players. Players have their parameters set accordingly.
