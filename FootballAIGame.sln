@@ -5,7 +5,7 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FootballAIGame.Server", "FootballAIGame.Server\FootballAIGame.Server.csproj", "{00A3C78D-FC4C-4A73-BF17-FFCA2CD6DA3C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FootballAIGame.MatchSimulation", "FootballAIGame.MatchSimulator\FootballAIGame.MatchSimulation.csproj", "{0FF41A2E-C156-4460-ADCF-BF4EF4E3D05C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FootballAIGame.MatchSimulation", "FootballAIGame.MatchSimulation\FootballAIGame.MatchSimulation.csproj", "{0FF41A2E-C156-4460-ADCF-BF4EF4E3D05C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FootballAIGame.LocalDesktopSimulator", "FootballAIGame.LocalDesktopSimulator\FootballAIGame.LocalDesktopSimulator.csproj", "{E5B74DAC-C465-4773-88D5-EBF66E905070}"
 EndProject

@@ -42,7 +42,7 @@
     <Compile Include="SimulationManager.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\FootballAIGame.MatchSimulator\FootballAIGame.MatchSimulation.csproj">
+    <ProjectReference Include="..\FootballAIGame.MatchSimulation\FootballAIGame.MatchSimulation.csproj">
       <Project>{0FF41A2E-C156-4460-ADCF-BF4EF4E3D05C}</Project>
       <Name>FootballAIGame.MatchSimulation</Name>
     </ProjectReference>

@@ -115,7 +115,7 @@
       <Project>{EA9A68AF-9A17-42D7-A322-0A55194E3D35}</Project>
       <Name>FootballAIGame.LocalSimulationBase</Name>
     </ProjectReference>
-    <ProjectReference Include="..\FootballAIGame.MatchSimulator\FootballAIGame.MatchSimulation.csproj">
+    <ProjectReference Include="..\FootballAIGame.MatchSimulation\FootballAIGame.MatchSimulation.csproj">
       <Project>{0FF41A2E-C156-4460-ADCF-BF4EF4E3D05C}</Project>
       <Name>FootballAIGame.MatchSimulation</Name>
     </ProjectReference>
