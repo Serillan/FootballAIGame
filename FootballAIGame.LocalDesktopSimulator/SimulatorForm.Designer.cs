@@ -483,7 +483,7 @@ namespace FootballAIGame.LocalDesktopSimulator
             this.MainMenu.Location = new System.Drawing.Point(0, 0);
             this.MainMenu.Name = "MainMenu";
             this.MainMenu.Padding = new System.Windows.Forms.Padding(0);
-            this.MainMenu.Size = new System.Drawing.Size(313, 27);
+            this.MainMenu.Size = new System.Drawing.Size(198, 27);
             this.MainMenu.TabIndex = 4;
             this.MainMenu.Text = "menuStrip1";
             // 
@@ -522,13 +522,13 @@ namespace FootballAIGame.LocalDesktopSimulator
             // 
             // SecondAiLabel
             // 
+            this.SecondAiLabel.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.SecondAiLabel.AutoSize = true;
-            this.SecondAiLabel.Dock = System.Windows.Forms.DockStyle.Left;
             this.SecondAiLabel.Font = new System.Drawing.Font("Tahoma", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.SecondAiLabel.Location = new System.Drawing.Point(684, 0);
+            this.SecondAiLabel.Location = new System.Drawing.Point(684, 3);
             this.SecondAiLabel.Margin = new System.Windows.Forms.Padding(0);
             this.SecondAiLabel.Name = "SecondAiLabel";
-            this.SecondAiLabel.Size = new System.Drawing.Size(93, 27);
+            this.SecondAiLabel.Size = new System.Drawing.Size(93, 21);
             this.SecondAiLabel.TabIndex = 5;
             this.SecondAiLabel.Text = "SecondAI";
             this.SecondAiLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -550,13 +550,13 @@ namespace FootballAIGame.LocalDesktopSimulator
             // 
             // FirstAiLabel
             // 
+            this.FirstAiLabel.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.FirstAiLabel.AutoSize = true;
-            this.FirstAiLabel.Dock = System.Windows.Forms.DockStyle.Right;
             this.FirstAiLabel.Font = new System.Drawing.Font("Tahoma", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.FirstAiLabel.Location = new System.Drawing.Point(566, 0);
+            this.FirstAiLabel.Location = new System.Drawing.Point(566, 3);
             this.FirstAiLabel.Margin = new System.Windows.Forms.Padding(0);
             this.FirstAiLabel.Name = "FirstAiLabel";
-            this.FirstAiLabel.Size = new System.Drawing.Size(68, 27);
+            this.FirstAiLabel.Size = new System.Drawing.Size(68, 21);
             this.FirstAiLabel.TabIndex = 4;
             this.FirstAiLabel.Text = "FirstAI";
             this.FirstAiLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
