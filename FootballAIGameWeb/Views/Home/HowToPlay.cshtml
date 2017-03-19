@@ -1,0 +1,80 @@
+﻿@{
+    ViewBag.Title = "How to play";
+}
+
+<h2>
+    How to play
+</h2>
+
+<section>
+    <p>
+        In order to compete against other players you need to have an active TCP Client application
+        that will be connected to the game server and that will
+        be sending AI actions during match simulation to the game server as the response to the received
+        request from the server.
+    </p>
+    <img style="margin: 1em" alt="Client-Server Schema" src="/Content/Images/ClientServerSchema.svg"/>
+    <p>
+        You can have more than one connected AI application. When you choose to play a match you select
+        an AI with which you will play.
+    </p>
+    <p>
+        There are prepared projects that implement the communication with the server
+        in accordance to the protocol, so you can focus just on implementing the AI behavior.
+    </p>
+</section>
+
+<section>
+    <h3>Basic Projects</h3>
+    <p>
+        Implements simple random behavior for demonstration. Suitable for creating completely custom AI without using
+        any prepared AI structure.
+    </p>
+    <p><a href="/Projects/CSharp">C# project</a></p>
+    <p><a href="/Projects/Java">Java project</a></p>
+
+    <p />
+
+    <h3>Finite State Machine AI Projects</h3>
+    <p>
+        Implements finite state machine based AI using state pattern.
+        It can be easily modified and extended to create a custom AI.
+    </p>
+    <p><a href="/Projects/CSharpFsm">C# project</a></p>
+    <p><a href="/Projects/JavaFsm">Java project</a></p>
+</section>
+
+<section>
+    <h3>
+        The football match overview
+    </h3>
+    <p>
+        The football match in the game has 5 minutes length. Each game step is 200ms long, so the total number of
+        game steps is 1500.
+        Before the match starts, the server will ask clients for the parameters settings for the football players.
+        After the server has received the responses it will start the game simulation.
+        In each game step the server will request action from both AI clients.
+        In the request the server also sends the current game state.
+        Clients have 100ms to send their actions back to the server. If server doesn't receive the
+        actions in time, it uses default behavior for the football team.
+        After the game ends, the players are notified and everyone can see the match in statistics and watch it.
+    </p>
+    <p>
+        The football field is two-dimensional with 110 meters width and 75 meters height.
+        The rules are different than in the real football match. There is no offside rule for
+        now and fouls don't exist. The positions where players are placed during kickoffs, goals or
+        match starts are set by the server.
+    </p>
+</section>
+
+<section>
+    <h3>
+        Details
+    </h3>
+    <a href="Protocol">Communication protocol between game server and AI client</a><br/>
+    <a href="Restrictions">Simulation Restrictions.</a>
+</section>
+
+
+
+

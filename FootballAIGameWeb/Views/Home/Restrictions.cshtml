@@ -1,0 +1,51 @@
+﻿
+@{
+    ViewBag.Title = "Simulation Restrictions";
+}
+
+<h2>Simulation Restrictions</h2>
+
+<section>
+    <p>
+        If the action received from the AI client doesn't fulfill these rules, than it is corrected
+        accordingly and the error message about the correction is added to the match error log.
+    </p>
+
+    <h3>Football player parameters</h3>
+    <p>
+        The parameters describe how good player is in certain game aspects.
+        There are 4 modifiable parameters - speed, possession, precision, kick power.
+        Every football player has value 1 that can be divided between these parameters.
+        Every parameter has the maximum value 0.4 and the minimum value 0.
+    </p>
+    <p>
+        If the football player value of some parameter is set to invalid number or the parameters don't add up to 1, than
+        the default parameter settings are applied - 0.25 to every parameter.
+    </p>
+
+    <h3>Football player movement</h3>
+    <p>
+        The maximum player speed is 4 + speedParamaterValue * 5 meters per second.
+        (there are properties in the prepared client applications to get current and the maximum speed of the player).
+    </p>
+    <p>The maximum player acceleration is 5 meters per second squared.</p>
+    <p>
+        If a football player accelerates faster than allowed or goes faster than his maximum speed,
+        the movement vector is corrected with accordance to the maximum allowed values. The acceleration is applied instantaneously at the beginning of the step.
+    </p>
+    <h3>Football player kicking</h3>
+    <p>
+        If player is near the ball and successfully kicks the ball he transfers his kicking vector to the
+        ball movement vector with certain modifications. The vector is deviated by the random angle with accordance
+        to the player's precision parameter. With higher precision there is smaller maximum deviation angle.
+        The maximum allowed speed of the ball is 15 + kickPowerValue * 5 meters per second. As with players
+        movement vector, the same correction is applied in this case. The maximum distance from the ball for kicking
+        is 2 meters. Ball decelerates by 1.5 meters per second squared. The deceleration is applied instantaneously at the beginning of the step before
+        the kick is applied.
+    </p>
+    <p>
+        If there are more players near ball kicking the ball, only one player kick will be
+        successful. The player who kicked ball in the last simulation step
+        has higher chance of his kick to success with accordance to the possession parameter.
+    </p>
+</section>

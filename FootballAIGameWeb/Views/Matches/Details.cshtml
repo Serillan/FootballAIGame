@@ -1,0 +1,72 @@
+﻿@model FootballAIGameWeb.Models.Match
+
+@{
+    ViewBag.Title = "Match Details";
+}
+
+<h2 class="text-center">
+    <a href="/players/details/@Model.Player1.Name">@Model.Player1.Name</a> vs
+    <a href="/players/details/@Model.Player2.Name">@Model.Player2.Name</a>
+</h2>
+
+<div class="container col-sm-4 text-center">
+    <h3>Goals</h3>
+    <table class="table table-responsive table-hover">
+        <thead>
+            <tr>
+                <th class="text-center">Time</th>
+                <th class="text-center">Team</th>
+                <th class="text-center">Player</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                var goals = Model.Goals.Split('|');
+                foreach (var goal in goals)
+                {
+                    var tokens = goal.Split(';');
+                    if (tokens.Length < 3)
+                    {
+                        continue;
+                    }
+                    <tr>
+                        <td>@tokens[0]</td>
+                        <td>@tokens[1]</td>
+                        <td>@tokens[2]</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+<div class="container col-sm-4 text-center">
+    <h3>@Model.Score</h3>
+    <table class="table table-responsive table-hover">
+        <thead>
+            <tr>
+                <th class="text-center">@Model.Player1.Name</th>
+                <th></th>
+                <th class="text-center">@Model.Player2.Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>@Model.Shots1</td>
+                <td>Shots</td>
+                <td>@Model.Shots2</td>
+            </tr>
+            <tr>
+                <td>@Model.ShotsOnTarget1</td>
+                <td>Shots on target</td>
+                <td>@Model.ShotsOnTarget2</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="col-sm-4 text-center" style="margin-top: 6em">
+    <div><a href="/matches/watch/@Model.Id" class="btn btn-primary">Watch the match</a></div>
+
+    <div style="margin-top: 2em"><a href="/matches/errors/@Model.Id" class="btn btn-primary">Error log</a></div>
+</div>

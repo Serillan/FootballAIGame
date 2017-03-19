@@ -1,0 +1,164 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:wsap="http://schemas.xmlsoap.org/ws/2004/08/addressing/policy" xmlns:wsa10="http://www.w3.org/2005/08/addressing" xmlns:tns="http://tempuri.org/" xmlns:msc="http://schemas.microsoft.com/ws/2005/12/wsdl/contract" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:wsam="http://www.w3.org/2007/05/addressing/metadata" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema" name="GameServerService" targetNamespace="http://tempuri.org/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsp:Policy wsu:Id="NetTcpBinding_IGameServerService_policy">
+    <wsp:ExactlyOne>
+      <wsp:All>
+        <msb:BinaryEncoding xmlns:msb="http://schemas.microsoft.com/ws/06/2004/mspolicy/netbinary1" />
+        <wsaw:UsingAddressing />
+      </wsp:All>
+    </wsp:ExactlyOne>
+  </wsp:Policy>
+  <wsdl:types>
+    <xsd:schema targetNamespace="http://tempuri.org/Imports">
+      <xsd:import namespace="http://tempuri.org/" />
+      <xsd:import namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
+    </xsd:schema>
+  </wsdl:types>
+  <wsdl:message name="IGameServerService_WantsToPlay_InputMessage">
+    <wsdl:part name="parameters" element="tns:WantsToPlay" />
+  </wsdl:message>
+  <wsdl:message name="IGameServerService_WantsToPlay_OutputMessage">
+    <wsdl:part name="parameters" element="tns:WantsToPlayResponse" />
+  </wsdl:message>
+  <wsdl:message name="IGameServerService_StartGame_InputMessage">
+    <wsdl:part name="parameters" element="tns:StartGame" />
+  </wsdl:message>
+  <wsdl:message name="IGameServerService_StartGame_OutputMessage">
+    <wsdl:part name="parameters" element="tns:StartGameResponse" />
+  </wsdl:message>
+  <wsdl:message name="IGameServerService_CancelMatch_InputMessage">
+    <wsdl:part name="parameters" element="tns:CancelMatch" />
+  </wsdl:message>
+  <wsdl:message name="IGameServerService_CancelMatch_OutputMessage">
+    <wsdl:part name="parameters" element="tns:CancelMatchResponse" />
+  </wsdl:message>
+  <wsdl:message name="IGameServerService_LeaveRunningTournament_InputMessage">
+    <wsdl:part name="parameters" element="tns:LeaveRunningTournament" />
+  </wsdl:message>
+  <wsdl:message name="IGameServerService_LeaveRunningTournament_OutputMessage">
+    <wsdl:part name="parameters" element="tns:LeaveRunningTournamentResponse" />
+  </wsdl:message>
+  <wsdl:message name="IGameServerService_PlanTournament_InputMessage">
+    <wsdl:part name="parameters" element="tns:PlanTournament" />
+  </wsdl:message>
+  <wsdl:message name="IGameServerService_PlanTournament_OutputMessage">
+    <wsdl:part name="parameters" element="tns:PlanTournamentResponse" />
+  </wsdl:message>
+  <wsdl:message name="IGameServerService_CancelLooking_InputMessage">
+    <wsdl:part name="parameters" element="tns:CancelLooking" />
+  </wsdl:message>
+  <wsdl:message name="IGameServerService_CancelLooking_OutputMessage">
+    <wsdl:part name="parameters" element="tns:CancelLookingResponse" />
+  </wsdl:message>
+  <wsdl:message name="IGameServerService_GetCurrentMatchStep_InputMessage">
+    <wsdl:part name="parameters" element="tns:GetCurrentMatchStep" />
+  </wsdl:message>
+  <wsdl:message name="IGameServerService_GetCurrentMatchStep_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GetCurrentMatchStepResponse" />
+  </wsdl:message>
+  <wsdl:portType name="IGameServerService">
+    <wsdl:operation name="WantsToPlay">
+      <wsdl:input wsaw:Action="http://tempuri.org/IGameServerService/WantsToPlay" message="tns:IGameServerService_WantsToPlay_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IGameServerService/WantsToPlayResponse" message="tns:IGameServerService_WantsToPlay_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="StartGame">
+      <wsdl:input wsaw:Action="http://tempuri.org/IGameServerService/StartGame" message="tns:IGameServerService_StartGame_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IGameServerService/StartGameResponse" message="tns:IGameServerService_StartGame_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="CancelMatch">
+      <wsdl:input wsaw:Action="http://tempuri.org/IGameServerService/CancelMatch" message="tns:IGameServerService_CancelMatch_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IGameServerService/CancelMatchResponse" message="tns:IGameServerService_CancelMatch_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="LeaveRunningTournament">
+      <wsdl:input wsaw:Action="http://tempuri.org/IGameServerService/LeaveRunningTournament" message="tns:IGameServerService_LeaveRunningTournament_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IGameServerService/LeaveRunningTournamentResponse" message="tns:IGameServerService_LeaveRunningTournament_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="PlanTournament">
+      <wsdl:input wsaw:Action="http://tempuri.org/IGameServerService/PlanTournament" message="tns:IGameServerService_PlanTournament_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IGameServerService/PlanTournamentResponse" message="tns:IGameServerService_PlanTournament_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="CancelLooking">
+      <wsdl:input wsaw:Action="http://tempuri.org/IGameServerService/CancelLooking" message="tns:IGameServerService_CancelLooking_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IGameServerService/CancelLookingResponse" message="tns:IGameServerService_CancelLooking_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="GetCurrentMatchStep">
+      <wsdl:input wsaw:Action="http://tempuri.org/IGameServerService/GetCurrentMatchStep" message="tns:IGameServerService_GetCurrentMatchStep_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IGameServerService/GetCurrentMatchStepResponse" message="tns:IGameServerService_GetCurrentMatchStep_OutputMessage" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="NetTcpBinding_IGameServerService" type="tns:IGameServerService">
+    <wsp:PolicyReference URI="#NetTcpBinding_IGameServerService_policy" />
+    <soap12:binding transport="http://schemas.microsoft.com/soap/tcp" />
+    <wsdl:operation name="WantsToPlay">
+      <soap12:operation soapAction="http://tempuri.org/IGameServerService/WantsToPlay" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="StartGame">
+      <soap12:operation soapAction="http://tempuri.org/IGameServerService/StartGame" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CancelMatch">
+      <soap12:operation soapAction="http://tempuri.org/IGameServerService/CancelMatch" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="LeaveRunningTournament">
+      <soap12:operation soapAction="http://tempuri.org/IGameServerService/LeaveRunningTournament" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="PlanTournament">
+      <soap12:operation soapAction="http://tempuri.org/IGameServerService/PlanTournament" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CancelLooking">
+      <soap12:operation soapAction="http://tempuri.org/IGameServerService/CancelLooking" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetCurrentMatchStep">
+      <soap12:operation soapAction="http://tempuri.org/IGameServerService/GetCurrentMatchStep" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="GameServerService">
+    <wsdl:port name="NetTcpBinding_IGameServerService" binding="tns:NetTcpBinding_IGameServerService">
+      <soap12:address location="net.tcp://127.0.0.1:50028/GameService" />
+      <wsa10:EndpointReference>
+        <wsa10:Address>net.tcp://127.0.0.1:50028/GameService</wsa10:Address>
+      </wsa10:EndpointReference>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

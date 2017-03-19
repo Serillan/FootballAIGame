@@ -1,0 +1,146 @@
+﻿@using FootballAIGameWeb.Models
+@model FootballAIGameWeb.ViewModels.Players.PlayerDetailsViewModel
+
+@{
+    ViewBag.Title = "Player Details";
+}
+
+<h2 class="text-center">
+    @Model.Player.Name
+</h2>
+
+<div class="container col-sm-4 text-center">
+    <h3>Last Matches</h3>
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th class="text-center">Time</th>
+                <th class="text-center">Opponent</th>
+                <th class="text-center">Result</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var match in Model.LastMatches)
+            {
+                var playerNumber = match.Player1 == Model.Player ? 1 : 2;
+                var playerAi = playerNumber == 1 ? match.Player1Ai : match.Player2Ai;
+                var otherPlayer = playerNumber == 1 ? match.Player2 : match.Player1;
+
+                if (match.Winner == 0) // draw
+                {
+                    <tr class="clickable-row" data-href="/matches/details/@match.Id">
+                        <td>@match.Time</td>
+                        <td>@otherPlayer.Name</td>
+                        <td>Draw</td>
+                    </tr>
+
+                }
+                else if (match.Winner == playerNumber)
+                {
+                    <tr class="success clickable-row" data-href="/matches/details/@match.Id">
+                        <td>@match.Time</td>
+                        <td>@otherPlayer.Name</td>
+                        <td>Win</td>
+                    </tr>
+                }
+                else
+                {
+                    <tr class="danger clickable-row" data-href="/matches/details/@match.Id">
+                        <td>@match.Time</td>
+                        <td>@otherPlayer.Name</td>
+                        <td>Loose</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+<div class="container col-sm-4 text-center">
+    <h4>Score: @Model.Player.Score (Rank @Model.Rank)</h4>
+    @if (Model.CurrentPlayer != null)
+    {
+        <div style="margin-top: 3em">
+            <button class="btn btn-default" id="challenge">Challenge Player</button>
+        </div>
+        <select class="form-control" id="ai-selection" style="margin: auto; margin-top: 2em; max-width: 60%;">
+            @foreach (var ai in Model.ActiveAIs)
+            {
+                <option>@ai</option>
+            }
+        </select>
+    }
+</div>
+
+<div class="container col-sm-4 text-center">
+    <h3>Last Tournaments</h3>
+    <table class="table table-responsive table-hover">
+        <thead>
+        <tr>
+            <th class="text-center">Time</th>
+            <th class="text-center">Name</th>
+            <th class="text-center">Position</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var tournament in Model.LastTournaments)
+        {
+            <tr class="clickable-row" data-href="/Tournaments/Details/@tournament.Id">
+                <td>@tournament.StartTime</td>
+                <td>@tournament.Name</td>
+                <td>@tournament.Players.Single(t => t.Player.Name == Model.Player.Name).PlayerPosition</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+
+
+@section scripts
+{
+    <script>
+        $(document)
+            .ready(function () {
+
+                @if (Model.SelectedAi != null)
+                {
+                    <text>$("select").val("@Model.SelectedAi");</text>
+                }
+                else if (Model.ActiveAIs.Count != 0)
+                {
+                    <text>$("select").val("@Model.ActiveAIs[0]");</text>
+                }
+
+                $("#challenge")
+                    .on("click",
+                        function () {
+
+                            var selectedAi = $("option:selected").text();
+                            if (selectedAi === undefined || selectedAi === "") {
+                                toastr.error("You need to have an active AI!");
+                                return;
+                            }
+
+                            $.ajax({
+                                url: "/api/game/selectai/" + selectedAi,
+                                method: "put",
+                                success: function () {
+                                    $.ajax({
+                                        url: "/api/game/challengeplayer/@Model.Player.Name",
+                                        method: "post",
+                                        success: function () {
+                                            location.replace("/");
+                                        },
+                                        error: function (xhr, status, error) {
+                                            toastr.error(json.responseText.message);
+                                        }
+                                    });
+                                },
+                                error: function (xhr, status, error) {
+                                    toastr.error(xhr.responseText.message);
+                                }
+                            });
+                        });
+            });
+    </script>
+}

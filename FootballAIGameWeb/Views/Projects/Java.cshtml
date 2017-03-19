@@ -1,0 +1,80 @@
+﻿@{
+    ViewBag.Title = "Java Project";
+}
+
+<h2>
+    Java Project
+</h2>
+
+<section>
+    <h3>Basic information</h3>
+    <p>
+        To modify the AI behavior you need to customize AI class (AI class in UserClasses package).
+    </p>
+    <p>
+        Requires at minimum Java 6.
+    </p>
+    <a href="https://github.com/Serillan/FootballAIGameJavaClient" style="font-size: 1.1em">Get Project</a>
+</section>
+
+<section>
+    <h3>AI Class Overview</h3>
+    <p>
+        AI class implements FootballAI interface. This interface contains methods that are
+        necessary to define the AI behavior. You can also create your AI by implementing this
+        interface and configuring application to use your implementation instead of AI class
+        in the main method located in Application class (in Application.java file).
+    </p>
+    <br />
+    <h4>Methods</h4>
+    <section>
+        <h5>initialize</h5>
+        <p>
+            This method is called every time the new match simulation with this AI starts.
+            You can use this methods to initialize your AI behavior.
+        </p>
+        <h5>getParameters</h5>
+        <p>
+            This method is used to set your football team parameters. You can customize football players
+            speed, precision, kick power and possession abilities.
+            For each player you have value 1, which you can divide between these abilities. There is one rule -
+            you can put maximally 0.4 value to one ability.
+            You set these abilities by creating new array of football players (with length 11) and by
+            modifying their properties. The first player in the array is goalkeeper.
+            Next 4 players are defenders, next 4 are midfielders and the last 2 are forwards.
+            That's how they will be placed when the match starts. However except for goalkeeper
+            they can have any roles in your AI.
+            The method is called before the match starts.
+        </p>
+        <h5>getAction</h5>
+        <p>
+            This method is called every simulation step to get the football team actions.
+            This method gets the Game State as parameter with the number of simulation step
+            to which this state belongs as its property. In the game state we have all informations
+            about players and ball positions and their current movement vectors. The first 11
+            players in the footballPlayers array are current team players and the next 11 players are from
+            the opponent team. They are ordered in the same manner as in getParamaters method.
+            Important note: football players in the given game state don't have their ability properties set but
+            we know from our getParameters method our team properties. As a result we need to
+            return PlayerAction instance with the actions of our players set. Every PlayerAction consists
+            of the movement and kick vector. The movement vector describes how the position of the player
+            should change during the current simulation step. The acceleration is applied
+            instantaneously at the beginning of the step. The kick vector describes what would be the
+            desired movement vector of the ball if the kick of the ball was successful and absolutely precise.
+        </p>
+        <p>
+            Beside player positions FootballPlayer entity has currentSpeed method
+            that returns the current player speed in meters per second and maxSpeed method which returns
+            the maximum speed of the player in meters per second if the speed parameter of the player is set
+            correctly. Also there is maxAcceleration public field which holds the maximum allowed acceleration
+            of the player. Similarly you can access currentSpeed and ballDeceralation in Ball class.
+        </p>
+        <p>
+            The last public constant that you can access is stepInterval in GameClient class. It holds the
+            time of one simulation step in milliseconds (200).
+        </p>
+    </section>
+</section>
+
+
+

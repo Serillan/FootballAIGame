@@ -1,0 +1,48 @@
+﻿@model FootballAIGameWeb.Models.Match
+
+@{
+    ViewBag.Title = "Errors log";
+}
+
+<h2 class="text-center">
+    <a href="/players/details/@Model.Player1.Name">@Model.Player1.Name</a> vs
+    <a href="/players/details/@Model.Player2.Name">@Model.Player2.Name</a>
+</h2>
+
+<h3>
+    Errors that happened during the match
+</h3>
+Only first 5 errors of the same kind are shown.
+<hr/>
+
+<div class="container col-sm-6">
+    <h4>@Model.Player1.Name errors</h4>
+    <ul>
+        @{
+            var messages = Model.Player1ErrorLog?.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            if (messages != null)
+            {
+                 foreach (var message in messages)
+                 {
+                     <li>@message</li>
+                 }
+            }
+        }
+    </ul>
+
+</div>
+<div class="container col-sm-6">
+    <h4>@Model.Player2.Name errors</h4>
+    <ul>
+        @{
+            messages = Model.Player2ErrorLog?.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            if (messages != null)
+            {
+                foreach (var message in messages)
+                {
+                    <li>@message</li>
+                }
+            }
+        }
+    </ul>
+</div>

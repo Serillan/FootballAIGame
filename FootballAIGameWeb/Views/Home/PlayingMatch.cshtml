@@ -1,0 +1,89 @@
+﻿@using FootballAIGameWeb.Models
+
+@{
+    ViewBag.Title = "Playing Match";
+}
+
+<div class="container text-center" style="margin-top: 4em;">
+    <h2 id="heading" style="margin-bottom: 0em">Game is being simulated.</h2>
+    <h2 id="dots">&nbsp;</h2>
+    <div class="progress">
+        <div id="progress" class="progress-bar" role="progressbar" style="width: 0">
+        </div>
+    </div>
+    <button id="btn" style="margin-top: 2em" class="btn btn-danger">Cancel</button>
+</div>
+
+@section scripts
+{
+    <script>
+        $(document).ready(function() {
+
+            ajaxCalls = setInterval(ajaxCall, 1000);
+            anim = setInterval(animation, 1000);
+            var counter = 0;
+
+            function animation() {
+                counter++;
+                var dots = String.fromCharCode(160); //&nbsp;
+                if (counter > 3)
+                    counter = 0;
+                for (var i = 0; i < counter; i++)
+                    dots = dots + ".";
+                $("#dots").text(dots);
+            }
+
+            function ajaxCall() {
+                $.ajax({
+                    url: "/api/game/getplayerstate",
+                    success: function(response) {
+                        if (@((int)PlayerState.PlayingMatch) === response) {
+                            // playing
+                        } else {
+                            clearInterval(ajaxCalls);
+                            clearInterval(anim);
+                            $("#dots").text(String.fromCharCode(160)); 
+
+                            $.ajax({
+                                url: "/api/game/getlastmatchresult",
+                                success: function(response2) {
+
+                                    if (response2.result === "win")
+                                        $("#heading").text("You have won!");
+                                    else if (response2.result === "loose")
+                                        $("#heading").text("You have lost!");
+                                    else if (response2.result === "draw")
+                                        $("#heading").text("Draw!");
+
+                                    $("#btn").removeProp("disabled");
+                                    $("#btn").text("Details");
+                                    $("#btn").off("click"); // remove old handler
+                                    $("#btn").on("click", function() {
+                                        window.location.href = "/matches/details/" + response2.matchId;
+                                    });
+                                }
+                            });
+                            
+                        }
+                    }
+                });
+                $.ajax({
+                    url: "/api/game/getmatchstep",
+                    success: function(response) {
+                        var percentage = Math.round(response / 1500 * 100);
+                        $("#progress").css("width", percentage + "%");
+                    }
+            });
+            }
+            
+            $("#btn").click(function() {
+                $.ajax({
+                    url: "/api/game/cancelmatch",
+                    method: "put"
+                });
+                clearInterval(anim);
+                $("#btn").prop("disabled", true);
+            });
+        });
+    </script>
+}
