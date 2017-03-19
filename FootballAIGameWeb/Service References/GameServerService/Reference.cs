@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace FootballAIGameWeb.GameServerService {
+namespace FootballAIGame.Web.GameServerService {
     
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
@@ -59,12 +59,12 @@ namespace FootballAIGameWeb.GameServerService {
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public interface IGameServerServiceChannel : FootballAIGameWeb.GameServerService.IGameServerService, System.ServiceModel.IClientChannel {
+    public interface IGameServerServiceChannel : FootballAIGame.Web.GameServerService.IGameServerService, System.ServiceModel.IClientChannel {
     }
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class GameServerServiceClient : System.ServiceModel.ClientBase<FootballAIGameWeb.GameServerService.IGameServerService>, FootballAIGameWeb.GameServerService.IGameServerService {
+    public partial class GameServerServiceClient : System.ServiceModel.ClientBase<FootballAIGame.Web.GameServerService.IGameServerService>, FootballAIGame.Web.GameServerService.IGameServerService {
         
         public GameServerServiceClient() {
         }
