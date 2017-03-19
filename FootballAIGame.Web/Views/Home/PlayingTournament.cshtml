@@ -1,0 +1,278 @@
+﻿@using FootballAIGame.Web.Models
+@model FootballAIGame.Web.ViewModels.Home.PlayingTournamentViewModel
+
+@{
+    ViewBag.Title = "Tournament Simulation";
+    var playingMatchText = "Match is being simulated";
+    var waitingText = "Waiting for the next match";
+}
+
+<h3 class="text-center">
+    @Model.Tournament.Name Tournament
+</h3>
+
+<div style="margin-top: 2em">
+
+    <div class="col-sm-4 text-center">
+        <h4>Players</h4>
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th class="text-center">Position</th>
+                    <th class="text-center">Name</th>
+                    <th class="text-center">Score</th>
+                </tr>
+            </thead>
+            <tbody id="players-body">
+                @foreach (var playerT in Model.Tournament.Players)
+            {
+                    <tr class="clickable-row" data-href="/Players/Details/@playerT.Player.Name">
+                        <td>@playerT.PlayerPosition</td>
+                        <td>@playerT.Player.Name</td>
+                        <td>@playerT.Player.Score</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="col-sm-4 text-center">
+        <h4 id="state" style="margin-top: 1em">
+            @{
+                switch (Model.CurrentPlayer.PlayerState)
+                {
+                    case PlayerState.PlayingTournamentWaiting:
+                        <text>@waitingText</text>
+                        break;
+                    case PlayerState.PlayingTournamentPlaying:
+                        <text>@playingMatchText</text>
+                        break;
+                }
+            }
+        </h4>
+        <h4 id="dots">&nbsp;</h4>
+        @if (Model.CurrentPlayer.PlayerState == PlayerState.PlayingTournamentPlaying)
+        {
+            <div id="progress-wrapper">
+                <div class="progress" id="progress-div" style="margin-top: 1em">
+                    <div id="progress" class="progress-bar"  role="progressbar" style="width: 0"></div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div id="progress-wrapper"></div>
+        }
+        <button id="btn" style="margin-top: 2em; font-size: 70%" class="btn btn-danger">Leave Tournament</button>
+    </div>
+
+    <div class="col-sm-4 text-center">
+        <h4>Matches</h4>
+        <table class="table table-responsive table-hover">
+            <thead>
+                <tr>
+                    <th class="text-center">Score</th>
+                    <th class="text-center">Player 1</th>
+                    <th class="text-center">Player 2</th>
+                </tr>
+            </thead>
+            <tbody id="matches-body">
+                @foreach (var match in Model.Tournament.Matches)
+                {
+                    <tr class="clickable-row" data-href="/matches/details/@match.Id">
+                        <td>@match.Score</td>
+                        @if (match.Winner == 1)
+                        {
+                            <td class="success">@match.Player1.Name</td>
+                            <td>@match.Player2.Name</td>
+                        }
+                        else if (match.Winner == 2)
+                        {
+                            <td>@match.Player1.Name</td>
+                            <td class="success">@match.Player2.Name</td>
+                        }
+                        else // draw
+                        {
+                            <td>@match.Player1.Name</td>
+                            <td>@match.Player2.Name</td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+
+
+@section scripts {
+    <script>
+
+        $(document)
+            .ready(function() {
+                ajaxCalls = setInterval(ajaxCall, 1000);
+                animation = setInterval(animationFunc, 1000);
+                ajaxCallsFunctions = [playerStateCall, tournamentInfoCall, matchStepCall];
+                var counter = 0;
+
+                function animationFunc() {
+                    counter++;
+                    var dots = String.fromCharCode(160); //&nbsp;
+                    if (counter > 3)
+                        counter = 0;
+                    for (var i = 0; i < counter; i++)
+                        dots = dots + ".";
+                    $("#dots").text(dots);
+                }
+
+                $("#btn").on("click.leaveTournament", function() {
+                    $.ajax({
+                        url: "/api/game/leavetournament/@Model.Tournament.Id",
+                        method: "put",
+                        success: function() {
+                            ajaxCallsFunctions.splice(ajaxCallsFunctions.indexOf(playerStateCall), 1);
+                            if (ajaxCallsFunctions.indexOf(matchStepCall > -1))
+                                ajaxCallsFunctions.splice(ajaxCallsFunctions.indexOf(matchStepCall), 1);
+
+                            $("#state").text("You have left the tournament.");
+                            clearInterval(animation);
+                            $("#dots").text("");
+                            $("div#progress-wrapper").html("");
+                            $("#btn").removeClass("btn-danger").addClass("btn-success").text("Home");
+                            $("#btn").off("click.leaveTournament"); // remove old handler (using namespace)
+                            $("#btn").on("click", function() {
+                                location.replace("/");
+                            });
+                        }
+                    });
+                });
+
+                function tournamentInfoCall() {
+                    $.ajax({
+                        url: "/api/game/gettournamentinfo/@Model.Tournament.Id",
+                        method: "get",
+                        success: function(response) {
+                            var playersTableBody = '';
+                            for (var i = 0; i < response.players.length; i++) {
+                                var player = response.players[i];
+                                if (player.position === null)
+                                    player.position = '';     // don't show null
+                                playersTableBody +=
+                                    '<tr class="clickable-row" data-href="/Players/Details/' + player.name +'">' +
+                                        '<td>' + player.position + '</td>' +
+                                        '<td>' + player.name + '</td>' +
+                                        '<td>' + player.score + '</td>' +
+                                     '</tr>';
+                            }
+                            $("#players-body").html(playersTableBody);
+
+                            var matchesTableBody = '';
+                            for (var i = 0; i < response.matches.length; i++) {
+                                var match = response.matches[i];
+                                matchesTableBody +=
+                                    '<tr class="clickable-row" data-href="/matches/details/' + match.id + '">' +
+                                    '<td>' + match.score + '</td>';
+                                if (match.winner === 1)
+                                    matchesTableBody +=
+                                        '<td class="success">' + match.player1Name + '</td>' +
+                                        '<td>' + match.player2Name + '</td>';
+                                else if (match.winner === 2)
+                                    matchesTableBody +=
+                                        '<td>' + match.player1Name + '</td>' +
+                                        '<td class="success">' + match.player2Name + '</td>';
+                                else
+                                    matchesTableBody +=
+                                        '<td>' + match.player1Name + '</td>' +
+                                        '<td>' + match.player2Name + '</td>';
+                                matchesTableBody += '</tr>';
+                            }
+
+                            $("#matches-body").html(matchesTableBody);
+                        }
+                    });
+                };
+
+                function playerStateCall() {
+                    $.ajax({
+                        url: "/api/game/getplayerstate",
+                        method: "get",
+                        success: function(response) {
+                            switch (response) {
+                                case @((int) PlayerState.PlayingTournamentWaiting):
+                                    if ($.trim($("#state").text()) !== "@waitingText") {
+                                        $("#state").text("@waitingText");
+                                        $("div#progress-wrapper").html("");
+                                        if (ajaxCallsFunctions.indexOf(matchStepCall > -1))
+                                            ajaxCallsFunctions.splice(ajaxCallsFunctions.indexOf(matchStepCall), 1);
+                                    }
+                                    break;
+                                case @((int) PlayerState.PlayingTournamentPlaying):
+                                    if ($.trim($("#state").text()) !== "@playingMatchText") {
+                                        $("#state").text("@playingMatchText");
+
+                                        if (ajaxCallsFunctions.indexOf(matchStepCall === -1))
+                                            ajaxCallsFunctions.push(matchStepCall);
+                                        
+                                        var progressBar =
+                                            '<div class="progress" id="progress-div" style="margin-top: 1em">' +
+                                            '    <div id="progress" class="progress-bar" role="progressbar" style="width: 0"></div>' +
+                                            '</div>';
+
+                                        $("div#progress-wrapper").html(progressBar);
+                                        
+                                    }
+
+                                    break;
+                                default:
+                                    // show final position
+                                    $("div#progress-wrapper").html("");
+                                    $.ajax({
+                                        url: "/api/game/gettournamentposition/@Model.Tournament.Id",
+                                        method: "get",
+                                        success: function(response) {
+                                            ajaxCallsFunctions.splice(ajaxCallsFunctions.indexOf(playerStateCall), 1);
+                                            if (ajaxCallsFunctions.indexOf(matchStepCall > -1))
+                                                ajaxCallsFunctions.splice(ajaxCallsFunctions.indexOf(matchStepCall), 1);
+
+                                            // write state
+                                            $("#state").text("Your final position: " + response);
+                                            clearInterval(animation);
+                                            $("#dots").text("");
+                                            $("div#progress-wrapper").html("");
+                                            $("#btn").removeClass("btn-danger").addClass("btn-success").text("Home");
+                                            $("#btn").off("click.leaveTournament"); // remove old handler (using namespace)
+                                            $("#btn").on("click", function() {
+                                                location.replace("/");
+                                            });
+                                        }
+                                    });
+                            }
+
+                        }
+                    });
+                }
+
+                function matchStepCall() {
+                    $.ajax({
+                        url: "/api/game/getmatchstep",
+                        method: "get",
+                        success: function(response) {
+                            var percentage = Math.round(response / 1500 * 100);
+                            $("#progress").css("width", percentage + "%");
+                        }
+                    });
+                }
+
+                function ajaxCall() {
+                    for (var i = 0; i < ajaxCallsFunctions.length; i++)
+                        ajaxCallsFunctions[i]();
+                }
+
+                // first initial call
+                ajaxCall();
+            });
+
+
+    </script>
+}

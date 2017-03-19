@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FootballAIGame.LocalSimulat
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FootballAIGame.LocalConsoleSimulator", "FootballAIGame.LocalConsoleSimulator\FootballAIGame.LocalConsoleSimulator.csproj", "{0FEA93A8-2F2B-42D5-AA04-289DBFE5B0F9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FootballAIGame.Web", "FootballAIGameWeb\FootballAIGame.Web.csproj", "{86DC9896-0D30-4C80-AC30-507776877587}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FootballAIGame.Web", "FootballAIGame.Web\FootballAIGame.Web.csproj", "{86DC9896-0D30-4C80-AC30-507776877587}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
