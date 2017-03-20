@@ -1,0 +1,111 @@
+﻿@{
+    ViewBag.Title = "Simulators";
+}
+
+<h2>
+    Simulators
+</h2>
+
+<section>
+    <h3>Basic Information</h3>
+    <p>
+        There are two simulator applications that you can use to simulate matches between your
+        AIs. One of them is the desktop application with user interface and possibility to
+        watch matches and the other one is the console application for simulating multiple matches at once.
+        You can use these application during you AI development for fast testing or creating AI based on
+        machine learning algorithms.
+
+        To use these applications you need to have at least .NET 4.5 framework version.
+        Besides windows, you should be able to use these application using <a href="http://www.mono-project.com/">Mono</a>
+        on Linux or Mac Os X.
+    </p>
+
+    <h3>Installation</h3>
+    <p>
+
+        You only need to extract the archive to the folder where you want to keep the application.
+        You can start the individual applications using their executables. <br />
+    </p>
+
+    <a href="https://www.dropbox.com/s/d5ik85qz2hgc45a/Simulators.zip?dl=0">Download Page</a>
+
+    <h3>Detailed Informations</h3>
+
+    <p>
+        Both applications act as the server (on localhost) for the AI applications the same way as the main game server.
+        You just need to specify the IP address accordingly (in prepared projects in the Main function).
+        After you start the application, you can connect to it with your AI the same way as you would
+        connect to the main game server but only the AI name matters, all other login fields are ignored.
+    </p>
+
+    <p>
+        Both application provide mechanism for saving matches. The matches are saved in JSON format. Click on the
+        following link for more information about the structure of the save file.
+    </p>
+
+    <a href="/About/SimulatorSaveStructure">Match Save Structure</a>.
+    <br /> <br />
+
+    <h4>Desktop Application</h4>
+    <p>
+        Desktop application provides you with the self describing graphical user interface. You can choose from the list of
+        active AIs the pair for simulation and simulate the match. Then you can watch the match, see all the information about
+        the match and save it. You can load the saved matches and watch them.
+    </p>
+    <br />
+
+    <h4>Console Application</h4>
+    <p>
+        Console Application gives you capability to simulate multiple matches at once. You can start the application
+        with <code>-v</code> argument for verbose mode. After you start the application
+        you can login with your AIs and then you can write to the input of the application the commands for simulation.
+        The application processes all the command from the input (divided by line break).
+    </p>
+    <p>
+        <h5> Simulation command</h5>
+        <code>simulate [option1, option2 ...] ai1 ai2 ai3 ai4 ... </code>.
+    </p>
+
+    <p>
+        This command will simulate the match between the pairs of AI (in order in which they are specified - ai1 vs ai2 ...) and
+        with accordance to the options write the result to the output. There have to be an even number AIs and all AIs must be
+        unique and active (logged in).
+        The default output line has the following format: <code>goals1:goals2, goals3:goals4 ...</code>.
+    </p>
+
+    <h5>Options:</h5>
+    <ul>
+        <li>
+            <p>
+                <code>e</code> - Show extended result. Instead of writing only final scores to the output, the output format will be
+                as followed:
+            </p>
+            <p>
+                <code>
+                    (goals1:goals2, shots1:shots2, shotsOnTarget1:shotsOnTarget2, [goalTime, ai1, Player9; ...],
+                    [errorTime : ai1 - Player8 has too high acceleration.; ...]), ...
+                </code>
+            </p>
+            <p>
+                Every match result is enclosed in parentheses. Matches are divided by comma. After initial
+                shots and goals numbers there is the first pair of brackets in which there are individual goals information
+                divided by semicolon. In the final pair of brackets there are error messages divided by semicolon.
+            </p>
+
+        </li>
+        <li>
+            <p><code>sd(directoryPath)</code> - Save simulated matches to the specified directory.</p>
+            <p>
+                Matches are saved to the files in the given directory with the following file names format:
+                <code>ai1_ai2.json</code>.
+            </p>
+        </li>
+        <li>
+            <p><code>sf(file1Path; file2Path; ...)</code> - Save simulated matches to the specified files.</p>
+            <p>
+                Matches are saved in order to the specified files until all files or all matches are processed.
+            </p>
+        </li>
+    </ul>
+</section>
+

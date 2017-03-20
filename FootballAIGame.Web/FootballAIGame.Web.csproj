@@ -182,6 +182,7 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\Startup.Auth.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Controllers\AboutController.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\Api\GameController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
@@ -719,7 +720,7 @@
     <Content Include="Views\_ViewStart.cshtml" />
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
-    <Content Include="Views\Home\About.cshtml" />
+    <Content Include="Views\About\Index.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Account\_ExternalLoginsListPartial.cshtml" />
     <Content Include="Views\Account\ConfirmEmail.cshtml" />
@@ -750,7 +751,7 @@
     <Content Include="Views\Home\PlayingMatch.cshtml" />
     <Content Include="Views\Tournaments\Index.cshtml" />
     <Content Include="Views\Tournaments\Details.cshtml" />
-    <Content Include="Views\Home\HowToPlay.cshtml" />
+    <Content Include="Views\About\HowToPlay.cshtml" />
     <Content Include="Views\Home\Statistics.cshtml" />
     <Content Include="Views\Matches\Index.cshtml" />
     <Content Include="Views\Players\Index.cshtml" />
@@ -758,8 +759,8 @@
     <Content Include="Views\Matches\Details.cshtml" />
     <Content Include="Views\Matches\Watch.cshtml" />
     <Content Include="Views\Matches\Errors.cshtml" />
-    <Content Include="Views\Home\Protocol.cshtml" />
-    <Content Include="Views\Home\Restrictions.cshtml" />
+    <Content Include="Views\About\Protocol.cshtml" />
+    <Content Include="Views\About\Restrictions.cshtml" />
     <Content Include="Views\Projects\CSharp.cshtml" />
     <Content Include="Views\Tournaments\Current.cshtml" />
     <Content Include="Views\Tournaments\_TournanamentMatches.cshtml" />
@@ -780,6 +781,8 @@
     <Content Include="Views\Projects\Java.cshtml" />
     <Content Include="Views\Projects\CSharpFsm.cshtml" />
     <Content Include="Views\Projects\JavaFsm.cshtml" />
+    <Content Include="Views\About\Simulators.cshtml" />
+    <Content Include="Views\About\SimulatorSaveStructure.cshtml" />
     <None Include="Web.Production.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

@@ -1,0 +1,78 @@
+﻿@{
+    ViewBag.Title = "Save Structure";
+}
+
+<h2>
+    Save Structure
+</h2>
+
+The match save is in JSON format. Here you can see an example of a match save without the match data (described under example).
+
+<br/>
+<br/>
+
+<pre><code>
+{
+  "Ai1Name": "myAI1",
+  "Ai2Name": "myAI2",
+  "MatchInfo": {
+    "Errors": [
+      {
+        "AffectedPlayerNumber": 0,
+        "Reason": 1,
+        "Team": 0,
+        "Time": "2:28"
+      }
+    ],
+    "Goals": [
+      {
+        "ScoreTime": "0:23",
+        "ScorerNumber": 10,
+        "TeamThatScored": 1
+      },
+      {
+        "ScoreTime": "3:24",
+        "ScorerNumber": 10,
+        "TeamThatScored": 0
+      }
+    ],
+    "MatchData": [],
+    "Team1Statistics": {
+      "Goals": 1,
+      "Shots": 3,
+      "ShotsOnTarget": 2
+    },
+    "Team2Statistics": {
+      "Goals": 1,
+      "Shots": 3,
+      "ShotsOnTarget": 3
+    },
+    "Winner": null
+  }
+}
+        </code></pre>
+
+<p>
+    <b>MatchData</b> is empty in this example, in the save it will be filled with the player's and ball's positions (floats) for every simulation
+    step in the following order: ballX, ballY, player1X, player1Y, ..., player22X, player22Y.
+    First 11 players are from the first team and the rest is from the second.
+</p>
+
+<p>
+    <b>Team</b> has two possible options - 0 for the first team and 1 for the second.
+</p>
+
+<p>
+    <b>Winner</b> is equal to null if the draw happens otherwise it is equal the winner team number.
+</p>
+
+<p>
+    <b>Errors Reason</b> has following meaning:
+    0: Too high speed,
+    1: Too high acceleration,
+    2: Too strong kick,
+    3: Invalid movement,
+    4: Invalid kick,
+    5: Disconnection,
+    6: Cancellation,
+</p>

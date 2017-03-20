@@ -119,44 +119,6 @@ namespace FootballAIGame.Web.Controllers
         }
 
         /// <summary>
-        /// Returns about view.
-        /// </summary>
-        /// <returns>The about view.</returns>
-        public ActionResult About()
-        {
-            ViewBag.Message = "Your application description page.";
-
-            return View();
-        }
-
-        /// <summary>
-        /// Returns how to play view.
-        /// </summary>
-        /// <returns>The how to play view.</returns>
-        public ActionResult HowToPlay()
-        {
-            return View();
-        }
-
-        /// <summary>
-        /// Returns protocol view.
-        /// </summary>
-        /// <returns>The protocol view.</returns>
-        public ActionResult Protocol()
-        {
-            return View();
-        }
-
-        /// <summary>
-        /// Returns restriction view.
-        /// </summary>
-        /// <returns>The rules view.</returns>
-        public ActionResult Restrictions()
-        {
-            return View();
-        }
-
-        /// <summary>
         /// Returns statistics view.
         /// </summary>
         /// <returns>The statistics view.</returns>

@@ -7,13 +7,13 @@
 </h2>
 
 <section>
+    <h4>Competition</h4>
     <p>
         In order to compete against other players you need to have an active TCP Client application
-        that will be connected to the game server and that will
-        be sending AI actions during match simulation to the game server as the response to the received
-        request from the server.
+        that will be connected to the game server and that will be sending AI actions during match simulation to the
+        game server as the response to the received request from the server.
     </p>
-    <img style="margin: 1em" alt="Client-Server Schema" src="/Content/Images/ClientServerSchema.svg"/>
+    <img style="margin: 1em" alt="Client-Server Schema" src="/Content/Images/ClientServerSchema.svg" />
     <p>
         You can have more than one connected AI application. When you choose to play a match you select
         an AI with which you will play.
@@ -22,6 +22,18 @@
         There are prepared projects that implement the communication with the server
         in accordance to the protocol, so you can focus just on implementing the AI behavior.
     </p>
+
+    <h4>Development</h4>
+    <p>
+        During AI development you can use the desktop simulator application for fast testing of your AI.
+        This application acts as the server to which you can connect with your AI application. It
+        gives you possibility to simulate matches, watch matches and save/load matches to your file system
+    </p>
+    <p>
+        You can also use console simulator application which provides the possibility to simulate and analyze multiple
+        matches at once (you can use this application to create machine learning based AI).
+    </p>
+    <p><a href="/About/Simulators">Simulators</a></p>
 </section>
 
 <section>
@@ -71,8 +83,8 @@
     <h3>
         Details
     </h3>
-    <a href="Protocol">Communication protocol between game server and AI client</a><br/>
-    <a href="Restrictions">Simulation Restrictions.</a>
+    <a href="/About/Protocol">Communication protocol between game server and AI client</a><br />
+    <a href="/About/Restrictions">Simulation Restrictions.</a>
 </section>
 
 
