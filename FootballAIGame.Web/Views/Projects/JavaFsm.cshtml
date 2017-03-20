@@ -14,14 +14,14 @@
     <p>
         Requires at minimum Java 6.
     </p>
-    <a href="https://github.com/Serillan/FootballAIGameJava.AI.FSM" style="font-size: 1.1em">Get Project</a>
+    <a href="https://github.com/Serillan/FootballAIGame.AI.Java.FSM" style="font-size: 1.1em">Get Project</a>
 </section>
 
 <section>
 
-    <h3>AI Architecture Overview</h3>
+    <h3>FsmFootballAI Architecture Overview</h3>
     <p>
-        For basic overview of the Ai class visit
+        For basic overview of the FootballAI class visit
         <a href="/Projects/Java">Basic Java project page</a>.
     </p>
 
@@ -70,8 +70,8 @@
         Located in Utilities (in UserClasses). It is Ai class member variable that is used for evaluating positions by certain criteria (safe pass/shot possible ...).
         It is used by SupportControlling player state. Its update method is called every simulation step.
 
-        <h5>Ai</h5>
-        On top of the basic Ai class responsibilities (from basic project) the main AI class is also responsible for holding team entities and calling appropriate entities methods to
+        <h5>FsmFootballAI</h5>
+        On top of the basic FootballAI class responsibilities this class is also responsible for holding team entities and calling appropriate entities methods to
         get the correct AI action in every simulation step. Every state has reference on this class so that it can access
         the information about the current state and all the created entities.
 
