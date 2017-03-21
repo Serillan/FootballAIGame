@@ -9,7 +9,7 @@ using FootballAIGame.Server.Models;
 namespace FootballAIGame.Server
 {
     /// <summary>
-    /// The class that contains the entry point of the application.
+    /// Provides entry point of the application.
     /// </summary>
     public static class Program
     {

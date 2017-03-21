@@ -10,20 +10,60 @@ using FootballAIGame.MatchSimulation.Models;
 namespace FootballAIGame.LocalConsoleSimulator.Commands
 {
     /// <summary>
-    /// The simulate matches command.
+    /// Represents the simulation command.
     /// </summary>
     public class SimulateMatchesCommand : ICommand
     {
+        /// <summary>
+        /// Gets or sets a value indicating whether the extended match result should be shown.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if the extended match result should be shown; otherwise, <c>false</c>.
+        /// </value>
         public bool ExtendedResultOn { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the saving to the specified <see cref="SavingDirectory"/> and
+        /// <see cref="SavingFiles"/> should be done.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if the saving to the specified <see cref="SavingDirectory"/> and
+        /// <see cref="SavingFiles"/> should be done; otherwise, <c>false</c>.
+        /// </value>
         public bool SavingOn { get; set; }
 
+        /// <summary>
+        /// Gets or sets the saving directory to which the match results will be saved during command execution
+        /// if the <see cref="SavingOn"/> is set to <c>true</c>.
+        /// </summary>
+        /// <value>
+        /// The saving directory.
+        /// </value>
         public DirectoryInfo SavingDirectory { get; set; }
 
+        /// <summary>
+        /// Gets or sets the saving files to which the match results will be saved during command execution
+        /// if the <see cref="SavingOn"/> is set to <c>true</c>.
+        /// </summary>
+        /// <value>
+        /// The saving files.
+        /// </value>
         public FileInfo[] SavingFiles { get; set; }
 
+        /// <summary>
+        /// Gets or sets the pairs of opponents (their names) that will be in match against each other during the command execution.
+        /// </summary>
+        /// <value>
+        /// The pairs of opponents.
+        /// </value>
         public List<Tuple<string, string>> Opponents { get; set; }
 
+        /// <summary>
+        /// Executes the command asynchronously.
+        /// </summary>
+        /// <returns>
+        /// A task that represents the asynchronous execute operation.
+        /// </returns>
         public async Task ExecuteAsync()
         {
             var manager = SimulationManager.Instance;
@@ -67,6 +107,11 @@ namespace FootballAIGame.LocalConsoleSimulator.Commands
                 SaveMatches(matches);
         }
 
+        /// <summary>
+        /// Saves the specified matches to the specified <see cref="SavingDirectory"/> and <see cref="SavingFiles"/> if they
+        /// are different from null respectively.
+        /// </summary>
+        /// <param name="matches">The matches to be saved.</param>
         private void SaveMatches(IReadOnlyList<Match> matches)
         {
             if (SavingDirectory != null)
@@ -95,6 +140,11 @@ namespace FootballAIGame.LocalConsoleSimulator.Commands
             }
         }
 
+        /// <summary>
+        /// Saves the specified match to the file specified by the path to that file.
+        /// </summary>
+        /// <param name="filePath">The save file path.</param>
+        /// <param name="match">The match to be saved.</param>
         private static void SaveMatch(string filePath, Match match)
         {
             try
@@ -110,6 +160,12 @@ namespace FootballAIGame.LocalConsoleSimulator.Commands
             }
         }
 
+        /// <summary>
+        /// Checks whether there are duplicate names in the <see cref="Opponents"/>.
+        /// If there are duplicates it also writes the error message to the standard error output.
+        /// </summary>
+        /// <returns><c>true</c> if there are duplicate names in the <see cref="Opponents"/>; 
+        /// otherwise, <c>false</c>.</returns>
         private bool CheckForAiDuplicates()
         {
             var duplicates = Opponents
@@ -125,6 +181,11 @@ namespace FootballAIGame.LocalConsoleSimulator.Commands
             return false;
         }
 
+        /// <summary>
+        /// Gets the result message describing the specified matches.
+        /// </summary>
+        /// <param name="matches">The matches.</param>
+        /// <returns>The result message.</returns>
         private string GetResultMessage(IEnumerable<Match> matches)
         {
             string[] messages;
@@ -154,6 +215,15 @@ namespace FootballAIGame.LocalConsoleSimulator.Commands
             return string.Join(", ", messages);
         }
 
+        /// <summary>
+        /// Gets the error message corresponding to the specified error.
+        /// </summary>
+        /// <param name="error">The simulation error.</param>
+        /// <param name="ai1">The first AI from the simulation.</param>
+        /// <param name="ai2">The second AI from the simulation.</param>
+        /// <returns>The error message corresponding to the specified error.</returns>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="error"/> has not
+        /// corresponding error message.</exception>
         private static string GetErrorMessage(SimulationError error, string ai1, string ai2)
         {
             var ai = error.Team == Team.FirstPlayer ? ai1 : ai2;

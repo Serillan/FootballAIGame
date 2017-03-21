@@ -10,8 +10,16 @@ using FootballAIGame.LocalConsoleSimulator.Commands;
 
 namespace FootballAIGame.LocalConsoleSimulator.CommandParsing
 {
+    /// <summary>
+    /// Provides methods for parsing the string input and convert it to the <see cref="ICommand"/>.
+    /// </summary>
     static class CommandParser
     {
+        /// <summary>
+        /// Tries to parse the input line.
+        /// </summary>
+        /// <param name="line">The input line.</param>
+        /// <returns>The <see cref="ParseResult"/> instance. </returns>
         public static ParseResult TryParse(string line)
         {
             if (line == null)
@@ -31,6 +39,12 @@ namespace FootballAIGame.LocalConsoleSimulator.CommandParsing
             return new ParseResult() { Error = new InvalidCommandName(line.Split()[0]) };
         }
 
+        /// <summary>
+        /// Tries to parse the input line and convert it to the <see cref="SimulateMatchesCommand"/>.
+        /// Expects the input line to start with the simulate word.
+        /// </summary>
+        /// <param name="line">The input line.</param>
+        /// <returns></returns>
         private static ParseResult TryParseSimulate(string line)
         {
             Debug.Assert(line != null && Regex.IsMatch(line, @"^simulate(\s|\s*$)"));
@@ -76,7 +90,7 @@ namespace FootballAIGame.LocalConsoleSimulator.CommandParsing
                 else if ((match = saveToFilesRegex.Match(option)).Success)
                 {
                     if (!match.Groups["files"].Success)
-                        return new ParseResult() {Error = new UnspecifiedSavePath()};
+                        return new ParseResult() { Error = new UnspecifiedSavePath() };
 
                     var filePaths = Regex.Split(match.Groups["files"].Value, @"\s*;\s*");
 
@@ -125,6 +139,13 @@ namespace FootballAIGame.LocalConsoleSimulator.CommandParsing
             return new ParseResult() { Command = command, IsSuccessful = true };
         }
 
+        /// <summary>
+        /// Tries to parse the directory path to the directory specified by the save to directory command option.
+        /// </summary>
+        /// <param name="directoryPath">The directory path.</param>
+        /// <param name="directoryInfo">The parsed directory information.</param>
+        /// <returns><see langword="null"/> if the parsing was successful and the parsed <see cref="DirectoryInfo"/> is saved to the 
+        /// <paramref name="directoryInfo"/> output parameter; otherwise, returns the <see cref="IParsingError"/> instance describing the error that happened. </returns>
         private static IParsingError TryParseSaveDirectory(string directoryPath, out DirectoryInfo directoryInfo)
         {
             directoryInfo = null;
@@ -154,11 +175,18 @@ namespace FootballAIGame.LocalConsoleSimulator.CommandParsing
             {
                 return new InvalidPath(directoryPath);
             }
-           
+
 
             return null;
         }
 
+        /// <summary>
+        /// Tries to parse the file path specified by the save to files command option.
+        /// </summary>
+        /// <param name="filePath">The file path.</param>
+        /// <param name="fileInfo">The parsed file information.</param>
+        /// <returns><see langword="null"/> if the parsing was successful and the parsed <see cref="FileInfo"/> is saved to the 
+        /// <paramref name="fileInfo"/> output parameter; otherwise, returns the <see cref="IParsingError"/> instance describing the error that happened. </returns>
         private static IParsingError TryParseSaveFile(string filePath, out FileInfo fileInfo)
         {
             fileInfo = null;
@@ -173,7 +201,7 @@ namespace FootballAIGame.LocalConsoleSimulator.CommandParsing
                 fileInfo = new FileInfo(filePath);
 
             }
-            catch (Exception ex) when(ex is SecurityException || ex is UnauthorizedAccessException)
+            catch (Exception ex) when (ex is SecurityException || ex is UnauthorizedAccessException)
             {
                 return new UnauthorizedAccess(filePath);
             }

@@ -174,7 +174,6 @@ namespace FootballAIGame.MatchSimulation
         /// <param name="gameState">State of the game.</param>
         /// <param name="playerNumber">1 if first 11 players from the given game state are
         /// client's players; otherwise 2 (seconds half are client's players)</param>
-        /// <returns></returns>
         public async Task SendAsync(GameState gameState, int playerNumber)
         {
             var data = new float[92];
