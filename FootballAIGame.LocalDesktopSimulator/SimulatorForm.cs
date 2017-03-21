@@ -11,22 +11,56 @@ using FootballAIGame.MatchSimulation.Models;
 
 namespace FootballAIGame.LocalDesktopSimulator
 {
+    /// <summary>
+    /// Represents a window that makes up an application's user interface.
+    /// </summary>
+    /// <seealso cref="System.Windows.Forms.Form" />
     public partial class SimulatorForm : Form
     {
+        /// <summary>
+        /// The progress bar update interval in which the progress bar will be updated during
+        /// a match simulation.
+        /// </summary>
         private const int ProgressBarUpdateInterval = 100;
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the <see cref="MatchPlayer"/> was playing the playback
+        /// of the match before the mouse down happened.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if the <see cref="MatchPlayer"/> was playing the match before 
+        /// the mouse down happened; otherwise, <c>false</c>.
+        /// </value>
         private bool WasPlayingBeforeMouseDownOnSlider { get; set; }
 
+        /// <summary>
+        /// Gets or sets the loaded match.
+        /// </summary>
+        /// <value>
+        /// The loaded match.
+        /// </value>
         private Match LoadedMatch { get; set; }
 
+        /// <summary>
+        /// Gets or sets the match player used for playing the playbacks of the matches.
+        /// </summary>
+        /// <value>
+        /// The match player.
+        /// </value>
         private MatchPlayer MatchPlayer { get; set; }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SimulatorForm"/> class.
+        /// </summary>
         public SimulatorForm()
         {
             InitializeComponent();
             DoCustomInitialization();
         }
 
+        /// <summary>
+        /// Does the custom (non-designer) initialization of this instance.
+        /// </summary>
         private void DoCustomInitialization()
         {
             SpeedDropDownList.SelectedItem = SpeedDropDownList.Items[0];
@@ -39,6 +73,12 @@ namespace FootballAIGame.LocalDesktopSimulator
             PlaySlider.MouseUp += PlaySliderOnMouseUp;
         }
 
+        /// <summary>
+        /// Occurs when the mouse button is released after the button was pressed on the <see cref="PlaySlider"/>.
+        /// Updates <see cref="MatchPlayer"/> accordingly to play the right part of the match.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="mouseEventArgs">The <see cref="MouseEventArgs"/> instance containing the event data.</param>
         private void PlaySliderOnMouseUp(object sender, MouseEventArgs mouseEventArgs)
         {
             MatchPlayer.RenderCurrentState();
@@ -47,6 +87,13 @@ namespace FootballAIGame.LocalDesktopSimulator
                 MatchPlayer.StartPlaying();
         }
 
+        /// <summary>
+        /// Occurs when the mouse is pressed on the <see cref="PlaySlider"/>.
+        /// Stops the <see cref="MatchPlayer"/> from playing the match.
+        /// Updates <see cref="WasPlayingBeforeMouseDownOnSlider"/> accordingly.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="mouseEventArgs">The <see cref="MouseEventArgs"/> instance containing the event data.</param>
         private void PlaySliderOnMouseDown(object sender, MouseEventArgs mouseEventArgs)
         {
             WasPlayingBeforeMouseDownOnSlider = MatchPlayer.IsPlaying;
@@ -54,18 +101,33 @@ namespace FootballAIGame.LocalDesktopSimulator
                 MatchPlayer.StopPlaying();
         }
 
+        /// <summary>
+        /// Handles the player connection asynchronously.
+        /// Occurs when the client connects.
+        /// </summary>
+        /// <param name="connection">The connection.</param>
+        /// <returns>A task that represents the asynchronous operation.</returns>
         private async Task HandlePlayerConnectionAsync(ClientConnection connection)
         {
             await Task.Yield();
             UpdateAiList();
         }
 
+        /// <summary>
+        /// Handles the player disconnection asynchronously.
+        /// Occurs when the client disconnects.
+        /// </summary>
+        /// <param name="connection">The connection.</param>
+        /// <returns>A task that represents the asynchronous operation.</returns>
         private async Task HandlePlayerDisconnectionAsync(ClientConnection connection)
         {
             await Task.Yield();
             UpdateAiList();
         }
 
+        /// <summary>
+        /// Updates the AI list to currently active client connections.
+        /// </summary>
         private void UpdateAiList()
         {
             AiListBox.BeginInvoke((MethodInvoker) (() =>
@@ -80,6 +142,12 @@ namespace FootballAIGame.LocalDesktopSimulator
             }));
         }
 
+        /// <summary>
+        /// Occurs when the <see cref="StartMatchButton"/> is clicked. Starts the match simulation between
+        /// the selected AIs from the <see cref="AiListBox"/>.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private async void StartMatchButtonClick(object sender, EventArgs e)
         {
             if (AiListBox.SelectedItems.Count != 2)
@@ -148,6 +216,14 @@ namespace FootballAIGame.LocalDesktopSimulator
             SimulationProgress.Visible = false;
         }
 
+        /// <summary>
+        /// Starts to update progress bar asynchronously in accordance with <see cref="ProgressBarUpdateInterval"/>.
+        /// Progress bar shows the current progress in the currently simulated match.
+        /// </summary>
+        /// <param name="ai1">The first AI that is currently in the simulated match.</param>
+        /// <param name="ai2">The second AI that is currently in the simulated match.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>A task that represents the asynchronous operation.</returns>
         private async Task StartUpdatingProgressBarAsync(string ai1, string ai2, CancellationToken cancellationToken)
         {
             while (!cancellationToken.IsCancellationRequested)
@@ -163,6 +239,10 @@ namespace FootballAIGame.LocalDesktopSimulator
             }
         }
 
+        /// <summary>
+        /// Loads the match. Updates the form to show all the information about the specified <see cref="Match"/>.
+        /// </summary>
+        /// <param name="match">The match.</param>
         private void LoadMatch(Match match)
         {
             var matchInfo = match.MatchInfo;
@@ -203,6 +283,15 @@ namespace FootballAIGame.LocalDesktopSimulator
             PlaySlider.Value = 0;
         }
 
+        /// <summary>
+        /// Gets the error message corresponding to the specified <see cref="SimulationError"/>.
+        /// </summary>
+        /// <param name="error">The simulation error.</param>
+        /// <param name="ai1">The first AI from the simulation.</param>
+        /// <param name="ai2">The second AI from the simulation.</param>
+        /// <returns>The error message corresponding to the specified error.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">The specified <paramref name="error"/> doesn't have
+        /// a corresponding error message.</exception>
         private static string GetErrorMessage(SimulationError error, string ai1, string ai2)
         {
             var ai = error.Team == Team.FirstPlayer ? ai1 : ai2;
@@ -229,6 +318,12 @@ namespace FootballAIGame.LocalDesktopSimulator
 
         }
 
+        /// <summary>
+        /// Occurs when the stop match button is clicked.
+        /// Stops the ongoing match simulation.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private void StopMatchButtonClick(object sender, EventArgs e)
         {
             var ai1 = AiListBox.Items[0].ToString();
@@ -237,6 +332,12 @@ namespace FootballAIGame.LocalDesktopSimulator
             SimulationManager.Instance.StopSimulation(ai1, ai2);
         }
 
+        /// <summary>
+        /// Occurs when the <see cref="SaveMatchToolStripMenuItem"/> is clicked.
+        /// Opens the dialog to select the file to which afterwards the <see cref="LoadedMatch"/> is saved.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private void SaveMatchToolStripMenuItemClick(object sender, EventArgs e)
         {
             if (LoadedMatch == null)
@@ -266,6 +367,12 @@ namespace FootballAIGame.LocalDesktopSimulator
             fileStream.Close();
         }
 
+        /// <summary>
+        /// Occurs when the <see cref="LoadMatchToolStripMenuItem"/> is clicked.
+        /// Opens the dialog to select the file from which afterwards the <see cref="Match"/> is loaded.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private void LoadMatchToolStripMenuItemClick(object sender, EventArgs e)
         {
             var dialog = new OpenFileDialog();
@@ -298,6 +405,12 @@ namespace FootballAIGame.LocalDesktopSimulator
             fileStream.Close();
         }
 
+        /// <summary>
+        /// Occurs when the <see cref="PlayButton"/> is clicked.
+        /// Starts playing playback of <see cref="LoadedMatch"/> using <see cref="MatchPlayer"/>.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private void PlayButtonClick(object sender, EventArgs e)
         {
             if (!MatchPlayer.IsPlaying)
@@ -306,6 +419,12 @@ namespace FootballAIGame.LocalDesktopSimulator
                 MatchPlayer.StopPlaying();
         }
 
+        /// <summary>
+        /// Occurs when the <see cref="SpeedDropDownList"/> selected value is changed.
+        /// Updates <see cref="MatchPlayer"/> accordingly to adjust the playing speed.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private void SpeedDropDownListSelectedIndexChanged(object sender, EventArgs e)
         {
             if (MatchPlayer != null)
@@ -314,6 +433,12 @@ namespace FootballAIGame.LocalDesktopSimulator
             }
         }
 
+        /// <summary>
+        /// Occurs when the <see cref="RestartButton"/> is clicked.
+        /// Changes <see cref="PlaySlider"/> value to 0.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private void RestartButtonClick(object sender, EventArgs e)
         {
             PlaySlider.Value = 0;

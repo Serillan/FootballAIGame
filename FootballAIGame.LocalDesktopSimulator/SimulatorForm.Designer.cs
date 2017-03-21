@@ -3,6 +3,9 @@ using FootballAIGame.LocalDesktopSimulator.CustomControls;
 
 namespace FootballAIGame.LocalDesktopSimulator
 {
+    /// <summary>
+    /// Represents a window that makes up an application's user interface.
+    /// </summary>
     partial class SimulatorForm
     {
         /// <summary>

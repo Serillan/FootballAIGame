@@ -222,8 +222,8 @@ namespace FootballAIGame.LocalConsoleSimulator.Commands
         /// <param name="ai1">The first AI from the simulation.</param>
         /// <param name="ai2">The second AI from the simulation.</param>
         /// <returns>The error message corresponding to the specified error.</returns>
-        /// <exception cref="ArgumentOutOfRangeException"><paramref name="error"/> has not
-        /// corresponding error message.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">The specified <paramref name="error"/> doesn't have
+        /// a corresponding error message.</exception>
         private static string GetErrorMessage(SimulationError error, string ai1, string ai2)
         {
             var ai = error.Team == Team.FirstPlayer ? ai1 : ai2;
