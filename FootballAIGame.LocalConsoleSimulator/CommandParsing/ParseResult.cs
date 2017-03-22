@@ -14,7 +14,7 @@ namespace FootballAIGame.LocalConsoleSimulator.CommandParsing
         /// Gets or sets the command.
         /// </summary>
         /// <value>
-        /// The command.
+        /// The <see cref="ICommand"/> representing the command.
         /// </value>
         public ICommand Command { get; set; }
 
@@ -30,7 +30,7 @@ namespace FootballAIGame.LocalConsoleSimulator.CommandParsing
         /// Gets or sets the parsing error that caused the parsing to not be successful.
         /// </summary>
         /// <value>
-        /// The parsing error.
+        /// The <see cref="IParsingError"/> representing the error.
         /// </value>
         public IParsingError Error { get; set; }
     }

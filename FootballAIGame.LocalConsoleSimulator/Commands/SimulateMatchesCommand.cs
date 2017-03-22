@@ -37,7 +37,7 @@ namespace FootballAIGame.LocalConsoleSimulator.Commands
         /// if the <see cref="SavingOn"/> is set to <c>true</c>.
         /// </summary>
         /// <value>
-        /// The saving directory.
+        /// The <see cref="DirectoryInfo"/> instance containing the directory.
         /// </value>
         public DirectoryInfo SavingDirectory { get; set; }
 
@@ -46,7 +46,7 @@ namespace FootballAIGame.LocalConsoleSimulator.Commands
         /// if the <see cref="SavingOn"/> is set to <c>true</c>.
         /// </summary>
         /// <value>
-        /// The saving files.
+        /// The array of <see cref="FileInfo"/> instances containing the files to which the matches are saved.
         /// </value>
         public FileInfo[] SavingFiles { get; set; }
 
@@ -54,9 +54,9 @@ namespace FootballAIGame.LocalConsoleSimulator.Commands
         /// Gets or sets the pairs of opponents (their names) that will be in match against each other during the command execution.
         /// </summary>
         /// <value>
-        /// The pairs of opponents.
+        /// The <see cref="IList{T}"/> of <see cref="Tuple{T1, T2}"/> that represent the pairs of opponents.
         /// </value>
-        public List<Tuple<string, string>> Opponents { get; set; }
+        public IList<Tuple<string, string>> Opponents { get; set; }
 
         /// <summary>
         /// Executes the command asynchronously.

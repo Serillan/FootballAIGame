@@ -8,11 +8,27 @@ using FootballAIGame.MatchSimulation.Messages;
 
 namespace FootballAIGame.LocalSimulationBase
 {
+    /// <summary>
+    /// Provides functionality to manage match simulations and AIs' connections for local simulators. Serves as the
+    /// bridge between MatchSimulation library and local simulators. It is implemented as singleton.
+    /// </summary>
     public class SimulationManager
     {
+        /// <summary>
+        /// Gets or sets the set of connected AIs.
+        /// </summary>
+        /// <value>
+        /// The <see cref="ISet{T}"/> containing the connected AIs' names.
+        /// </value>
         private ISet<string> ConnectedAiNames { get; set; }
 
-        private List<MatchSimulator> RunningSimulations { get; set; } = new List<MatchSimulator>();
+        /// <summary>
+        /// Gets or sets the running simulations.
+        /// </summary>
+        /// <value>
+        /// The <see cref="IList{T}"/> containing the running simulations.
+        /// </value>
+        private IList<MatchSimulator> RunningSimulations { get; set; } = new List<MatchSimulator>();
 
         /// <summary>
         /// Gets the singleton instance.
@@ -22,13 +38,33 @@ namespace FootballAIGame.LocalSimulationBase
         /// </value>
         public static SimulationManager Instance => _instance ?? (_instance = new SimulationManager());
 
+        /// <summary>
+        /// The singleton instance.
+        /// </summary>
         private static SimulationManager _instance; // singleton instance
 
+        /// <summary>
+        /// Prevents a default instance of the <see cref="SimulationManager"/> class from being created.
+        /// </summary>
         private SimulationManager()
         {
             Initialize();
         }
 
+        /// <summary>
+        /// Simulates the match between the specified AIs asynchronously.
+        /// </summary>
+        /// <param name="ai1">The first AI name.</param>
+        /// <param name="ai2">The second AI name.</param>
+        /// <returns>The task that represents the asynchronous simulate operation. 
+        /// The value of the task's result is the <see cref="Match"/> that represents the simulated match with
+        /// all the information about the simulation set.</returns>
+        /// <exception cref="InvalidOperationException">
+        /// The specified AIs are the same or at least one of the specified AIs is already in the match.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// At least one of the specified AIs in not logged in.
+        /// </exception>
         public async Task<Match> SimulateAsync(string ai1, string ai2)
         {
             if (ai1 == ai2)
@@ -83,11 +119,23 @@ namespace FootballAIGame.LocalSimulationBase
             return match;
         }
 
+        /// <summary>
+        /// Starts accepting AIs connections asynchronously.
+        /// </summary>
+        /// <returns>The task that represents the asynchronous operation of accepting connections.</returns>
         public async Task StartAcceptingConnectionsAsync()
         {
             await ConnectionManager.Instance.StartListeningAsync();
         }
 
+        /// <summary>
+        /// Tries to get the simulation step of the currently simulated match between the specified AIs.
+        /// </summary>
+        /// <param name="ai1">The name of the first AI.</param>
+        /// <param name="ai2">The name of the second AI.</param>
+        /// <param name="step">The simulation step of the currently simulated match between the specified AIs.</param>
+        /// <returns><c>true</c> if the specified AIs are in the currently simulated match and the
+        /// simulation step was set accordingly; otherwise, <c>false</c></returns>
         public bool TryGetSimulationStep(string ai1, string ai2, out int step)
         {
             var simulation = GetRunningSimulation(ai1, ai2);
@@ -102,6 +150,9 @@ namespace FootballAIGame.LocalSimulationBase
             return true;
         }
 
+        /// <summary>
+        /// Initializes this instance.
+        /// </summary>
         private void Initialize()
         {
             ConnectedAiNames = new HashSet<string>();
@@ -111,12 +162,21 @@ namespace FootballAIGame.LocalSimulationBase
             ConnectionManager.Instance.CheckConnectionsInterval = 500; // lower interval
         }
 
+        /// <summary>
+        /// Sets the simulation handlers. Sets <see cref="ConnectionManager"/> handlers for client's authentication and
+        /// disconnection.
+        /// </summary>
         private void SetSimulationHandlers()
         {
             ConnectionManager.Instance.AuthenticationHandler = ProcessLoginMessageAsync;
             ConnectionManager.Instance.PlayerDisconnectedHandler += HandlePlayerDisconnectionAsync;
         }
 
+        /// <summary>
+        /// Handles the player disconnection asynchronously.
+        /// </summary>
+        /// <param name="connection">The connection.</param>
+        /// <returns>The task that represents the asynchronous operation.</returns>
         private async Task HandlePlayerDisconnectionAsync(ClientConnection connection)
         {
             await Task.Yield();
@@ -155,6 +215,13 @@ namespace FootballAIGame.LocalSimulationBase
             return isNameUnused;
         }
 
+        /// <summary>
+        /// Gets the running simulation between the specified AIs.
+        /// </summary>
+        /// <param name="ai1">The name of the first AI.</param>
+        /// <param name="ai2">The name of the second AI.</param>
+        /// <returns><c>null</c> if there is not a running simulation between the specified AIs; otherwise 
+        /// the <see cref="MatchSimulator"/> simulating the match between the specified AIs.</returns>
         private MatchSimulator GetRunningSimulation(string ai1, string ai2)
         {
             lock (RunningSimulations)
@@ -165,6 +232,11 @@ namespace FootballAIGame.LocalSimulationBase
             }
         }
 
+        /// <summary>
+        /// Stops the simulation between the specified AIs.
+        /// </summary>
+        /// <param name="ai1">The name of the first AI.</param>
+        /// <param name="ai2">The name of the second AI.</param>
         public void StopSimulation(string ai1, string ai2)
         {
             var simulation = GetRunningSimulation(ai1, ai2);

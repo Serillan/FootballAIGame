@@ -220,8 +220,8 @@ namespace FootballAIGame.LocalDesktopSimulator
         /// Starts to update progress bar asynchronously in accordance with <see cref="ProgressBarUpdateInterval"/>.
         /// Progress bar shows the current progress in the currently simulated match.
         /// </summary>
-        /// <param name="ai1">The first AI that is currently in the simulated match.</param>
-        /// <param name="ai2">The second AI that is currently in the simulated match.</param>
+        /// <param name="ai1">The name of the first AI that is currently in the simulated match.</param>
+        /// <param name="ai2">The name of the second AI that is currently in the simulated match.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A task that represents the asynchronous operation.</returns>
         private async Task StartUpdatingProgressBarAsync(string ai1, string ai2, CancellationToken cancellationToken)

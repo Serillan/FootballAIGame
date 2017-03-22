@@ -22,43 +22,43 @@ namespace FootballAIGame.LocalDesktopSimulator
         private const int DefaultUpdateFrequency = 200; // [ms]
 
         /// <summary>
-        /// Gets or sets the match that will be watched.
+        /// Gets or sets the <see cref="Match"/> whose playback is played.
         /// </summary>
         /// <value>
-        /// The match.
+        /// The <see cref="Match"/> whose playback is played.
         /// </value>
         private Match Match { get; set; }
 
         /// <summary>
-        /// Gets or sets the panel on which the match will be rendered during playback.
+        /// Gets or sets a panel on which the loaded <see cref="Match"/> is rendered during playing of its playback.
         /// </summary>
         /// <value>
-        /// The game panel on which the match will be rendered.
+        /// A <see cref="Panel"/> on which the match is rendered.
         /// </value>
         private Panel GamePanel { get; set; }
 
         /// <summary>
-        /// Gets or sets the label on which the score will be rendered during playback.
+        /// Gets or sets the <see cref="Label"/> on which the score is rendered during playing of its playback.
         /// </summary>
         /// <value>
-        /// The score label.
+        /// The <see cref="Label"/> on which the score is rendered.
         /// </value>
         private Label ScoreLabel { get; set; }
 
         /// <summary>
-        /// Gets or sets the label on which the time will be rendered during playback.
+        /// Gets or sets the <see cref="Label"/> on which the time is rendered during playing of the playback.
         /// </summary>
         /// <value>
-        /// The time label.
+        /// The time <see cref="Label"/>.
         /// </value>
         private Label TimeLabel { get; set; }
 
         /// <summary>
-        /// Gets or sets the slider that shows which simulation step is being rendered during
-        /// playback. It can be manipulated by user to adjust the step.
+        /// Gets or sets the <see cref="Slider"/> that shows which simulation step is being rendered during playing of the
+        /// playback. It can be manipulated by user to adjust the simulation step.
         /// </summary>
         /// <value>
-        /// The play slider.
+        /// The play <see cref="Slider"/>.
         /// </value>
         private Slider PlaySlider { get; set; }
 

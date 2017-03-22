@@ -144,7 +144,7 @@ namespace FootballAIGame.LocalConsoleSimulator.CommandParsing
         /// </summary>
         /// <param name="directoryPath">The directory path.</param>
         /// <param name="directoryInfo">The parsed directory information.</param>
-        /// <returns><see langword="null"/> if the parsing was successful and the parsed <see cref="DirectoryInfo"/> is saved to the 
+        /// <returns>Null if the parsing was successful and the parsed <see cref="DirectoryInfo"/> is saved to the 
         /// <paramref name="directoryInfo"/> output parameter; otherwise, returns the <see cref="IParsingError"/> instance describing the error that happened. </returns>
         private static IParsingError TryParseSaveDirectory(string directoryPath, out DirectoryInfo directoryInfo)
         {
@@ -185,7 +185,7 @@ namespace FootballAIGame.LocalConsoleSimulator.CommandParsing
         /// </summary>
         /// <param name="filePath">The file path.</param>
         /// <param name="fileInfo">The parsed file information.</param>
-        /// <returns><see langword="null"/> if the parsing was successful and the parsed <see cref="FileInfo"/> is saved to the 
+        /// <returns>Null if the parsing was successful and the parsed <see cref="FileInfo"/> is saved to the 
         /// <paramref name="fileInfo"/> output parameter; otherwise, returns the <see cref="IParsingError"/> instance describing the error that happened. </returns>
         private static IParsingError TryParseSaveFile(string filePath, out FileInfo fileInfo)
         {

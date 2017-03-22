@@ -15,7 +15,7 @@ namespace FootballAIGame.LocalDesktopSimulator
         /// connections.
         /// </summary>
         [STAThread]
-        static void Main()
+        private static void Main()
         {
             Task.Run(() => SimulationManager.Instance.StartAcceptingConnectionsAsync());
 
