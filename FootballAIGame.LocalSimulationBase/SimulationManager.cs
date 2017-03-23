@@ -10,7 +10,7 @@ namespace FootballAIGame.LocalSimulationBase
 {
     /// <summary>
     /// Provides functionality to manage match simulations and AIs' connections for local simulators. Serves as the
-    /// bridge between MatchSimulation library and local simulators. It is implemented as singleton.
+    /// bridge between MatchSimulation library and local simulators. Implemented as singleton.
     /// </summary>
     public class SimulationManager
     {
@@ -169,7 +169,7 @@ namespace FootballAIGame.LocalSimulationBase
         private void SetSimulationHandlers()
         {
             ConnectionManager.Instance.AuthenticationHandler = ProcessLoginMessageAsync;
-            ConnectionManager.Instance.PlayerDisconnectedHandler += HandlePlayerDisconnectionAsync;
+            ConnectionManager.Instance.ActiveClientDisconnectedHandler += HandlePlayerDisconnectionAsync;
         }
 
         /// <summary>
@@ -227,8 +227,8 @@ namespace FootballAIGame.LocalSimulationBase
             lock (RunningSimulations)
             {
                 return RunningSimulations.FirstOrDefault(s =>
-                    (s.Player1AiConnection.PlayerName == ai1 && s.Player2AiConnection.PlayerName == ai2) ||
-                    (s.Player1AiConnection.PlayerName == ai2 && s.Player2AiConnection.PlayerName == ai1));
+                    (s.AI1Communicator.PlayerName == ai1 && s.AI2Communicator.PlayerName == ai2) ||
+                    (s.AI1Communicator.PlayerName == ai2 && s.AI2Communicator.PlayerName == ai1));
             }
         }
 
@@ -243,7 +243,7 @@ namespace FootballAIGame.LocalSimulationBase
             if (simulation == null)
                 return;
 
-            simulation.Player1CancelRequested = true;
+            simulation.AI1CancelRequested = true;
         }
     }
 }

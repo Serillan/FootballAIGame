@@ -66,8 +66,8 @@ namespace FootballAIGame.LocalDesktopSimulator
             SpeedDropDownList.SelectedItem = SpeedDropDownList.Items[0];
             MatchPlayer = new MatchPlayer(MatchPanel, CurrentScoreLabel, CurrentTimeLabel, PlaySlider);
 
-            ConnectionManager.Instance.PlayerConnectedHandler += HandlePlayerConnectionAsync;
-            ConnectionManager.Instance.PlayerDisconnectedHandler += HandlePlayerDisconnectionAsync;
+            ConnectionManager.Instance.ClientLoggedInHandler += HandlePlayerConnectionAsync;
+            ConnectionManager.Instance.ActiveClientDisconnectedHandler += HandlePlayerDisconnectionAsync;
 
             PlaySlider.MouseDown += PlaySliderOnMouseDown;
             PlaySlider.MouseUp += PlaySliderOnMouseUp;

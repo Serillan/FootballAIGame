@@ -2,22 +2,25 @@
 
 namespace FootballAIGame.MatchSimulation.Models
 {
+    /// <summary>
+    /// Represents the football ball in the simulation.
+    /// </summary>
     public class Ball
     {
         /// <summary>
         /// Gets or sets the position.
         /// </summary>
         /// <value>
-        /// The position.
+        /// The position <see cref="Vector"/>.
         /// </value>
         public Vector Position { get; set; }
 
         /// <summary>
-        /// Gets or sets the movement vector. It describes how ball position will
-        /// change in one simulation step.
+        /// Gets or sets the movement vector. It describes how the ball position changes
+        /// in one simulation step.
         /// </summary>
         /// <value>
-        /// The movement vector.
+        /// The movement <see cref="Vector"/>.
         /// </value>
         public Vector Movement { get; set; }
 

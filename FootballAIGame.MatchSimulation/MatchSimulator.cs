@@ -9,7 +9,7 @@ using FootballAIGame.MatchSimulation.Models;
 namespace FootballAIGame.MatchSimulation
 {
     /// <summary>
-    /// Responsible for simulating a football match between two AIs.
+    /// Provides the functionality to simulate football matches.
     /// </summary>
     public class MatchSimulator
     {
@@ -26,35 +26,40 @@ namespace FootballAIGame.MatchSimulation
         public const int PlayerTimeForOneStep = 1000000; // [ms]
 
         /// <summary>
-        /// The time in milliseconds of one simulation step.
+        /// The time of one simulation step in milliseconds.
         /// </summary>
         public const int StepInterval = 200; // [ms]
 
         /// <summary>
-        /// The maximum allowed acceleration in meters per second squared of football player.
+        /// The maximum allowed acceleration of football players in meters per second squared.
         /// </summary>
         public const double MaxAcceleration = 5; // [m/s/s]
 
         /// <summary>
-        /// The ball deceleration in meters per second squared.
+        /// The ball's deceleration in meters per second squared.
         /// </summary>
         public const double BallDeceleration = 1.5; // [m/s/s]
 
+        /// <summary>
+        /// The ball's maximum allowed distance for kicking the ball in meters.
+        /// </summary>
         public const double BallMaxDistanceForKick = 2; // [m]
 
         /// <summary>
-        /// The minimal opponent length from kickoff in meters.
+        /// The opponents' minimal distance from the kickoff's position during kickoff in meters.
         /// </summary>
-        public const double MinimalOpponentDirectionFromKickoff = 6; // [m]
+        public const double MinimalOpponentDistanceFromKickoff = 6; // [m]
 
         /// <summary>
-        /// The maximum number of errors of the same kind in the error log.
+        /// The maximum number of errors with the same <see cref="SimulationErrorReason"/> that
+        /// is saved to the error log.
         /// </summary>
-        public const int MaximumNumberOfSameKindErrorInLog = 5;
+        public const int MaximumNumberOfSameReasonErrorInLog = 5;
 
         /// <summary>
         /// Specifies how big the speed/acceleration correction needs to be
-        /// for it to be reported (because of rounding errors).
+        /// for it to be reported (because of rounding errors). <para/>
+        /// 
         /// e.g. If max speed is 10 then the speed needs to be greater than 10 * AllowableRange
         /// for it to be saved to the error log.
         /// </summary>
@@ -73,6 +78,15 @@ namespace FootballAIGame.MatchSimulation
         #endregion
 
         /// <summary>
+        /// Gets or sets a value indicating whether the information about the ongoing simulation
+        /// should be written to the output.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if this instance is verbose; otherwise, <c>false</c>.
+        /// </value>
+        public bool IsVerbose { get; set; }
+
+        /// <summary>
         /// Gets the current simulation task.
         /// </summary>
         /// <value>
@@ -81,20 +95,20 @@ namespace FootballAIGame.MatchSimulation
         public Task CurrentSimulationTask { get; private set; }
 
         /// <summary>
-        /// Gets the first player AI <see cref="ClientConnection"/>.
+        /// Gets the first AI's <see cref="IClientCommunicator"/>.
         /// </summary>
         /// <value>
-        /// The player1 AI connection.
+        /// The first AI's <see cref="IClientCommunicator"/>.
         /// </value>
-        public IClientCommunicator Player1AiConnection { get; private set; }
+        public IClientCommunicator AI1Communicator { get; private set; }
 
         /// <summary>
-        /// Gets the second player AI <see cref="ClientConnection"/>.
+        /// Gets the second AI's <see cref="IClientCommunicator"/>.
         /// </summary>
         /// <value>
-        /// The player2 AI connection.
+        /// The second AI's <see cref="IClientCommunicator"/>.
         /// </value>
-        public IClientCommunicator Player2AiConnection { get; private set; }
+        public IClientCommunicator AI2Communicator { get; private set; }
 
         /// <summary>
         /// Gets or sets the current simulation step.
@@ -105,48 +119,99 @@ namespace FootballAIGame.MatchSimulation
         public int CurrentStep { get; set; }
 
         /// <summary>
-        /// Gets or sets the winner. If the match has not yet ended or it ended
-        /// in draw, returns null.
-        /// </summary>
-        //public string Winner { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether first player has requested to cancel the match.
+        /// Gets or sets a value indicating whether the first client has requested to cancel the match.
         /// </summary>
         /// <value>
-        /// <c>true</c> if first player requested to cancel the match; otherwise, <c>false</c>.
+        /// <c>true</c> if the first client has requested to cancel the match; otherwise, <c>false</c>.
         /// </value>
-        public bool Player1CancelRequested { get; set; }
+        public bool AI1CancelRequested { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether second player has requested to cancel the match.
+        /// Gets or sets a value indicating whether the second client has requested to cancel the match.
         /// </summary>
         /// <value>
-        /// <c>true</c> if second player requested to cancel the match; otherwise, <c>false</c>.
+        /// <c>true</c> if second client has requested to cancel the match; otherwise, <c>false</c>.
         /// </value>
-        public bool Player2CancelRequested { get; set; }
-
-        public bool IsVerbose { get; set; }
-
-        //public string Player1ErrorLog { get; set; }
-
-        //public string Player2ErrorLog { get; set; }
+        public bool AI2CancelRequested { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="System.Random"/> used for generating random numbers.
+        /// Gets or sets the <see cref="System.Random" /> used for generating random numbers.
         /// </summary>
+        /// <value>
+        /// The <see cref="Random"/> instance.
+        /// </value>
         public static Random Random { get; set; } = new Random();
 
+        /// <summary>
+        /// Gets or sets the match information containing all the information about the simulated match.
+        /// </summary>
+        /// <value>
+        /// The <see cref="MatchInfo"/> instance containing all the information about the simulated match.
+        /// </value>
         public MatchInfo MatchInfo { get; set; }
 
+        /// <summary>
+        /// Gets or sets the current state of the game.
+        /// </summary>
+        /// <value>
+        /// The state of the game.
+        /// </value>
         private GameState GameState { get; set; }
+
+        /// <summary>
+        /// Gets or sets the first AI's ping.
+        /// </summary>
+        /// <value>
+        /// The first AI's ping.
+        /// </value>
         private int Ping1 { get; set; }
+
+        /// <summary>
+        /// Gets or sets the second AI's ping.
+        /// </summary>
+        /// <value>
+        /// The second AI's pint.
+        /// </value>
         private int Ping2 { get; set; }
-        private Task<IClientMessage> Message1 { get; set; }
-        private Task<IClientMessage> Message2 { get; set; }
+
+        /// <summary>
+        /// Gets or sets a task that represents the asynchronous receive operation from the first AI. 
+        /// </summary>
+        /// <value>
+        /// The task that represents the asynchronous receive operation from the first AI. 
+        /// </value>
+        private Task<IClientMessage> AI1ReceiveMessage { get; set; }
+
+        /// <summary>
+        /// Gets or sets a task that represents the asynchronous receive operation from the second AI. 
+        /// </summary>
+        /// <value>
+        /// The task that represents the asynchronous receive operation from the second AI. 
+        /// </value>
+        private Task<IClientMessage> AI2ReceiveMessage { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="FootballPlayer"/> that was the last to kick the ball.
+        /// </summary>
+        /// <value>
+        /// The last kicker.
+        /// </value>
         private FootballPlayer LastKicker { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="Team"/> that is on the left side of the football field.
+        /// </summary>
+        /// <value>
+        /// The <see cref="Team"/> that is on the left side of the football field.
+        /// </value>
         private Team WhoIsOnLeft { get; set; }
 
+        /// <summary>
+        /// Gets the current match's time. 
+        /// </summary>
+        /// <value>
+        /// The current time in the following format: "minutes:seconds".
+        /// </value>
         private string CurrentTime
         {
             get
@@ -157,20 +222,37 @@ namespace FootballAIGame.MatchSimulation
                 return $"{minutes}:{seconds}";
             }
         }
-        //private int CurrentScore1 { get; set; }
-        //private int CurrentScore2 { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="Dictionary{TKey,TValue}"/> containing for each <see cref="SimulationErrorReason"/>
+        /// the number of first AI's errors with that reason that have happened until now.
+        /// </summary>
+        /// <value>
+        /// The <see cref="Dictionary{TKey,TValue}"/> containing for each <see cref="SimulationErrorReason"/>
+        /// the number of first AI's errors with that reason that have happened until now.
+        /// </value>
         private Dictionary<SimulationErrorReason, int> NumberOfPlayer1Errors { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="Dictionary{TKey,TValue}"/> containing for each <see cref="SimulationErrorReason"/>
+        /// the number of second AI's errors with that reason that have happened until now.
+        /// </summary>
+        /// <value>
+        /// The <see cref="Dictionary{TKey,TValue}"/> containing for each <see cref="SimulationErrorReason"/>
+        /// the number of second AI's errors with that reason that have happened until now.
+        /// </value>
         private Dictionary<SimulationErrorReason, int> NumberOfPlayer2Errors { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="MatchSimulator"/> class.
+        /// Initializes a new instance of the <see cref="MatchSimulator"/> class that is used to simulate the
+        /// match between the specified AI's.
         /// </summary>
-        /// <param name="player1AiConnection">The player1 AI connection that will play the match.</param>
-        /// <param name="player2AiConnection">The player2 AI connection that will play the match.</param>
-        public MatchSimulator(IClientCommunicator player1AiConnection, IClientCommunicator player2AiConnection)
+        /// <param name="firstAICommunicator">The first AI communicator.</param>
+        /// <param name="secondAICommunicator">The second AI communicator.</param>
+        public MatchSimulator(IClientCommunicator firstAICommunicator, IClientCommunicator secondAICommunicator)
         {
-            Player1AiConnection = player1AiConnection;
-            Player2AiConnection = player2AiConnection;
+            AI1Communicator = firstAICommunicator;
+            AI2Communicator = secondAICommunicator;
 
             NumberOfPlayer1Errors = new Dictionary<SimulationErrorReason, int>();
             NumberOfPlayer2Errors = new Dictionary<SimulationErrorReason, int>();
@@ -183,9 +265,9 @@ namespace FootballAIGame.MatchSimulation
         }
 
         /// <summary>
-        /// Simulates the match.
+        /// Simulates the match asynchronously.
         /// </summary>
-        /// <returns>Task that will be completed with simulation.</returns>
+        /// <returns>The task that represents the asynchronous simulate operation.</returns>
         public async Task SimulateMatchAsync()
         {
             CurrentSimulationTask = SimulateAsync();
@@ -193,9 +275,10 @@ namespace FootballAIGame.MatchSimulation
         }
 
         /// <summary>
-        /// Simulates the match. <see cref="SimulateMatchAsync"/> is it's public wrapper, that is used to set 
-        /// <see cref="CurrentSimulationTask"/> property.
+        /// Simulates the match. <see cref="SimulateMatchAsync" /> is it's public wrapper, that is used to set
+        /// <see cref="CurrentSimulationTask" />.
         /// </summary>
+        /// <returns>The task that represents the asynchronous simulate operation.</returns>
         private async Task SimulateAsync()
         {
             await ProcessSimulationStartAsync();
@@ -206,13 +289,13 @@ namespace FootballAIGame.MatchSimulation
             {
                 // first half
                 WhoIsOnLeft = Team.FirstPlayer;
-                SetStartingPositions(firstBall == 1 ? Team.FirstPlayer : Team.SecondPlayer);
+                SetPlayersToStartingPositions(firstBall == 1 ? Team.FirstPlayer : Team.SecondPlayer);
                 SaveState(); // save starting state
 
                 for (var step = 0; step < NumberOfSimulationSteps / 2; step++)
                 {
-                    if (Player1CancelRequested || Player2CancelRequested || !Player1AiConnection.IsActive ||
-                        !Player2AiConnection.IsActive)
+                    if (AI1CancelRequested || AI2CancelRequested || !AI1Communicator.IsLoggedIn ||
+                        !AI2Communicator.IsLoggedIn)
                     {
                         ProcessSimulationEnd();
                         return;
@@ -226,11 +309,11 @@ namespace FootballAIGame.MatchSimulation
 
                 // second half
                 WhoIsOnLeft = Team.SecondPlayer;
-                SetStartingPositions(firstBall == 1 ? Team.SecondPlayer : Team.FirstPlayer);
+                SetPlayersToStartingPositions(firstBall == 1 ? Team.SecondPlayer : Team.FirstPlayer);
                 for (var step = NumberOfSimulationSteps / 2; step < NumberOfSimulationSteps; step++)
                 {
-                    if (Player1CancelRequested || Player2CancelRequested || !Player1AiConnection.IsActive ||
-                        !Player2AiConnection.IsActive)
+                    if (AI1CancelRequested || AI2CancelRequested || !AI1Communicator.IsLoggedIn ||
+                        !AI2Communicator.IsLoggedIn)
                     {
                         ProcessSimulationEnd();
                         return;
@@ -255,16 +338,15 @@ namespace FootballAIGame.MatchSimulation
         }
 
         /// <summary>
-        /// Processes the simulation start. New match is initialized. Players parameters
-        /// and ping are set.
+        /// Processes the simulation start asynchronously. New match is initialized. Players parameters and ping are set.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The task that represents the asynchronous process operation.</returns>
         private async Task ProcessSimulationStartAsync()
         {
             if (IsVerbose)
             {
-                Console.WriteLine($"Starting simulation between {Player1AiConnection.PlayerName} " +
-                                  $"and {Player2AiConnection.PlayerName}");
+                Console.WriteLine($"Starting simulation between {AI1Communicator.PlayerName} " +
+                                  $"and {AI2Communicator.PlayerName}");
             }
 
             // 1. check pings
@@ -279,41 +361,41 @@ namespace FootballAIGame.MatchSimulation
             {
                 Ball = new Ball(),
                 FootballPlayers = new FootballPlayer[22],
-                KickOff = false
+                IsKickOff = false
             };
 
             await ProcessGettingParametersAsync();
 
-            Message1 = Player1AiConnection.ReceiveClientMessageAsync();
-            Message2 = Player2AiConnection.ReceiveClientMessageAsync();
+            AI1ReceiveMessage = AI1Communicator.ReceiveClientMessageAsync();
+            AI2ReceiveMessage = AI2Communicator.ReceiveClientMessageAsync();
         }
 
         /// <summary>
-        /// Processes the simulation step. Client action are retrieved and the game state is updated
+        /// Processes the simulation step asynchronously. Client action are retrieved and the game state is updated
         /// accordingly.
         /// </summary>
         /// <param name="step">The step number.</param>
-        /// <returns></returns>
+        /// <returns>The task that represents the asynchronous process operation.</returns>
         private async Task ProcessSimulationStepAsync(int step)
         {
             ActionMessage actionMessage1 = null;
             ActionMessage actionMessage2 = null;
             GameState.Step = step;
-            GameState.KickOff = GameState.KickOff || GameState.Step == NumberOfSimulationSteps / 2 ||
+            GameState.IsKickOff = GameState.IsKickOff || GameState.Step == NumberOfSimulationSteps / 2 ||
                 GameState.Step == 0;
 
             //await Task.Delay(20); // wait TODO delete
-            var receiveActionMessage1 = Player1AiConnection.ReceiveActionMessageAsync(step);
-            var receiveActionMessage2 = Player2AiConnection.ReceiveActionMessageAsync(step);
+            var receiveActionMessage1 = AI1Communicator.ReceiveActionMessageAsync(step);
+            var receiveActionMessage2 = AI2Communicator.ReceiveActionMessageAsync(step);
 
-            await Player1AiConnection.TrySendAsync("GET ACTION");
-            await Player1AiConnection.TrySendAsync(GameState, 1);
+            await AI1Communicator.TrySendAsync("GET ACTION");
+            await AI1Communicator.TrySendAsync(GameState, Team.FirstPlayer);
 
-            await Player2AiConnection.TrySendAsync("GET ACTION");
-            await Player2AiConnection.TrySendAsync(GameState, 2);
+            await AI2Communicator.TrySendAsync("GET ACTION");
+            await AI2Communicator.TrySendAsync(GameState, Team.SecondPlayer);
             //Console.WriteLine($"{GameState.Step} sent!");
 
-            GameState.KickOff = false; // reset for next step!
+            GameState.IsKickOff = false; // reset for next step!
 
             var getMessage1Task = Task.WhenAny(receiveActionMessage1, Task.Delay(Ping1 + PlayerTimeForOneStep));
             var getMessage2Task = Task.WhenAny(receiveActionMessage2, Task.Delay(Ping2 + PlayerTimeForOneStep));
@@ -322,29 +404,29 @@ namespace FootballAIGame.MatchSimulation
             var getMessage2Result = await getMessage2Task;
             //Console.WriteLine($"{GameState.Step} received actions.");
 
-            if (Message1.IsFaulted || !Player1AiConnection.IsActive || Message2.IsFaulted ||
-                !Player2AiConnection.IsActive)
+            if (AI1ReceiveMessage.IsFaulted || !AI1Communicator.IsLoggedIn || AI2ReceiveMessage.IsFaulted ||
+                !AI2Communicator.IsLoggedIn)
             {
                 return;
             }
 
             if (getMessage1Result == receiveActionMessage1 && !receiveActionMessage1.IsFaulted)
             {
-                actionMessage1 = Message1.Result as ActionMessage;
+                actionMessage1 = AI1ReceiveMessage.Result as ActionMessage;
 
                 if (step < NumberOfSimulationSteps - 1)
                 {
-                    Message1 = Player1AiConnection.ReceiveClientMessageAsync();
+                    AI1ReceiveMessage = AI1Communicator.ReceiveClientMessageAsync();
                 }
             }
 
             if (getMessage2Result == receiveActionMessage2 && !receiveActionMessage2.IsFaulted)
             {
-                actionMessage2 = Message2.Result as ActionMessage;
+                actionMessage2 = AI2ReceiveMessage.Result as ActionMessage;
 
                 if (step < NumberOfSimulationSteps - 1)
                 {
-                    Message2 = Player2AiConnection.ReceiveClientMessageAsync();
+                    AI2ReceiveMessage = AI2Communicator.ReceiveClientMessageAsync();
                 }
             }
 
@@ -353,7 +435,7 @@ namespace FootballAIGame.MatchSimulation
         }
 
         /// <summary>
-        /// Processes the simulation end.
+        /// Processes the simulation end. Sets <see cref="MatchInfo"/> result values accordingly.
         /// </summary>
         private void ProcessSimulationEnd()
         {
@@ -365,7 +447,7 @@ namespace FootballAIGame.MatchSimulation
                 ? Team.FirstPlayer
                 : MatchInfo.Team2Statistics.Goals > MatchInfo.Team1Statistics.Goals ? Team.SecondPlayer : (Team?)null;
 
-            if (Message1.IsFaulted || !Player1AiConnection.IsActive)
+            if (AI1ReceiveMessage.IsFaulted || !AI1Communicator.IsLoggedIn)
             {
                 MatchInfo.Winner = Team.SecondPlayer;
                 MatchInfo.Errors.Add(new SimulationError()
@@ -375,7 +457,7 @@ namespace FootballAIGame.MatchSimulation
                     Reason = SimulationErrorReason.Disconnection
                 });
             }
-            if (Message2.IsFaulted || !Player2AiConnection.IsActive)
+            if (AI2ReceiveMessage.IsFaulted || !AI2Communicator.IsLoggedIn)
             {
                 MatchInfo.Winner = Team.FirstPlayer;
                 MatchInfo.Errors.Add(new SimulationError()
@@ -386,7 +468,7 @@ namespace FootballAIGame.MatchSimulation
                 });
             }
 
-            if (Player1CancelRequested)
+            if (AI1CancelRequested)
             {
                 MatchInfo.Winner = Team.SecondPlayer;
                 MatchInfo.Errors.Add(new SimulationError()
@@ -396,7 +478,7 @@ namespace FootballAIGame.MatchSimulation
                     Reason = SimulationErrorReason.Cancellation
                 });
             }
-            if (Player2CancelRequested)
+            if (AI2CancelRequested)
             {
                 MatchInfo.Winner = Team.FirstPlayer;
                 MatchInfo.Errors.Add(new SimulationError()
@@ -410,13 +492,13 @@ namespace FootballAIGame.MatchSimulation
         }
 
         /// <summary>
-        /// Processes getting of the players parameters from both AIs.
+        /// Processes the getting of the players parameters from both AIs.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The task that represents the asynchronous parameters retrieving operation.</returns>
         private async Task ProcessGettingParametersAsync()
         {
-            var getParameters1 = GetPlayerParametersAsync(Player1AiConnection);
-            var getParameters2 = GetPlayerParametersAsync(Player2AiConnection);
+            var getParameters1 = GetPlayerParametersAsync(AI1Communicator);
+            var getParameters2 = GetPlayerParametersAsync(AI2Communicator);
             var result1 = await Task.WhenAny(getParameters1, Task.Delay(500 + Ping1));
             var result2 = await Task.WhenAny(getParameters2, Task.Delay(500 + Ping2));
 
@@ -495,10 +577,10 @@ namespace FootballAIGame.MatchSimulation
         }
 
         /// <summary>
-        /// Sets the starting positions.
+        /// Sets players to their starting positions.
         /// </summary>
-        /// <param name="whoHasBall">The number indicating whether player1 (1) or player2 (2) has the ball.</param>
-        private void SetStartingPositions(Team whoHasBall)
+        /// <param name="whoHasBall">The team that is in possession of the ball.</param>
+        private void SetPlayersToStartingPositions(Team whoHasBall)
         {
             var players = GameState.FootballPlayers;
 
@@ -579,15 +661,15 @@ namespace FootballAIGame.MatchSimulation
         }
 
         /// <summary>
-        /// Updates the match. Simulates current simulation step with the given players actions.
+        /// Updates the match to the next simulation step in accordance with the specified actions. 
         /// </summary>
-        /// <param name="player1Action">The player1 action.</param>
-        /// <param name="player2Action">The player2 action.</param>
-        private void UpdateMatch(ActionMessage player1Action, ActionMessage player2Action)
+        /// <param name="ai1Action">The first AI's action.</param>
+        /// <param name="ai2Action">The second AI's action.</param>
+        private void UpdateMatch(ActionMessage ai1Action, ActionMessage ai2Action)
         {
-            UpdateBall(player1Action, player2Action);
-            UpdatePlayers(player1Action, player2Action);
-            HandleOuts();
+            UpdateBall(ai1Action, ai2Action);
+            UpdatePlayers(ai1Action, ai2Action);
+            ProcessOut();
             HandleGoals();
         }
 
@@ -611,18 +693,20 @@ namespace FootballAIGame.MatchSimulation
         }
 
         /// <summary>
-        /// Gets the player parameters from the given AI.
+        /// Gets the player parameters from the specified <see cref="IClientCommunicator"/> asynchronously.
         /// </summary>
-        /// <param name="playerConnection">The player AI connection.</param>
-        /// <returns>The array of football players with their parameters set accordingly.</returns>
-        private static async Task<FootballPlayer[]> GetPlayerParametersAsync(IClientCommunicator playerConnection)
+        /// <param name="clientCommunicator">The client communicator.</param>
+        /// <returns>The task that represents the asynchronous get operation.
+        /// The value of the task's result is an array of football players 
+        /// with their parameters set accordingly.</returns>
+        private static async Task<FootballPlayer[]> GetPlayerParametersAsync(IClientCommunicator clientCommunicator)
         {
             IClientMessage message;
 
             while (true)
             {
-                await playerConnection.TrySendAsync("GET PARAMETERS");
-                message = await playerConnection.ReceiveClientMessageAsync();
+                await clientCommunicator.TrySendAsync("GET PARAMETERS");
+                message = await clientCommunicator.ReceiveClientMessageAsync();
                 if (message is ParametersMessage)
                     break;
             }
@@ -631,25 +715,25 @@ namespace FootballAIGame.MatchSimulation
         }
 
         /// <summary>
-        /// Updates the players movements according to the given AI actions.
+        /// Updates the players' movements in accordance with the specified actions.
         /// </summary>
-        /// <param name="player1Action">The player1 AI action.</param>
-        /// <param name="player2Action">The player2 AI action.</param>
-        private void UpdatePlayers(ActionMessage player1Action, ActionMessage player2Action)
+        /// <param name="ai1Action">The first AI's action.</param>
+        /// <param name="ai2Action">The second AI's action.</param>
+        private void UpdatePlayers(ActionMessage ai1Action, ActionMessage ai2Action)
         {
-            if (player1Action != null)
+            if (ai1Action != null)
             {
                 // movement
                 for (var i = 0; i < 11; i++)
                 {
                     var player = GameState.FootballPlayers[i];
-                    var action = player1Action.PlayersActions[i];
+                    var action = ai1Action.PlayersActions[i];
 
                     if (double.IsNaN(action.Movement.X) || double.IsNaN(action.Movement.Y) ||
                         double.IsInfinity(action.Movement.X) || double.IsInfinity(action.Movement.Y))
                     {
                         action.Movement = new Vector(0, 0);
-                        if (NumberOfPlayer1Errors[SimulationErrorReason.InvalidMovementVector]++ < MaximumNumberOfSameKindErrorInLog)
+                        if (NumberOfPlayer1Errors[SimulationErrorReason.InvalidMovementVector]++ < MaximumNumberOfSameReasonErrorInLog)
                             MatchInfo.Errors.Add(new SimulationError()
                             {
                                 Time = CurrentTime,
@@ -673,7 +757,7 @@ namespace FootballAIGame.MatchSimulation
                         action.Movement.Y = player.Movement.Y + fixedAcceleration.Y;
 
                         if (accelerationValue > MaxAcceleration * MinReportableCorrection &&
-                            NumberOfPlayer1Errors[SimulationErrorReason.TooHighAcceleration]++ < MaximumNumberOfSameKindErrorInLog)
+                            NumberOfPlayer1Errors[SimulationErrorReason.TooHighAcceleration]++ < MaximumNumberOfSameReasonErrorInLog)
                             MatchInfo.Errors.Add(new SimulationError()
                             {
                                 Time = CurrentTime,
@@ -696,7 +780,7 @@ namespace FootballAIGame.MatchSimulation
                         player.Movement.Y *= player.MaxSpeed / newSpeed;
 
                         if (newSpeed > player.MaxSpeed * MinReportableCorrection &&
-                            NumberOfPlayer1Errors[SimulationErrorReason.TooHighSpeed]++ < MaximumNumberOfSameKindErrorInLog)
+                            NumberOfPlayer1Errors[SimulationErrorReason.TooHighSpeed]++ < MaximumNumberOfSameReasonErrorInLog)
                             MatchInfo.Errors.Add(new SimulationError()
                             {
                                 Time = CurrentTime,
@@ -718,22 +802,22 @@ namespace FootballAIGame.MatchSimulation
             {
                 // default (nothing for now)
                 // todo add error message
-                Console.WriteLine(Player1AiConnection.PlayerName + " timeout.");
+                Console.WriteLine(AI1Communicator.PlayerName + " timeout.");
             }
 
-            if (player2Action != null)
+            if (ai2Action != null)
             {
                 // movement
                 for (var i = 0; i < 11; i++)
                 {
                     var player = GameState.FootballPlayers[i + 11];
-                    var action = player2Action.PlayersActions[i];
+                    var action = ai2Action.PlayersActions[i];
 
                     if (double.IsNaN(action.Movement.X) || double.IsNaN(action.Movement.Y) ||
                       double.IsInfinity(action.Movement.X) || double.IsInfinity(action.Movement.Y))
                     {
                         action.Movement = new Vector(0, 0);
-                        if (NumberOfPlayer2Errors[SimulationErrorReason.InvalidMovementVector]++ < MaximumNumberOfSameKindErrorInLog)
+                        if (NumberOfPlayer2Errors[SimulationErrorReason.InvalidMovementVector]++ < MaximumNumberOfSameReasonErrorInLog)
                             MatchInfo.Errors.Add(new SimulationError()
                             {
                                 Time = CurrentTime,
@@ -757,7 +841,7 @@ namespace FootballAIGame.MatchSimulation
                         action.Movement.Y = (float)(player.Movement.Y + fixedAcceleration.Y);
 
                         if (accelerationValue > MaxAcceleration * MinReportableCorrection &&
-                            NumberOfPlayer2Errors[SimulationErrorReason.TooHighAcceleration]++ < MaximumNumberOfSameKindErrorInLog)
+                            NumberOfPlayer2Errors[SimulationErrorReason.TooHighAcceleration]++ < MaximumNumberOfSameReasonErrorInLog)
                             MatchInfo.Errors.Add(new SimulationError()
                             {
                                 Time = CurrentTime,
@@ -778,7 +862,7 @@ namespace FootballAIGame.MatchSimulation
                         player.Movement.Y *= (float)(player.MaxSpeed / newSpeed);
 
                         if (newSpeed > player.MaxSpeed * MinReportableCorrection &&
-                            NumberOfPlayer2Errors[SimulationErrorReason.TooHighSpeed]++ < MaximumNumberOfSameKindErrorInLog)
+                            NumberOfPlayer2Errors[SimulationErrorReason.TooHighSpeed]++ < MaximumNumberOfSameReasonErrorInLog)
                             MatchInfo.Errors.Add(new SimulationError()
                             {
                                 Time = CurrentTime,
@@ -801,11 +885,15 @@ namespace FootballAIGame.MatchSimulation
             {
                 // default (nothing for now)
                 // todo add error message
-                Console.WriteLine(Player2AiConnection.PlayerName + " timeout.");
+                Console.WriteLine(AI2Communicator.PlayerName + " timeout.");
             }
         }
 
-        private void StopPlayerFromGoingOutside(FootballPlayer player)
+        /// <summary>
+        /// Stops the player from going too far outside of the playing field.
+        /// </summary>
+        /// <param name="player">The player.</param>
+        private static void StopPlayerFromGoingOutside(FootballPlayer player)
         {
             var y0 = player.Position.Y;
             var y1 = player.Position.Y + player.Movement.Y;
@@ -827,17 +915,17 @@ namespace FootballAIGame.MatchSimulation
         }
 
         /// <summary>
-        /// Updates the ball movement according to the given AI actions.
+        /// Updates the ball's movement in accordance with the specified actions.
         /// </summary>
-        /// <param name="player1Action">The player1 AI action.</param>
-        /// <param name="player2Action">The player2 AI action.</param>
-        private void UpdateBall(ActionMessage player1Action, ActionMessage player2Action)
+        /// <param name="ai1Action">The first AI's action.</param>
+        /// <param name="ai2Action">The second AI's action.</param>
+        private void UpdateBall(ActionMessage ai1Action, ActionMessage ai2Action)
         {
             // add kick actions to players
             for (var i = 0; i < 11; i++)
             {
-                GameState.FootballPlayers[i].Kick.X = player1Action?.PlayersActions[i].Kick.X ?? 0;
-                GameState.FootballPlayers[i].Kick.Y = player1Action?.PlayersActions[i].Kick.Y ?? 0;
+                GameState.FootballPlayers[i].Kick.X = ai1Action?.PlayersActions[i].Kick.X ?? 0;
+                GameState.FootballPlayers[i].Kick.Y = ai1Action?.PlayersActions[i].Kick.Y ?? 0;
 
                 var kickX = GameState.FootballPlayers[i].Kick.X;
                 var kickY = GameState.FootballPlayers[i].Kick.Y;
@@ -846,7 +934,7 @@ namespace FootballAIGame.MatchSimulation
                       double.IsInfinity(kickX) || double.IsInfinity(kickY))
                 {
                     GameState.FootballPlayers[i].Kick = new Vector(0, 0);
-                    if (NumberOfPlayer1Errors[SimulationErrorReason.InvalidKickVector]++ < MaximumNumberOfSameKindErrorInLog)
+                    if (NumberOfPlayer1Errors[SimulationErrorReason.InvalidKickVector]++ < MaximumNumberOfSameReasonErrorInLog)
                         MatchInfo.Errors.Add(new SimulationError()
                         {
                             Team = Team.FirstPlayer,
@@ -859,8 +947,8 @@ namespace FootballAIGame.MatchSimulation
             }
             for (var i = 0; i < 11; i++)
             {
-                GameState.FootballPlayers[i + 11].Kick.X = player2Action?.PlayersActions[i].Kick.X ?? 0;
-                GameState.FootballPlayers[i + 11].Kick.Y = player2Action?.PlayersActions[i].Kick.Y ?? 0;
+                GameState.FootballPlayers[i + 11].Kick.X = ai2Action?.PlayersActions[i].Kick.X ?? 0;
+                GameState.FootballPlayers[i + 11].Kick.Y = ai2Action?.PlayersActions[i].Kick.Y ?? 0;
 
 
                 var kickX = GameState.FootballPlayers[i + 11].Kick.X;
@@ -870,7 +958,7 @@ namespace FootballAIGame.MatchSimulation
                       double.IsInfinity(kickX) || double.IsInfinity(kickY))
                 {
                     GameState.FootballPlayers[i + 11].Kick = new Vector(0, 0);
-                    if (NumberOfPlayer2Errors[SimulationErrorReason.InvalidKickVector]++ < MaximumNumberOfSameKindErrorInLog)
+                    if (NumberOfPlayer2Errors[SimulationErrorReason.InvalidKickVector]++ < MaximumNumberOfSameReasonErrorInLog)
                         MatchInfo.Errors.Add(new SimulationError()
                         {
                             Team = Team.SecondPlayer,
@@ -891,7 +979,7 @@ namespace FootballAIGame.MatchSimulation
             if (kickWinner != null)
             {
                 // check whether the ball was shot or shot on target
-                HandleStoppedShots(kickWinner);
+                ProcessStoppedShots(kickWinner);
 
                 LastKicker = kickWinner;
                 GameState.Ball.Movement.X = kickWinner.Kick.X;
@@ -916,7 +1004,7 @@ namespace FootballAIGame.MatchSimulation
                     if (kickWinner.Id < 11)
                     {
                         if (newSpeed > maxAllowedSpeed * MinReportableCorrection &&
-                            NumberOfPlayer1Errors[SimulationErrorReason.TooStrongKick]++ < MaximumNumberOfSameKindErrorInLog)
+                            NumberOfPlayer1Errors[SimulationErrorReason.TooStrongKick]++ < MaximumNumberOfSameReasonErrorInLog)
                             MatchInfo.Errors.Add(new SimulationError()
                             {
                                 Team = Team.FirstPlayer,
@@ -928,7 +1016,7 @@ namespace FootballAIGame.MatchSimulation
                     else
                     {
                         if (newSpeed > maxAllowedSpeed * MinReportableCorrection &&
-                            NumberOfPlayer2Errors[SimulationErrorReason.TooStrongKick]++ < MaximumNumberOfSameKindErrorInLog)
+                            NumberOfPlayer2Errors[SimulationErrorReason.TooStrongKick]++ < MaximumNumberOfSameReasonErrorInLog)
                             MatchInfo.Errors.Add(new SimulationError()
                             {
                                 Team = Team.SecondPlayer,
@@ -954,9 +1042,9 @@ namespace FootballAIGame.MatchSimulation
         }
 
         /// <summary>
-        /// Handles out of play rules simulation.
+        /// Processes an out if there is one currently happening.
         /// </summary>
-        private void HandleOuts()
+        private void ProcessOut()
         {
             var lastTeam = Team.FirstPlayer; // default (will be set correctly)
             var players = GameState.FootballPlayers;
@@ -971,7 +1059,7 @@ namespace FootballAIGame.MatchSimulation
             {
                 if (GameState.Ball.Position.X > 110)
                 {
-                    GameState.KickOff = true;
+                    GameState.IsKickOff = true;
 
                     if (WhoIsOnLeft == lastTeam)
                     {
@@ -1015,7 +1103,7 @@ namespace FootballAIGame.MatchSimulation
 
                 if (GameState.Ball.Position.X < 0)
                 {
-                    GameState.KickOff = true;
+                    GameState.IsKickOff = true;
 
                     if (WhoIsOnLeft != lastTeam)
                     {
@@ -1062,7 +1150,7 @@ namespace FootballAIGame.MatchSimulation
             // touch lines
             if (ball.Position.Y < 0)
             {
-                GameState.KickOff = true;
+                GameState.IsKickOff = true;
 
                 ball.Position.Y = 1;
                 ball.Movement.X = 0f;
@@ -1082,7 +1170,7 @@ namespace FootballAIGame.MatchSimulation
             }
             if (ball.Position.Y > 75)
             {
-                GameState.KickOff = true;
+                GameState.IsKickOff = true;
 
                 ball.Position.Y = 74;
                 ball.Movement.X = 0f;
@@ -1103,9 +1191,9 @@ namespace FootballAIGame.MatchSimulation
         }
 
         /// <summary>
-        /// Handles the goals.
+        /// Processes the goal if there is one currently happening.
         /// </summary>
-        private void HandleGoals()
+        private void ProcessGoal()
         {
             var lastTeam = Team.FirstPlayer; // default (will be set correctly)
             var ball = GameState.Ball;
@@ -1116,7 +1204,7 @@ namespace FootballAIGame.MatchSimulation
 
             if (ball.Position.X < 0 && ball.Position.Y < 75f / 2 + 7.32 / 2 && ball.Position.Y > 75f / 2 - 7.32 / 2)
             {
-                GameState.KickOff = true;
+                GameState.IsKickOff = true;
 
                 var teamThatScored = WhoIsOnLeft == Team.FirstPlayer ? Team.SecondPlayer : Team.FirstPlayer;
 
@@ -1151,11 +1239,11 @@ namespace FootballAIGame.MatchSimulation
                     ScorerNumber = scoringPlayerNumber
                 });
 
-                SetStartingPositions(WhoIsOnLeft);
+                SetPlayersToStartingPositions(WhoIsOnLeft);
             }
             else if (ball.Position.X > 110 && ball.Position.Y < 75f / 2 + 7.32 / 2 && ball.Position.Y > 75f / 2 - 7.32 / 2)
             {
-                GameState.KickOff = true;
+                GameState.IsKickOff = true;
 
                 var teamThatScored = WhoIsOnLeft == Team.SecondPlayer ? Team.SecondPlayer : Team.FirstPlayer;
 
@@ -1190,16 +1278,16 @@ namespace FootballAIGame.MatchSimulation
                     ScorerNumber = scoringPlayerNumber
                 });
 
-                SetStartingPositions(WhoIsOnLeft == Team.FirstPlayer ? Team.SecondPlayer : Team.FirstPlayer);
+                SetPlayersToStartingPositions(WhoIsOnLeft == Team.FirstPlayer ? Team.SecondPlayer : Team.FirstPlayer);
             }
         }
 
         /// <summary>
-        /// Handles the stopped shots. Updates shots and shots on target statistics
+        /// Processes the stopped shots. Updates shots and shots on target statistics
         /// accordingly.
         /// </summary>
         /// <param name="currentKickWinner">The current kick winner.</param>
-        private void HandleStoppedShots(FootballPlayer currentKickWinner)
+        private void ProcessStoppedShots(FootballPlayer currentKickWinner)
         {
             var currentWinnerTeam = Team.FirstPlayer; // default (will be set correctly)
             var lastWinnerTeam = Team.FirstPlayer; // default (will be set correctly)
@@ -1215,17 +1303,17 @@ namespace FootballAIGame.MatchSimulation
             if (lastWinnerTeam == currentWinnerTeam)
                 return;
 
-            var intersectionWithGoalLine1 = GetIntersectionWithGoalLine(GameState.Ball, 1);
-            var intersectionWithGoalLine2 = GetIntersectionWithGoalLine(GameState.Ball, 2);
+            var intersectionWithLeftGoalLine = GetIntersectionWithGoalLine(GameState.Ball, true);
+            var intersectionWithRightGoalLine = GetIntersectionWithGoalLine(GameState.Ball, false);
 
-            var wasBallGoingToGoalLine1 = intersectionWithGoalLine1 != null;
-            var wasBallGoingToGoalLine2 = intersectionWithGoalLine2 != null;
-            var wasBallGoingToGoalPost1 = intersectionWithGoalLine1 != null
-                                          && intersectionWithGoalLine1.Y > 75f / 2 - 7.32 &&
-                                          intersectionWithGoalLine1.Y < 75f / 2 + 7.32;
-            var wasBallGoingToGoalPost2 = intersectionWithGoalLine2 != null
-                                          && intersectionWithGoalLine2.Y > 75f / 2 - 7.32 &&
-                                          intersectionWithGoalLine2.Y < 75f / 2 + 7.32;
+            var wasBallGoingToGoalLine1 = intersectionWithLeftGoalLine != null;
+            var wasBallGoingToGoalLine2 = intersectionWithRightGoalLine != null;
+            var wasBallGoingToGoalPost1 = intersectionWithLeftGoalLine != null
+                                          && intersectionWithLeftGoalLine.Y > 75f / 2 - 7.32 &&
+                                          intersectionWithLeftGoalLine.Y < 75f / 2 + 7.32;
+            var wasBallGoingToGoalPost2 = intersectionWithRightGoalLine != null
+                                          && intersectionWithRightGoalLine.Y > 75f / 2 - 7.32 &&
+                                          intersectionWithRightGoalLine.Y < 75f / 2 + 7.32;
 
             // process result
             if (wasBallGoingToGoalLine1 && lastWinnerTeam != WhoIsOnLeft)
@@ -1263,12 +1351,12 @@ namespace FootballAIGame.MatchSimulation
         }
 
         /// <summary>
-        /// Pushes the players from the given team away from the given <see cref="position"/> in 
-        /// accordance to the <see cref="MinimalOpponentDirectionFromKickoff"/>.
-        /// Used for pushing opponent players from kickoffs.
+        /// Pushes the players from the specified team away from the specified position in 
+        /// accordance with the <see cref="MinimalOpponentDistanceFromKickoff"/>.
+        /// Used for pushing opponent's away players from kickoffs.
         /// </summary>
         /// <param name="teamToBePushed">The team to be pushed.</param>
-        /// <param name="position">The position from which the players will be pushed aways.</param>
+        /// <param name="position">The position from which the players will be pushed away.</param>
         private void PushPlayersFromPosition(Team teamToBePushed, Vector position)
         {
             var toBePushedPlayers = new List<FootballPlayer>();
@@ -1276,7 +1364,7 @@ namespace FootballAIGame.MatchSimulation
             for (var i = 0; i < 11; i++)
             {
                 var player = GameState.FootballPlayers[teamToBePushed == Team.FirstPlayer ? i : i + 11];
-                if (Vector.DistanceBetween(player.Position, position) < MinimalOpponentDirectionFromKickoff)
+                if (Vector.DistanceBetween(player.Position, position) < MinimalOpponentDistanceFromKickoff)
                     toBePushedPlayers.Add(player);
             }
 
@@ -1286,36 +1374,36 @@ namespace FootballAIGame.MatchSimulation
                 var length = vectorToPlayer.Length;
 
                 // apply push
-                vectorToPlayer.X *= MinimalOpponentDirectionFromKickoff / length;
-                vectorToPlayer.Y *= MinimalOpponentDirectionFromKickoff / length;
+                vectorToPlayer.X *= MinimalOpponentDistanceFromKickoff / length;
+                vectorToPlayer.Y *= MinimalOpponentDistanceFromKickoff / length;
 
                 player.Position.X = position.X + vectorToPlayer.X;
                 player.Position.Y = position.Y + vectorToPlayer.Y;
 
                 if (player.Position.X > 110)
-                    player.Position.X = 110 - MinimalOpponentDirectionFromKickoff;
+                    player.Position.X = 110 - MinimalOpponentDistanceFromKickoff;
                 if (player.Position.Y > 75)
-                    player.Position.Y = 75 - MinimalOpponentDirectionFromKickoff;
+                    player.Position.Y = 75 - MinimalOpponentDistanceFromKickoff;
                 if (player.Position.X < 0)
-                    player.Position.X = MinimalOpponentDirectionFromKickoff;
+                    player.Position.X = MinimalOpponentDistanceFromKickoff;
                 if (player.Position.Y < 0)
-                    player.Position.Y = MinimalOpponentDirectionFromKickoff;
+                    player.Position.Y = MinimalOpponentDistanceFromKickoff;
             }
 
         }
 
         /// <summary>
-        /// Gets the nearest player to the ball from the given team .
+        /// Gets the nearest player to the ball from the specified team.
         /// </summary>
-        /// <param name="fromWhichTeam">Team number.</param>
-        /// <returns>Nearest player to the ball from the given team.</returns>
-        private FootballPlayer GetNearestPlayerToBall(int fromWhichTeam)
+        /// <param name="team">The team.</param>
+        /// <returns>Nearest <see cref="FootballPlayer"/> to the ball from the specified team.</returns>
+        private FootballPlayer GetNearestPlayerToBall(Team team)
         {
             FootballPlayer nearestPlayer = null;
             var players = GameState.FootballPlayers;
             var ball = GameState.Ball;
 
-            if (fromWhichTeam == 1)
+            if (team == 1)
             {
                 nearestPlayer = players[1];
                 for (int i = 2; i < 11; i++)
@@ -1323,7 +1411,7 @@ namespace FootballAIGame.MatchSimulation
                         Vector.DistanceBetween(ball.Position, nearestPlayer.Position))
                         nearestPlayer = players[i];
             }
-            if (fromWhichTeam == 2)
+            if (team == 2)
             {
                 nearestPlayer = players[12];
                 for (int i = 13; i < 22; i++)
@@ -1336,19 +1424,20 @@ namespace FootballAIGame.MatchSimulation
         }
 
         /// <summary>
-        /// Gets the intersection with goal line that ball would have if it wasn't stopped by any player.
+        /// Gets the intersection that the ball would have with the goal line if it wasn't stopped by any player.
         /// </summary>
         /// <param name="ball">The ball.</param>
-        /// <param name="whichGoalLine">The number of the goal line.</param>
-        /// <returns>Intersection with the goal line point. Null if there is not such intersection (ball 
+        /// <param name="leftGoalLine">If set to true then the intersection with the left goal line is
+        /// retrieved; otherwise the intersection with the right goal line is retrieved.</param>
+        /// <returns>The intersection with the goal line point. Null if there is no such intersection (ball 
         /// is not moving to the goal line or it is moving too slow).</returns>
-        private Vector GetIntersectionWithGoalLine(Ball ball, int whichGoalLine)
+        private static Vector GetIntersectionWithGoalLine(Ball ball, bool leftGoalLine)
         {
             double ballMovementToIntersectionVectorRatio;
             if (Math.Abs(ball.Movement.X) < 0.0001) // doesn't move
                 return null;
 
-            if (whichGoalLine == 1)
+            if (leftGoalLine)
                 ballMovementToIntersectionVectorRatio = -ball.Position.X / ball.Movement.X;
             else
                 ballMovementToIntersectionVectorRatio = (110 - ball.Position.X) / ball.Movement.X;
@@ -1385,9 +1474,9 @@ namespace FootballAIGame.MatchSimulation
         }
 
         /// <summary>
-        /// Gets the kick winner in accordance to the kickers near the ball parameters.
+        /// Gets the kick winner in accordance with the kickers' possession parameters.
         /// </summary>
-        /// <param name="kickers">The kickers near the ball.</param>
+        /// <param name="kickers">The football players that are currently kicking the ball.</param>
         /// <returns>The kick winner.</returns>
         private FootballPlayer GetKickWinner(FootballPlayer[] kickers)
         {

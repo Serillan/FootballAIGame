@@ -2,8 +2,17 @@
 
 namespace FootballAIGame.MatchSimulation.Models
 {
+    /// <summary>
+    /// Represents the football player in the simulation.
+    /// </summary>
     public class FootballPlayer
     {
+        /// <summary>
+        /// Gets or sets the identifier.
+        /// </summary>
+        /// <value>
+        /// The identifier.
+        /// </value>
         public int Id { get; set; }
 
         /// <summary>
@@ -97,6 +106,13 @@ namespace FootballAIGame.MatchSimulation.Models
         public double MaxSpeed =>
              4 + Speed * 2 / 0.4;
 
+        /// <summary>
+        /// Gets the maximum allowed kick speed describing the speed that the ball can
+        /// have immediately after the player kicks it.
+        /// </summary>
+        /// <value>
+        /// The maximum allowed kick speed.
+        /// </value>
         public double MaxKickSpeed =>
             15 + KickPower * 5;
     }

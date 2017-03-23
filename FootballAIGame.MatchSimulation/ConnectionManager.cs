@@ -7,53 +7,107 @@ using FootballAIGame.MatchSimulation.Messages;
 
 namespace FootballAIGame.MatchSimulation
 {
-    public delegate Task PlayerDisconnectedHandler(ClientConnection connection);
-    public delegate Task PlayerConnectedHandler(ClientConnection connection);
+    /// <summary>
+    /// Represents the method that is used to handle the client's disconnection asynchronously.
+    /// </summary>
+    /// <param name="connection">The connection.</param>
+    /// <returns>The task that represents the asynchronous handle operation.</returns>
+    public delegate Task ClientDisconnectedHandler(ClientConnection connection);
+
+    /// <summary>
+    /// Represents the method that is used to handle the new logged in client asynchronously.
+    /// </summary>
+    /// <param name="connection">The connection.</param>
+    /// <returns>The task that represents the asynchronous handle operation.</returns>
+    public delegate Task ClientLoggedInHandler(ClientConnection connection);
+
+    /// <summary>
+    /// Represents the method that is used to authenticate the client asynchronously.
+    /// </summary>
+    /// <param name="message">The message.</param>
+    /// <param name="connection">The connection.</param>
+    /// <returns>The task that represents the asynchronous handle operation.
+    /// The value of the task's result is <c>true</c> if the client has successfully authenticated;
+    /// otherwise, returns <c>false</c>.</returns>
     public delegate Task<bool> AuthenticationHandler(LoginMessage message, ClientConnection connection);
 
     /// <summary>
-    /// Responsible for keeping all the client connections.
-    /// Provides method to start listening for new connections, and public properties
-    /// to access those connections. <para />
-    /// It is singleton class. Use Instance static property to get the instance.
+    /// Responsible for managing client connections.
+    /// Provides the method to start listening for new connections and public properties to access these connections. Implemented as singleton. 
     /// </summary>
     public class ConnectionManager
     {
         /// <summary>
-        /// The port on which connection manager listens for connections. Also this port is used
-        /// for communication with connected clients.
+        /// The port on which connection manager listens for new connections.
         /// </summary>
         public const int GameServerPort = 50030;
 
         /// <summary>
-        /// Gets or sets the interval in milliseconds of checking that clients are still connected and also for sending keep alive
-        /// packets to clients that are not currently in a match.
+        /// The singleton instance.
         /// </summary>
+        private static ConnectionManager _instance;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the information about the new connections and disconnections
+        /// should be written to the output.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if this instance is verbose; otherwise, <c>false</c>.
+        /// </value>
+        public bool IsVerbose { get; set; }
+
+        /// <summary>
+        /// Gets or sets the interval in milliseconds in which the clients are checked
+        /// whether they are still connected.
+        /// </summary>
+        /// <value>
+        /// The check connections interval.
+        /// </value>
         public int CheckConnectionsInterval { get; set; } = 5000; // [ms]
 
         /// <summary>
-        /// Gets or sets the connected connections.
+        /// Gets or sets the <see cref="List{T}"/> of connected <see cref="ClientConnection"/>s.
         /// </summary>
         /// <value>
-        /// The connections.
+        /// The <see cref="List{T}"/> of connected <see cref="ClientConnection"/>.
         /// </value>
         public List<ClientConnection> Connections { get; set; }
 
         /// <summary>
-        /// Gets or sets the active connections. Connection becomes active when the client successfully logs in.
+        /// Gets or sets the <see cref="List{T}"/> of active <see cref="ClientConnection"/>s. 
+        /// Connection becomes active when the client successfully logs in.
         /// </summary>
         /// <value>
-        /// The active connections.
+        /// The <see cref="List{T}"/> of active <see cref="ClientConnection"/>s.
         /// </value>
         public List<ClientConnection> ActiveConnections { get; set; }
 
+        /// <summary>
+        /// Gets or sets the authentication handler that is used for authenticating
+        /// a <see cref="ClientConnection"/>.
+        /// </summary>
+        /// <value>
+        /// The <see cref="AuthenticationHandler"/>.
+        /// </value>
         public AuthenticationHandler AuthenticationHandler { get; set; }
 
-        public PlayerDisconnectedHandler PlayerDisconnectedHandler { get; set; }
+        /// <summary>
+        /// Gets or sets the <see cref="ActiveClientDisconnectedHandler"/> that is called when a 
+        /// logged in <see cref="ClientConnection"/> disconnects.
+        /// </summary>
+        /// <value>
+        /// The <see cref="MatchSimulation.ClientDisconnectedHandler"/>.
+        /// </value>
+        public ClientDisconnectedHandler ActiveClientDisconnectedHandler { get; set; }
 
-        public PlayerConnectedHandler PlayerConnectedHandler { get; set; }
-
-        public bool IsVerbose { get; set; }
+        /// <summary>
+        /// Gets or sets the <see cref="MatchSimulation.ClientLoggedInHandler"/> that is called when
+        /// the client successfully logs in.
+        /// </summary>
+        /// <value>
+        /// The <see cref="ClientLoggedInHandler"/>.
+        /// </value>
+        public ClientLoggedInHandler ClientLoggedInHandler { get; set; }
 
         /// <summary>
         /// Gets the singleton instance.
@@ -62,10 +116,9 @@ namespace FootballAIGame.MatchSimulation
         /// The instance.
         /// </value>
         public static ConnectionManager Instance => _instance ?? (_instance = new ConnectionManager());
-        private static ConnectionManager _instance; // singleton instance
 
         /// <summary>
-        /// Gets or sets the TCP listener that listens for new clients.
+        /// Gets or sets the TCP listener that listens for new connections.
         /// </summary>
         /// <value>
         /// The listener.
@@ -85,14 +138,15 @@ namespace FootballAIGame.MatchSimulation
         }
 
         /// <summary>
-        /// Starts the listening for new AI clients. After the client connects, he is added to
-        /// the <see cref="Connections"/> collection and he remains there while the connection is opened.
+        /// Starts the listening for new AI clients. When the client connects, he is added to
+        /// the <see cref="Connections" /> and he remains there while the connection is opened.
         /// </summary>
+        /// <returns>The task that represents the asynchronous listening operation.</returns>
         public async Task StartListeningAsync()
         {
             Listener.Start();
 
-            StartCheckingConnections();
+            var checkingConnectionsTask = StartCheckingConnectionsAsync();
 
             while (true)
             {
@@ -105,7 +159,9 @@ namespace FootballAIGame.MatchSimulation
 
                 if (IsVerbose)
                     Console.WriteLine("New client connection established.");
-                WaitForLogin(connection);
+
+                // fire and forget
+                var loginTask = HandleClientLoggingInAsync(connection); 
             }
         }
 
@@ -114,8 +170,7 @@ namespace FootballAIGame.MatchSimulation
         /// and keep sending keep alive packets to clients that are not currently in a match. <para />
         /// The interval of doing it is specified by <see cref="CheckConnectionsInterval"/>.
         /// </summary>
-        /// <returns></returns>
-        public async void StartCheckingConnections()
+        public async Task StartCheckingConnectionsAsync()
         {
             while (true)
             {
@@ -131,16 +186,16 @@ namespace FootballAIGame.MatchSimulation
                     {
                         if (!clientConnection.IsConnected)
                         {
-                            if (clientConnection.IsActive && IsVerbose)
+                            if (clientConnection.IsLoggedIn && IsVerbose)
                                 Console.WriteLine($"Player {clientConnection.PlayerName} with AI " +
                                               $"{clientConnection.AiName} has disconnected.");
 
-                            clientConnection.IsActive = false;
+                            clientConnection.IsLoggedIn = false;
 
                             toBeRemovedConnections.Add(clientConnection);
 
                         }
-                        else if (!clientConnection.IsInMatch && clientConnection.IsActive)
+                        else if (!clientConnection.IsInMatch && clientConnection.IsLoggedIn)
                         {
                             runningTasks.Add(clientConnection.TrySendAsync("keepalive"));
                         }
@@ -153,13 +208,13 @@ namespace FootballAIGame.MatchSimulation
 
                 lock (ActiveConnections)
                 {
-                    ActiveConnections.RemoveAll(c => c.IsActive == false);
+                    ActiveConnections.RemoveAll(c => c.IsLoggedIn == false);
                 }
 
                 foreach (var connection in toBeRemovedConnections)
                 {
-                    if (PlayerDisconnectedHandler != null)
-                        runningTasks.Add(PlayerDisconnectedHandler(connection));
+                    if (ActiveClientDisconnectedHandler != null)
+                        runningTasks.Add(ActiveClientDisconnectedHandler(connection));
 
                 }
 
@@ -170,10 +225,11 @@ namespace FootballAIGame.MatchSimulation
         }
 
         /// <summary>
-        /// Asynchronously waits for the specified client to log in using player name and desired AI name.
+        /// Handles client's logging in asynchronously.
         /// </summary>
-        /// <param name="connection">The client connection.</param>
-        private async void WaitForLogin(ClientConnection connection)
+        /// <param name="connection">The client's connection.</param>
+        /// <returns>The task that represents the asynchronous logging in operation.</returns>
+        private async Task HandleClientLoggingInAsync(ClientConnection connection)
         {
             while (true)
             {
@@ -203,7 +259,7 @@ namespace FootballAIGame.MatchSimulation
                         connection.PlayerName = loginMessage.PlayerName;
 
                         await connection.TrySendAsync("CONNECTED");
-                        connection.IsActive = true;
+                        connection.IsLoggedIn = true;
                         lock (ActiveConnections)
                         {
                             ActiveConnections.Add(connection);
@@ -211,8 +267,8 @@ namespace FootballAIGame.MatchSimulation
 
                         if (IsVerbose)
                             Console.WriteLine($"Player {connection.PlayerName} with AI {connection.AiName} has log on.");
-                        if (PlayerConnectedHandler != null)
-                            await PlayerConnectedHandler(connection);
+                        if (ClientLoggedInHandler != null)
+                            await ClientLoggedInHandler(connection);
                         break;
                     }
                 }
@@ -220,11 +276,14 @@ namespace FootballAIGame.MatchSimulation
         }
 
         /// <summary>
-        /// Processes the login message asynchronously.
+        /// Does default asynchronous client authentication. Its the default value
+        /// of <see cref="AuthenticationHandler"/>.
         /// </summary>
-        /// <param name="message">The message.</param>
+        /// <param name="message">The client's login message.</param>
         /// <param name="connection">The connection.</param>
-        /// <returns><c>true</c> if the client has log on successfully; otherwise <c>false</c></returns>
+        /// <returns>The task that represents the asynchronous logging in operation.
+        /// The value of the task's result is <c>true</c> if the client has authenticated successfully; 
+        /// otherwise <c>false</c></returns>
         private Task<bool> DoDefaultAuthenticationAsync(LoginMessage message, ClientConnection connection)
         {
             return Task.FromResult(true);

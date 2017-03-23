@@ -121,11 +121,13 @@ namespace FootballAIGame.Server.Models
         /// <summary>
         /// Gets or sets the match data. 
         /// Match data is binary representation of game states from all simulation steps. <para />
-        /// For each step there is a ball position with a movement vector and 22 players positions and movement vectors. <para />
-        /// Everything is encoded as float. So each step takes 23*4 = 92 floats = 368 Bytes
+        /// For each step there should be a ball position and 22 players positions. <para />
+        /// Everything is encoded as float. So each step takes 23*2 = 46 floats = 184 Bytes
         /// </summary>
         /// <value>
-        /// The match data.
+        /// If set correctly then there should be the match float data in the following order: 
+        /// step0BallX, step0BallY, step0Player0X, step0Player0Y, ...step0Player22Y, step1BallX ... 
+        /// converted to bytes.
         /// </value>
         public byte[] MatchData { get; set; }
 

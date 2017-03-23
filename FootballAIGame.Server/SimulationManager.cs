@@ -70,10 +70,10 @@ namespace FootballAIGame.Server
             {
                 foreach (var runningSimulation in RunningSimulations)
                 {
-                    if (runningSimulation.Player1AiConnection.PlayerName == playerName)
-                        runningSimulation.Player1CancelRequested = true;
-                    if (runningSimulation.Player2AiConnection.PlayerName == playerName)
-                        runningSimulation.Player2CancelRequested = true;
+                    if (runningSimulation.AI1Communicator.PlayerName == playerName)
+                        runningSimulation.AI1CancelRequested = true;
+                    if (runningSimulation.AI2Communicator.PlayerName == playerName)
+                        runningSimulation.AI2CancelRequested = true;
                 }
             }
         }
@@ -159,8 +159,8 @@ namespace FootballAIGame.Server
         public MatchSimulator GetMatchSimulator(string userName)
         {
             return RunningSimulations
-                .FirstOrDefault(m => m.Player1AiConnection.PlayerName == userName ||
-                                     m.Player2AiConnection.PlayerName == userName);
+                .FirstOrDefault(m => m.AI1Communicator.PlayerName == userName ||
+                                     m.AI2Communicator.PlayerName == userName);
         }
 
         private void Initialize()
@@ -189,15 +189,15 @@ namespace FootballAIGame.Server
         private void SetSimulationHandlers()
         {
             ConnectionManager.Instance.AuthenticationHandler = ProcessLoginMessageAsync;
-            ConnectionManager.Instance.PlayerDisconnectedHandler = ProcessClientDisconnectionAsync;
+            ConnectionManager.Instance.ActiveClientDisconnectedHandler = ProcessClientDisconnectionAsync;
         }
 
         private async Task<MatchSimulator> OnSimulationEndAsync(DateTime startTime, MatchSimulator simulator, int? tournamentId)
         {
             var matchInfo = simulator.MatchInfo;
 
-            var player1AiConnection = simulator.Player1AiConnection as ClientConnection;
-            var player2AiConnection = simulator.Player2AiConnection as ClientConnection;
+            var player1AiConnection = simulator.AI1Communicator as ClientConnection;
+            var player2AiConnection = simulator.AI2Communicator as ClientConnection;
             Debug.Assert(player1AiConnection != null, "player1AiConnection != null");
             Debug.Assert(player2AiConnection != null, "player2AiConnection != null");
 

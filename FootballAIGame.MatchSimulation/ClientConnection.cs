@@ -11,26 +11,26 @@ using FootballAIGame.MatchSimulation.Models;
 namespace FootballAIGame.MatchSimulation
 {
     /// <summary>
-    /// Responsible for keeping TCP connection to the connected client.
+    /// Responsible for keeping TCP connection to a connected client.
     /// Provides methods for communicating with the client.
     /// </summary>
+    /// <seealso cref="FootballAIGame.MatchSimulation.IClientCommunicator" /> <para />
     /// <seealso cref="System.IDisposable" />
     public class ClientConnection : IDisposable, IClientCommunicator
     {
         /// <summary>
-        /// Gets or sets a value indicating whether the connection is active.
-        /// Connection becomes active when the client successfully logs in.
+        /// Gets or sets a value indicating whether the client is logged in.
         /// </summary>
         /// <value>
-        ///   <c>true</c> if the connection is active; otherwise, <c>false</c>.
+        ///   <c>true</c> if the client is logged in; otherwise, <c>false</c>.
         /// </value>
-        public bool IsActive { get; set; }
+        public bool IsLoggedIn { get; set; }
 
         /// <summary>
-        /// Gets a value indicating whether this instance is connected.
+        /// Gets a value indicating whether the connection is still on.
         /// </summary>
         /// <value>
-        /// <c>true</c> if this instance is connected; otherwise, <c>false</c>.
+        /// <c>true</c> if the connection is connected to the client; otherwise, <c>false</c>.
         /// </value>
         public bool IsConnected
         {
@@ -58,10 +58,10 @@ namespace FootballAIGame.MatchSimulation
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether this instance is in match.
+        /// Gets or sets a value indicating whether the connection is in a match.
         /// </summary>
         /// <value>
-        /// <c>true</c> if this instance is in match; otherwise, <c>false</c>.
+        /// <c>true</c> if the connection is in a match; otherwise, <c>false</c>.
         /// </value>
         public bool IsInMatch { get; set; }
 
@@ -82,25 +82,24 @@ namespace FootballAIGame.MatchSimulation
         public string AiName { get; set; }
 
         /// <summary>
-        /// Gets or sets the TCP client associated with the connected client.
+        /// Gets or sets the <see cref="TcpClient"/> associated with the connected client.
         /// </summary>
         /// <value>
-        /// The TCP client.
+        /// The <see cref="TcpClient"/> associated with this connection.
         /// </value>
         private TcpClient TcpClient { get; set; }
 
         /// <summary>
-        /// Gets or sets the network stream associated with the connected client.
+        /// Gets or sets the <see cref="NetworkStream"/> associated with the connection.
         /// </summary>
         /// <value>
-        /// The network stream.
+        /// The <see cref="NetworkStream"/> associated with the connection.
         /// </value>
         private NetworkStream NetworkStream { get; set; }
 
         /// <summary>
-        /// Gets or sets the current receive task. There is always one receive task for
-        /// receiving client messages. After the message was received new receive task
-        /// is created when somebody uses <see cref="ReceiveClientMessageAsync"/> method.
+        /// Gets or sets the current receive task. There is always at most one receive task for
+        /// receiving client messages.
         /// </summary>
         /// <value>
         /// The current receive task.
@@ -110,18 +109,18 @@ namespace FootballAIGame.MatchSimulation
         /// <summary>
         /// Initializes a new instance of the <see cref="ClientConnection"/> class.
         /// </summary>
-        /// <param name="tcpClient">The TCP client connected to the client application.</param>
+        /// <param name="tcpClient">The <see cref="TcpClient"/> connected to the client.</param>
         public ClientConnection(TcpClient tcpClient)
         {
             TcpClient = tcpClient;
             TcpClient.NoDelay = true;
             NetworkStream = tcpClient.GetStream();
-            IsActive = false;
+            IsLoggedIn = false;
         }
 
         /// <summary>
         /// Pings the connected client several times and computes average round trip time in milliseconds.
-        /// If client doesn't allow pinging, returns default round trip time.
+        /// If the client doesn't allow pinging, returns default round trip time.
         /// </summary>
         /// <returns>The average round trip time if client allows pings; otherwise returns the default 
         /// round trip time.</returns>
@@ -148,9 +147,10 @@ namespace FootballAIGame.MatchSimulation
         }
 
         /// <summary>
-        /// Sends message to the client asynchronously.
+        /// Sends the specified message to the client asynchronously.
         /// </summary>
         /// <param name="message">The message.</param>
+        /// <returns>The task that represents the asynchronous send operation.</returns>
         public async Task SendAsync(string message)
         {
             var bytes = Encoding.UTF8.GetBytes(message + "\n");
@@ -161,7 +161,8 @@ namespace FootballAIGame.MatchSimulation
         /// Tries to send the message to the client asynchronously.
         /// </summary>
         /// <param name="message">The message.</param>
-        /// <returns>True if the sending was successful; otherwise returns false.</returns>
+        /// <returns>The task that represents the asynchronous send operation. 
+        /// The value of the task's result is <c>true</c> if the sending was successful; otherwise <c>false</c>.</returns>
         public async Task<bool> TrySendAsync(string message)
         {
             var bytes = Encoding.UTF8.GetBytes(message + "\n");
@@ -169,12 +170,12 @@ namespace FootballAIGame.MatchSimulation
         }
 
         /// <summary>
-        /// Sends the specified game state to the client asynchronously.
+        /// Sends the specified <see cref="GameState" /> to the client asynchronously.
         /// </summary>
-        /// <param name="gameState">State of the game.</param>
-        /// <param name="playerNumber">1 if first 11 players from the given game state are
-        /// client's players; otherwise 2 (seconds half are client's players)</param>
-        public async Task SendAsync(GameState gameState, int playerNumber)
+        /// <param name="gameState">The state of the game.</param>
+        /// <param name="team">The <see cref="Team" /> belonging to this connection.</param>
+        /// <returns>The task that represents the asynchronous send operation. </returns>
+        public async Task SendAsync(GameState gameState, Team team)
         {
             var data = new float[92];
 
@@ -183,7 +184,7 @@ namespace FootballAIGame.MatchSimulation
             data[2] = (float)gameState.Ball.Movement.X;
             data[3] = (float)gameState.Ball.Movement.Y;
 
-            if (playerNumber == 1)
+            if (team == Team.FirstPlayer)
             {
                 for (var i = 0; i < 22; i++)
                 {
@@ -216,7 +217,7 @@ namespace FootballAIGame.MatchSimulation
             var numArray = new[] { gameState.Step };
 
             Buffer.BlockCopy(numArray, 0, byteArray, 0, 4);
-            byteArray[4] = gameState.KickOff ? (byte)1 : (byte)0;
+            byteArray[4] = gameState.IsKickOff ? (byte)1 : (byte)0;
             Buffer.BlockCopy(data, 0, byteArray, 5, data.Length * 4);
             await SendAsync(byteArray);
         }
@@ -224,15 +225,15 @@ namespace FootballAIGame.MatchSimulation
         /// <summary>
         /// Tries to send the specified game state to the client asynchronously.
         /// </summary>
-        /// <param name="gameState">State of the game.</param>
-        /// <param name="playerNumber">1 if first 11 players from the given game state are
-        /// client's players; otherwise 2 (seconds half are client's players)</param>
-        /// <returns>True if the sending was successful; otherwise returns false.</returns>
-        public async Task<bool> TrySendAsync(GameState gameState, int playerNumber)
+        /// <param name="gameState">The state of the game.</param>
+        /// <param name="team">The <see cref="Team"/> belonging to this connection.</param>
+        /// <returns>The task that represents the asynchronous send operation. 
+        /// The value of the task's result is <c>true</c> if the sending was successful; otherwise <c>false</c>.</returns>
+        public async Task<bool> TrySendAsync(GameState gameState, Team team)
         {
             try
             {
-                await SendAsync(gameState, playerNumber);
+                await SendAsync(gameState, team);
                 return true;
             }
             catch (Exception)
@@ -245,17 +246,18 @@ namespace FootballAIGame.MatchSimulation
         /// Sends the specified data to the client asynchronously.
         /// </summary>
         /// <param name="data">The data.</param>
+        /// <returns>The task that represents the asynchronous send operation.</returns>
         public async Task SendAsync(byte[] data)
         {
             await NetworkStream.WriteAsync(data, 0, data.Length);
         }
 
         /// <summary>
-        /// Tries to send the specified data to the client asynchronously. Return true
-        /// if it was successful; otherwise returns false.
+        /// Tries to send the specified data to the client asynchronously.
         /// </summary>
         /// <param name="data">The data.</param>
-        /// <returns>True if the sending was successful; otherwise returns false.</returns>
+        /// <returns>The task that represents the asynchronous send operation. 
+        /// The value of the task's result is <c>true</c> if the sending was successful; otherwise <c>false</c>.</returns>
         public async Task<bool> TrySendAsync(byte[] data)
         {
             try
@@ -271,9 +273,12 @@ namespace FootballAIGame.MatchSimulation
         }
 
         /// <summary>
-        /// Receives the client message asynchronously. Returns null if the connection was dropped.
+        /// Receives a client message asynchronously.
+        /// The task's result is null if the connection is dropped.
         /// </summary>
-        /// <returns>The next received client message.</returns>
+        /// <returns>The task that represents the asynchronous receive operation. 
+        /// The value of the task's result is null if the connection is dropped; otherwise,
+        /// the received <see cref="IClientMessage"/>.</returns>
         public async Task<IClientMessage> ReceiveClientMessageAsync()
         {
             if (CurrentReceiveTask == null || CurrentReceiveTask.IsCanceled || CurrentReceiveTask.IsCompleted ||
@@ -291,9 +296,11 @@ namespace FootballAIGame.MatchSimulation
         }
 
         /// <summary>
-        /// Reads the next line asynchronously. Returns null if the connection was dropped.
+        /// Reads the next line asynchronously.
+        /// The task's result is null if the connection is dropped.
         /// </summary>
-        /// <returns>The read line.</returns>
+        /// <returns>The task that represents the asynchronous read operation. The value of the task's result
+        /// is null if the connection is dropped; otherwise, the received line.</returns>
         public async Task<string> ReadLineAsync()
         {
             var bytes = new List<byte>();
@@ -319,10 +326,12 @@ namespace FootballAIGame.MatchSimulation
         }
 
         /// <summary>
-        /// Receives the client message asynchronously task. There is always only
-        /// one receiving at any moment.
+        /// Starts a new receiving of a <see cref="IClientMessage"/> if there is not already one receiving.
+        /// The task's result is null if the connection is dropped.
         /// </summary>
-        /// <returns>The next received client message.</returns>
+        /// <returns>The task that represents the asynchronous receive operation. 
+        /// The value of the task's result is null if the connection is dropped; otherwise,
+        /// the received <see cref="IClientMessage"/>.</returns>
         private async Task<IClientMessage> StartReceivingClientMessageAsync()
         {
             IClientMessage message;
@@ -375,7 +384,7 @@ namespace FootballAIGame.MatchSimulation
         }
 
         /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// Closes the connection. Releases all allocated resources.
         /// </summary>
         public void Dispose()
         {
@@ -383,10 +392,13 @@ namespace FootballAIGame.MatchSimulation
         }
 
         /// <summary>
-        /// Receives the action message asynchronously. Returns null if the connection was dropped.
+        /// Receives the <see cref="ActionMessage"/> asynchronously.
+        /// The task's result is null if the connection is dropped.
         /// </summary>
-        /// <param name="step">The expected simulation step of the action message.</param>
-        /// <returns>The next received action client message with the specified step.</returns>
+        /// <param name="step">The simulation step which a received <see cref="ActionMessage"/> must have.</param>
+        /// <returns>The task that represents the asynchronous receive operation. 
+        /// The value of the task's result is null if the connection is dropped or invalid message
+        /// is received; otherwise, the received <see cref="ActionMessage"/>.</returns>
         public async Task<ActionMessage> ReceiveActionMessageAsync(int step)
         {
             while (true)
@@ -400,7 +412,7 @@ namespace FootballAIGame.MatchSimulation
 
                 if (actionMessage == null)
                 {
-                    Console.WriteLine("Invalid message received.");
+                    //Console.WriteLine("Invalid message received.");
                     continue;
                 }
 
@@ -408,17 +420,17 @@ namespace FootballAIGame.MatchSimulation
                     return actionMessage;
                 else if (actionMessage.Step > step)
                 {
-                    Console.WriteLine($"Wrong action received! Received {actionMessage.Step} instead of {step}");
+                    //Console.WriteLine($"Wrong action received! Received {actionMessage.Step} instead of {step}");
                     return null;
                 }
                 else if (actionMessage.Step < step)
                 {
-                    Console.WriteLine($"Wrong action received! Received {actionMessage.Step} instead of {step}");
+                    //Console.WriteLine($"Wrong action received! Received {actionMessage.Step} instead of {step}");
                     return null;
                 }
                 else
                 {
-                    Console.WriteLine($"Wrong action received! actionMessage.Step == null, expected step - {step}");
+                    //Console.WriteLine($"Wrong action received! actionMessage.Step == null, expected step - {step}");
                 }
             }
         }

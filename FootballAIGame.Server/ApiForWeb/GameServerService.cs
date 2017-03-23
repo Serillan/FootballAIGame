@@ -145,8 +145,8 @@ namespace FootballAIGame.Server.ApiForWeb
             lock (SimulationManager.Instance.RunningSimulations)
             {
                 var match = SimulationManager.Instance.RunningSimulations
-                    .FirstOrDefault(m => m.Player1AiConnection.PlayerName == playerName ||
-                                         m.Player2AiConnection.PlayerName == playerName);
+                    .FirstOrDefault(m => m.AI1Communicator.PlayerName == playerName ||
+                                         m.AI2Communicator.PlayerName == playerName);
                 return match?.CurrentStep ?? 1500;
             }
         }

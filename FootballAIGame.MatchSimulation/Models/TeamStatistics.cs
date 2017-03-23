@@ -2,32 +2,35 @@
 
 namespace FootballAIGame.MatchSimulation.Models
 {
+    /// <summary>
+    /// Represents the football statistics of a football team in a football match.
+    /// </summary>
     [DataContract]
     public class TeamStatistics
     {
         /// <summary>
-        /// Gets or sets the number of team goals.
+        /// Gets or sets the number of goals scored by the team.
         /// </summary>
         /// <value>
-        /// The number of player1 team shots.
+        /// The number of goals scored by the team.
         /// </value>
         [DataMember]
         public int Goals { get; set; }
 
         /// <summary>
-        /// Gets or sets the number of team shots.
+        /// Gets or sets the number of the team's shots.
         /// </summary>
         /// <value>
-        /// The number of player1 team shots.
+        /// The number of the team's shots.
         /// </value>
         [DataMember]
         public int Shots { get; set; }
 
         /// <summary>
-        /// Gets or sets the number of team shots on target.
+        /// Gets or sets the number of the team's shots on target.
         /// </summary>
         /// <value>
-        /// The number of player1 team shots on target.
+        /// The number of the team's shots on target.
         /// </value>
         [DataMember]
         public int ShotsOnTarget { get; set; }

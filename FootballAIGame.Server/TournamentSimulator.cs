@@ -353,13 +353,13 @@ namespace FootballAIGame.Server
 
                         if (matchSimulator.MatchInfo.Winner == Team.FirstPlayer)
                         {
-                            winnerPlayerName = matchSimulator.Player1AiConnection.PlayerName;
-                            looserPlayerName = matchSimulator.Player2AiConnection.PlayerName;
+                            winnerPlayerName = matchSimulator.AI1Communicator.PlayerName;
+                            looserPlayerName = matchSimulator.AI2Communicator.PlayerName;
                         }
                         else
                         {
-                            winnerPlayerName = matchSimulator.Player2AiConnection.PlayerName;
-                            looserPlayerName = matchSimulator.Player1AiConnection.PlayerName;
+                            winnerPlayerName = matchSimulator.AI2Communicator.PlayerName;
+                            looserPlayerName = matchSimulator.AI1Communicator.PlayerName;
                         }
 
 
@@ -369,9 +369,9 @@ namespace FootballAIGame.Server
                     else
                     {
                         var player1 =
-                            Players.FirstOrDefault(p => p.Player.Name == matchSimulator.Player1AiConnection.PlayerName);
+                            Players.FirstOrDefault(p => p.Player.Name == matchSimulator.AI1Communicator.PlayerName);
                         var player2 =
-                            Players.FirstOrDefault(p => p.Player.Name == matchSimulator.Player2AiConnection.PlayerName);
+                            Players.FirstOrDefault(p => p.Player.Name == matchSimulator.AI2Communicator.PlayerName);
                         var rndWinner = MatchSimulator.Random.Next(2);
 
                         // in tournament winner is chosen randomly in case of draw !
