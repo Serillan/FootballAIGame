@@ -56,7 +56,7 @@ namespace FootballAIGame.Server
                     player.PlayerState = PlayerState.Idle; // TODO show browser clients that error has occurred
                 }
 
-                TournamentSimulator.CloseRunningTournaments(context);
+                TournamentManager.Instance.CloseRunningTournaments(context);
 
                 context.SaveChanges();
             }

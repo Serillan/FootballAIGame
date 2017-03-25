@@ -56,7 +56,7 @@ namespace FootballAIGame.Server.ApiForWeb
         {
             // cancel tournament match if player is in it
             SimulationManager.Instance.CancelMatch(playerName);
-            TournamentSimulator.LeaveRunningTournament(playerName);
+            TournamentManager.Instance.LeaveRunningTournament(playerName);
         }
 
         /// <summary>
@@ -65,15 +65,7 @@ namespace FootballAIGame.Server.ApiForWeb
         /// <param name="tournamentId">The tournament identifier.</param>
         public void PlanTournament(int tournamentId)
         {
-            using (var context = new ApplicationDbContext())
-            {
-                var tournament = context.Tournaments.SingleOrDefault(t => t.Id == tournamentId);
-                if (tournament == null)
-                    return;
-
-                var simulator = new TournamentSimulator(tournament);
-                simulator.PlanSimulation();
-            }
+            TournamentManager.PlanTournament(tournamentId);
         }
 
         /// <summary>

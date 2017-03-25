@@ -24,7 +24,7 @@ namespace FootballAIGame.Server
         /// <value>
         /// The list of currently running simulations.
         /// </value>
-        public List<MatchSimulator> RunningSimulations { get; set; } = new List<MatchSimulator>();
+        private List<MatchSimulator> RunningSimulations { get; set; } = new List<MatchSimulator>();
 
         /// <summary>
         /// Gets or sets the wants to play connections.
@@ -32,7 +32,7 @@ namespace FootballAIGame.Server
         /// <value>
         /// The wants to play connections.
         /// </value>
-        public List<ClientConnection> WantsToPlayConnections { get; set; } = new List<ClientConnection>();
+        private List<ClientConnection> WantsToPlayConnections { get; set; } = new List<ClientConnection>();
 
         /// <summary>
         /// Gets the singleton instance.
@@ -50,7 +50,7 @@ namespace FootballAIGame.Server
 
         public async Task StartSimulatingAsync()
         {
-            TournamentSimulator.PlanUnstartedTournaments();
+            TournamentManager.PlanUnstartedTournaments();
             Console.WriteLine("Tournaments planned.");
 
             ConnectionManager.Instance.IsVerbose = true;
@@ -149,18 +149,6 @@ namespace FootballAIGame.Server
         {
             Task<MatchSimulator> task;
             return StartMatch(userName1, ai1, userName2, ai2, out task);
-        }
-
-        /// <summary>
-        /// Gets the match simulator that is simulating match in which the specified player is.
-        /// </summary>
-        /// <param name="userName">Name of the player.</param>
-        /// <returns></returns>
-        public MatchSimulator GetMatchSimulator(string userName)
-        {
-            return RunningSimulations
-                .FirstOrDefault(m => m.AI1Communicator.PlayerName == userName ||
-                                     m.AI2Communicator.PlayerName == userName);
         }
 
         public string AddToWantsToPlayConnections(string userName, string aiName)

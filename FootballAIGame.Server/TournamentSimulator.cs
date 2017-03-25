@@ -15,22 +15,13 @@ namespace FootballAIGame.Server
     public class TournamentSimulator
     {
         /// <summary>
-        /// Gets or sets the running tournaments.
-        /// </summary>
-        /// <value>
-        /// The running tournaments.
-        /// </value>
-        public static List<TournamentSimulator> RunningTournaments { get; set; } 
-            = new List<TournamentSimulator>();
-
-        /// <summary>
         /// Gets or sets the tournament identifier of the tournament that
         /// is simulated by this instance.
         /// </summary>
         /// <value>
         /// The tournament identifier.
         /// </value>
-        private int TournamentId { get; set; }
+        public int TournamentId { get; }
 
         /// <summary>
         /// Gets or sets the start time of the tournament.
@@ -49,7 +40,7 @@ namespace FootballAIGame.Server
         /// <value>
         /// The players.
         /// </value>
-        private List<TournamentPlayer> Players { get; set; }
+        public List<TournamentPlayer> Players { get; set; }
 
         /// <summary>
         /// Gets the time until start of the tournament.
@@ -67,25 +58,6 @@ namespace FootballAIGame.Server
         {
             TournamentId = tournament.Id;
             StartTime = tournament.StartTime;
-        }
-
-        /// <summary>
-        /// Plans the unstarted tournaments.
-        /// </summary>
-        public static void PlanUnstartedTournaments()
-        {
-            using (var context = new ApplicationDbContext())
-            {
-                var nextTournaments = context.Tournaments
-                    .Where(t => t.TournamentState == TournamentState.Unstarted)
-                    .ToList();
-
-                foreach (var nextTournament in nextTournaments)
-                {
-                    var simulator = new TournamentSimulator(nextTournament);
-                    simulator.PlanSimulation();
-                }
-            }
         }
 
         /// <summary>
@@ -118,42 +90,6 @@ namespace FootballAIGame.Server
         }
 
         /// <summary>
-        /// Player will leave a running tournament in which he currently is.
-        /// If there is not such tournament, then it does nothing.
-        /// </summary>
-        /// <param name="playerName">The player name.</param>
-        public static void LeaveRunningTournament(string playerName)
-        {
-            TournamentSimulator tournamentSimulator;
-
-            lock (RunningTournaments)
-            {
-                tournamentSimulator = RunningTournaments
-                    .SingleOrDefault(t => t.Players.Any(p => p.Player.Name == playerName));
-            }
-
-            if (tournamentSimulator == null)
-                return;
-
-            lock (tournamentSimulator.Players)
-            {
-                tournamentSimulator.Players.RemoveAll(p => p.Player.Name == playerName);
-            }
-
-            // improve position for players that have already ended
-            using (var context = new ApplicationDbContext())
-            {
-                var playersWithPosition = context.TournamentPlayers
-                    .Where(tp => tp.TournamentId == tournamentSimulator.TournamentId && tp.PlayerPosition != null);
-                foreach (var tournamentPlayer in playersWithPosition)
-                {
-                    tournamentPlayer.PlayerPosition--;
-                }
-                context.SaveChanges();
-            }
-        }
-
-        /// <summary>
         /// Starts the tournament simulation.
         /// </summary>
         private async Task SimulateAsync()
@@ -180,18 +116,16 @@ namespace FootballAIGame.Server
                     tournament.TournamentState = TournamentState.NotEnoughtPlayersClosed;
                     if (tournament.RecurringTournament != null)
                     {
-                        var nextTournament = CreateNextRecurring(tournament.RecurringTournament);
-                        var simulator = new TournamentSimulator(nextTournament);
-                        simulator.PlanSimulation();
+                        TournamentManager.PlanNextRecurring(tournament.RecurringTournament);
                     }
                     context.SaveChanges();
                     return;
                 }
 
                 tournament.TournamentState = TournamentState.Running;
-                lock (RunningTournaments)
+                lock (TournamentManager.Instance.RunningTournaments)
                 {
-                    RunningTournaments.Add(this);
+                    TournamentManager.Instance.RunningTournaments.Add(this);
                 }
 
                 // get players and update their states
@@ -256,9 +190,7 @@ namespace FootballAIGame.Server
             // if it's recurring then plan new one
             if (tournament.RecurringTournament != null)
             {
-                var nextTournament = CreateNextRecurring(tournament.RecurringTournament);
-                var simulator = new TournamentSimulator(nextTournament);
-                simulator.PlanSimulation();
+                TournamentManager.PlanNextRecurring(tournament.RecurringTournament);
             }
         }
 
@@ -404,32 +336,6 @@ namespace FootballAIGame.Server
         }
 
         /// <summary>
-        /// Creates the next tournament from the specified <see cref="RecurringTournament"/>.
-        /// </summary>
-        /// <param name="tournament">The recurring tournament.</param>
-        /// <returns>The created tournament.</returns>
-        private static Tournament CreateNextRecurring(RecurringTournament tournament)
-        {
-            using (var context = new ApplicationDbContext())
-            {
-                var reccuringTournament = context.RecurringTournaments
-                    .Include(t => t.Tournaments)
-                    .SingleOrDefault(t => t.Id == tournament.Id);
-
-                if (reccuringTournament == null)
-                    return null;
-
-                var lastTournamentTime = reccuringTournament.Tournaments.Max(t => t.StartTime);
-                var nextTournament = new Tournament(reccuringTournament,
-                    lastTournamentTime + TimeSpan.FromMinutes(reccuringTournament.RecurrenceInterval));
-                context.Tournaments.Add(nextTournament);
-                context.SaveChanges();
-
-                return nextTournament;
-            }
-        }
-
-        /// <summary>
         /// Saves players states and tournament positions.
         /// </summary>
         /// <param name="players">The players.</param>
@@ -489,27 +395,6 @@ namespace FootballAIGame.Server
 
                 context.TournamentPlayers.RemoveRange(playersToBeRemoved);
                 context.SaveChanges();
-            }
-        }
-
-        /// <summary>
-        /// Closes the running tournaments.
-        /// </summary>
-        /// <param name="context">The context.</param>
-        public static void CloseRunningTournaments(ApplicationDbContext context)
-        {
-            lock (RunningTournaments)
-            {
-                var runningTournaments = context.Tournaments
-                    .Include(t => t.RecurringTournament)
-                    .Where(t => t.TournamentState == TournamentState.Running);
-                    
-                foreach (var runningTournament in runningTournaments)
-                {
-                    runningTournament.TournamentState = TournamentState.ErrorClosed;
-                    if (runningTournament.RecurringTournament != null)
-                        CreateNextRecurring(runningTournament.RecurringTournament);
-                }
             }
         }
 
