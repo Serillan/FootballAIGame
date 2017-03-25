@@ -6,7 +6,7 @@ using System.Text;
 using System.Web;
 using System.Web.Security;
 
-namespace FootballAIGame.Web.Helpers
+namespace FootballAIGame.Web.Utilities
 {
     public static class AccessKeyGenerator
     {

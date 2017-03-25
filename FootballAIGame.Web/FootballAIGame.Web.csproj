@@ -198,9 +198,6 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Helpers\AccessKeyGenerator.cs" />
-    <Compile Include="Helpers\CustomDateTimeConverter.cs" />
-    <Compile Include="Helpers\JoinedTournamentComparer.cs" />
     <Compile Include="Migrations\201608091238327_InitialMigration.cs" />
     <Compile Include="Migrations\201608091238327_InitialMigration.Designer.cs">
       <DependentUpon>201608091238327_InitialMigration.cs</DependentUpon>
@@ -335,6 +332,9 @@
       <DependentUpon>Reference.svcmap</DependentUpon>
     </Compile>
     <Compile Include="Startup.cs" />
+    <Compile Include="Utilities\AccessKeyGenerator.cs" />
+    <Compile Include="Utilities\CustomDateTimeConverter.cs" />
+    <Compile Include="Utilities\JoinedTournamentComparer.cs" />
     <Compile Include="ViewModels\Account\ExternalLoginConfirmationViewModel.cs" />
     <Compile Include="ViewModels\Account\ExternalLoginListViewModel.cs" />
     <Compile Include="ViewModels\Account\ForgotPasswordViewModel.cs" />
