@@ -26,7 +26,10 @@
     </p>
     <p>
         You need to log in with the AI.
-        The server expects message in the form: <code>LOGIN UserName AIName</code> on a separate line (ending with the newline character).
+        The server expects message in the form: <code>LOGIN UserName AIName AccessKey</code> on a separate line (ending with the newline character).
+        The access key is shown on your application home page when you are logged in. The access key is used instead of password
+        because the communication between your AI application and the server is not encrypted. You can also
+        generate a new access key in the account manager.
     </p>
     <p>
         If your log in is successful you will receive <code>CONNECTED</code> otherwise you will receive the message with a reason why your log in failed.

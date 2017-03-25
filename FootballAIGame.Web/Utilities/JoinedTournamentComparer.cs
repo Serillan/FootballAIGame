@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿using System.Collections.Generic;
 using FootballAIGame.Web.Models;
 
-namespace FootballAIGame.Web.Helpers
+namespace FootballAIGame.Web.Utilities
 {
     /// <summary>
     /// The comparer used for sorting <see cref="Tournament"/>s by their start time and state.

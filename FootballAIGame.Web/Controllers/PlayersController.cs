@@ -4,8 +4,8 @@ using System.Data.Entity;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
-using FootballAIGame.Web.Helpers;
 using FootballAIGame.Web.Models;
+using FootballAIGame.Web.Utilities;
 using FootballAIGame.Web.ViewModels.Players;
 using Microsoft.AspNet.Identity;
 

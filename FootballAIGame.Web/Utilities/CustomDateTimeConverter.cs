@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Web;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace FootballAIGame.Web.Helpers
+namespace FootballAIGame.Web.Utilities
 {
     /// <summary>
     /// Used for converting <see cref="DateTime"/> to JSON and parsing from JSON.

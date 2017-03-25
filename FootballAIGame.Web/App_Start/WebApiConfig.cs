@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Web.Http;
-using FootballAIGame.Web.Helpers;
+using FootballAIGame.Web.Utilities;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
