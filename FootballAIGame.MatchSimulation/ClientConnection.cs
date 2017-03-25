@@ -124,7 +124,7 @@ namespace FootballAIGame.MatchSimulation
         /// </summary>
         /// <returns>The average round trip time if client allows pings; otherwise returns the default 
         /// round trip time.</returns>
-        public int PingTimeAverage()
+        public int ComputeAveragePingTime()
         {
             long totalTime = 0;
             var timeout = 500;
@@ -338,9 +338,7 @@ namespace FootballAIGame.MatchSimulation
 
             while (true) // while correct message is not received
             {
-                //Console.WriteLine($"{PlayerName} - receiving line");
                 var firstLine = await ReadLineAsync();//await NetworkReader.ReadLineAsync();
-                //Console.WriteLine($"{PlayerName} - received line: {firstLine}");
 
                 if (firstLine.Length >= 6 && firstLine.Substring(firstLine.Length - 6) == "ACTION")
                 {
@@ -349,7 +347,6 @@ namespace FootballAIGame.MatchSimulation
 
                     var data = new byte[180];
                     await NetworkStream.ReadAsync(data, 0, data.Length);
-                    //Console.WriteLine($"{PlayerName} - received action");
                     message = ActionMessage.ParseMessage(data);
                     break;
                 }
@@ -363,9 +360,9 @@ namespace FootballAIGame.MatchSimulation
                 else // LOGIN expected
                 {
                     var tokens = firstLine.Split();
-                    if (tokens.Length != 3 || (tokens.Length > 0 && tokens[0] != "LOGIN"))
+                    if (tokens.Length != 4 || (tokens.Length > 0 && tokens[0] != "LOGIN"))
                     {
-                        Console.WriteLine($"{PlayerName} - received line: {firstLine}");
+                        //Console.WriteLine($"{PlayerName} - received line: {firstLine}");
                         //SendAsync("FAIL invalid message format.");
                         continue;
                     }
@@ -373,8 +370,8 @@ namespace FootballAIGame.MatchSimulation
                     message = new LoginMessage()
                     {
                         PlayerName = tokens[1],
-                        AiName = tokens[2]
-
+                        AIName = tokens[2],
+                        AccessKey = tokens[3]
                     };
                     break;
                 }

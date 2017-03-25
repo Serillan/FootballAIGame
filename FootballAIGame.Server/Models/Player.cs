@@ -31,6 +31,8 @@ namespace FootballAIGame.Server.Models
         /// </value>
         public string Name { get; set; }
 
+        public string AccessKey { get; set; }
+
         /// <summary>
         /// Gets or sets the tournaments in which the player has participated.
         /// </summary>

@@ -33,6 +33,14 @@ namespace FootballAIGame.Web.Models
         public string Name { get; set; }
 
         /// <summary>
+        /// Gets or sets the access key.
+        /// </summary>
+        /// <value>
+        /// The access key.
+        /// </value>
+        public string AccessKey { get; set; }
+
+        /// <summary>
         /// Gets or sets the tournaments in which the player has participated.
         /// </summary>
         /// <value>

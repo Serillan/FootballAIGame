@@ -163,6 +163,78 @@ namespace FootballAIGame.Server
                                      m.AI2Communicator.PlayerName == userName);
         }
 
+        public string AddToWantsToPlayConnections(string userName, string aiName)
+        {
+            ClientConnection connection;
+
+            lock (ConnectionManager.Instance.ActiveConnections)
+            {
+                connection = ConnectionManager.Instance.ActiveConnections
+                    .FirstOrDefault(c => c.PlayerName == userName && c.AiName == aiName);
+            }
+
+            if (connection == null)
+                return "AI is no longer active.";
+
+            ClientConnection otherPlayerConnection;
+
+            lock (WantsToPlayConnections)
+            {
+                if (WantsToPlayConnections.Count == 0)
+                {
+                    WantsToPlayConnections.Add(connection);
+                    return "ok";
+                }
+
+                otherPlayerConnection = WantsToPlayConnections[0];
+                WantsToPlayConnections.Remove(otherPlayerConnection);
+            }
+
+            // start match
+            using (var context = new ApplicationDbContext())
+            {
+                var player1 = context.Players.FirstOrDefault(p => p.Name == connection.PlayerName);
+                var player2 = context.Players.FirstOrDefault(p => p.Name == otherPlayerConnection.PlayerName);
+
+                if (player1 == null)
+                    return $"{connection.PlayerName} is not valid name";
+                if (player2 == null)
+                    return $"{connection.PlayerName} is not valid name";
+
+                if (otherPlayerConnection == connection)
+                    return "Player is already looking for opponent.";
+
+                player1.PlayerState = PlayerState.PlayingMatch;
+                player2.PlayerState = PlayerState.PlayingMatch;
+
+                context.SaveChanges();
+            }
+
+            StartMatch(connection.PlayerName, connection.AiName,
+                otherPlayerConnection.PlayerName, otherPlayerConnection.AiName);
+
+            return "ok";
+        }
+
+        public void RemoveFromWantsToPlayConnections(string userName)
+        {
+            lock (WantsToPlayConnections)
+            {
+                WantsToPlayConnections.RemoveAll(p => p.PlayerName == userName);
+            }
+        }
+
+        public int GetMatchStep(string userName)
+        {
+            lock (RunningSimulations)
+            {
+                var match = RunningSimulations
+                    .FirstOrDefault(m => m.AI1Communicator.PlayerName == userName ||
+                                         m.AI2Communicator.PlayerName == userName);
+                return match?.CurrentStep ?? 1500;
+            }
+        }
+
         private void Initialize()
         {
             ResetPlayers();
@@ -188,7 +260,7 @@ namespace FootballAIGame.Server
 
         private void SetSimulationHandlers()
         {
-            ConnectionManager.Instance.AuthenticationHandler = ProcessLoginMessageAsync;
+            ConnectionManager.Instance.AuthenticationHandler = AuthenticateUserAsync;
             ConnectionManager.Instance.ActiveClientDisconnectedHandler = ProcessClientDisconnectionAsync;
         }
 
@@ -288,12 +360,13 @@ namespace FootballAIGame.Server
         }
 
         /// <summary>
-        /// Processes the login message asynchronously.
+        /// Authenticates the user asynchronously.
         /// </summary>
-        /// <param name="message">The message.</param>
-        /// <param name="connection">The connection.</param>
-        /// <returns><c>true</c> if the client has log on successfully; otherwise <c>false</c></returns>
-        private static async Task<bool> ProcessLoginMessageAsync(LoginMessage message, ClientConnection connection)
+        /// <param name="message">The login message.</param>
+        /// <returns>The task that represents the asynchronous authenticate operation.
+        /// The value of the task's result is null if the client has successfully authenticated;
+        /// otherwise, an error message.</returns>
+        private static async Task<string> AuthenticateUserAsync(LoginMessage message)
         {
             using (var context = new ApplicationDbContext())
             {
@@ -303,27 +376,30 @@ namespace FootballAIGame.Server
 
                 if (player == null)
                 {
-                    await connection.TrySendAsync("Invalid player name");
-                    return false;
+                    return "Invalid player name.";
+                }
+
+                if (message.AccessKey != player.AccessKey)
+                {
+                    return "Invalid access key.";
                 }
 
                 if (player.ActiveAis == null)
-                    player.ActiveAis = message.AiName;
+                    player.ActiveAis = message.AIName;
                 else
                 {
-                    if (player.ActiveAis.Split(';').Contains(message.AiName))
+                    if (player.ActiveAis.Split(';').Contains(message.AIName))
                     {
-                        await connection.TrySendAsync("AI name is already being used.");
-                        return false;
+                        return "AI name is already being used.";
                     }
 
-                    player.ActiveAis += ";" + message.AiName;
+                    player.ActiveAis += ";" + message.AIName;
                 }
 
                 await context.SaveChangesAsync();
             }
 
-            return true;
+            return null;
         }
     }
 }

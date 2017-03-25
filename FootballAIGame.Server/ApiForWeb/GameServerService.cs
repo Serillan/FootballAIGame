@@ -20,55 +20,7 @@ namespace FootballAIGame.Server.ApiForWeb
         /// </returns>
         public string WantsToPlay(string userName, string ai)
         {
-            ClientConnection connection;
-
-            lock (ConnectionManager.Instance.ActiveConnections)
-            {
-                connection = ConnectionManager.Instance.ActiveConnections
-                    .FirstOrDefault(c => c.PlayerName == userName && c.AiName == ai);
-            }
-
-            if (connection == null)
-                return "AI is no longer active.";
-
-            ClientConnection otherPlayerConnection;
-
-            lock (SimulationManager.Instance.WantsToPlayConnections)
-            {
-                if (SimulationManager.Instance.WantsToPlayConnections.Count == 0)
-                {
-                    SimulationManager.Instance.WantsToPlayConnections.Add(connection);
-                    return "ok";
-                }
-
-                otherPlayerConnection = SimulationManager.Instance.WantsToPlayConnections[0];
-                SimulationManager.Instance.WantsToPlayConnections.Remove(otherPlayerConnection);
-            }
-
-            // start match
-            using (var context = new ApplicationDbContext())
-            {
-                var player1 = context.Players.FirstOrDefault(p => p.Name == connection.PlayerName);
-                var player2 = context.Players.FirstOrDefault(p => p.Name == otherPlayerConnection.PlayerName);
-
-                if (player1 == null)
-                    return $"{connection.PlayerName} is not valid name";
-                if (player2 == null)
-                    return $"{connection.PlayerName} is not valid name";
-
-                if (otherPlayerConnection == connection)
-                    return "Player is already looking for opponent.";
-
-                player1.PlayerState = PlayerState.PlayingMatch;
-                player2.PlayerState = PlayerState.PlayingMatch;
-
-                context.SaveChanges();
-            }
-
-            StartGame(connection.PlayerName, connection.AiName,
-                otherPlayerConnection.PlayerName, otherPlayerConnection.AiName);
-
-            return "ok";
+            return SimulationManager.Instance.AddToWantsToPlayConnections(userName, ai);
         }
 
         /// <summary>
@@ -130,10 +82,7 @@ namespace FootballAIGame.Server.ApiForWeb
         /// <param name="playerName">The player name.</param>
         public void CancelLooking(string playerName)
         {
-            lock (SimulationManager.Instance.WantsToPlayConnections)
-            {
-                SimulationManager.Instance.WantsToPlayConnections.RemoveAll(p => p.PlayerName == playerName);
-            }
+            SimulationManager.Instance.RemoveFromWantsToPlayConnections(playerName);
         }
 
         /// <summary>
@@ -142,13 +91,7 @@ namespace FootballAIGame.Server.ApiForWeb
         /// <param name="playerName">Name of the player.</param>
         public int GetCurrentMatchStep(string playerName)
         {
-            lock (SimulationManager.Instance.RunningSimulations)
-            {
-                var match = SimulationManager.Instance.RunningSimulations
-                    .FirstOrDefault(m => m.AI1Communicator.PlayerName == playerName ||
-                                         m.AI2Communicator.PlayerName == playerName);
-                return match?.CurrentStep ?? 1500;
-            }
+            return SimulationManager.Instance.GetMatchStep(playerName);
         }
     }
 }

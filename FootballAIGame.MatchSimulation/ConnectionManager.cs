@@ -25,11 +25,10 @@ namespace FootballAIGame.MatchSimulation
     /// Represents the method that is used to authenticate the client asynchronously.
     /// </summary>
     /// <param name="message">The message.</param>
-    /// <param name="connection">The connection.</param>
     /// <returns>The task that represents the asynchronous handle operation.
-    /// The value of the task's result is <c>true</c> if the client has successfully authenticated;
-    /// otherwise, returns <c>false</c>.</returns>
-    public delegate Task<bool> AuthenticationHandler(LoginMessage message, ClientConnection connection);
+    /// The value of the task's result is null if the client has successfully authenticated;
+    /// otherwise, an error message.</returns>
+    public delegate Task<string> AuthenticationHandler(LoginMessage message);
 
     /// <summary>
     /// Responsible for managing client connections.
@@ -248,14 +247,17 @@ namespace FootballAIGame.MatchSimulation
                 {
                     if (IsVerbose)
                         Console.WriteLine("Client has sent invalid message for connecting.");
-                    await connection.TrySendAsync("FAIL invalid message format.");
+                    await connection.TrySendAsync("Invalid message format.");
                 }
                 else
                 {
                     var loginMessage = clientMessage as LoginMessage;
-                    if (await AuthenticationHandler(loginMessage, connection))
+
+                    string errorMessage;
+
+                    if ((errorMessage = await AuthenticationHandler(loginMessage)) == null)
                     {
-                        connection.AiName = loginMessage.AiName;
+                        connection.AiName = loginMessage.AIName;
                         connection.PlayerName = loginMessage.PlayerName;
 
                         await connection.TrySendAsync("CONNECTED");
@@ -266,27 +268,31 @@ namespace FootballAIGame.MatchSimulation
                         }
 
                         if (IsVerbose)
-                            Console.WriteLine($"Player {connection.PlayerName} with AI {connection.AiName} has log on.");
+                            Console.WriteLine($"Player {connection.PlayerName} with AI {connection.AiName} has logged in.");
                         if (ClientLoggedInHandler != null)
                             await ClientLoggedInHandler(connection);
                         break;
+                    }
+                    else
+                    {
+                        if (IsVerbose)
+                            Console.WriteLine("Client authentication error: " + errorMessage);
+                        await connection.TrySendAsync(errorMessage);
                     }
                 }
             }
         }
 
         /// <summary>
-        /// Does default asynchronous client authentication. Its the default value
-        /// of <see cref="AuthenticationHandler"/>.
+        /// Does default asynchronous client authentication. Its the default value of <see cref="AuthenticationHandler"/>.
         /// </summary>
         /// <param name="message">The client's login message.</param>
-        /// <param name="connection">The connection.</param>
         /// <returns>The task that represents the asynchronous logging in operation.
-        /// The value of the task's result is <c>true</c> if the client has authenticated successfully; 
-        /// otherwise <c>false</c></returns>
-        private Task<bool> DoDefaultAuthenticationAsync(LoginMessage message, ClientConnection connection)
+        /// The value of the task's result is null if the client has successfully authenticated;
+        /// otherwise, an error message.</returns>
+        private Task<string> DoDefaultAuthenticationAsync(LoginMessage message)
         {
-            return Task.FromResult(true);
+            return Task.FromResult((string)null);
         }
 
     }

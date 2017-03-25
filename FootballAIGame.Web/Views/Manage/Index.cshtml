@@ -23,5 +23,36 @@
             }
             ]
         </dd>
+        <dt>Access Key:</dt>
+        <dd>
+            [
+            <a id="GenerateKey" style="cursor: pointer">Generate new key.</a>
+            ]
+        </dd>
     </dl>
 </div>
+
+@section scripts
+{
+    <script>
+        $(document)
+            .ready(function() {
+
+                $("#GenerateKey").on("click", function() {
+                    $.ajax({
+                        url: "/Api/Game/GenerateNewAccessKey",
+                        method: "post",
+                        success: function () {
+                            toastr.success("A new access key has been generated.");
+                        },
+                        error: function (xhr, status, error) {
+                            var json = JSON.parse(xhr.responseText);
+                            toastr.error(json.message);
+                        }
+                    });
+                });
+
+
+            });
+    </script>
+}

@@ -343,7 +343,7 @@ namespace FootballAIGame.Web.Controllers.Api
         /// </summary>
         /// <returns>Ok Http response with player's active AI names in it's body.</returns>
         [HttpGet]
-        public IHttpActionResult GetActiveAis()
+        public IHttpActionResult GetActiveAIs()
         {
             using (var context = new ApplicationDbContext())
             {
@@ -369,9 +369,7 @@ namespace FootballAIGame.Web.Controllers.Api
             using (var context = new ApplicationDbContext())
             {
                 var match = context.Matches.SingleOrDefault(m => m.Id == id);
-                if (match == null)
-                    return NotFound();
-
+                if (match == null) return NotFound();
                 var data = match.MatchData;
 
                 var result = new HttpResponseMessage(HttpStatusCode.OK);
@@ -803,6 +801,21 @@ namespace FootballAIGame.Web.Controllers.Api
 
                 return Ok();
             }
+        }
+
+        [HttpPost]
+        public IHttpActionResult GenerateNewAccessKey()
+        {
+            var newKey = AccessKeyGenerator.Generate();
+
+            using (var context = new ApplicationDbContext())
+            {
+                var player = GetCurrentPlayer(context);
+                player.AccessKey = newKey;
+                context.SaveChanges();
+            }
+
+            return Ok(newKey);
         }
     }
 }

@@ -198,6 +198,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Helpers\AccessKeyGenerator.cs" />
     <Compile Include="Helpers\CustomDateTimeConverter.cs" />
     <Compile Include="Helpers\JoinedTournamentComparer.cs" />
     <Compile Include="Migrations\201608091238327_InitialMigration.cs" />
@@ -311,6 +312,10 @@
     <Compile Include="Migrations\201611300339237_FixMispelledWord.cs" />
     <Compile Include="Migrations\201611300339237_FixMispelledWord.Designer.cs">
       <DependentUpon>201611300339237_FixMispelledWord.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201703251502519_AddAccessKeyToPlayer.cs" />
+    <Compile Include="Migrations\201703251502519_AddAccessKeyToPlayer.Designer.cs">
+      <DependentUpon>201703251502519_AddAccessKeyToPlayer.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\ApplicationDbContext.cs" />
@@ -881,6 +886,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201611300339237_FixMispelledWord.resx">
       <DependentUpon>201611300339237_FixMispelledWord.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201703251502519_AddAccessKeyToPlayer.resx">
+      <DependentUpon>201703251502519_AddAccessKeyToPlayer.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

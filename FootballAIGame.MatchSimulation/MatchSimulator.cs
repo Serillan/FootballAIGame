@@ -23,7 +23,7 @@ namespace FootballAIGame.MatchSimulation
         /// <summary>
         /// The time in milliseconds that player AI has for generating action in one simulation step.
         /// </summary>
-        public const int PlayerTimeForOneStep = 1000000; // [ms]
+        public const int PlayerTimeForOneStep = 600; // [ms]
 
         /// <summary>
         /// The time of one simulation step in milliseconds.
@@ -157,22 +157,6 @@ namespace FootballAIGame.MatchSimulation
         /// The state of the game.
         /// </value>
         private GameState GameState { get; set; }
-
-        /// <summary>
-        /// Gets or sets the first AI's ping.
-        /// </summary>
-        /// <value>
-        /// The first AI's ping.
-        /// </value>
-        private int Ping1 { get; set; }
-
-        /// <summary>
-        /// Gets or sets the second AI's ping.
-        /// </summary>
-        /// <value>
-        /// The second AI's pint.
-        /// </value>
-        private int Ping2 { get; set; }
 
         /// <summary>
         /// Gets or sets a task that represents the asynchronous receive operation from the first AI. 
@@ -384,7 +368,6 @@ namespace FootballAIGame.MatchSimulation
             GameState.IsKickOff = GameState.IsKickOff || GameState.Step == NumberOfSimulationSteps / 2 ||
                 GameState.Step == 0;
 
-            //await Task.Delay(20); // wait TODO delete
             var receiveActionMessage1 = AI1Communicator.ReceiveActionMessageAsync(step);
             var receiveActionMessage2 = AI2Communicator.ReceiveActionMessageAsync(step);
 
@@ -393,16 +376,14 @@ namespace FootballAIGame.MatchSimulation
 
             await AI2Communicator.TrySendAsync("GET ACTION");
             await AI2Communicator.TrySendAsync(GameState, Team.SecondPlayer);
-            //Console.WriteLine($"{GameState.Step} sent!");
 
             GameState.IsKickOff = false; // reset for next step!
 
-            var getMessage1Task = Task.WhenAny(receiveActionMessage1, Task.Delay(Ping1 + PlayerTimeForOneStep));
-            var getMessage2Task = Task.WhenAny(receiveActionMessage2, Task.Delay(Ping2 + PlayerTimeForOneStep));
+            var getMessage1Task = Task.WhenAny(receiveActionMessage1, Task.Delay(PlayerTimeForOneStep));
+            var getMessage2Task = Task.WhenAny(receiveActionMessage2, Task.Delay(PlayerTimeForOneStep));
 
             var getMessage1Result = await getMessage1Task;
             var getMessage2Result = await getMessage2Task;
-            //Console.WriteLine($"{GameState.Step} received actions.");
 
             if (AI1ReceiveMessage.IsFaulted || !AI1Communicator.IsLoggedIn || AI2ReceiveMessage.IsFaulted ||
                 !AI2Communicator.IsLoggedIn)
@@ -499,8 +480,8 @@ namespace FootballAIGame.MatchSimulation
         {
             var getParameters1 = GetPlayerParametersAsync(AI1Communicator);
             var getParameters2 = GetPlayerParametersAsync(AI2Communicator);
-            var result1 = await Task.WhenAny(getParameters1, Task.Delay(500 + Ping1));
-            var result2 = await Task.WhenAny(getParameters2, Task.Delay(500 + Ping2));
+            var result1 = await Task.WhenAny(getParameters1, Task.Delay(1000));
+            var result2 = await Task.WhenAny(getParameters2, Task.Delay(1000));
 
             // player 1
             if (result1 == getParameters1 && !getParameters1.IsFaulted)
@@ -670,7 +651,7 @@ namespace FootballAIGame.MatchSimulation
             UpdateBall(ai1Action, ai2Action);
             UpdatePlayers(ai1Action, ai2Action);
             ProcessOut();
-            HandleGoals();
+            ProcessGoal();
         }
 
         /// <summary>
@@ -1089,7 +1070,7 @@ namespace FootballAIGame.MatchSimulation
                         ball.Movement.Y = 0f;
 
                         var nearestPlayerFromOppositeTeam =
-                            GetNearestPlayerToBall(lastTeam == Team.FirstPlayer ? 2 : 1);
+                            GetNearestPlayerToBall(lastTeam == Team.FirstPlayer ? Team.SecondPlayer : Team.FirstPlayer);
 
                         nearestPlayerFromOppositeTeam.Movement.X = 0;
                         nearestPlayerFromOppositeTeam.Movement.Y = 0;
@@ -1134,7 +1115,7 @@ namespace FootballAIGame.MatchSimulation
                         ball.Movement.Y = 0f;
 
                         var nearestPlayerFromOppositeTeam =
-                           GetNearestPlayerToBall(lastTeam == Team.FirstPlayer ? 2 : 1);
+                           GetNearestPlayerToBall(lastTeam == Team.FirstPlayer ? Team.SecondPlayer : Team.FirstPlayer);
 
                         nearestPlayerFromOppositeTeam.Position.X = 0;
                         nearestPlayerFromOppositeTeam.Position.Y = ball.Position.Y < 75 / 2f ? 0 : 75;
@@ -1157,7 +1138,7 @@ namespace FootballAIGame.MatchSimulation
                 ball.Movement.Y = 0f;
 
                 var nearestPlayerFromOppositeTeam =
-                          GetNearestPlayerToBall(lastTeam == Team.FirstPlayer ? 2 : 1);
+                          GetNearestPlayerToBall(lastTeam == Team.FirstPlayer ? Team.SecondPlayer : Team.FirstPlayer);
 
                 nearestPlayerFromOppositeTeam.Position.X = ball.Position.X;
                 nearestPlayerFromOppositeTeam.Position.Y = 0;
@@ -1177,7 +1158,7 @@ namespace FootballAIGame.MatchSimulation
                 ball.Movement.Y = 0f;
 
                 var nearestPlayerFromOppositeTeam =
-                    GetNearestPlayerToBall(lastTeam == Team.FirstPlayer ? 2 : 1);
+                    GetNearestPlayerToBall(lastTeam == Team.FirstPlayer ? Team.SecondPlayer : Team.FirstPlayer);
 
                 nearestPlayerFromOppositeTeam.Position.X = ball.Position.X;
                 nearestPlayerFromOppositeTeam.Position.Y = 75;
@@ -1403,7 +1384,7 @@ namespace FootballAIGame.MatchSimulation
             var players = GameState.FootballPlayers;
             var ball = GameState.Ball;
 
-            if (team == 1)
+            if (team == Team.FirstPlayer)
             {
                 nearestPlayer = players[1];
                 for (int i = 2; i < 11; i++)
@@ -1411,7 +1392,7 @@ namespace FootballAIGame.MatchSimulation
                         Vector.DistanceBetween(ball.Position, nearestPlayer.Position))
                         nearestPlayer = players[i];
             }
-            if (team == 2)
+            if (team == Team.SecondPlayer)
             {
                 nearestPlayer = players[12];
                 for (int i = 13; i < 22; i++)

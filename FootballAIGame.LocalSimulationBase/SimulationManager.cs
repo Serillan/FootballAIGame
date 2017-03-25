@@ -168,19 +168,17 @@ namespace FootballAIGame.LocalSimulationBase
         /// </summary>
         private void SetSimulationHandlers()
         {
-            ConnectionManager.Instance.AuthenticationHandler = ProcessLoginMessageAsync;
-            ConnectionManager.Instance.ActiveClientDisconnectedHandler += HandlePlayerDisconnectionAsync;
+            ConnectionManager.Instance.AuthenticationHandler = msg => Task.FromResult(AuthenticateUser(msg));
+            ConnectionManager.Instance.ActiveClientDisconnectedHandler += connection => Task.Run(() => HandlePlayerDisconnection(connection));
         }
 
         /// <summary>
-        /// Handles the player disconnection asynchronously.
+        /// Handles the player disconnection.
         /// </summary>
         /// <param name="connection">The connection.</param>
         /// <returns>The task that represents the asynchronous operation.</returns>
-        private async Task HandlePlayerDisconnectionAsync(ClientConnection connection)
+        private void HandlePlayerDisconnection(ClientConnection connection)
         {
-            await Task.Yield();
-
             lock (ConnectedAiNames)
             {
                 ConnectedAiNames.Remove(connection.AiName);
@@ -188,31 +186,29 @@ namespace FootballAIGame.LocalSimulationBase
         }
 
         /// <summary>
-        /// Processes the login message asynchronously.
+        /// Authenticates the user.
         /// </summary>
-        /// <param name="message">The message.</param>
-        /// <param name="connection">The connection.</param>
-        /// <returns><c>true</c> if the client has log on successfully; otherwise <c>false</c></returns>
-        private async Task<bool> ProcessLoginMessageAsync(LoginMessage message, ClientConnection connection)
+        /// <param name="message">The login message.</param>
+        /// <returns>Null if the client has successfully authenticated;
+        /// otherwise, an error message.</returns>
+        private string AuthenticateUser(LoginMessage message)
         {
-            await Task.Yield();
+            if (string.IsNullOrEmpty(message.AIName))
+                return "Invalid AI Name";
 
-            // player name is ignored! (AiName is used instead for differentiation)
-            message.PlayerName = message.AiName;
+            // player name is ignored! (AIName is used instead for differentiation)
+            message.PlayerName = message.AIName;
 
             bool isNameUnused;
 
             lock (ConnectedAiNames)
             {
-                isNameUnused = !ConnectedAiNames.Contains(message.AiName);
+                isNameUnused = !ConnectedAiNames.Contains(message.AIName);
                 if (isNameUnused)
-                    ConnectedAiNames.Add(message.AiName);
+                    ConnectedAiNames.Add(message.AIName);
             }
 
-            if (!isNameUnused)
-                await connection.TrySendAsync("AI name is already being used.");
-
-            return isNameUnused;
+            return !isNameUnused ? "AI name is already being used." : null;
         }
 
         /// <summary>

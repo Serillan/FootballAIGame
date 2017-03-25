@@ -20,6 +20,14 @@
         /// <value>
         /// The name of the AI.
         /// </value>
-        public string AiName { get; set; }
+        public string AIName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the access key.
+        /// </summary>
+        /// <value>
+        /// The access key.
+        /// </value>
+        public string AccessKey { get; set; }
     }
 }
