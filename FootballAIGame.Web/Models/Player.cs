@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using FootballAIGame.Web.Utilities;
 
 namespace FootballAIGame.Web.Models
 {
@@ -112,6 +113,7 @@ namespace FootballAIGame.Web.Models
             Score = 0;
             WonGames = 0;
             WonTournaments = 0;
+            AccessKey = AccessKeyGenerator.Generate();
         }
 
         /// <summary>
