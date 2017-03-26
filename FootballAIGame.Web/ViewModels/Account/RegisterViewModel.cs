@@ -9,11 +9,6 @@ namespace FootballAIGame.Web.ViewModels.Account
     public class RegisterViewModel
     {
         [Required]
-        [EmailAddress]
-        [Display(Name = "Email")]
-        public string Email { get; set; }
-
-        [Required]
         [RegularExpression(@"^[^\s]+$", ErrorMessage = "Space is not allowed in User Name.")]
         [Display(Name = "User Name")]
         public string UserName { get; set; }

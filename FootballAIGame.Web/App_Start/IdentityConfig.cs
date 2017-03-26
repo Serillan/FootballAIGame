@@ -46,8 +46,8 @@ namespace FootballAIGame.Web
             // Configure validation logic for usernames
             manager.UserValidator = new UserValidator<User>(manager)
             {
-                AllowOnlyAlphanumericUserNames = false,
-                RequireUniqueEmail = true
+                AllowOnlyAlphanumericUserNames = true,
+                RequireUniqueEmail = false
             };
 
             // Configure validation logic for passwords
@@ -55,8 +55,8 @@ namespace FootballAIGame.Web
             {
                 RequiredLength = 6,
                 //RequireNonLetterOrDigit = true,
-                RequireDigit = true,
-                RequireLowercase = true,
+                //RequireDigit = true,
+                //RequireLowercase = true,
                 //RequireUppercase = true,
             };
 
