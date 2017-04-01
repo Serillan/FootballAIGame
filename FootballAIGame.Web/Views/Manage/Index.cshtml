@@ -13,20 +13,13 @@
         <dt>Password:</dt>
         <dd>
             [
-            @if (Model.HasPassword)
-            {
                 @Html.ActionLink("Change your password", "ChangePassword")
-            }
-            else
-            {
-                @Html.ActionLink("Create", "SetPassword")
-            }
             ]
         </dd>
         <dt>Access Key:</dt>
         <dd>
             [
-            <a id="GenerateKey" style="cursor: pointer">Generate new key.</a>
+                <a id="GenerateKey" style="cursor: pointer">Generate new key.</a>
             ]
         </dd>
     </dl>

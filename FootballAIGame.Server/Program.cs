@@ -21,7 +21,10 @@ namespace FootballAIGame.Server
         public static void Main()
         {
             // start simulating
-            var simulatingTask = SimulationManager.Instance.StartSimulatingAsync();
+            var simulatingTask = SimulationManager.Instance.StartsAcceptingConnectionsAsync();
+
+            // start tournaments
+            TournamentManager.PlanUnstartedTournaments();
 
             // start services
             var host = new ServiceHost(typeof(GameServerService));
@@ -37,10 +40,9 @@ namespace FootballAIGame.Server
 
         /// <summary>
         /// Callback that is called every time the console event is raised.
-        /// It is used for handling closing of the application.
+        /// It is used for handling a closing of the application.
         /// </summary>
         /// <param name="eventType">Type of the event.</param>
-        /// <returns></returns>
         private static bool ConsoleEventHandler(int eventType)
         {
             if (eventType != 2 && eventType != 4) return false; // if application is not being closed
@@ -82,7 +84,6 @@ namespace FootballAIGame.Server
         /// </summary>
         /// <param name="handlerRoutine">A delegate to the application-defined HandlerRoutine function to be added or removed.</param>
         /// <param name="add">If this parameter is <c>true</c>, the handler is added; if it is <c>false</c>, the handler is removed.</param>
-        /// <returns></returns>
         [DllImport("kernel32.dll", SetLastError = true)]
         private static extern bool SetConsoleCtrlHandler(ConsoleEventDelegate handlerRoutine, bool add);
 

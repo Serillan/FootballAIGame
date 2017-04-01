@@ -10,16 +10,16 @@ using FootballAIGame.Server.Models;
 namespace FootballAIGame.Server
 {
     /// <summary>
-    /// Responsible for simulating a tournament.
+    /// Provides the functionality to simulate a tournament.
     /// </summary>
     public class TournamentSimulator
     {
         /// <summary>
-        /// Gets or sets the tournament identifier of the tournament that
+        /// Gets or sets the tournament's ID of the tournament that
         /// is simulated by this instance.
         /// </summary>
         /// <value>
-        /// The tournament identifier.
+        /// The tournament's ID.
         /// </value>
         public int TournamentId { get; }
 
@@ -32,21 +32,19 @@ namespace FootballAIGame.Server
         private DateTime StartTime { get; set; }
 
         /// <summary>
-        /// Gets or sets the list consisting of players that
-        /// are currently in the running tournament. It is used for
-        /// simulation and is empty when the tournament is not
-        /// currently running.
+        /// Gets or sets the players that are currently in the running tournament. It is used for
+        /// simulation and is empty if the tournament is not currently running.
         /// </summary>
         /// <value>
-        /// The players.
+        /// The list of players that are currently in the running tournament.
         /// </value>
         public List<TournamentPlayer> Players { get; set; }
 
         /// <summary>
-        /// Gets the time until start of the tournament.
+        /// Gets the time until the start of the tournament.
         /// </summary>
         /// <value>
-        /// The time until start.
+        /// The time until the tournament's start.
         /// </value>
         private TimeSpan TimeUntilStart => StartTime - DateTime.Now;
 
@@ -63,7 +61,6 @@ namespace FootballAIGame.Server
         /// <summary>
         /// Plans the simulation.
         /// </summary>
-        /// <returns></returns>
         public void PlanSimulation()
         {
             Console.WriteLine($"Simulation of tournament {TournamentId} is being planned!");
@@ -90,8 +87,9 @@ namespace FootballAIGame.Server
         }
 
         /// <summary>
-        /// Starts the tournament simulation.
+        /// Simulated the tournament asynchronously.
         /// </summary>
+        /// <returns>The task that represents the asynchronous simulate operation.</returns>
         private async Task SimulateAsync()
         {
             Tournament tournament;
@@ -195,10 +193,11 @@ namespace FootballAIGame.Server
         }
 
         /// <summary>
-        /// Simulates the round. Returns the list of advancing players.
+        /// Simulates the tournament's round. Returns the list of advancing players.
         /// </summary>
         /// <param name="tournament">The tournament.</param>
-        /// <returns>The list of advancing players.</returns>
+        /// <returns>The task that represents the asynchronous simulate operation.
+        /// The value of the task's result is the list of advancing players.</returns>
         private async Task<List<TournamentPlayer>> SimulateRoundAsync(Tournament tournament)
         {
             Console.WriteLine($"Tournament {TournamentId} : Simulating round.");
@@ -336,9 +335,9 @@ namespace FootballAIGame.Server
         }
 
         /// <summary>
-        /// Saves players states and tournament positions.
+        /// Saves players' states and tournament's positions.
         /// </summary>
-        /// <param name="players">The players.</param>
+        /// <param name="players">The players to be saved.</param>
         private async Task SavePlayersAsync(IEnumerable<TournamentPlayer> players)
         {
             using (var context = new ApplicationDbContext())
@@ -363,7 +362,7 @@ namespace FootballAIGame.Server
         }
 
         /// <summary>
-        /// Kicks the inactive players from the tournament.
+        /// Kicks inactive players from the tournament.
         /// </summary>
         private void KickInactive()
         {

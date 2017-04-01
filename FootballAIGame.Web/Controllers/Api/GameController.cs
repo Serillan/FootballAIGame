@@ -476,8 +476,10 @@ namespace FootballAIGame.Web.Controllers.Api
                 var tournament = context.Tournaments
                     .Include(t => t.Players)
                     .SingleOrDefault(t => t.Id == tournamentId);
+
                 if (tournament == null)
                     return BadRequest("Invalid tournament ID.");
+
                 if (tournament.TournamentState != TournamentState.Unstarted)
                     return BadRequest("The tournament has already started.");
 
@@ -491,6 +493,7 @@ namespace FootballAIGame.Web.Controllers.Api
 
                 if (string.IsNullOrEmpty(aiName))
                     return BadRequest("Invalid AI.");
+
                 if (tournament.Players.Count >= tournament.MaximumNumberOfPlayers)
                     return BadRequest("Tournament is currently full.");
 

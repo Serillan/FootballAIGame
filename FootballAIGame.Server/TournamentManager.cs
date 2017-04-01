@@ -8,13 +8,16 @@ using FootballAIGame.Server.Models;
 
 namespace FootballAIGame.Server
 {
+    /// <summary>
+    /// Provides the functionality to manage tournament simulations. Implemented as singleton.
+    /// </summary>
     public class TournamentManager
     {
         /// <summary>
         /// Gets or sets the running tournaments.
         /// </summary>
         /// <value>
-        /// The running tournaments.
+        /// The list of running tournaments.
         /// </value>
         public List<TournamentSimulator> RunningTournaments { get; set; } = new List<TournamentSimulator>();
 
@@ -26,10 +29,20 @@ namespace FootballAIGame.Server
         /// </value>
         public static TournamentManager Instance => _instance ?? (_instance = new TournamentManager());
 
+        /// <summary>
+        /// The singleton instance.
+        /// </summary>
         private static TournamentManager _instance; // singleton instance
 
+        /// <summary>
+        /// Prevents a default instance of the <see cref="TournamentManager"/> class from being created.
+        /// </summary>
         private TournamentManager() { }
 
+        /// <summary>
+        /// Plans the specified tournament.
+        /// </summary>
+        /// <param name="tournamentId">The tournament's ID.</param>
         public static void PlanTournament(int tournamentId)
         {
             using (var context = new ApplicationDbContext())
@@ -73,11 +86,11 @@ namespace FootballAIGame.Server
         }
 
         /// <summary>
-        /// Player will leave a running tournament in which he currently is.
+        /// Removes the specified player from a running tournament in which he currently is.
         /// If there is not such tournament, then it does nothing.
         /// </summary>
-        /// <param name="playerName">The player name.</param>
-        public void LeaveRunningTournament(string playerName)
+        /// <param name="playerName">The player's name.</param>
+        public void RemoveFromRunningTournament(string playerName)
         {
             TournamentSimulator tournamentSimulator;
 
@@ -126,13 +139,15 @@ namespace FootballAIGame.Server
                     var simulator = new TournamentSimulator(nextTournament);
                     simulator.PlanSimulation();
                 }
+
+                Console.WriteLine("Tournaments planned.");
             }
         }
 
         /// <summary>
-        /// Closes the running tournaments.
+        /// Closes running tournaments.
         /// </summary>
-        /// <param name="context">The context.</param>
+        /// <param name="context">The db context.</param>
         public void CloseRunningTournaments(ApplicationDbContext context)
         {
             lock (RunningTournaments)

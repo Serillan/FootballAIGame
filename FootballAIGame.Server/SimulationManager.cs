@@ -12,9 +12,8 @@ using FootballAIGame.Server.Models;
 namespace FootballAIGame.Server
 {
     /// <summary>
-    /// Responsible for managing <see cref="MatchSimulator"/> instances.
-    /// It provides methods for starting new simulations and accessing currently
-    /// running simulations.
+    /// Provides functionality to manage match simulations. Implemented as singleton.
+    /// Serves as the bridge between the server's service and the simulation library.
     /// </summary>
     public class SimulationManager
     {
@@ -27,10 +26,11 @@ namespace FootballAIGame.Server
         private List<MatchSimulator> RunningSimulations { get; set; } = new List<MatchSimulator>();
 
         /// <summary>
-        /// Gets or sets the wants to play connections.
+        /// Gets or sets the list of connections that belong to player that is currently looking
+        /// for a new match.
         /// </summary>
         /// <value>
-        /// The wants to play connections.
+        /// The list of wants to play connections.
         /// </value>
         private List<ClientConnection> WantsToPlayConnections { get; set; } = new List<ClientConnection>();
 
@@ -41,18 +41,26 @@ namespace FootballAIGame.Server
         /// The instance.
         /// </value>
         public static SimulationManager Instance => _instance ?? (_instance = new SimulationManager());
+
+        /// <summary>
+        /// The singleton instance.
+        /// </summary>
         private static SimulationManager _instance; // singleton instance
 
+        /// <summary>
+        /// Prevents a default instance of the <see cref="SimulationManager"/> class from being created.
+        /// </summary>
         private SimulationManager()
         {
             Initialize();
         }
 
-        public async Task StartSimulatingAsync()
+        /// <summary>
+        /// Starts listening for a new AI connections asynchronously.
+        /// </summary>
+        /// <returns>The task that represents the asynchronous operation of accepting connections.</returns>
+        public async Task StartsAcceptingConnectionsAsync()
         {
-            TournamentManager.PlanUnstartedTournaments();
-            Console.WriteLine("Tournaments planned.");
-
             ConnectionManager.Instance.IsVerbose = true;
             var listening = ConnectionManager.Instance.StartListeningAsync();
             Console.WriteLine("Listening has started.");
@@ -61,9 +69,9 @@ namespace FootballAIGame.Server
         }
 
         /// <summary>
-        /// Cancels the game match in which a given player is.
+        /// Cancels the game match in which a specified player is.
         /// </summary>
-        /// <param name="playerName">Name of the player.</param>
+        /// <param name="playerName">The name of the player.</param>
         public void CancelMatch(string playerName)
         {
             lock (RunningSimulations)
@@ -79,17 +87,17 @@ namespace FootballAIGame.Server
         }
 
         /// <summary>
-        /// Starts the game between the given players AIs.
+        /// Starts the match between specified AIs.
         /// </summary>
         /// <param name="userName1">The player1 name.</param>
         /// <param name="ai1">The player1 AI name.</param>
         /// <param name="userName2">The player2 name.</param>
         /// <param name="ai2">The player2 AI name.</param>
-        /// <param name="simulationTask">The task that is completed after both <see cref="MatchSimulator"/> simulation and
-        /// <see cref="OnSimulationEndAsync"/> have completed.</param>
+        /// <param name="simulationTask">The task that represents the asynchronous simulate operation.
+        /// The value of the task result holds the <see cref="MatchSimulator"/> that simulated the match.</param>
         /// <param name="tournamentId">The tournament Id. (optional)</param>
         /// <returns>
-        /// "ok" if operation was successful; otherwise, error message
+        /// "ok" if operation was successful; otherwise, an error message.
         /// </returns>
         public string StartMatch(string userName1, string ai1, string userName2, string ai2, out Task<MatchSimulator> simulationTask, int? tournamentId = null)
         {
@@ -136,14 +144,14 @@ namespace FootballAIGame.Server
         }
 
         /// <summary>
-        /// Starts the game between the given players AIs.
+        /// Starts the game between the specified AIs.
         /// </summary>
         /// <param name="userName1">The player1 name.</param>
         /// <param name="ai1">The player1 AI name.</param>
         /// <param name="userName2">The player2 name.</param>
         /// <param name="ai2">The player2 AI name.</param>
         /// <returns>
-        /// "ok" if operation was successful; otherwise, error message
+        /// "ok" if operation was successful; otherwise, an error message.
         /// </returns>
         public string StartMatch(string userName1, string ai1, string userName2, string ai2)
         {
@@ -151,6 +159,12 @@ namespace FootballAIGame.Server
             return StartMatch(userName1, ai1, userName2, ai2, out task);
         }
 
+        /// <summary>
+        /// Adds a new wants to play connection.
+        /// </summary>
+        /// <param name="userName">The user name.</param>
+        /// <param name="aiName">The AI name.</param>
+        /// "ok" if operation was successful; otherwise, an error message.
         public string AddToWantsToPlayConnections(string userName, string aiName)
         {
             ClientConnection connection;
@@ -204,6 +218,10 @@ namespace FootballAIGame.Server
             return "ok";
         }
 
+        /// <summary>
+        /// Remove the wants to play connection of the specified user.
+        /// </summary>
+        /// <param name="userName">The user name.</param>
         public void RemoveFromWantsToPlayConnections(string userName)
         {
             lock (WantsToPlayConnections)
@@ -212,6 +230,12 @@ namespace FootballAIGame.Server
             }
         }
 
+        /// <summary>
+        /// Gets the match step of the match in which the specified user's AI is.
+        /// </summary>
+        /// <param name="userName">The user name.</param>
+        /// <returns>The match step of the match in which the specified user's AI is or 1500 if the user
+        /// doesn't have any AI in the match.</returns>
         public int GetMatchStep(string userName)
         {
             lock (RunningSimulations)
@@ -223,6 +247,9 @@ namespace FootballAIGame.Server
             }
         }
 
+        /// <summary>
+        /// Initializes this instance.
+        /// </summary>
         private void Initialize()
         {
             ResetPlayers();
@@ -230,6 +257,10 @@ namespace FootballAIGame.Server
             SetSimulationHandlers();
         }
 
+        /// <summary>
+        /// Resets players.
+        /// Sets all players to idle state.
+        /// </summary>
         private static void ResetPlayers()
         {
             // reset player states on the start
@@ -246,13 +277,23 @@ namespace FootballAIGame.Server
             }
         }
 
+        /// <summary>
+        /// Sets the simulation handlers.
+        /// </summary>
         private void SetSimulationHandlers()
         {
             ConnectionManager.Instance.AuthenticationHandler = AuthenticateUserAsync;
             ConnectionManager.Instance.ActiveClientDisconnectedHandler = ProcessClientDisconnectionAsync;
         }
 
-        private async Task<MatchSimulator> OnSimulationEndAsync(DateTime startTime, MatchSimulator simulator, int? tournamentId)
+        /// <summary>
+        /// Handles the simulation end asynchronously. 
+        /// </summary>
+        /// <param name="startTime">The start time of the simulation.</param>
+        /// <param name="simulator">The match simulator.</param>
+        /// <param name="tournamentID">If specified then it holds an ID of a tournament to which the simulated match belongs.</param>
+        /// <returns>The task that represents the asynchronous handle operation.</returns>
+        private async Task OnSimulationEndAsync(DateTime startTime, MatchSimulator simulator, int? tournamentID)
         {
             var matchInfo = simulator.MatchInfo;
 
@@ -284,9 +325,9 @@ namespace FootballAIGame.Server
                     Player2Ai = player2AiConnection.AiName,
                 };
 
-                if (tournamentId != null)
+                if (tournamentID != null)
                 {
-                    var tournament = context.Tournaments.FirstOrDefault(t => t.Id == tournamentId);
+                    var tournament = context.Tournaments.FirstOrDefault(t => t.Id == tournamentID);
                     if (tournament != null)
                         match.Tournament = tournament;
                 }
@@ -311,9 +352,13 @@ namespace FootballAIGame.Server
                 player2AiConnection.IsInMatch = false;
             }
 
-            return simulator;
         }
 
+        /// <summary>
+        /// Processes a client's disconnection asynchronously.
+        /// </summary>
+        /// <param name="connection">The client's connection.</param>
+        /// <returns>The task that represents the asynchronous process operation.</returns>
         private async Task ProcessClientDisconnectionAsync(ClientConnection connection)
         {
             Debug.Assert(connection != null, "connection != null");
