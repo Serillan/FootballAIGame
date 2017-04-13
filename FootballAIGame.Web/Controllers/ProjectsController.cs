@@ -26,22 +26,5 @@ namespace FootballAIGame.Web.Controllers
             return View();
         }
 
-        /// <summary>
-        /// Returns C# FSM AI Project view.
-        /// </summary>
-        /// <returns>The C# FSM AI Project view.</returns>
-        public ActionResult CSharpFsm()
-        {
-            return View();
-        }
-
-        /// <summary>
-        /// Returns Java FSM AI Project view.
-        /// </summary>
-        /// <returns>The Java FSM AI Project view.</returns>
-        public ActionResult JavaFsm()
-        {
-            return View();
-        }
     }
 }

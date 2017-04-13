@@ -9,21 +9,39 @@
 <section>
     <h3>Basic information</h3>
     <p>
-        To modify the AI behavior you need to customize AI class (AI class in UserClasses package).
+        The project includes two sample AIs. To create a custom AI you can either modify one of the
+        prepared AIs or implement your own AI behavior by implementing the FootballAI interface.
+    </p>
+    <p>
+        In the program's main located in the Application class you set an FootballAI's
+        implementation that will be used.
+    </p>
+
+    <p>
+        The first AI (BasicAI) implements a simple random behavior for a demonstration.
+    </p>
+
+    <p>
+        The second AI (FsmAI) is finite state machine based AI. It is implemented using the state pattern.
+        It can be easily modified and extended to create a custom AI.
     </p>
     <p>
         Requires at minimum Java 6.
     </p>
-    <a href="https://github.com/Serillan/FootballAIGame.AI.Java.Basic" style="font-size: 1.1em">Get Project</a>
+    
+    <br/>
+    <h4><a href="https://github.com/Serillan/FootballAIGame.Client.Java" style="font-size: 1.1em">Get Project</a></h4>
+    <br/>
+
 </section>
 
 <section>
-    <h3>BasicFootballAI Class Overview</h3>
+    <h3>FootballAI interface overview</h3>
     <p>
-        BasicFootballAI class implements FootballAI interface. This interface contains methods that are
-        necessary to define the AI behavior. You can also create your AI by implementing this
-        interface and configuring application to use your implementation instead of BasicFootballAI class
-        in the main method located in Application class (in Application.java file).
+        Contains methods that are necessary to define the AI behavior.
+        You can also create a custom AI by implementing this interface and configuring application to use
+        your implementation instead of FsmAI class in the main method located in the Application class
+        (in Application.java file).
     </p>
     <br />
     <h4>Methods</h4>
@@ -37,7 +55,7 @@
         <p>
             This method is used to set your football team parameters. You can customize football players
             speed, precision, kick power and possession abilities.
-            For each player you have value 1, which you can divide between these abilities. There is one rule -
+            For each player you have value 1, which you can be divided between these abilities. There is one rule -
             you can put maximally 0.4 value to one ability.
             You set these abilities by creating new array of football players (with length 11) and by
             modifying their properties. The first player in the array is goalkeeper.
@@ -72,6 +90,58 @@
         <p>
             The last public constant that you can access is stepInterval in GameClient class. It holds the
             time of one simulation step in milliseconds (200).
+        </p>
+        
+        <h3>FsmFootballAI architecture overview</h3>
+        <p>
+            <h5>Entities</h5>
+            The entities are the extensions of the basic simulation entities classes.
+            There is the team class which represents the team and abstract player class with
+            its subclasses that represent certain player roles. Every player and team has getAction(s) method
+            that retrieve the player desired actions. Team's loadState method is called every simulation step
+            before getActions is called so that the team properties (players...) are correctly updated. Also
+            entities provide many useful utility functions and properties.
+
+            <h5>States</h5>
+            Every entity is always in one normal state that can be changed to other state during the execution.
+            Also every entity has its global state that never changes. States have methods for entering the
+            state, exiting the state and methods that will execute each simulation step while the player is
+            in the given state. State might have it's own local data.
+
+            <h5>FiniteStateMachine</h5>
+            Every entity owns an instance of this class. It keeps the entity current and global state and provides methods
+            for correct state transitions and updates. Update method is called each simulation step.
+
+            <h5>SteeringBehaviors</h5>
+            These classes define variety of movements that football player might do. They have methods for computing
+            the desired movement vector of the behavior.
+
+            <h5>SteeringBehaviorManager</h5>
+            Every player owns an instance of this class. It provides methods for adding and removing steering behavior
+            of the player. Its calculateAccelerationVector function is used every simulation step to get the player's movement action.
+
+            <h5>Messages</h5>
+            Messages are used for sending requests between entities. For example player might request pass from another player.
+            Messages are sent through MessageDispatcher. States have onMessage method that handles these messages. Firstly
+            the current state onMessage method is called and if it doesn't handle the message, then it is handled by the global
+            state onMessage method (this is the main reason for global state hierarchy - goalkeepers might handle messages differently
+            from forwards etc.).
+
+            <h5>Region</h5>
+            This class is located in CustomDataTypes.  It is used for defining home regions of the players. Every player
+            has its home region (used by MoveToHomeRegion player state). Usually team states set the home region accordingly.
+
+            <h5>SupportPositionManager</h5>
+            Located in Utilities. It is the AI class member variable that is used for evaluating positions by certain criteria (safe pass/shot possible ...).
+            It is used by SupportControlling player state. Its update method is called every simulation step.
+
+            <h5>FsmFootballAI</h5>
+            On top of the basic FootballAI responsibilities this class is also responsible for holding team entities and calling appropriate entities methods to
+            get the correct AI action in every simulation step. Every state has reference on this class so that it can access
+            the information about the current state and all the created entities.
+
+            <h5>Parameters</h5>
+            Holds all AI constants that control the AI behavior.
         </p>
     </section>
 </section>

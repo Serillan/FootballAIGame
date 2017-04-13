@@ -770,8 +770,6 @@
       <SubType>Designer</SubType>
     </None>
     <Content Include="Views\Projects\Java.cshtml" />
-    <Content Include="Views\Projects\CSharpFsm.cshtml" />
-    <Content Include="Views\Projects\JavaFsm.cshtml" />
     <Content Include="Views\About\Simulators.cshtml" />
     <Content Include="Views\About\SimulatorSaveStructure.cshtml" />
     <None Include="Web.Production.config">

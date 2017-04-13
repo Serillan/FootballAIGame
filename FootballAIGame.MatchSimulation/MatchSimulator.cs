@@ -51,6 +51,11 @@ namespace FootballAIGame.MatchSimulation
         public const double MinimalOpponentDistanceFromKickoff = 6; // [m]
 
         /// <summary>
+        /// The maximum player Manhattan distance from  the football field in meters.
+        /// </summary>
+        public const double MaximumPlayerManhattanDistanceFromField = 5; // [m]
+
+        /// <summary>
         /// The maximum number of errors with the same <see cref="SimulationErrorReason"/> that
         /// is saved to the error log.
         /// </summary>
@@ -883,14 +888,14 @@ namespace FootballAIGame.MatchSimulation
 
             var k = 1.0;
 
-            if (y1 < -5)
-                k = (-5 - y0) / y1;
-            if (y1 > FieldHeight + 5)
-                k = (FieldHeight + 5 - y0) / y1;
-            if (x1 < -5)
-                k = (-5 - x0) / x1;
-            if (x1 > FieldWidth + 5)
-                k = (FieldWidth + 5 - x0) / x1;
+            if (y1 < -MaximumPlayerManhattanDistanceFromField)
+                k = (-MaximumPlayerManhattanDistanceFromField - y0) / y1;
+            if (y1 > FieldHeight + MaximumPlayerManhattanDistanceFromField)
+                k = (FieldHeight + MaximumPlayerManhattanDistanceFromField - y0) / y1;
+            if (x1 < -MaximumPlayerManhattanDistanceFromField)
+                k = (-MaximumPlayerManhattanDistanceFromField - x0) / x1;
+            if (x1 > FieldWidth + MaximumPlayerManhattanDistanceFromField)
+                k = (FieldWidth + MaximumPlayerManhattanDistanceFromField - x0) / x1;
 
             player.Movement = new Vector(player.Movement.X * k, player.Movement.Y * k);
         }
