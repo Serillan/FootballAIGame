@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using FootballAIGame.MatchSimulation.CustomDataTypes;
@@ -286,7 +287,7 @@ namespace FootballAIGame.MatchSimulation
                     if (AI1CancelRequested || AI2CancelRequested || !AI1Communicator.IsLoggedIn ||
                         !AI2Communicator.IsLoggedIn)
                     {
-                        ProcessSimulationEnd();
+                        ProcessSimulationEnd(step);
                         return;
                     }
 
@@ -304,7 +305,7 @@ namespace FootballAIGame.MatchSimulation
                     if (AI1CancelRequested || AI2CancelRequested || !AI1Communicator.IsLoggedIn ||
                         !AI2Communicator.IsLoggedIn)
                     {
-                        ProcessSimulationEnd();
+                        ProcessSimulationEnd(step);
                         return;
                     }
 
@@ -314,7 +315,7 @@ namespace FootballAIGame.MatchSimulation
                     //    Console.WriteLine(step);
                 }
 
-                ProcessSimulationEnd();
+                ProcessSimulationEnd(NumberOfSimulationSteps);
             }
             catch (Exception ex)
             {
@@ -376,6 +377,9 @@ namespace FootballAIGame.MatchSimulation
             var receiveActionMessage1 = AI1Communicator.ReceiveActionMessageAsync(step);
             var receiveActionMessage2 = AI2Communicator.ReceiveActionMessageAsync(step);
 
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
             await AI1Communicator.TrySendAsync("GET ACTION");
             await AI1Communicator.TrySendAsync(GameState, Team.FirstPlayer);
 
@@ -383,6 +387,19 @@ namespace FootballAIGame.MatchSimulation
             await AI2Communicator.TrySendAsync(GameState, Team.SecondPlayer);
 
             GameState.IsKickOff = false; // reset for next step!
+
+            Action<Task, TeamStatistics> logLatency = (task, teamStatistics) =>
+            {
+                task.ContinueWith((t) =>
+                {
+                    var currAverage = teamStatistics.AverageActionLatency;
+                    int time = (int)stopwatch.ElapsedMilliseconds;
+                    teamStatistics.AverageActionLatency += time;
+                });
+            };
+
+            logLatency(receiveActionMessage1, MatchInfo.Team1Statistics);
+            logLatency(receiveActionMessage2, MatchInfo.Team2Statistics);
 
             var getMessage1Task = Task.WhenAny(receiveActionMessage1, Task.Delay(PlayerTimeForOneStep));
             var getMessage2Task = Task.WhenAny(receiveActionMessage2, Task.Delay(PlayerTimeForOneStep));
@@ -421,12 +438,17 @@ namespace FootballAIGame.MatchSimulation
         }
 
         /// <summary>
-        /// Processes the simulation end. Sets <see cref="MatchInfo"/> result values accordingly.
+        /// Processes the simulation end. Sets <see cref="MatchInfo" /> result values accordingly.
         /// </summary>
-        private void ProcessSimulationEnd()
+        /// <param name="numberOfCompletedSteps">The number of completed steps.</param>
+        private void ProcessSimulationEnd(int numberOfCompletedSteps)
         {
             //Console.WriteLine($"Ending simulation between {Player1AiConnection.PlayerName}:{Player1AiConnection.AiName} " +
             //                 $"and {Player2AiConnection.PlayerName}:{Player2AiConnection.AiName}");
+
+            // average action latencies division
+            MatchInfo.Team1Statistics.AverageActionLatency /= numberOfCompletedSteps;
+            MatchInfo.Team2Statistics.AverageActionLatency /= numberOfCompletedSteps;
 
             // default winner
             MatchInfo.Winner = MatchInfo.Team1Statistics.Goals > MatchInfo.Team2Statistics.Goals

@@ -61,13 +61,25 @@
         you can login with your AIs and then you can write to the input of the application the commands for simulation.
         The application processes all the command from the input (divided by line break).
     </p>
+    
     <p>
-        <h5> Simulation command</h5>
+        <h5>Wait command</h5>
+        <code>wait ai1 ai2 ai3 ai4 ... </code>
+    </p>
+    
+    <p>
+        When this command is used, the simulator will wait until AIs with the specified names connect.
+        It doesn't necessarily mean that at the end there will be AIs with the specified names connected. It just
+        means that they were connected sometimes during the waiting (they might disconnect).
+    </p>
+
+    <p>
+        <h5> Simulate command</h5>
         <code>simulate [option1, option2 ...] ai1 ai2 ai3 ai4 ... </code>.
     </p>
 
     <p>
-        This command will simulate the match between the pairs of AI (in order in which they are specified - ai1 vs ai2 ...) and
+        This command will simulate a match between pairs of AI (in order in which they are specified - ai1 vs ai2 ...) and
         with accordance to the options write the result to the output. There have to be an even number AIs and all AIs must be
         unique and active (logged in).
         The default output line has the following format: <code>goals1:goals2, goals3:goals4 ...</code>.

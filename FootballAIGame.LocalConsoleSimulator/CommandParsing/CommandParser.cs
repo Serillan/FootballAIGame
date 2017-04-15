@@ -35,8 +35,32 @@ namespace FootballAIGame.LocalConsoleSimulator.CommandParsing
             if (Regex.IsMatch(line, @"^simulate(\s|\s*$)"))
                 return TryParseSimulate(line);
 
+            if (Regex.IsMatch(line, @"^wait(\s|\s*$)"))
+                return TryParseWait(line);
 
             return new ParseResult() { Error = new InvalidCommandName(line.Split()[0]) };
+        }
+
+        /// <summary>
+        /// Tries to parse the input line and convert it to the <see cref="WaitForAIsCommand"/>.
+        /// Expects the input line to start with the simulate word.
+        /// </summary>
+        /// <param name="line">The input line.</param>
+        /// <returns></returns>
+        private static ParseResult TryParseWait(string line)
+        {
+            Debug.Assert(line != null && Regex.IsMatch(line, @"^wait(\s|\s*$)"));
+
+            var tokens = Regex.Split(line, @"\s+");
+
+            var result = new WaitForAIsCommand();
+
+            for (int i = 1; i < tokens.Length; i++)
+            {
+                result.AINames.Add(tokens[i]);
+            }
+
+            return new ParseResult() {Command = result, IsSuccessful = true };
         }
 
         /// <summary>

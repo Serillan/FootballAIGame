@@ -231,8 +231,14 @@
                 var drawBall = function(x, y) {
                     ctx.beginPath();
                     ctx.arc(x, y, 0.22, 0, 2 * Math.PI);
-                    ctx.fillStyle = 'black';
+                    ctx.fillStyle = 'white';
                     ctx.fill();
+
+                    ctx.strokeStyle = 'yellow';
+                    ctx.beginPath();
+                    ctx.arc(x, y, 1, 0, 2 * Math.PI);
+                    ctx.stroke();
+                    ctx.strokeStyle = 'white';
                 }
 
                 $("#start")

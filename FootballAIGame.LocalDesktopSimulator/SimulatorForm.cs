@@ -71,6 +71,9 @@ namespace FootballAIGame.LocalDesktopSimulator
 
             PlaySlider.MouseDown += PlaySliderOnMouseDown;
             PlaySlider.MouseUp += PlaySliderOnMouseUp;
+
+            // if someone connected before the handler was set
+            AiListBox.Items.AddRange(ConnectionManager.Instance.ActiveConnections.Select(c => c.AiName).Cast<object>().ToArray());
         }
 
         /// <summary>
@@ -130,16 +133,16 @@ namespace FootballAIGame.LocalDesktopSimulator
         /// </summary>
         private void UpdateAiList()
         {
-            AiListBox.BeginInvoke((MethodInvoker) (() =>
-            {
-                lock (ConnectionManager.Instance.ActiveConnections)
-                {
-                    AiListBox.Items.Clear();
-                    AiListBox.Items.AddRange(ConnectionManager.Instance.ActiveConnections
-                        .Select(c => c.AiName).Cast<object>().ToArray());
-                }
-                AiListBox.Invalidate();
-            }));
+            AiListBox.BeginInvoke((MethodInvoker)(() =>
+           {
+               lock (ConnectionManager.Instance.ActiveConnections)
+               {
+                   AiListBox.Items.Clear();
+                   AiListBox.Items.AddRange(ConnectionManager.Instance.ActiveConnections
+                       .Select(c => c.AiName).Cast<object>().ToArray());
+               }
+               AiListBox.Invalidate();
+           }));
         }
 
         /// <summary>
@@ -253,8 +256,8 @@ namespace FootballAIGame.LocalDesktopSimulator
                 $"{matchInfo.Team1Statistics.ShotsOnTarget} / {matchInfo.Team2Statistics.ShotsOnTarget}";
 
             var goalsEnumerable = from goal in matchInfo.Goals
-                let aiName = goal.TeamThatScored == Team.FirstPlayer ? match.Ai1Name : match.Ai2Name
-                select $"{goal.ScoreTime} : {aiName} - Player{goal.ScorerNumber}";
+                                  let aiName = goal.TeamThatScored == Team.FirstPlayer ? match.Ai1Name : match.Ai2Name
+                                  select $"{goal.ScoreTime} : {aiName} - Player{goal.ScorerNumber}";
 
             GoalsListBox.Items.Clear();
             GoalsListBox.Items.AddRange(goalsEnumerable.Cast<object>().ToArray());
@@ -429,7 +432,7 @@ namespace FootballAIGame.LocalDesktopSimulator
         {
             if (MatchPlayer != null)
             {
-                MatchPlayer.Speed = Convert.ToDouble(((string) SpeedDropDownList.SelectedItem).Substring(0, 1));
+                MatchPlayer.Speed = Convert.ToDouble(((string)SpeedDropDownList.SelectedItem).Substring(0, 1));
             }
         }
 

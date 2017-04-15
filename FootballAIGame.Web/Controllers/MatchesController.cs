@@ -5,6 +5,8 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using FootballAIGame.Web.Models;
+using FootballAIGame.Web.ViewModels.Matches;
+using Microsoft.AspNet.Identity;
 
 namespace FootballAIGame.Web.Controllers
 {
@@ -14,6 +16,24 @@ namespace FootballAIGame.Web.Controllers
         /// The application database context used for accessing database using entity framework.
         /// </summary>
         private ApplicationDbContext _context;
+
+        /// <summary>
+        /// Gets the current connected player.
+        /// </summary>
+        /// <value>
+        /// The current player.
+        /// </value>
+        private Player CurrentPlayer
+        {
+            get
+            {
+                var userId = User.Identity.GetUserId();
+                var user = _context.Users
+                    .Include(u => u.Player)
+                    .SingleOrDefault(u => u.Id == userId);
+                return user?.Player;
+            }
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MatchesController"/> class.
@@ -62,7 +82,20 @@ namespace FootballAIGame.Web.Controllers
             if (match == null)
                 return HttpNotFound();
 
-            return View("Details", match);
+
+            var model = new MatchDetailsViewModel() { Match = match };
+
+            var currentPlayer = CurrentPlayer;
+
+            if (currentPlayer != null)
+            {
+                if (currentPlayer.Name == match.Player1.Name)
+                    model.LoggedPlayerActionLatency = match.Player1AverageActionLatency;
+                if (currentPlayer.Name == match.Player2.Name)
+                    model.LoggedPlayerActionLatency = match.Player2AverageActionLatency;
+            }
+
+            return View("Details", model);
         }
 
         /// <summary>

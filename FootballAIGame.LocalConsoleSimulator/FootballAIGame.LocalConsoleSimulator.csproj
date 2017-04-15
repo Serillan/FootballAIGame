@@ -58,6 +58,7 @@
     <Compile Include="Commands\SimulateMatchesCommand.cs" />
     <Compile Include="CommandParsing\Errors\IParsingError.cs" />
     <Compile Include="CommandParsing\Errors\UnknownOption.cs" />
+    <Compile Include="Commands\WaitForAIsCommand.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

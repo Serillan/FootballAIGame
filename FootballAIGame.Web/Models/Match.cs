@@ -123,6 +123,22 @@ namespace FootballAIGame.Web.Models
         public string Player2ErrorLog { get; set; }
 
         /// <summary>
+        /// Gets or sets the player1's average time that the simulator waited for the team's action to be received.
+        /// </summary>
+        /// <value>
+        /// The player1's average time that the simulator waited for the team's action to be received.
+        /// </value>
+        public int Player1AverageActionLatency { get; set; }
+
+        /// <summary>
+        /// Gets or sets the player2's average time that the simulator waited for the team's action to be received.
+        /// </summary>
+        /// <value>
+        /// The player2's average time that the simulator waited for the team's action to be received.
+        /// </value>
+        public int Player2AverageActionLatency { get; set; }
+
+        /// <summary>
         /// Gets or sets the match data. 
         /// Match data is binary representation of game states from all simulation steps. <para />
         /// For each step there is a ball position with a movement vector and 22 players positions and movement vectors. <para />

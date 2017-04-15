@@ -1,12 +1,13 @@
-﻿@model FootballAIGame.Web.Models.Match
+﻿@using System.Drawing.Printing
+@model FootballAIGame.Web.ViewModels.Matches.MatchDetailsViewModel
 
 @{
     ViewBag.Title = "Match Details";
 }
 
 <h2 class="text-center">
-    <a href="/players/details/@Model.Player1.Name">@Model.Player1.Name</a> vs
-    <a href="/players/details/@Model.Player2.Name">@Model.Player2.Name</a>
+    <a href="/players/details/@Model.Match.Player1.Name">@Model.Match.Player1.Name</a> vs
+    <a href="/players/details/@Model.Match.Player2.Name">@Model.Match.Player2.Name</a>
 </h2>
 
 <div class="container col-sm-4 text-center">
@@ -21,7 +22,7 @@
         </thead>
         <tbody>
             @{
-                var goals = Model.Goals.Split('|');
+                var goals = Model.Match.Goals.Split('|');
                 foreach (var goal in goals)
                 {
                     var tokens = goal.Split(';');
@@ -41,32 +42,57 @@
 </div>
 
 <div class="container col-sm-4 text-center">
-    <h3>@Model.Score</h3>
+    <h3>@Model.Match.Score</h3>
     <table class="table table-responsive table-hover">
         <thead>
             <tr>
-                <th class="text-center">@Model.Player1.Name</th>
+                <th class="text-center">@Model.Match.Player1.Name</th>
                 <th></th>
-                <th class="text-center">@Model.Player2.Name</th>
+                <th class="text-center">@Model.Match.Player2.Name</th>
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td>@Model.Shots1</td>
+                <td>@Model.Match.Shots1</td>
                 <td>Shots</td>
-                <td>@Model.Shots2</td>
+                <td>@Model.Match.Shots2</td>
             </tr>
             <tr>
-                <td>@Model.ShotsOnTarget1</td>
+                <td>@Model.Match.ShotsOnTarget1</td>
                 <td>Shots on target</td>
-                <td>@Model.ShotsOnTarget2</td>
+                <td>@Model.Match.ShotsOnTarget2</td>
             </tr>
         </tbody>
     </table>
 </div>
 
-<div class="col-sm-4 text-center" style="margin-top: 6em">
-    <div><a href="/matches/watch/@Model.Id" class="btn btn-primary">Watch the match</a></div>
+<div class="col-sm-4 text-center">
 
-    <div style="margin-top: 2em"><a href="/matches/errors/@Model.Id" class="btn btn-primary">Error log</a></div>
+    @if (Model.LoggedPlayerActionLatency != null)
+    {
+        <div>
+            <p>
+                Your average action latency in the match: @Model.LoggedPlayerActionLatency ms.
+            </p>
+            <p style="font-size: 0.8em">
+                The maximum allowed action latency is 600ms.
+            </p>
+        </div>
+    }
+
+    <div @if (Model.LoggedPlayerActionLatency == null)
+         {
+             <text>style = "margin-top: 6em")</text>
+         }
+         else
+         {
+             <text>style = "margin-top: 2em")</text>
+         }
+         >
+        <a href="/matches/watch/@Model.Match.Id" class="btn btn-primary" style="margin-top: 1em">Watch the match</a>
+    </div>
+
+    <div style="margin-top: 2em">
+        <a href="/matches/errors/@Model.Match.Id" class="btn btn-primary">Error log</a>
+    </div>
 </div>

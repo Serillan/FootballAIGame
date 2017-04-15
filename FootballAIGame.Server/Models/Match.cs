@@ -119,6 +119,22 @@ namespace FootballAIGame.Server.Models
         public string Player2ErrorLog { get; set; }
 
         /// <summary>
+        /// Gets or sets the player1's average time that the simulator waited for the team's action to be received.
+        /// </summary>
+        /// <value>
+        /// The player1's average time that the simulator waited for the team's action to be received.
+        /// </value>
+        public int Player1AverageActionLatency { get; set; }
+
+        /// <summary>
+        /// Gets or sets the player2's average time that the simulator waited for the team's action to be received.
+        /// </summary>
+        /// <value>
+        /// The player2's average time that the simulator waited for the team's action to be received.
+        /// </value>
+        public int Player2AverageActionLatency { get; set; }
+
+        /// <summary>
         /// Gets or sets the match data. 
         /// Match data is binary representation of game states from all simulation steps. <para />
         /// For each step there should be a ball position and 22 players positions. <para />
@@ -158,6 +174,8 @@ namespace FootballAIGame.Server.Models
             Shots2 = matchInfo.Team2Statistics.Shots;
             ShotsOnTarget1 = matchInfo.Team1Statistics.ShotsOnTarget;
             ShotsOnTarget2 = matchInfo.Team2Statistics.ShotsOnTarget;
+            Player1AverageActionLatency = matchInfo.Team1Statistics.AverageActionLatency;
+            Player2AverageActionLatency = matchInfo.Team2Statistics.AverageActionLatency;
             Score = $"{matchInfo.Team1Statistics.Goals}:{matchInfo.Team2Statistics.Goals}";
             Winner = matchInfo.Winner == Team.FirstPlayer ? 1 : matchInfo.Winner == Team.SecondPlayer ? 2 : 0;
 

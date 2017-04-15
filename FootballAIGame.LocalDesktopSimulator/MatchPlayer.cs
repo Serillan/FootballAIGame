@@ -286,9 +286,11 @@ namespace FootballAIGame.LocalDesktopSimulator
             var x = data[46 * step];
             var y = data[46 * step + 1];
 
-            var brush = new SolidBrush(Color.Black);
-
+            var brush = new SolidBrush(Color.White);
             graphics.FillEllipse(brush, x - 0.22f, y - 0.22f, 2 * 0.22f, 2 * 0.22f);
+
+            var pen = new Pen(Color.Yellow, 0.2f);
+            graphics.DrawEllipse(pen, x - 1f, y - 1f, 2 * 1f, 2 * 1f);
         }
 
         /// <summary>

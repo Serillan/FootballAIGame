@@ -30,6 +30,8 @@ namespace FootballAIGame.LocalSimulationBase
         /// </value>
         private IList<MatchSimulator> RunningSimulations { get; set; } = new List<MatchSimulator>();
 
+        private IDictionary<string, TaskCompletionSource<bool>> WaitingForAITaskSources { get; set; } = new Dictionary<string, TaskCompletionSource<bool>>();
+
         /// <summary>
         /// Gets the singleton instance.
         /// </summary>
@@ -150,6 +152,23 @@ namespace FootballAIGame.LocalSimulationBase
             return true;
         }
 
+        public Task WaitForAIToConnectAsync(string name)
+        {
+            if (ConnectedAiNames.Contains(name))
+                return Task.FromResult(true);
+
+            TaskCompletionSource<bool> source;
+            WaitingForAITaskSources.TryGetValue(name, out source);
+            
+            if (source == null)
+            { 
+                source = new TaskCompletionSource<bool>();
+                WaitingForAITaskSources.Add(name, source);
+            }
+
+            return source.Task;
+        }
+
         /// <summary>
         /// Initializes this instance.
         /// </summary>
@@ -205,7 +224,14 @@ namespace FootballAIGame.LocalSimulationBase
             {
                 isNameUnused = !ConnectedAiNames.Contains(message.AIName);
                 if (isNameUnused)
+                {
                     ConnectedAiNames.Add(message.AIName);
+
+                    TaskCompletionSource<bool> source;
+                    WaitingForAITaskSources.TryGetValue(message.AIName, out source);
+                    source?.SetResult(true);
+                    WaitingForAITaskSources.Remove(message.AIName);
+                }
             }
 
             return !isNameUnused ? "AI name is already being used." : null;

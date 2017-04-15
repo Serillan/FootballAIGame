@@ -34,5 +34,13 @@ namespace FootballAIGame.MatchSimulation.Models
         /// </value>
         [DataMember]
         public int ShotsOnTarget { get; set; }
+
+        /// <summary>
+        /// Gets or sets the average time that the simulator waited for the team's action to be received.
+        /// </summary>
+        /// <value>
+        /// The average time that the simulator waited for the team's action to be received.
+        /// </value>
+        public int AverageActionLatency { get; set; }
     }
 }

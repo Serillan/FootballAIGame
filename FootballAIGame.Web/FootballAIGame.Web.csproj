@@ -314,6 +314,10 @@
     <Compile Include="Migrations\201703251502519_AddAccessKeyToPlayer.Designer.cs">
       <DependentUpon>201703251502519_AddAccessKeyToPlayer.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201704151907279_AddAverageActionLatenciesToMatches.cs" />
+    <Compile Include="Migrations\201704151907279_AddAverageActionLatenciesToMatches.Designer.cs">
+      <DependentUpon>201704151907279_AddAverageActionLatenciesToMatches.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\ApplicationDbContext.cs" />
     <Compile Include="Models\Challenge.cs" />
@@ -355,6 +359,7 @@
     <Compile Include="ViewModels\Manage\ManageLoginsViewModel.cs" />
     <Compile Include="ViewModels\Manage\SetPasswordViewModel.cs" />
     <Compile Include="ViewModels\Manage\VerifyPhoneNumberViewModel.cs" />
+    <Compile Include="ViewModels\Matches\MatchDetailsViewModel.cs" />
     <Compile Include="ViewModels\Players\PlayerDetailsViewModel.cs" />
     <Compile Include="ViewModels\Tournaments\TournamentDetailsViewModel.cs" />
   </ItemGroup>
@@ -873,6 +878,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201703251502519_AddAccessKeyToPlayer.resx">
       <DependentUpon>201703251502519_AddAccessKeyToPlayer.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201704151907279_AddAverageActionLatenciesToMatches.resx">
+      <DependentUpon>201704151907279_AddAverageActionLatenciesToMatches.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
