@@ -45,7 +45,7 @@ namespace FootballAIGame.Server
         /// <summary>
         /// The singleton instance.
         /// </summary>
-        private static SimulationManager _instance; // singleton instance
+        private static SimulationManager _instance;
 
         /// <summary>
         /// Prevents a default instance of the <see cref="SimulationManager"/> class from being created.

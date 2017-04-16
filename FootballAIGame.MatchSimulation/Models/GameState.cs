@@ -23,10 +23,10 @@
         public Ball Ball { get; set; }
 
         /// <summary>
-        /// Gets or sets the simulation step to which this instance belongs.
+        /// Gets or sets the simulation step to which the state belongs.
         /// </summary>
         /// <value>
-        /// The step number to which this instance belongs.
+        /// The step number to which the state belongs.
         /// </value>
         public int Step { get; set; }
 

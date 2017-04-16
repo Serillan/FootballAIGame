@@ -39,7 +39,7 @@ namespace FootballAIGame.MatchSimulation.Models
         /// Gets or sets the number of the football player that was affected by the error.
         /// </summary>
         /// <value>
-        /// The affected player number if there is one exactly one player that was affected
+        /// The affected player's number if there is exactly one player that was affected
         /// by the error; otherwise <c>null</c>.
         /// </value>
         [DataMember]

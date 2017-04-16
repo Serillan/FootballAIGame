@@ -32,7 +32,7 @@ namespace FootballAIGame.Server
         /// <summary>
         /// The singleton instance.
         /// </summary>
-        private static TournamentManager _instance; // singleton instance
+        private static TournamentManager _instance;
 
         /// <summary>
         /// Prevents a default instance of the <see cref="TournamentManager"/> class from being created.

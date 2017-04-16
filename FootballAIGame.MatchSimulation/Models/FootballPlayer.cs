@@ -60,11 +60,10 @@ namespace FootballAIGame.MatchSimulation.Models
         public Vector Position { get; set; }
 
         /// <summary>
-        /// Gets or sets the movement vector. It describes how player position will
-        /// change in one simulation step.
+        /// Gets or sets the movement vector. It describes how player changes in one simulation step.
         /// </summary>
         /// <value>
-        /// The movement vector.
+        /// The <see cref="Vector"/> representing a movement.
         /// </value>
         public Vector Movement { get; set; }
 
@@ -73,7 +72,7 @@ namespace FootballAIGame.MatchSimulation.Models
         /// that ball would get if the kick was done with 100% precision.
         /// </summary>
         /// <value>
-        /// The kick vector.
+        /// The <see cref="Vector"/> representing a kick.
         /// </value>
         public Vector Kick { get; set; }
 

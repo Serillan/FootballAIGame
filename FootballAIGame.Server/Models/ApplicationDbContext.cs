@@ -9,8 +9,6 @@ namespace FootballAIGame.Server.Models
     /// <seealso cref="Microsoft.AspNet.Identity.EntityFramework.IdentityDbContext{User}" />
     public class ApplicationDbContext : IdentityDbContext<User>
     {
-        // DbSets for accessing database tables
-
         /// <summary>
         /// Gets or sets the players.
         /// </summary>

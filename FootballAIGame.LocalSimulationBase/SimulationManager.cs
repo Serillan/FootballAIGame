@@ -30,6 +30,12 @@ namespace FootballAIGame.LocalSimulationBase
         /// </value>
         private IList<MatchSimulator> RunningSimulations { get; set; } = new List<MatchSimulator>();
 
+        /// <summary>
+        /// Gets or sets the task sources for the waiting commands' tasks.
+        /// </summary>
+        /// <value>
+        /// The <see cref="IDictionary{TKey,TValue}"/> of the task sources for the waiting commands' tasks.
+        /// </value>
         private IDictionary<string, TaskCompletionSource<bool>> WaitingForAITaskSources { get; set; } = new Dictionary<string, TaskCompletionSource<bool>>();
 
         /// <summary>
@@ -43,7 +49,7 @@ namespace FootballAIGame.LocalSimulationBase
         /// <summary>
         /// The singleton instance.
         /// </summary>
-        private static SimulationManager _instance; // singleton instance
+        private static SimulationManager _instance;
 
         /// <summary>
         /// Prevents a default instance of the <see cref="SimulationManager"/> class from being created.
@@ -122,7 +128,7 @@ namespace FootballAIGame.LocalSimulationBase
         }
 
         /// <summary>
-        /// Starts accepting AIs connections asynchronously.
+        /// Starts accepting AIs' connections asynchronously.
         /// </summary>
         /// <returns>The task that represents the asynchronous operation of accepting connections.</returns>
         public async Task StartAcceptingConnectionsAsync()
@@ -152,6 +158,11 @@ namespace FootballAIGame.LocalSimulationBase
             return true;
         }
 
+        /// <summary>
+        /// Waits for an AI with the specified name to connect asynchronously.
+        /// </summary>
+        /// <param name="name">The name of the AI.</param>
+        /// <returns>The task that represents the asynchronous wait operation.</returns>
         public Task WaitForAIToConnectAsync(string name)
         {
             if (ConnectedAiNames.Contains(name))
@@ -192,10 +203,10 @@ namespace FootballAIGame.LocalSimulationBase
         }
 
         /// <summary>
-        /// Handles the player disconnection.
+        /// Handles the player's disconnection.
         /// </summary>
         /// <param name="connection">The connection.</param>
-        /// <returns>The task that represents the asynchronous operation.</returns>
+        /// <returns>The task that represents the asynchronous handle operation.</returns>
         private void HandlePlayerDisconnection(ClientConnection connection)
         {
             lock (ConnectedAiNames)

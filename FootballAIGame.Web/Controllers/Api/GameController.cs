@@ -25,7 +25,7 @@ namespace FootballAIGame.Web.Controllers.Api
 {
     /// <summary>
     /// Web API controller that exposes web services for using the application.
-    /// Web browser uses AJAX calls to call these services in accordance to
+    /// Web browser uses AJAX calls to call these services in accordance with
     /// the user actions.
     /// </summary>
     /// <seealso cref="System.Web.Http.ApiController" />
@@ -806,6 +806,9 @@ namespace FootballAIGame.Web.Controllers.Api
             }
         }
 
+        /// <summary>
+        /// Generates the new access key for the connected player.
+        /// </summary>
         [HttpPost]
         public IHttpActionResult GenerateNewAccessKey()
         {

@@ -3,7 +3,7 @@
 namespace FootballAIGame.MatchSimulation.Models
 {
     /// <summary>
-    /// Represents the football goal.
+    /// Represents the football's goal.
     /// </summary>
     [DataContract]
     public class Goal
@@ -30,7 +30,7 @@ namespace FootballAIGame.MatchSimulation.Models
         /// Gets or sets the number of team's player who scored the goal.
         /// </summary>
         /// <value>
-        /// The scorer number.
+        /// The number of the scorer.
         /// </value>
         [DataMember]
         public int ScorerNumber { get; set; }

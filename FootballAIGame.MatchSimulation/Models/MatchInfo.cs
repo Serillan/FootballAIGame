@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 namespace FootballAIGame.MatchSimulation.Models
 {
     /// <summary>
-    /// Contains all the information about the match simulation.
+    /// Represents the information about a match simulation.
     /// </summary>
     [DataContract]
     public class MatchInfo
@@ -43,16 +43,16 @@ namespace FootballAIGame.MatchSimulation.Models
         /// Gets or sets the team that won the match.
         /// </summary>
         /// <value>
-        /// The team that won the match or null in case of draw.
+        /// The <see cref="Team"/> that won the match or null in case of draw.
         /// </value>
         [DataMember]
         public Team? Winner { get; set; }
 
         /// <summary>
-        /// Gets or sets the second team's <see cref="TeamStatistics"/>.
+        /// Gets or sets the first team's <see cref="TeamStatistics"/>.
         /// </summary>
         /// <value>
-        /// The second team's <see cref="TeamStatistics"/>.
+        /// The first team's <see cref="TeamStatistics"/>.
         /// </value>
         [DataMember]
         public TeamStatistics Team1Statistics { get; set; }
