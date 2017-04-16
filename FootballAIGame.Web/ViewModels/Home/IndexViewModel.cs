@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using FootballAIGame.Web.Models;
+using FootballAIGame.DbModel.Models;
 
 namespace FootballAIGame.Web.ViewModels.Home
 {

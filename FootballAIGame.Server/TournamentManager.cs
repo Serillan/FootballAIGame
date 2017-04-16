@@ -4,7 +4,7 @@ using System.Data.Entity;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using FootballAIGame.Server.Models;
+using FootballAIGame.DbModel.Models;
 
 namespace FootballAIGame.Server
 {
@@ -75,8 +75,16 @@ namespace FootballAIGame.Server
                     return;
 
                 var lastTournamentTime = reccuringTournament.Tournaments.Max(t => t.StartTime);
-                nextTournament = new Tournament(reccuringTournament,
-                    lastTournamentTime + TimeSpan.FromMinutes(reccuringTournament.RecurrenceInterval));
+
+                nextTournament = new Tournament()
+                {
+                    StartTime = lastTournamentTime + TimeSpan.FromMinutes(reccuringTournament.RecurrenceInterval),
+                    Name = reccuringTournament.Name,
+                    MinimumNumberOfPlayers = reccuringTournament.MinimumNumberOfPlayers,
+                    MaximumNumberOfPlayers = reccuringTournament.MaximumNumberOfPlayers,
+                    RecurringTournament = reccuringTournament
+                };
+
                 context.Tournaments.Add(nextTournament);
                 context.SaveChanges();
             }

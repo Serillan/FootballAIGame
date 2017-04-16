@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using FootballAIGame.Web.Models;
+using FootballAIGame.DbModel.Models;
 
 namespace FootballAIGame.Web.Utilities
 {
@@ -9,7 +9,7 @@ namespace FootballAIGame.Web.Utilities
     /// Secondary newest finished/closed (first that ended) tournaments and oldest (first that will start)
     /// unstarted/running tournaments go first.
     /// </summary>
-    /// <seealso cref="System.Collections.Generic.IComparer{FootballAIGame.Web.Models.Tournament}" />
+    /// <seealso cref="System.Collections.Generic.IComparer{FootballAIGame.DbModel.Models.Tournament}" />
     public class JoinedTournamentComparer : IComparer<Tournament>
     {
         /// <summary>

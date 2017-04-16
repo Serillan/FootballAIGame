@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using System.ServiceModel;
 using FootballAIGame.MatchSimulation;
 using FootballAIGame.Server.ApiForWeb;
-using FootballAIGame.Server.Models;
+using FootballAIGame.DbModel.Models;
 
 namespace FootballAIGame.Server
 {

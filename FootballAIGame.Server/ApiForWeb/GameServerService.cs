@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 using FootballAIGame.MatchSimulation;
-using FootballAIGame.Server.Models;
+using FootballAIGame.DbModel.Models;
 
 namespace FootballAIGame.Server.ApiForWeb
 {

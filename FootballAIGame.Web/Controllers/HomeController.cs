@@ -5,11 +5,10 @@ using System.Linq;
 using System.Net;
 using System.Web;
 using System.Web.Mvc;
-using FootballAIGame.Web.Models;
+using FootballAIGame.DbModel.Models;
 using FootballAIGame.Web.Utilities;
 using FootballAIGame.Web.ViewModels.Home;
 using FootballAIGame.Web.ViewModels.Manage;
-using Microsoft.Ajax.Utilities;
 using Microsoft.AspNet.Identity;
 
 namespace FootballAIGame.Web.Controllers

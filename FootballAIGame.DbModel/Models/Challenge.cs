@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Web;
-
-namespace FootballAIGame.Web.Models
+﻿
+namespace FootballAIGame.DbModel.Models
 {
     public class Challenge
     {

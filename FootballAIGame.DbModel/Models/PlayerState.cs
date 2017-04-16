@@ -1,4 +1,4 @@
-﻿namespace FootballAIGame.Server.Models
+﻿namespace FootballAIGame.DbModel.Models
 {
     public enum PlayerState
     {

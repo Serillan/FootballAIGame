@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FootballAIGame.LocalConsole
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FootballAIGame.Web", "FootballAIGame.Web\FootballAIGame.Web.csproj", "{86DC9896-0D30-4C80-AC30-507776877587}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FootballAIGame.DbModel", "FootballAIGame.DbModel\FootballAIGame.DbModel.csproj", "{43CC2287-D8BA-4BA7-9534-ECA3D9D00396}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Base|Any CPU = Base|Any CPU
@@ -71,6 +73,14 @@ Global
 		{86DC9896-0D30-4C80-AC30-507776877587}.Production|Any CPU.Build.0 = Production|Any CPU
 		{86DC9896-0D30-4C80-AC30-507776877587}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{86DC9896-0D30-4C80-AC30-507776877587}.Release|Any CPU.Build.0 = Release|Any CPU
+		{43CC2287-D8BA-4BA7-9534-ECA3D9D00396}.Base|Any CPU.ActiveCfg = Release|Any CPU
+		{43CC2287-D8BA-4BA7-9534-ECA3D9D00396}.Base|Any CPU.Build.0 = Release|Any CPU
+		{43CC2287-D8BA-4BA7-9534-ECA3D9D00396}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{43CC2287-D8BA-4BA7-9534-ECA3D9D00396}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{43CC2287-D8BA-4BA7-9534-ECA3D9D00396}.Production|Any CPU.ActiveCfg = Release|Any CPU
+		{43CC2287-D8BA-4BA7-9534-ECA3D9D00396}.Production|Any CPU.Build.0 = Release|Any CPU
+		{43CC2287-D8BA-4BA7-9534-ECA3D9D00396}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{43CC2287-D8BA-4BA7-9534-ECA3D9D00396}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -2,15 +2,10 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace FootballAIGame.Server.Models
+namespace FootballAIGame.DbModel.Models
 {
-    /// <summary>
-    /// Represents the Tournament.
-    /// </summary>
-    /// <seealso cref="TournamentBase" />
     public class Tournament : TournamentBase
     {
-
         /// <summary>
         /// Gets or sets the state of the tournament.
         /// </summary>
@@ -42,25 +37,5 @@ namespace FootballAIGame.Server.Models
         /// </value>
         public ICollection<Match> Matches { get; set; }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Tournament"/> class.
-        /// </summary>
-        public Tournament()
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Tournament"/> class.
-        /// </summary>
-        /// <param name="reccuringTournament">The recurring tournament.</param>
-        /// <param name="startTime">The start time.</param>
-        public Tournament(RecurringTournament reccuringTournament, DateTime startTime)
-        {
-            StartTime = startTime;
-            Name = reccuringTournament.Name;
-            MinimumNumberOfPlayers = reccuringTournament.MinimumNumberOfPlayers;
-            MaximumNumberOfPlayers = reccuringTournament.MaximumNumberOfPlayers;
-            RecurringTournament = reccuringTournament;
-        }
     }
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Web;
-using FootballAIGame.Web.Models;
+using FootballAIGame.DbModel.Models;
 
 namespace FootballAIGame.Web.ViewModels.Home
 {

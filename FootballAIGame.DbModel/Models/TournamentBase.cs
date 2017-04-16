@@ -1,15 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Web;
 
-namespace FootballAIGame.Web.Models
+namespace FootballAIGame.DbModel.Models
 {
     /// <summary>
     /// Represents the information about tournament that is shared between
-    /// <see cref="RecurringTournament"/> and <see cref="Tournament"/>.
+    /// <see cref="Tournament"/> and <see cref="RecurringTournament"/>.
     /// </summary>
     public abstract class TournamentBase
     {

@@ -6,7 +6,7 @@ using System.Web.Mvc;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
-using FootballAIGame.Web.Models;
+using FootballAIGame.DbModel.Models;
 using FootballAIGame.Web.ViewModels.Manage;
 
 namespace FootballAIGame.Web.Controllers

@@ -6,7 +6,7 @@ using System.Web;
 using System.Web.Http.Results;
 using System.Web.Mvc;
 using FootballAIGame.Web.GameServerService;
-using FootballAIGame.Web.Models;
+using FootballAIGame.DbModel.Models;
 using FootballAIGame.Web.ViewModels.Tournaments;
 using Microsoft.AspNet.Identity;
 
@@ -202,7 +202,15 @@ namespace FootballAIGame.Web.Controllers
             var time = recurringTournament.StartTime;
             for (int i = 0; i < recurringTournament.NumberOfPresentTournaments; i++)
             {
-                var tournament = new Tournament(recurringTournament, time);
+                var tournament = new Tournament()
+                {
+                    StartTime = recurringTournament.StartTime,
+                    Name = recurringTournament.Name,
+                    MinimumNumberOfPlayers = recurringTournament.MinimumNumberOfPlayers,
+                    MaximumNumberOfPlayers = recurringTournament.MaximumNumberOfPlayers,
+                    RecurringTournament = recurringTournament
+                };
+
                 _context.Tournaments.Add(tournament);
                 _context.SaveChanges();
 

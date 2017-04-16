@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using FootballAIGame.Web.Controllers.Api;
-using FootballAIGame.Web.Models;
+using FootballAIGame.DbModel.Models;
 
 namespace FootballAIGame.Web.Dtos
 {

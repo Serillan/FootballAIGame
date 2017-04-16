@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using FootballAIGame.DbModel.Utilities;
 
-namespace FootballAIGame.Server.Models
+namespace FootballAIGame.DbModel.Models
 {
     public class Player
     {
@@ -31,6 +32,12 @@ namespace FootballAIGame.Server.Models
         /// </value>
         public string Name { get; set; }
 
+        /// <summary>
+        /// Gets or sets the access key.
+        /// </summary>
+        /// <value>
+        /// The access key.
+        /// </value>
         public string AccessKey { get; set; }
 
         /// <summary>
@@ -93,5 +100,27 @@ namespace FootballAIGame.Server.Models
         /// </value>
         public int WonTournaments { get; set; }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Player"/> class.
+        /// </summary>
+        /// <param name="user">The user.</param>
+        public Player(User user)
+        {
+            UserId = user.Id;
+            Name = user.UserName;
+            PlayerState = PlayerState.Idle;
+            Score = 0;
+            WonGames = 0;
+            WonTournaments = 0;
+            AccessKey = AccessKeyGenerator.Generate();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Player"/> class.
+        /// Parameterless constructor must be present for entity framework to work correctly!
+        /// </summary>
+        public Player()
+        {
+        }
     }
 }

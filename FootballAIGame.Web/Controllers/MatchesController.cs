@@ -4,7 +4,7 @@ using System.Data.Entity;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
-using FootballAIGame.Web.Models;
+using FootballAIGame.DbModel.Models;
 using FootballAIGame.Web.ViewModels.Matches;
 using Microsoft.AspNet.Identity;
 

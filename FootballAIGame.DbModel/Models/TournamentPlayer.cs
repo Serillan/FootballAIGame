@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace FootballAIGame.Server.Models
+namespace FootballAIGame.DbModel.Models
 {
     /// <summary>
     /// Represents the relation entity between <see cref="Player"/>

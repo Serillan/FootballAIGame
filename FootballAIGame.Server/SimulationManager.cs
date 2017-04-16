@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using FootballAIGame.MatchSimulation;
 using FootballAIGame.MatchSimulation.Messages;
 using FootballAIGame.MatchSimulation.Models;
-using FootballAIGame.Server.Models;
+using FootballAIGame.DbModel.Models;
 
 namespace FootballAIGame.Server
 {
@@ -316,14 +316,7 @@ namespace FootballAIGame.Server
                 player2.PlayerState = player2.PlayerState == PlayerState.PlayingTournamentPlaying ?
                     PlayerState.PlayingTournamentWaiting : PlayerState.Idle;
 
-                var match = new Match(matchInfo, player1AiConnection.PlayerName, player2AiConnection.PlayerName)
-                {
-                    Time = startTime,
-                    Player1 = player1,
-                    Player2 = player2,
-                    Player1Ai = player1AiConnection.AiName,
-                    Player2Ai = player2AiConnection.AiName,
-                };
+                var match = CreateMatch(simulator, startTime, player1, player2);
 
                 if (tournamentID != null)
                 {
@@ -352,6 +345,97 @@ namespace FootballAIGame.Server
                 player2AiConnection.IsInMatch = false;
             }
 
+        }
+
+        private Match CreateMatch(MatchSimulator simulator, DateTime startTime, Player player1, Player player2)
+        {
+            var matchInfo = simulator.MatchInfo;
+            var player1Name = simulator.AI1Communicator.PlayerName;
+            var player2Name = simulator.AI2Communicator.PlayerName;
+
+            var ai1Name = (simulator.AI1Communicator as ClientConnection)?.AiName;
+            var ai2Name = (simulator.AI1Communicator as ClientConnection)?.AiName;
+
+            Debug.Assert(ai1Name != null, "player1AiConnection is ClientConnection");
+            Debug.Assert(ai2Name != null, "player2AiConnection is ClientConnection");
+
+            var match = new Match
+            {
+                Time = startTime,
+                Player1 = player1,
+                Player2 = player2,
+                Player1Ai = ai1Name,
+                Player2Ai = ai2Name,
+                Shots1 = matchInfo.Team1Statistics.Shots,
+                Shots2 = matchInfo.Team2Statistics.Shots,
+                ShotsOnTarget1 = matchInfo.Team1Statistics.ShotsOnTarget,
+                ShotsOnTarget2 = matchInfo.Team2Statistics.ShotsOnTarget,
+                Player1AverageActionLatency = matchInfo.Team1Statistics.AverageActionLatency,
+                Player2AverageActionLatency = matchInfo.Team2Statistics.AverageActionLatency,
+                Score = $"{matchInfo.Team1Statistics.Goals}:{matchInfo.Team2Statistics.Goals}",
+                Winner = matchInfo.Winner == Team.FirstPlayer ? 1 : matchInfo.Winner == Team.SecondPlayer ? 2 : 0
+            };
+
+
+            var goalsEnumerable = from goal in matchInfo.Goals
+                                  let userName = goal.TeamThatScored == Team.FirstPlayer ? player1Name : player2Name
+                                  select $"{goal.ScoreTime};{userName};Player{goal.ScorerNumber}";
+            match.Goals = string.Join("|", goalsEnumerable);
+
+            SetErrorsLogs(match, matchInfo.Errors);
+
+            // convert match data to byte array
+            var matchByteData = new byte[matchInfo.MatchData.Count * 4];
+            Buffer.BlockCopy(matchInfo.MatchData.ToArray(), 0, matchByteData, 0, matchInfo.MatchData.Count * 4);
+            match.MatchData = matchByteData;
+
+            return match;
+        }
+
+        private void SetErrorsLogs(Match match, IEnumerable<SimulationError> errors)
+        {
+            var player1Errors = new List<string>();
+            var player2Errors = new List<string>();
+
+            foreach (var error in errors)
+            {
+                string errorMessage;
+
+                switch (error.Reason)
+                {
+                    case SimulationErrorReason.TooHighSpeed:
+                        errorMessage = $"{error.Time} - Player{error.AffectedPlayerNumber} has too high speed.";
+                        break;
+                    case SimulationErrorReason.TooHighAcceleration:
+                        errorMessage = $"{error.Time} - Player{error.AffectedPlayerNumber} has too high acceleration.";
+                        break;
+                    case SimulationErrorReason.TooStrongKick:
+                        errorMessage = $"{error.Time} - Player{error.AffectedPlayerNumber} has made too strong kick.";
+                        break;
+                    case SimulationErrorReason.InvalidMovementVector:
+                        errorMessage = $"{error.Time} - Player{error.AffectedPlayerNumber} has invalid movement vector set.";
+                        break;
+                    case SimulationErrorReason.InvalidKickVector:
+                        errorMessage = $"{error.Time} - Player{error.AffectedPlayerNumber} has invalid kick vector set.";
+                        break;
+                    case SimulationErrorReason.Disconnection:
+                        errorMessage = $"{error.Time} - Player has disconnected.";
+                        break;
+                    case SimulationErrorReason.Cancellation:
+                        errorMessage = $"{error.Time} - Player has left the match.";
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+
+                if (error.Team == Team.FirstPlayer)
+                    player1Errors.Add(errorMessage);
+                else
+                    player2Errors.Add(errorMessage);
+            }
+
+            match.Player1ErrorLog = string.Join(";", player1Errors);
+            match.Player2ErrorLog = string.Join(";", player2Errors);
         }
 
         /// <summary>

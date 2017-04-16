@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-
-namespace FootballAIGame.Web.Models
+﻿namespace FootballAIGame.DbModel.Models
 {
     public static class RolesNames
     {

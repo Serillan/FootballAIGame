@@ -1,13 +1,13 @@
 using System.Collections.Generic;
 using System.Data.Entity.Migrations;
 using System.Linq;
-using FootballAIGame.Web.Models;
+using FootballAIGame.DbModel.Models;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 
 namespace FootballAIGame.Web.Migrations
 {
-    internal sealed class Configuration : DbMigrationsConfiguration<FootballAIGame.Web.Models.ApplicationDbContext>
+    internal sealed class Configuration : DbMigrationsConfiguration<FootballAIGame.DbModel.Models.ApplicationDbContext>
     {
         public Configuration()
         {

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using FootballAIGame.MatchSimulation;
 using FootballAIGame.MatchSimulation.Models;
-using FootballAIGame.Server.Models;
+using FootballAIGame.DbModel.Models;
 
 namespace FootballAIGame.Server
 {
