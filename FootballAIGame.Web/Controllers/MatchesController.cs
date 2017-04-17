@@ -5,60 +5,21 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using FootballAIGame.DbModel.Models;
+using FootballAIGame.Web.Utilities;
 using FootballAIGame.Web.ViewModels.Matches;
 using Microsoft.AspNet.Identity;
 
 namespace FootballAIGame.Web.Controllers
 {
-    public class MatchesController : Controller
+    public class MatchesController : BaseController
     {
-        /// <summary>
-        /// The application database context used for accessing database using entity framework.
-        /// </summary>
-        private ApplicationDbContext _context;
-
-        /// <summary>
-        /// Gets the current connected player.
-        /// </summary>
-        /// <value>
-        /// The current player.
-        /// </value>
-        private Player CurrentPlayer
-        {
-            get
-            {
-                var userId = User.Identity.GetUserId();
-                var user = _context.Users
-                    .Include(u => u.Player)
-                    .SingleOrDefault(u => u.Id == userId);
-                return user?.Player;
-            }
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MatchesController"/> class.
-        /// </summary>
-        public MatchesController()
-        {
-            _context = new ApplicationDbContext();
-        }
-
-        /// <summary>
-        /// Releases unmanaged resources and optionally releases managed resources.
-        /// </summary>
-        /// <param name="disposing">true to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
-        protected override void Dispose(bool disposing)
-        {
-            _context.Dispose();
-        }
-
         /// <summary>
         /// Returns the matches index view.
         /// </summary>
         /// <returns>The index matches view.</returns>
         public ActionResult Index()
         {
-            var viewModel = _context.Matches
+            var viewModel = Context.Matches
                 .Include(m => m.Player1)
                 .Include(m => m.Player2)
                 .ToList();
@@ -74,7 +35,7 @@ namespace FootballAIGame.Web.Controllers
         /// otherwise returns HttpNotFound response.</returns>
         public ActionResult Details(int id)
         {
-            var match = _context.Matches
+            var match = Context.Matches
                 .Include(m => m.Player1)
                 .Include(m => m.Player2)
                 .SingleOrDefault(m => m.Id == id);
@@ -106,7 +67,7 @@ namespace FootballAIGame.Web.Controllers
         /// otherwise returns HttpNotFound response.</returns>
         public ActionResult Errors(int id)
         {
-            var match = _context.Matches
+            var match = Context.Matches
                 .Include(m => m.Player1)
                 .Include(m => m.Player2)
                 .SingleOrDefault(m => m.Id == id);
@@ -125,7 +86,7 @@ namespace FootballAIGame.Web.Controllers
         /// otherwise returns HttpNotFound response.</returns>
         public ActionResult Watch(int id)
         {
-            var match = _context.Matches
+            var match = Context.Matches
                 .Include(m => m.Player1)
                 .Include(m => m.Player2)
                 .SingleOrDefault(m => m.Id == id);

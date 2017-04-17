@@ -82,20 +82,22 @@
 @section scripts {
     <script>
         $(document)
-            .ready(function () {
+            .ready(function() {
                 $("select#ai-selection").editableSelect();
+
+                var ajaxCalls;
 
                 $("button#join")
                     .on("click",
-                        function () {
+                        function() {
                             var selectedAi = $("input#ai-selection").val();
                             $.ajax({
-                                url: "/api/game/jointournament/@Model.Tournament.Id/" + selectedAi,
+                                url: "/api/tournaments/jointournament/@Model.Tournament.Id/" + selectedAi,
                                 method: "post",
-                                success: function () {
+                                success: function() {
                                     location.reload();
                                 },
-                                error: function (xhr) {
+                                error: function(xhr) {
                                     var json = JSON.parse(xhr.responseText);
                                     toastr.error(json.message);
                                 }
@@ -104,112 +106,134 @@
 
                 $("button#cancel")
                     .on("click",
-                        function () {
+                        function() {
                             $.ajax({
-                                url: "/api/game/leavetournament/@Model.Tournament.Id",
+                                url: "/api/tournaments/leavetournament/@Model.Tournament.Id",
                                 method: "put",
-                                success: function () {
+                                success: function() {
                                     location.reload();
                                 },
-                                error: function (xhr) {
+                                error: function(xhr) {
                                     var json = JSON.parse(xhr.responseText);
                                     toastr.error(json.message);
                                 }
                             });
                         });
-                @if (Model.Tournament.TournamentState == TournamentState.Running ||
-                     Model.Tournament.TournamentState == TournamentState.Unstarted)
-                {
-                    <text>
-                function ajaxCall() {
-                    $.ajax({
-                        url: "/api/game/gettournamentinfo/@Model.Tournament.Id",
-                        method: "get",
-                        success: function(response) {
-                            var state = response.tournamentState;
-                            var stateText = "";
-                            switch (state) {
-                                case @((int) TournamentState.Unstarted):
-                                    stateText = "Not yet started";
-                                    break;
-                                case @((int) TournamentState.Finished):
-                                    stateText = "Finished";
-                                    break;
-                                case @((int) TournamentState.NotEnoughtPlayersClosed):
-                                    stateText = "Closed - Not enough players";
-                                    break;
-                                case @((int) TournamentState.Running):
-                                    stateText = "Currently running";
-                                    break;
-                                case @((int) TournamentState.ErrorClosed):
-                                    stateText = "Closed - Error during simulation";
-                                    break;
-                            }
 
-                            var playersTableBody = '';
-                            for (var i = 0; i < response.players.length; i++) {
-                                var player = response.players[i];
-                                if (player.position === null)
-                                    player.position = ''; // don't show null
-                                playersTableBody +=
-                                    '<tr class="clickable-row" data-href="/Players/Details/' +
-                                    player.name +
-                                    '">' +
-                                    '<td>' +
-                                    player.position +
-                                    '</td>' +
-                                    '<td>' +
-                                    player.name +
-                                    '</td>' +
-                                    '<td>' +
-                                    player.score +
-                                    '</td>' +
-                                    '</tr>';
-                            }
+                 @if (Model.Tournament.TournamentState == TournamentState.Running ||
+                      Model.Tournament.TournamentState == TournamentState.Unstarted)
+                 {
+                     <text>
+                         function ajaxCall() {
+                             $.ajax({
+                                 url: "/api/tournaments/gettournamentinfo/@Model.Tournament.Id",
+                                 method: "get",
+                                 success: function(response) {
+                                     var state = response.tournamentState;
+                                     var stateText = "";
+                                     switch (state) {
+                                     case @((int) TournamentState.Unstarted):
+                                         stateText = "Not yet started";
+                                         break;
+                                     case @((int) TournamentState.Finished):
+                                         stateText = "Finished";
+                                         break;
+                                     case @((int) TournamentState.NotEnoughtPlayersClosed):
+                                         stateText = "Closed - Not enough players";
+                                         break;
+                                     case @((int) TournamentState.Running):
+                                         stateText = "Currently running";
+                                         break;
+                                     case @((int) TournamentState.ErrorClosed):
+                                         stateText = "Closed - Error during simulation";
+                                         break;
+                                     }
 
-                            $("#state").text(stateText);
-                            $("#players-body").html(playersTableBody);
-                            $("#number-of-players").text(response.players.length);
+                                     var playersTableBody = '';
+                                     for (var i = 0; i < response.players.length; i++) {
+                                         var player = response.players[i];
+                                         if (player.position === null)
+                                             player.position = ''; // don't show null
+                                         playersTableBody +=
+                                             '<tr class="clickable-row" data-href="/Players/Details/' +
+                                             player.name +
+                                             '">' +
+                                             '<td>' +
+                                             player.position +
+                                             '</td>' +
+                                             '<td>' +
+                                             player.name +
+                                             '</td>' +
+                                             '<td>' +
+                                             player.score +
+                                             '</td>' +
+                                             '</tr>';
+                                     }
 
-                            // update matches
-                            if (state !== @((int)TournamentState.Unstarted)) {
-                                if ($("#matches-body").length === 0) // if the match part is not present
-                                    location.reload();
+                                     $("#state").text(stateText);
+                                     $("#players-body").html(playersTableBody);
+                                     $("#number-of-players").text(response.players.length);
 
-                            var matchesTableBody = '';
-                            for (var i = 0; i < response.matches.length; i++) {
-                                var match = response.matches[i];
-                                matchesTableBody +=
-                                    '<tr class="clickable-row" data-href="/Matches/Details/' + match.id + '">' +
-                                    '<td>' + match.score + '</td>';
-                                if (match.winner === 1)
-                                    matchesTableBody +=
-                                        '<td class="success">' + match.player1Name + '</td>' +
-                                        '<td>' + match.player2Name + '</td>';
-                                else if (match.winner === 2)
-                                    matchesTableBody +=
-                                        '<td>' + match.player1Name + '</td>' +
-                                        '<td class="success">' + match.player2Name + '</td>';
-                                else
-                                    matchesTableBody +=
-                                        '<td>' + match.player1Name + '</td>' +
-                                        '<td>' + match.player2Name + '</td>';
-                                matchesTableBody += '</tr>';
-                            }
-                            $("#matches-body").html(matchesTableBody);
-                        }
+                                     // update matches
+                                     if (state !== @((int) TournamentState.Unstarted)) {
+                                         if ($("#matches-body").length === 0) // if the match part is not present
+                                             location.reload();
 
-                        // if there won't be any other changes we can stop calls
-                            if (state !== @((int) TournamentState.Unstarted) &&
-                                state !== @((int) TournamentState.Running))
-                    clearInterval(ajaxCalls);
-                }
+                                         var matchesTableBody = '';
+                                         for (var i = 0; i < response.matches.length; i++) {
+                                             var match = response.matches[i];
+                                             matchesTableBody +=
+                                                 '<tr class="clickable-row" data-href="/Matches/Details/' +
+                                                 match.id +
+                                                 '">' +
+                                                 '<td>' +
+                                                 match.score +
+                                                 '</td>';
+                                             if (match.winner === 1)
+                                                 matchesTableBody +=
+                                                     '<td class="success">' +
+                                                     match.player1Name +
+                                                     '</td>' +
+                                                     '<td>' +
+                                                     match.player2Name +
+                                                     '</td>';
+                                             else if (match.winner === 2)
+                                                 matchesTableBody +=
+                                                     '<td>' +
+                                                     match.player1Name +
+                                                     '</td>' +
+                                                     '<td class="success">' +
+                                                     match.player2Name +
+                                                     '</td>';
+                                             else
+                                                 matchesTableBody +=
+                                                     '<td>' +
+                                                     match.player1Name +
+                                                     '</td>' +
+                                                     '<td>' +
+                                                     match.player2Name +
+                                                     '</td>';
+                                             matchesTableBody += '</tr>';
+                                         }
+                                         $("#matches-body").html(matchesTableBody);
+                                     }
+
+                                     // if there won't be any other changes we can stop calls
+                                     if (state !== @((int) TournamentState.Unstarted) &&
+                                         state !== @((int) TournamentState.Running)) {
+                                         clearInterval(ajaxCalls);
+                                     }
+                                 }
+                             });
+                         }
+                     </text>
+                 }
+                     @if (Model.Tournament.TournamentState == TournamentState.Running ||
+                          Model.Tournament.TournamentState == TournamentState.Unstarted)
+                     {
+                         <text>ajaxCalls = setInterval(ajaxCall, 1000);</text> @* will exist *@
+                     }
             });
-        }
 
-        ajaxCalls = setInterval(ajaxCall, 1000);
-        </text>
-                }
-        });
     </script>
 }

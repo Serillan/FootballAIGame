@@ -6,7 +6,7 @@ using System.Web.Mvc;
 
 namespace FootballAIGame.Web.Controllers
 {
-    public class AboutController : Controller
+    public class AboutController : BaseController
     {
         /// <summary>
         /// Returns the index view.
@@ -17,10 +17,12 @@ namespace FootballAIGame.Web.Controllers
             return View();
         }
 
+
         /// <summary>
         /// Returns how to play view.
         /// </summary>
         /// <returns>The how to play view.</returns>
+        [Route("about/how-to-play")]
         public ActionResult HowToPlay()
         {
             return View();
@@ -57,6 +59,7 @@ namespace FootballAIGame.Web.Controllers
         /// Returns the simulator save structure view.
         /// </summary>
         /// <returns>The simulator save structure view.</returns>
+        [Route("about/simulator-save-structure")]
         public ActionResult SimulatorSaveStructure()
         {
             return View();

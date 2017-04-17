@@ -19,7 +19,7 @@
         <tr>
             <th>First Start Time</th>
             <th>Name</th>
-            <th>Reccurence Interval (minutes)</th>
+            <th>Recurrence Interval (minutes)</th>
             <th>Number of Present Tournaments</th>
             <th>Minimum Number of Players</th>
             <th>Maximum Number of Players</th>
@@ -65,7 +65,7 @@
                     },
                     callback: function (result) {
                         $.ajax({
-                            url: "/api/game/deleterecurringtournament/" + tournamentId + "/" + result,
+                            url: "/api/tournaments/deleterecurringtournament/" + tournamentId + "/" + result,
                             method: "delete",
                             success: function () {
                                 toastr.success("The recurring tournament was deleted.");

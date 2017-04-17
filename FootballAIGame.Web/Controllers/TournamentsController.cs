@@ -7,78 +7,39 @@ using System.Web.Http.Results;
 using System.Web.Mvc;
 using FootballAIGame.Web.GameServerService;
 using FootballAIGame.DbModel.Models;
+using FootballAIGame.Web.Utilities;
 using FootballAIGame.Web.ViewModels.Tournaments;
 using Microsoft.AspNet.Identity;
 
 namespace FootballAIGame.Web.Controllers
 {
-    public class TournamentsController : Controller
+    public class TournamentsController : BaseController
     {
-        /// <summary>
-        /// The application database context used for accessing database using entity framework.
-        /// </summary>
-        private ApplicationDbContext _context;
-
-        /// <summary>
-        /// Gets the current connected player.
-        /// </summary>
-        /// <value>
-        /// The current player.
-        /// </value>
-        private Player CurrentPlayer
-        {
-            get
-            {
-                var userId = User.Identity.GetUserId();
-                var user = _context.Users
-                    .Include(u => u.Player)
-                    .SingleOrDefault(u => u.Id == userId);
-                return user?.Player;
-            }
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TournamentsController"/> class.
-        /// </summary>
-        public TournamentsController()
-        {
-            _context = new ApplicationDbContext();
-        }
-
-        /// <summary>
-        /// Releases unmanaged resources and optionally releases managed resources.
-        /// </summary>
-        /// <param name="disposing">true to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
-        protected override void Dispose(bool disposing)
-        {
-            _context.Dispose();
-        }
-
-        /// <summary>
-        /// Returns the tournaments index view.
-        /// </summary>
-        /// <returns>The tournaments index view.</returns>
-        public ActionResult Index()
-        {
-            var viewModel = _context.Tournaments
-                .Include(t => t.Players)
-                .Where(t => t.TournamentState != TournamentState.Unstarted &&
-                            t.TournamentState != TournamentState.Running);
-
-            return View(viewModel);
-        }
-
         /// <summary>
         /// Returns the current tournaments view.
         /// </summary>
         public ActionResult Current()
         {
-            var viewModel = _context.Tournaments
+            var viewModel = Context.Tournaments
                 .Include(t => t.Players)
                 .Where(t => t.TournamentState == TournamentState.Unstarted || 
                             t.TournamentState == TournamentState.Running);
 
             return User.IsInRole(RolesNames.TournamentAdmin) ? View("CurrentForAdmin", viewModel) : View(viewModel);
+        }
+
+        /// <summary>
+        /// Returns the finished tournaments view.
+        /// </summary>
+        /// <returns></returns>
+        public ActionResult Finished()
+        {
+            var viewModel = Context.Tournaments
+                .Include(t => t.Players)
+                .Where(t => t.TournamentState != TournamentState.Unstarted &&
+                            t.TournamentState != TournamentState.Running);
+
+            return View(viewModel);
         }
 
         /// <summary>
@@ -88,7 +49,7 @@ namespace FootballAIGame.Web.Controllers
         /// <returns>The details of the specified tournament.</returns>
         public ActionResult Details(int id)
         {
-            var tournament = _context.Tournaments
+            var tournament = Context.Tournaments
                 .Include(t => t.Players.Select(tp => tp.Player))  // nested include
                 .Include(t => t.Matches.Select(m => m.Player1))
                 .Include(t => t.Matches.Select(m => m.Player2))
@@ -101,14 +62,16 @@ namespace FootballAIGame.Web.Controllers
                 tournament.Players.OrderBy(p => p.PlayerPosition)
                 .ThenByDescending(p => p.Player.Score).ToList();
 
-            var activeAIs = CurrentPlayer?.ActiveAis?.Split(';').ToList() ?? new List<string>();
-            var currentTournamentPlayer = tournament.Players.SingleOrDefault(tp => tp.Player == CurrentPlayer);
+            var currentPlayer = CurrentPlayer;
+
+            var activeAIs = currentPlayer?.ActiveAis?.Split(';').ToList() ?? new List<string>();
+            var currentTournamentPlayer = tournament.Players.SingleOrDefault(tp => tp.Player == currentPlayer);
             
             var viewModel = new TournamentDetailsViewModel()
             {
                 Tournament = tournament,
                 ActiveAIs = activeAIs,
-                CurrentPlayer = CurrentPlayer,
+                CurrentPlayer = currentPlayer,
                 CurrentTournamentPlayer = currentTournamentPlayer
             };
 
@@ -129,7 +92,7 @@ namespace FootballAIGame.Web.Controllers
         [Authorize(Roles = RolesNames.TournamentAdmin)]
         public ActionResult ManageRecurring()
         {
-            var viewModel = _context.RecurringTournaments;
+            var viewModel = Context.RecurringTournaments;
             return View(viewModel);
         }
 
@@ -154,8 +117,8 @@ namespace FootballAIGame.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Tournaments.Add(tournament);
-                _context.SaveChanges();
+                Context.Tournaments.Add(tournament);
+                Context.SaveChanges();
                 // let server know
                 try
                 {
@@ -196,7 +159,7 @@ namespace FootballAIGame.Web.Controllers
         {
             if (!ModelState.IsValid) return View(recurringTournament);
 
-            _context.RecurringTournaments.Add(recurringTournament);
+            Context.RecurringTournaments.Add(recurringTournament);
 
             // plan recurringTournament.NumberOfPresentTournaments tournaments
             var time = recurringTournament.StartTime;
@@ -211,8 +174,8 @@ namespace FootballAIGame.Web.Controllers
                     RecurringTournament = recurringTournament
                 };
 
-                _context.Tournaments.Add(tournament);
-                _context.SaveChanges();
+                Context.Tournaments.Add(tournament);
+                Context.SaveChanges();
 
                 // let server know
                 try

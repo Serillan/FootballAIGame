@@ -49,7 +49,10 @@ namespace FootballAIGame.Server
 
             using (var context = new ApplicationDbContext())
             {
+                // todo check if really all that needs to be removed is specified here
+
                 var players = context.Players.ToList();
+                var challenges = context.Challenges.ToList();
 
                 foreach (var player in players)
                 {
@@ -57,6 +60,8 @@ namespace FootballAIGame.Server
                     player.ActiveAis = null;
                     player.PlayerState = PlayerState.Idle; // TODO show browser clients that error has occurred
                 }
+
+                context.Challenges.RemoveRange(challenges);
 
                 TournamentManager.Instance.CloseRunningTournaments(context);
 

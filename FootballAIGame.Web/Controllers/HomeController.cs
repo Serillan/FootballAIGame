@@ -13,48 +13,8 @@ using Microsoft.AspNet.Identity;
 
 namespace FootballAIGame.Web.Controllers
 {
-    public class HomeController : Controller
+    public class HomeController : BaseController
     {
-        /// <summary>
-        /// The application database context used for accessing database using entity framework.
-        /// </summary>
-        private ApplicationDbContext _context;
-
-        /// <summary>
-        /// Gets the current connected player.
-        /// </summary>
-        /// <value>
-        /// The current player.
-        /// </value>
-        private Player CurrentPlayer
-        {
-            get
-            {
-                var userId = User.Identity.GetUserId();
-                var user = _context.Users
-                    .Include(u => u.Player)
-                    .Single(u => u.Id == userId);
-                return user.Player;
-            }
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="HomeController"/> class.
-        /// </summary>
-        public HomeController()
-        {
-            _context = new ApplicationDbContext();
-        }
-
-        /// <summary>
-        /// Releases unmanaged resources and optionally releases managed resources.
-        /// </summary>
-        /// <param name="disposing">true to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
-        protected override void Dispose(bool disposing)
-        {
-            _context.Dispose();
-        }
-
         /// <summary>
         /// Returns default index view with last matches and next tournaments if the user is
         /// not log on. Otherwise returns player home view.
@@ -70,7 +30,7 @@ namespace FootballAIGame.Web.Controllers
 
             var viewModel = new ViewModels.Home.IndexViewModel()
             {
-                NextTournaments = _context.Tournaments
+                NextTournaments = Context.Tournaments
                     .Include(t => t.Players)
                     .Where(t => t.TournamentState == TournamentState.Unstarted ||
                                 t.TournamentState == TournamentState.Running)
@@ -78,7 +38,7 @@ namespace FootballAIGame.Web.Controllers
                     .Take(5)
                     .ToList(),
 
-                LastMatches = _context.Matches
+                LastMatches = Context.Matches
                     .Include(m => m.Player1)
                     .Include(m => m.Player2)
                     .OrderByDescending(m => m.Time)
@@ -110,20 +70,11 @@ namespace FootballAIGame.Web.Controllers
                     if (viewModel != null)
                         return View("PlayingTournament", viewModel);
                     player.PlayerState = PlayerState.Idle;  // tournament wasn't found -> back to idle
-                    _context.SaveChanges();
+                    Context.SaveChanges();
                     break;
             }
 
             return View("PlayerHome", GetNewPlayerHomeViewModel());
-        }
-
-        /// <summary>
-        /// Returns statistics view.
-        /// </summary>
-        /// <returns>The statistics view.</returns>
-        public ActionResult Statistics()
-        {
-            return View();
         }
 
         /// <summary>
@@ -133,7 +84,8 @@ namespace FootballAIGame.Web.Controllers
         private PlayerHomeViewModel GetNewPlayerHomeViewModel()
         {
             var player = CurrentPlayer;
-            var lastMatches = _context.Matches
+
+            var lastMatches = Context.Matches
                 .Include(m => m.Player1)
                 .Include(m => m.Player2)
                 .Where(m => m.Player1.UserId == player.UserId || m.Player2.UserId == player.UserId)
@@ -141,7 +93,7 @@ namespace FootballAIGame.Web.Controllers
                 .Take(5) // only last 5 matches
                 .ToList();
 
-            var joinedTournaments = _context.Tournaments
+            var joinedTournaments = Context.Tournaments
                 .Include(t => t.Players.Select(tp => tp.Player))
                 .AsEnumerable() // to use comparison with player (only allowed in memory!)
                 .Where(t => t.Players.Any(tp => tp.Player == player))
@@ -160,7 +112,7 @@ namespace FootballAIGame.Web.Controllers
             {
                 ActiveAIs = activeAIs,
                 LastMatches = lastMatches,
-                Challenges = _context.Challenges
+                Challenges = Context.Challenges
                     .Where(c => c.ChallengedPlayer.UserId == player.UserId)
                     .Select(c => c.ChallengingPlayer)
                     .ToList(),
@@ -177,7 +129,7 @@ namespace FootballAIGame.Web.Controllers
         /// </summary>
         private PlayingTournamentViewModel GetPlayingTournamentViewModel()
         {
-            var tournament = _context.Tournaments
+            var tournament = Context.Tournaments
                 .Include(t => t.Matches.Select(m => m.Player1))
                 .Include(t => t.Matches.Select(m => m.Player2))
                 .Include(t => t.Players.Select(tp => tp.Player))

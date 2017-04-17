@@ -19,7 +19,7 @@
         <tr>
             <th>Start Time</th>
             <th>Name</th>
-            <th>Numer of Signed Players</th>
+            <th>Number of Signed Players</th>
             <th>Maximum Number of Players</th>
             <th>State</th>
             <th>Admin Action</th>
@@ -38,7 +38,7 @@
             {
                 <td class="text-center"><a class="delete" data-tournament-id="@tournament.Id" role="button">Delete</a></td>
             }
-            <td><a href="/Tournaments/Details/@tournament.Id">Details</a></td>
+            <td><a href="/tournaments/details/@tournament.Id">Details</a></td>
         </tr>
     }
 </table>
@@ -54,7 +54,7 @@
                 var row = $(this).closest("tr");
                 var tournamentId = $(this).attr("data-tournament-id");
                 $.ajax({
-                    url: "/api/game/deletetournament/" + tournamentId,
+                    url: "/api/tournaments/deletetournament/" + tournamentId,
                     method: "delete",
                     success: function () {
                         toastr.success("The tournament was deleted.");

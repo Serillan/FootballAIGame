@@ -6,7 +6,7 @@ using System.Web.Mvc;
 
 namespace FootballAIGame.Web.Controllers
 {
-    public class ProjectsController : Controller
+    public class ProjectsController : BaseController
     {
         /// <summary>
         /// Returns C# AI Project view.

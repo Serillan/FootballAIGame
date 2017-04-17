@@ -33,7 +33,7 @@
         You can also use console simulator application which provides the possibility to simulate and analyze multiple
         matches at once (you can use this application to create machine learning based AI).
     </p>
-    <p><a href="/About/Simulators">Simulators</a></p>
+    <p>@Html.ActionLink("Simulators", "Simulators", "About")</p>
 </section>
 
 <section>
@@ -51,9 +51,10 @@
     <p>
         The second AI (FsmAI) is finite state machine based AI. It is implemented using the state pattern. It can be easily modified and extended to create a custom AI.
     </p>
-
-    <p><a href="/Projects/CSharp">C# project</a></p>
-    <p><a href="/Projects/Java">Java project</a></p>
+    
+    
+    <p>@Html.ActionLink("C# project", "CSharp", "Projects")</p>
+    <p>@Html.ActionLink("Java project", "Java", "Projects")</p>
 
     <p />
 </section>
@@ -85,8 +86,8 @@
     <h3>
         Details
     </h3>
-    <a href="/About/Protocol">Communication protocol between game server and AI client</a><br />
-    <a href="/About/Restrictions">Simulation Restrictions.</a>
+    @Html.ActionLink("Communication protocol between game server and AI client", "Protocol", "About")<br />
+    @Html.ActionLink("Simulation Restrictions", "Restrictions", "About")
 </section>
 
 

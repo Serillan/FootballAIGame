@@ -35,7 +35,7 @@
 
             function ajaxCall() {
                 $.ajax({
-                    url: "/api/game/getplayerstate",
+                    url: "/api/user/getplayerstate",
                     success: function(response) {
                         if (@((int)PlayerState.PlayingMatch) === response) {
                             // playing
@@ -45,7 +45,7 @@
                             $("#dots").text(String.fromCharCode(160)); 
 
                             $.ajax({
-                                url: "/api/game/getlastmatchresult",
+                                url: "/api/matches/getlastmatchresult",
                                 success: function(response2) {
 
                                     if (response2.result === "win")
@@ -68,7 +68,7 @@
                     }
                 });
                 $.ajax({
-                    url: "/api/game/getmatchstep",
+                    url: "/api/matches/getmatchstep",
                     success: function(response) {
                         var percentage = Math.round(response / 1500 * 100);
                         $("#progress").css("width", percentage + "%");
@@ -78,7 +78,7 @@
             
             $("#btn").click(function() {
                 $.ajax({
-                    url: "/api/game/cancelmatch",
+                    url: "/api/matches/cancelmatch",
                     method: "put"
                 });
                 clearInterval(anim);

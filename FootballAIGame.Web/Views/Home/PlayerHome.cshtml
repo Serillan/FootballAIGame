@@ -111,7 +111,7 @@
         <div class="container col-sm-5" style="text-align: center">
 
             <div class="container text-center col-sm-12" style="margin-top: 2em">
-                <a href="/Tournaments/Current" class="btn btn-default">Current Tournaments</a>
+                <a href="/tournaments/current" class="btn btn-default">Current Tournaments</a>
                 
                 <h5 style="margin-top: 5em">Access Key</h5>
                 @Model.Player.AccessKey
@@ -139,7 +139,7 @@
                             trClass = "danger";
                         }
 
-                        <tr class="clickable-row @trClass" data-href="/Tournaments/Details/@tournament.Id">
+                        <tr class="clickable-row @trClass" data-href="/tournaments/details/@tournament.Id">
                             <td>@tournament.StartTime</td>
                             <td>@tournament.Name</td>
                             <td>@tournament.Players.Count() / @tournament.MaximumNumberOfPlayers</td>
@@ -189,7 +189,7 @@
                     $("#SelectedAi").attr("value", nextValue);
 
                     $.ajax({
-                        url: "/api/game/toggleai/" + nextValue,
+                        url: "/api/ais/toggleai/" + nextValue,
                         method: "put"
                     });
 
@@ -202,7 +202,7 @@
                             $("#btn").prop("disabled", true);
                             if (aiMustBeSelected()) {
                                 $.ajax({
-                                    url: "/api/game/startrandommatch",
+                                    url: "/api/matches/startrandommatch",
                                     method: "post",
                                     success: function () {
                                         location.replace("/");
@@ -230,7 +230,7 @@
 
                     if (aiMustBeSelected()) {
                         $.ajax({
-                            url: "/api/game/challengeplayer/" + opponentName,
+                            url: "/api/challenges/challengeplayer/" + opponentName,
                             method: "post",
                             success: function () {
                                 location.replace("/");
@@ -249,7 +249,7 @@
                     button.closest("tr").remove();
 
                     $.ajax({
-                        url: "/api/game/decline/" + $(this).attr("data-value"),
+                        url: "/api/challenges/decline/" + $(this).attr("data-value"),
                         type: "DELETE"
                     });
                 };
@@ -280,7 +280,7 @@
                 // challenges polling
                 var ajaxCalls = function () {
                     $.ajax({
-                        url: "/api/game/getchallengersnames",
+                        url: "/api/challenges/getchallengersnames",
                         success: function (response) {
                             var newTableBody = "";
                             for (var i = 0; i < response.length; i++) {
@@ -302,7 +302,7 @@
                         }
                     });
                     $.ajax({
-                        url: "/api/game/getactiveais",
+                        url: "/api/ais/getactiveais",
                         success: function (response) {
                             var newTableBody = "";
                             var selectedAi = $("tr[data-selected]>td").text();
@@ -328,7 +328,7 @@
                         }
                     });
                     $.ajax({
-                        url: "/api/game/getplayerstate",
+                        url: "/api/user/getplayerstate",
                         method: "get",
                         success: function(response) {
                             if (@((int) PlayerState.Idle) !== response)
@@ -336,7 +336,7 @@
                         }
                     });
                     $.ajax({
-                        url: "/api/game/getjoinedtournaments",
+                        url: "/api/tournaments/getjoinedtournaments",
                         method: "get",
                         success: function(response) {
                             var newTableBody = "";

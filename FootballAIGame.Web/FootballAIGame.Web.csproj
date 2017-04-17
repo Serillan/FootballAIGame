@@ -171,7 +171,13 @@
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\AboutController.cs" />
     <Compile Include="Controllers\AccountController.cs" />
-    <Compile Include="Controllers\Api\GameController.cs" />
+    <Compile Include="Controllers\Api\AIsController.cs" />
+    <Compile Include="Controllers\Api\BaseApiController.cs" />
+    <Compile Include="Controllers\Api\ChallengesController.cs" />
+    <Compile Include="Controllers\Api\MatchesController.cs" />
+    <Compile Include="Controllers\Api\UserController.cs" />
+    <Compile Include="Controllers\Api\TournamentsController.cs" />
+    <Compile Include="Controllers\BaseController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
     <Compile Include="Controllers\MatchesController.cs" />
@@ -721,10 +727,9 @@
     <Content Include="Views\Home\LookingForOpponent.cshtml" />
     <Content Include="Views\Home\WaitingForOpponentToAcceptChallenge.cshtml" />
     <Content Include="Views\Home\PlayingMatch.cshtml" />
-    <Content Include="Views\Tournaments\Index.cshtml" />
+    <Content Include="Views\Tournaments\Finished.cshtml" />
     <Content Include="Views\Tournaments\Details.cshtml" />
     <Content Include="Views\About\HowToPlay.cshtml" />
-    <Content Include="Views\Home\Statistics.cshtml" />
     <Content Include="Views\Matches\Index.cshtml" />
     <Content Include="Views\Players\Index.cshtml" />
     <Content Include="Views\Players\Details.cshtml" />

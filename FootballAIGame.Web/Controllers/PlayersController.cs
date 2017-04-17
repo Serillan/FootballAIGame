@@ -11,48 +11,8 @@ using Microsoft.AspNet.Identity;
 
 namespace FootballAIGame.Web.Controllers
 {
-    public class PlayersController : Controller
+    public class PlayersController : BaseController
     {
-        /// <summary>
-        /// The application database context used for accessing database using entity framework.
-        /// </summary>
-        private ApplicationDbContext _context;
-
-        /// <summary>
-        /// Gets the current connected player.
-        /// </summary>
-        /// <value>
-        /// The current player.
-        /// </value>
-        private Player CurrentPlayer
-        {
-            get
-            {
-                var userId = User.Identity.GetUserId();
-                var user = _context.Users
-                    .Include(u => u.Player)
-                    .SingleOrDefault(u => u.Id == userId);
-                return user?.Player;
-            }
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PlayersController"/> class.
-        /// </summary>
-        public PlayersController()
-        {
-            _context = new ApplicationDbContext();
-        }
-
-        /// <summary>
-        /// Releases unmanaged resources and optionally releases managed resources.
-        /// </summary>
-        /// <param name="disposing">true to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
-        protected override void Dispose(bool disposing)
-        {
-            _context.Dispose();
-        }
-
         /// <summary>
         /// Returns the players index view.
         /// </summary>
@@ -61,7 +21,7 @@ namespace FootballAIGame.Web.Controllers
         {
             if (User.IsInRole(RolesNames.MainAdmin))
             {
-                var viewModel = _context.Players
+                var viewModel = Context.Players
                     .Include(p => p.User.Roles)
                     .ToList();
 
@@ -69,7 +29,7 @@ namespace FootballAIGame.Web.Controllers
             }
             else
             {
-                var viewModel = _context.Players.ToList();
+                var viewModel = Context.Players.ToList();
                 return View(viewModel);
             }
         }
@@ -82,30 +42,31 @@ namespace FootballAIGame.Web.Controllers
         /// otherwise returns HttpNotFound response.</returns>
         public ActionResult Details(string id)
         {
-            var player = _context.Players.SingleOrDefault(p => p.Name == id);
+            var player = Context.Players.SingleOrDefault(p => p.Name == id);
             var currentPlayer = CurrentPlayer;
 
             if (player == null)
                 return HttpNotFound();
 
-            var activeAIs = CurrentPlayer?.ActiveAis?.Split(';').ToList() ?? new List<string>();
+            var activeAIs = currentPlayer?.ActiveAis?.Split(';').ToList() ?? new List<string>();
 
-            var orderedPlayers = _context.Players.OrderByDescending(p => p.Score).ToList();
+            var orderedPlayers = Context.Players.OrderByDescending(p => p.Score).ToList();
             var rank = 1 + orderedPlayers.TakeWhile(orderedPlayer => orderedPlayer.UserId != player.UserId).Count();
 
-            var lastMatches = _context.Matches
+            var lastMatches = Context.Matches
                 .Include(m => m.Player1)
                 .Include(m => m.Player2)
                 .Where(m => m.Player1.UserId == player.UserId || m.Player2.UserId == player.UserId)
                 .OrderByDescending(m => m.Time)
                 .Take(5).ToList();
 
-            var lastTournaments = _context.Tournaments
+            var lastTournaments = Context.Tournaments
                 .Include(t => t.Players.Select(tp => tp.Player))
                 .AsEnumerable() // to use comparison with player (only allowed in memory!)
                 .Where(t => t.TournamentState == TournamentState.Finished && 
                             t.Players.Any(tp => tp.Player == player))
-                .ToList();
+                .OrderByDescending(t => t.StartTime)
+                .Take(5).ToList();
 
             lastTournaments.Sort(new JoinedTournamentComparer());
 

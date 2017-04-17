@@ -32,11 +32,11 @@
 
                 function ajaxCall() {
                     $.ajax({
-                        url: "/api/game/getplayerstate",
+                        url: "/api/user/getplayerstate",
                         success: function(response) {
-                            if (@((int) PlayerState.WaitingForOpponentToAcceptChallenge) === response) {
+                            if (@((int)PlayerState.WaitingForOpponentToAcceptChallenge) === response) {
                                 // still waiting
-                            } else {
+                            } else if (@((int)PlayerState.Idle) === response) {
                                 clearInterval(ajaxCalls);
                                 clearInterval(anim);
                                 $("#dots").text(String.fromCharCode(160));
@@ -44,9 +44,13 @@
                                 $("#textField").text("Opponent has declined the challenge.");
                                 $("#cancel").text("Home");
                                 $("#cancel").off("click");
-                                $("#cancel").on("click", function() {
-                                    location.replace("/");
-                                });
+                                $("#cancel")
+                                    .on("click",
+                                        function() {
+                                            location.replace("/");
+                                        });
+                            } else {
+                                location.replace("/");
                             }
                         }
                     });
@@ -55,7 +59,7 @@
                 $("#cancel")
                     .click(function() {
                         $.ajax({
-                            url: "/api/game/cancelchallenge",
+                            url: "/api/challenges/cancelchallenge",
                             method: "delete",
                             success: function() {
                                 location.replace("/");

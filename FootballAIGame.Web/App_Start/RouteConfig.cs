@@ -16,7 +16,11 @@ namespace FootballAIGame.Web
         /// <param name="routes">The routes.</param>
         public static void RegisterRoutes(RouteCollection routes)
         {
+            routes.MapMvcAttributeRoutes(); // enable custom attribute routes
+
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
+
+            routes.LowercaseUrls = true;
 
             routes.MapRoute(
                 name: "Default",

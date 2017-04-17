@@ -4,12 +4,12 @@ using FootballAIGame.DbModel.Models;
 namespace FootballAIGame.Web.Utilities
 {
     /// <summary>
-    /// The comparer used for sorting <see cref="Tournament"/>s by their start time and state.
+    /// The comparer used for sorting <see cref="Tournament" />s by their start time and state.
     /// The unstarted/running tournaments have higher priority than finished (or closed) ones.
     /// Secondary newest finished/closed (first that ended) tournaments and oldest (first that will start)
     /// unstarted/running tournaments go first.
     /// </summary>
-    /// <seealso cref="System.Collections.Generic.IComparer{FootballAIGame.DbModel.Models.Tournament}" />
+    /// <seealso cref="System.Collections.Generic.IComparer{T}" />
     public class JoinedTournamentComparer : IComparer<Tournament>
     {
         /// <summary>

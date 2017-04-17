@@ -3,6 +3,7 @@
 
 @{
     ViewBag.Title = "Tournament Simulation";
+
     var playingMatchText = "Match is being simulated";
     var waitingText = "Waiting for the next match";
 }
@@ -26,7 +27,7 @@
             <tbody id="players-body">
                 @foreach (var playerT in Model.Tournament.Players)
             {
-                    <tr class="clickable-row" data-href="/Players/Details/@playerT.Player.Name">
+                    <tr class="clickable-row" data-href="/players/details/@playerT.Player.Name">
                         <td>@playerT.PlayerPosition</td>
                         <td>@playerT.Player.Name</td>
                         <td>@playerT.Player.Score</td>
@@ -128,7 +129,7 @@
 
                 $("#btn").on("click.leaveTournament", function() {
                     $.ajax({
-                        url: "/api/game/leavetournament/@Model.Tournament.Id",
+                        url: "/api/tournaments/leavetournament/@Model.Tournament.Id",
                         method: "put",
                         success: function() {
                             ajaxCallsFunctions.splice(ajaxCallsFunctions.indexOf(playerStateCall), 1);
@@ -150,7 +151,7 @@
 
                 function tournamentInfoCall() {
                     $.ajax({
-                        url: "/api/game/gettournamentinfo/@Model.Tournament.Id",
+                        url: "/api/tournaments/gettournamentinfo/@Model.Tournament.Id",
                         method: "get",
                         success: function(response) {
                             var playersTableBody = '';
@@ -195,7 +196,7 @@
 
                 function playerStateCall() {
                     $.ajax({
-                        url: "/api/game/getplayerstate",
+                        url: "/api/user/getplayerstate",
                         method: "get",
                         success: function(response) {
                             switch (response) {
@@ -228,7 +229,7 @@
                                     // show final position
                                     $("div#progress-wrapper").html("");
                                     $.ajax({
-                                        url: "/api/game/gettournamentposition/@Model.Tournament.Id",
+                                        url: "/api/tournaments/gettournamentposition/@Model.Tournament.Id",
                                         method: "get",
                                         success: function(response) {
                                             ajaxCallsFunctions.splice(ajaxCallsFunctions.indexOf(playerStateCall), 1);
@@ -255,7 +256,7 @@
 
                 function matchStepCall() {
                     $.ajax({
-                        url: "/api/game/getmatchstep",
+                        url: "/api/matches/getmatchstep",
                         method: "get",
                         success: function(response) {
                             var percentage = Math.round(response / 1500 * 100);

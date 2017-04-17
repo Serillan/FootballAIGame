@@ -58,7 +58,7 @@
 
 <div class="container col-sm-4 text-center">
     <h4>Score: @Model.Player.Score (Rank @Model.Rank)</h4>
-    @if (Model.CurrentPlayer != null)
+    @if (Model.CurrentPlayer != null && Model.CurrentPlayer.Name != Model.Player.Name)
     {
         <div style="margin-top: 3em">
             <button class="btn btn-default" id="challenge">Challenge Player</button>
@@ -122,11 +122,11 @@
                             }
 
                             $.ajax({
-                                url: "/api/game/selectai/" + selectedAi,
+                                url: "/api/ais/selectai/" + selectedAi,
                                 method: "put",
                                 success: function () {
                                     $.ajax({
-                                        url: "/api/game/challengeplayer/@Model.Player.Name",
+                                        url: "/api/challenges/challengeplayer/@Model.Player.Name",
                                         method: "post",
                                         success: function () {
                                             location.replace("/");
