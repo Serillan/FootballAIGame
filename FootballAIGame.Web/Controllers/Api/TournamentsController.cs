@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
+using System.ServiceModel;
 using System.Web.Http;
 using FootballAIGame.DbModel.Models;
 using FootballAIGame.Web.Dtos;
@@ -18,7 +20,7 @@ namespace FootballAIGame.Web.Controllers.Api
         /// <param name="tournamentId">The tournament identifier.</param>
         /// <param name="aiName">Name of the AI.</param>
         [HttpPost]
-        [Route("api/tournaments/jointournament/{tournamentId}/{aiName}")]
+        [Route("api/tournaments/JoinTournament/{tournamentId}/{aiName}")]
         public IHttpActionResult JoinTournament(int tournamentId, string aiName)
         {
             var tournament = Context.Tournaments
@@ -224,13 +226,29 @@ namespace FootballAIGame.Web.Controllers.Api
         [Authorize(Roles = RolesNames.TournamentAdmin)]
         public IHttpActionResult DeleteTournament(int id)
         {
-            var tournament = Context.Tournaments.SingleOrDefault(t => t.Id == id);
+            var tournament = Context.Tournaments
+                .Include(t => t.RecurringTournament)
+                .SingleOrDefault(t => t.Id == id);
+
+            if (tournament == null)
+                return BadRequest("A tournament with the specified ID doesn't exist.");
+
+            var isReccuring = tournament.RecurringTournament != null; // because of the second use after delete op.
+
+            if (isReccuring)
+                PlanNextRecurring(tournament.RecurringTournament.Id);
+
             var res = DeleteTournament(tournament);
             if (res != "")
                 return BadRequest(res);
 
             Context.SaveChanges();
-            return Ok();
+
+            if (isReccuring)
+                return Ok("The tournament was deleted, but because it is a part of a recurring tournament, a next" +
+                          " tournament was planned. (reload page to see the new one)");
+
+            return Ok("The tournament was deleted."); // todo maybe inform if the reccuring tournament was planned
         }
 
         /// <summary>
@@ -240,7 +258,7 @@ namespace FootballAIGame.Web.Controllers.Api
         private string DeleteTournament(Tournament tournament)
         {
             if (tournament == null)
-                return "The tournament doesn't exist.";
+                return "A tournament with the specified ID doesn't exist.";
 
             // TODO let server know (if the server is not yet running it won't start the tournament)
             if (tournament.TournamentState == TournamentState.Running) // if it was already running
@@ -261,13 +279,13 @@ namespace FootballAIGame.Web.Controllers.Api
         /// <param name="id">The recurring tournament identifier.</param>
         /// <param name="deleteUnstarted">if set to <c>true</c> then it also deletes all created unstarted tournaments
         /// belonging to the specified recurring tournament.</param>
-        [Route("api/tournaments/deleterecurringtournament/{id}/{deleteUnstarted}")]
+        [Route("api/tournaments/DeleteRecurringTournament/{id}/{deleteUnstarted}")]
         [HttpDelete]
         [Authorize(Roles = RolesNames.TournamentAdmin)]
         public IHttpActionResult DeleteRecurringTournament(int id, bool deleteUnstarted)
         {
             var reccuringTournament = Context.RecurringTournaments
-                .Include(tr => tr.Tournaments)
+                .Include(rt => rt.Tournaments)
                 .SingleOrDefault(t => t.Id == id);
 
             if (reccuringTournament == null)
@@ -292,6 +310,52 @@ namespace FootballAIGame.Web.Controllers.Api
             Context.RecurringTournaments.Remove(reccuringTournament);
             Context.SaveChanges();
             return Ok();
+        }
+
+        /// <summary>
+        /// Creates and plans the next tournament from the specified <see cref="RecurringTournament"/>.
+        /// </summary>
+        /// <param name="id">The recurring tournament's ID.</param>
+        /// <returns>The created tournament.</returns>
+        private void PlanNextRecurring(int id)
+        {
+            var recurringTournament =
+                Context.RecurringTournaments.Include(rt => rt.Tournaments).SingleOrDefault(t => t.Id == id);
+
+            if (recurringTournament == null)
+                return;
+
+            // the current time if there are no tournaments
+            var lastTournamentTime = DateTime.Now;
+            if (recurringTournament.Tournaments.Any(t => true))
+                lastTournamentTime = recurringTournament.Tournaments.Max(t => t.StartTime);
+
+            var nextTournament = new Tournament()
+            {
+                StartTime = lastTournamentTime + TimeSpan.FromMinutes(recurringTournament.RecurrenceInterval),
+                TournamentState = TournamentState.Unstarted,
+                Name = recurringTournament.Name,
+                MinimumNumberOfPlayers = recurringTournament.MinimumNumberOfPlayers,
+                MaximumNumberOfPlayers = recurringTournament.MaximumNumberOfPlayers,
+                RecurringTournament = recurringTournament
+            };
+
+            Context.Tournaments.Add(nextTournament);
+            Context.SaveChanges();
+
+            // try plan
+            try
+            {
+                using (var gameServer = new GameServerServiceClient())
+                {
+                    gameServer.PlanTournament(nextTournament.Id);
+                }
+            }
+            catch (Exception ex) when (ex is CommunicationObjectFaultedException || ex is EndpointNotFoundException)
+            {
+                // ignore
+            }
+
         }
     }
 }

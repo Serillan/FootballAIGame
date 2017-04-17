@@ -9,8 +9,8 @@
 </h2>
 
 <div style="margin-bottom: 2em">
-    <a href="Create" class="btn btn-success">New Tournament</a>
-    <a href="ManageRecurring" class="btn btn-default">Manage Recurring Tournaments</a>
+    <a href="/tournaments/create" class="btn btn-success">New Tournament</a>
+    <a href="/tournaments/manage-recurring" class="btn btn-default">Manage Recurring Tournaments</a>
 </div>
 
 
@@ -47,17 +47,17 @@
     <script>
         $(document).ready(function() {
             $("#match-table").DataTable({
-                "order": [[0, "asc"]] // oldest first (the first that will start)
+                "order": [[0, "asc"]] @* oldest first (the first that will start) *@
             });
 
             $(".delete").on("click", function () {
                 var row = $(this).closest("tr");
                 var tournamentId = $(this).attr("data-tournament-id");
                 $.ajax({
-                    url: "/api/tournaments/deletetournament/" + tournamentId,
+                    url: "/api/tournaments/DeleteTournament/" + tournamentId,
                     method: "delete",
-                    success: function () {
-                        toastr.success("The tournament was deleted.");
+                    success: function (response) {
+                        toastr.success(response);
                         row.remove();
                     },
                     error: function (xhr) {

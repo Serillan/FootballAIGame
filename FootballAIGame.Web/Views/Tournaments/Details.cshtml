@@ -92,7 +92,7 @@
                         function() {
                             var selectedAi = $("input#ai-selection").val();
                             $.ajax({
-                                url: "/api/tournaments/jointournament/@Model.Tournament.Id/" + selectedAi,
+                                url: "/api/tournaments/JoinTournament/@Model.Tournament.Id/" + selectedAi,
                                 method: "post",
                                 success: function() {
                                     location.reload();
@@ -108,7 +108,7 @@
                     .on("click",
                         function() {
                             $.ajax({
-                                url: "/api/tournaments/leavetournament/@Model.Tournament.Id",
+                                url: "/api/tournaments/LeaveTournament/@Model.Tournament.Id",
                                 method: "put",
                                 success: function() {
                                     location.reload();
@@ -126,7 +126,7 @@
                      <text>
                          function ajaxCall() {
                              $.ajax({
-                                 url: "/api/tournaments/gettournamentinfo/@Model.Tournament.Id",
+                                 url: "/api/tournaments/GetTournamentInfo/@Model.Tournament.Id",
                                  method: "get",
                                  success: function(response) {
                                      var state = response.tournamentState;

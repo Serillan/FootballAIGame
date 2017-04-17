@@ -58,10 +58,10 @@ namespace FootballAIGame.Server
 
         /// <summary>
         /// Creates and plans the next tournament from the specified <see cref="RecurringTournament"/>.
+        /// If a recurring tournament with the specified ID doesn't exist, does nothing.
         /// </summary>
-        /// <param name="tournament">The recurring tournament.</param>
-        /// <returns>The created tournament.</returns>
-        public static void PlanNextRecurring(RecurringTournament tournament)
+        /// <param name="id">The recurring tournament's ID.</param>
+        public static void PlanNextRecurring(int id)
         {
             Tournament nextTournament;
 
@@ -69,16 +69,20 @@ namespace FootballAIGame.Server
             {
                 var reccuringTournament = context.RecurringTournaments
                     .Include(t => t.Tournaments)
-                    .SingleOrDefault(t => t.Id == tournament.Id);
+                    .SingleOrDefault(t => t.Id == id);
 
                 if (reccuringTournament == null)
                     return;
 
-                var lastTournamentTime = reccuringTournament.Tournaments.Max(t => t.StartTime);
+                // the current time if there are no tournaments
+                var lastTournamentTime = DateTime.Now; 
+                if (reccuringTournament.Tournaments.Any(t => true))
+                    lastTournamentTime = reccuringTournament.Tournaments.Max(t => t.StartTime);
 
                 nextTournament = new Tournament()
                 {
                     StartTime = lastTournamentTime + TimeSpan.FromMinutes(reccuringTournament.RecurrenceInterval),
+                    TournamentState = TournamentState.Unstarted,
                     Name = reccuringTournament.Name,
                     MinimumNumberOfPlayers = reccuringTournament.MinimumNumberOfPlayers,
                     MaximumNumberOfPlayers = reccuringTournament.MaximumNumberOfPlayers,
@@ -168,7 +172,7 @@ namespace FootballAIGame.Server
                 {
                     runningTournament.TournamentState = TournamentState.ErrorClosed;
                     if (runningTournament.RecurringTournament != null)
-                        PlanNextRecurring(runningTournament.RecurringTournament);
+                        PlanNextRecurring(runningTournament.RecurringTournament.Id);
                 }
             }
         }

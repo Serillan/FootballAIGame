@@ -32,7 +32,7 @@
 
                 function ajaxCall() {
                     $.ajax({
-                        url: "/api/user/getplayerstate",
+                        url: "/api/user/GetPlayerState",
                         success: function(response) {
                             if (@((int)PlayerState.WaitingForOpponentToAcceptChallenge) === response) {
                                 // still waiting
@@ -59,7 +59,7 @@
                 $("#cancel")
                     .click(function() {
                         $.ajax({
-                            url: "/api/challenges/cancelchallenge",
+                            url: "/api/challenges/CancelChallenge",
                             method: "delete",
                             success: function() {
                                 location.replace("/");

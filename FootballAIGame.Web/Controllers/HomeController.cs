@@ -133,7 +133,7 @@ namespace FootballAIGame.Web.Controllers
                 .Include(t => t.Matches.Select(m => m.Player1))
                 .Include(t => t.Matches.Select(m => m.Player2))
                 .Include(t => t.Players.Select(tp => tp.Player))
-                .SingleOrDefault(t => t.TournamentState == TournamentState.Running);
+                .FirstOrDefault(t => t.TournamentState == TournamentState.Running);
 
             if (tournament?.Players != null)
                 tournament.Players = tournament.Players

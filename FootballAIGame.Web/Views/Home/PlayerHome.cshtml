@@ -189,7 +189,7 @@
                     $("#SelectedAi").attr("value", nextValue);
 
                     $.ajax({
-                        url: "/api/ais/toggleai/" + nextValue,
+                        url: "/api/ais/ToggleAI/" + nextValue,
                         method: "put"
                     });
 
@@ -202,7 +202,7 @@
                             $("#btn").prop("disabled", true);
                             if (aiMustBeSelected()) {
                                 $.ajax({
-                                    url: "/api/matches/startrandommatch",
+                                    url: "/api/matches/StartRandomMatch",
                                     method: "post",
                                     success: function () {
                                         location.replace("/");
@@ -230,7 +230,7 @@
 
                     if (aiMustBeSelected()) {
                         $.ajax({
-                            url: "/api/challenges/challengeplayer/" + opponentName,
+                            url: "/api/challenges/ChallengePlayer/" + opponentName,
                             method: "post",
                             success: function () {
                                 location.replace("/");
@@ -249,7 +249,7 @@
                     button.closest("tr").remove();
 
                     $.ajax({
-                        url: "/api/challenges/decline/" + $(this).attr("data-value"),
+                        url: "/api/challenges/Decline/" + $(this).attr("data-value"),
                         type: "DELETE"
                     });
                 };
@@ -280,7 +280,7 @@
                 // challenges polling
                 var ajaxCalls = function () {
                     $.ajax({
-                        url: "/api/challenges/getchallengersnames",
+                        url: "/api/challenges/GetChallengersNames",
                         success: function (response) {
                             var newTableBody = "";
                             for (var i = 0; i < response.length; i++) {
@@ -302,7 +302,7 @@
                         }
                     });
                     $.ajax({
-                        url: "/api/ais/getactiveais",
+                        url: "/api/ais/GetActiveAIs",
                         success: function (response) {
                             var newTableBody = "";
                             var selectedAi = $("tr[data-selected]>td").text();
@@ -328,7 +328,7 @@
                         }
                     });
                     $.ajax({
-                        url: "/api/user/getplayerstate",
+                        url: "/api/user/GetPlayerState",
                         method: "get",
                         success: function(response) {
                             if (@((int) PlayerState.Idle) !== response)
@@ -336,7 +336,7 @@
                         }
                     });
                     $.ajax({
-                        url: "/api/tournaments/getjoinedtournaments",
+                        url: "/api/tournaments/GetJoinedTournaments",
                         method: "get",
                         success: function(response) {
                             var newTableBody = "";

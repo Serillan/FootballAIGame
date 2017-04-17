@@ -122,11 +122,11 @@
                             }
 
                             $.ajax({
-                                url: "/api/ais/selectai/" + selectedAi,
+                                url: "/api/ais/SelectAI/" + selectedAi,
                                 method: "put",
                                 success: function () {
                                     $.ajax({
-                                        url: "/api/challenges/challengeplayer/@Model.Player.Name",
+                                        url: "/api/challenges/ChallengePlayer/@Model.Player.Name",
                                         method: "post",
                                         success: function () {
                                             location.replace("/");

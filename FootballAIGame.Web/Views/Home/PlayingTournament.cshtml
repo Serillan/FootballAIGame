@@ -129,7 +129,7 @@
 
                 $("#btn").on("click.leaveTournament", function() {
                     $.ajax({
-                        url: "/api/tournaments/leavetournament/@Model.Tournament.Id",
+                        url: "/api/tournaments/LeaveTournament/@Model.Tournament.Id",
                         method: "put",
                         success: function() {
                             ajaxCallsFunctions.splice(ajaxCallsFunctions.indexOf(playerStateCall), 1);
@@ -151,7 +151,7 @@
 
                 function tournamentInfoCall() {
                     $.ajax({
-                        url: "/api/tournaments/gettournamentinfo/@Model.Tournament.Id",
+                        url: "/api/tournaments/GetTournamentInfo/@Model.Tournament.Id",
                         method: "get",
                         success: function(response) {
                             var playersTableBody = '';
@@ -196,7 +196,7 @@
 
                 function playerStateCall() {
                     $.ajax({
-                        url: "/api/user/getplayerstate",
+                        url: "/api/user/GetPlayerState",
                         method: "get",
                         success: function(response) {
                             switch (response) {
@@ -229,7 +229,7 @@
                                     // show final position
                                     $("div#progress-wrapper").html("");
                                     $.ajax({
-                                        url: "/api/tournaments/gettournamentposition/@Model.Tournament.Id",
+                                        url: "/api/tournaments/GetTournamentPosition/@Model.Tournament.Id",
                                         method: "get",
                                         success: function(response) {
                                             ajaxCallsFunctions.splice(ajaxCallsFunctions.indexOf(playerStateCall), 1);
@@ -256,7 +256,7 @@
 
                 function matchStepCall() {
                     $.ajax({
-                        url: "/api/matches/getmatchstep",
+                        url: "/api/matches/GetMatchStep",
                         method: "get",
                         success: function(response) {
                             var percentage = Math.round(response / 1500 * 100);

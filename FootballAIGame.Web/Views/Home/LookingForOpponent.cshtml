@@ -32,7 +32,7 @@
 
                 function ajaxCall() {
                     $.ajax({
-                        url: "/api/user/getplayerstate",
+                        url: "/api/user/GetPlayerState",
                         success: function(response) {
                             if (@((int) PlayerState.LookingForOpponent) === response) {
                                 // still looking
@@ -44,7 +44,7 @@
 
                 $("#cancel").click(function() {
                     $.ajax({
-                        url: "/api/matches/cancellooking",
+                        url: "/api/matches/CancelLooking",
                         method: "put",
                         success: function() {
                             location.replace("/");

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace FootballAIGame.DbModel.Models
 {
@@ -17,6 +18,7 @@ namespace FootballAIGame.DbModel.Models
         /// The recurrence interval.
         /// </value>
         [DisplayName("Recurrence Interval (minutes)")]
+        [Range(1, 525600)]
         public int RecurrenceInterval { get; set; }
 
         /// <summary>
@@ -29,6 +31,7 @@ namespace FootballAIGame.DbModel.Models
         /// The number of present tournaments.
         /// </value>
         [DisplayName("Number of Present Tournaments")]
+        [Range(1, 100)]
         public int NumberOfPresentTournaments { get; set; }
 
         /// <summary>

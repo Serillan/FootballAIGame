@@ -30,7 +30,7 @@ namespace FootballAIGame.Web.Controllers.Api
         /// </summary>
         /// <param name="userId">The user identifier.</param>
         /// <param name="roleName">Name of the role.</param>
-        [Route("api/user/togglerole/{userId}/{roleName}")]
+        [Route("api/user/ToggleRole/{userId}/{roleName}")]
         [HttpPut]
         [Authorize(Roles = RolesNames.MainAdmin)]
         public IHttpActionResult ToggleRole(string userId, string roleName)

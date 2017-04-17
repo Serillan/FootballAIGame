@@ -78,7 +78,7 @@
                         var inp = $(this);
 
                         $.ajax({
-                            url: "/api/user/togglerole/" + userId + "/@RolesNames.TournamentAdmin",
+                            url: "/api/user/ToggleRole/" + userId + "/@RolesNames.TournamentAdmin",
                             method: "put",
                             error: function (xhr, status, error) {
                                 if (error !== "Bad Request") {

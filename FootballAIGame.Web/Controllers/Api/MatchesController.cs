@@ -1,4 +1,5 @@
-﻿using System.Data.Entity;
+﻿using System;
+using System.Data.Entity;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -44,7 +45,7 @@ namespace FootballAIGame.Web.Controllers.Api
                     }
                 }
             }
-            catch (CommunicationObjectFaultedException)
+            catch (Exception ex) when (ex is CommunicationObjectFaultedException || ex is EndpointNotFoundException)
             {
                 player.PlayerState = PlayerState.Idle;
                 Context.SaveChanges();

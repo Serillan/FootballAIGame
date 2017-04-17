@@ -94,51 +94,78 @@ namespace FootballAIGame.Server
         {
             Tournament tournament;
 
-            using (var context = new ApplicationDbContext())
+            lock (TournamentManager.Instance.RunningTournaments) // only one simultaneous starting
             {
-                // get tournament
-                 tournament = context.Tournaments
-                    .Include(t => t.Players.Select(tp => tp.Player))
-                    .Include(t => t.RecurringTournament)
-                    .SingleOrDefault(t => t.Id == TournamentId);
-
-                if (tournament == null)
+                using (var context = new ApplicationDbContext())
                 {
-                    Console.WriteLine($"ERROR: Cannot find tournament with id {TournamentId} in database.");
-                    return;
-                }
+                    // get tournament
+                    tournament = context.Tournaments
+                       .Include(t => t.Players.Select(tp => tp.Player))
+                       .Include(t => t.RecurringTournament)
+                       .SingleOrDefault(t => t.Id == TournamentId);
 
-                // set state -> check if there is enough players
-                if (tournament.Players.Count < tournament.MinimumNumberOfPlayers)
-                {
-                    tournament.TournamentState = TournamentState.NotEnoughtPlayersClosed;
-                    if (tournament.RecurringTournament != null)
+                    if (tournament == null)
                     {
-                        TournamentManager.PlanNextRecurring(tournament.RecurringTournament);
+                        Console.WriteLine($"ERROR: Cannot find tournament with id {TournamentId} in database.");
+                        return;
                     }
-                    context.SaveChanges();
-                    return;
-                }
 
-                tournament.TournamentState = TournamentState.Running;
-                lock (TournamentManager.Instance.RunningTournaments)
-                {
-                    TournamentManager.Instance.RunningTournaments.Add(this);
-                }
+                    // set state -> check if there is enough players
+                    if (tournament.Players.Count < tournament.MinimumNumberOfPlayers)
+                    {
+                        tournament.TournamentState = TournamentState.NotEnoughtPlayersClosed;
 
-                // get players and update their states
-                Players = new List<TournamentPlayer>(); // players in tournament
-                lock (Players)
-                {
-                    foreach (var tournamentPlayer in tournament.Players)
-                        if (tournamentPlayer.Player.PlayerState == PlayerState.Idle)
+                        if (tournament.RecurringTournament != null)
                         {
-                            tournamentPlayer.Player.PlayerState = PlayerState.PlayingTournamentWaiting;
-                            Players.Add(tournamentPlayer);
+                            TournamentManager.PlanNextRecurring(tournament.RecurringTournament.Id);
                         }
-                }
 
-                context.SaveChanges();
+                        context.SaveChanges();
+                        return;
+                    }
+
+                    tournament.TournamentState = TournamentState.Running;
+
+                    TournamentManager.Instance.RunningTournaments.Add(this);
+
+                    // get players and update their states
+                    Players = new List<TournamentPlayer>(); // players in tournament
+                    lock (Players)
+                    {
+                        var toBeRemovedTournamentPlayers = new List<TournamentPlayer>();
+
+                        foreach (var tournamentPlayer in tournament.Players)
+                        {
+                            if (tournamentPlayer.Player.PlayerState == PlayerState.Idle)
+                            {
+                                Players.Add(tournamentPlayer);
+                            }
+                            else
+                            {
+                                toBeRemovedTournamentPlayers.Add(tournamentPlayer);
+                            }
+                        }
+
+                        context.TournamentPlayers.RemoveRange(toBeRemovedTournamentPlayers); // disqualified
+
+                        // check again after the remove of toBeRemovedTournamentPlayers
+                        if (Players.Count < tournament.MinimumNumberOfPlayers)
+                        {
+                            tournament.TournamentState = TournamentState.NotEnoughtPlayersClosed;
+
+                            if (tournament.RecurringTournament != null)
+                                TournamentManager.PlanNextRecurring(tournament.RecurringTournament.Id);
+
+                            context.SaveChanges();
+                            return;
+                        }
+
+                        foreach (var tournamentPlayer in Players)
+                            tournamentPlayer.Player.PlayerState = PlayerState.PlayingTournamentWaiting;
+                    }
+
+                    context.SaveChanges();
+                }
             }
 
             // while there is more than 1 player -> round simulation
@@ -168,6 +195,7 @@ namespace FootballAIGame.Server
                 if (player != null)
                 {
                     player.PlayerPosition = 1;
+                    player.Player.Score += 3;
                     player.Player.WonTournaments++;
                     player.Player.PlayerState = PlayerState.Idle;
                 }
@@ -188,7 +216,7 @@ namespace FootballAIGame.Server
             // if it's recurring then plan new one
             if (tournament.RecurringTournament != null)
             {
-                TournamentManager.PlanNextRecurring(tournament.RecurringTournament);
+                TournamentManager.PlanNextRecurring(tournament.RecurringTournament.Id);
             }
         }
 
@@ -241,11 +269,11 @@ namespace FootballAIGame.Server
 
                         SimulationManager.Instance.StartMatch(firstPlayer.Player.Name, firstPlayer.PlayerAi,
                             tournamentPlayer.Player.Name, tournamentPlayer.PlayerAi, out simulationTask, tournament.Id);
-                        
+
                         // update player states
                         firstPlayer.Player.PlayerState = PlayerState.PlayingTournamentPlaying;
                         tournamentPlayer.Player.PlayerState = PlayerState.PlayingTournamentPlaying;
-                        
+
                         // add match to matches
                         simulationTasks.Add(simulationTask);
                         firstPlayer = null;
@@ -269,7 +297,7 @@ namespace FootballAIGame.Server
 
                 // get looser position number
                 var exp = 1;
-                while (exp*2 < Players.Count)
+                while (exp * 2 < Players.Count)
                     exp *= 2;
                 var looserPos = exp + 1; // ex. from 8. (2^3) to 5. (2^2+1) player they will have position 5
 
@@ -322,6 +350,10 @@ namespace FootballAIGame.Server
                         continue;
                     looser.PlayerPosition = looserPos;
                     looser.Player.PlayerState = PlayerState.Idle;
+
+                    // increase looser score in accordance with his position
+                    if (looserPos <= 3)
+                        looser.Player.Score += 4 - looserPos;
                 }
 
                 // remove all skipping players that left during round
@@ -354,6 +386,7 @@ namespace FootballAIGame.Server
                         dbPlayer.Player.PlayerState = player.Player.PlayerState;
                         dbPlayer.PlayerPosition = player.PlayerPosition;
                         dbPlayer.Player.WonTournaments = player.Player.WonTournaments;
+                        dbPlayer.Player.Score = player.Player.Score;
                     }
                 }
 

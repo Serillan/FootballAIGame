@@ -90,6 +90,7 @@ namespace FootballAIGame.Web.Controllers
         /// Returns the manage recurring tournaments view.
         /// </summary>
         [Authorize(Roles = RolesNames.TournamentAdmin)]
+        [Route("tournaments/manage-recurring")]
         public ActionResult ManageRecurring()
         {
             var viewModel = Context.RecurringTournaments;
@@ -142,6 +143,7 @@ namespace FootballAIGame.Web.Controllers
         /// Returns the create recurring tournament view.
         /// </summary>
         [Authorize(Roles = RolesNames.TournamentAdmin)]
+        [Route("tournaments/create-recurring")]
         public ActionResult CreateRecurring()
         {
             return View();
@@ -155,6 +157,7 @@ namespace FootballAIGame.Web.Controllers
         [HttpPost]
         [Authorize(Roles = RolesNames.TournamentAdmin)]
         [ValidateAntiForgeryToken]
+        [Route("tournaments/create-recurring")]
         public ActionResult CreateRecurring(RecurringTournament recurringTournament)
         {
             if (!ModelState.IsValid) return View(recurringTournament);
@@ -163,11 +166,13 @@ namespace FootballAIGame.Web.Controllers
 
             // plan recurringTournament.NumberOfPresentTournaments tournaments
             var time = recurringTournament.StartTime;
+
             for (int i = 0; i < recurringTournament.NumberOfPresentTournaments; i++)
             {
                 var tournament = new Tournament()
                 {
-                    StartTime = recurringTournament.StartTime,
+                    StartTime = time,
+                    TournamentState = TournamentState.Unstarted,
                     Name = recurringTournament.Name,
                     MinimumNumberOfPlayers = recurringTournament.MinimumNumberOfPlayers,
                     MaximumNumberOfPlayers = recurringTournament.MaximumNumberOfPlayers,

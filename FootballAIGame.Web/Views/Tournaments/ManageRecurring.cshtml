@@ -9,8 +9,8 @@
 </h2>
 
 <div style="margin-bottom: 2em">
-    <a href="CreateRecurring" class="btn btn-success">New Recurring Tournament</a>
-    <a href="Current" class="btn btn-default">Current Tournaments</a>
+    <a href="/tournaments/create-recurring" class="btn btn-success">New Recurring Tournament</a>
+    <a href="/tournaments/current" class="btn btn-default">Current Tournaments</a>
 </div>
 
 
@@ -65,7 +65,7 @@
                     },
                     callback: function (result) {
                         $.ajax({
-                            url: "/api/tournaments/deleterecurringtournament/" + tournamentId + "/" + result,
+                            url: "/api/tournaments/DeleteRecurringTournament/" + tournamentId + "/" + result,
                             method: "delete",
                             success: function () {
                                 toastr.success("The recurring tournament was deleted.");

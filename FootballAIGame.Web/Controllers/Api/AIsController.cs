@@ -15,7 +15,7 @@ namespace FootballAIGame.Web.Controllers.Api
         /// <param name="id">The AI name.</param>
         /// <returns>Ok HTTP response.</returns>
         [HttpPut]
-        public IHttpActionResult SelectAi(string id)
+        public IHttpActionResult SelectAI(string id)
         {
             CurrentPlayer.SelectedAi = id;
 
@@ -31,7 +31,7 @@ namespace FootballAIGame.Web.Controllers.Api
         /// <param name="id">The AI name.</param>
         /// <returns>Ok http response.</returns>
         [HttpPut]
-        public IHttpActionResult ToggleAi(string id)
+        public IHttpActionResult ToggleAI(string id)
         {
             var player = CurrentPlayer;
 
