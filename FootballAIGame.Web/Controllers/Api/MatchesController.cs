@@ -37,7 +37,7 @@ namespace FootballAIGame.Web.Controllers.Api
                     Context.SaveChanges(); // must be done before calling service!
 
                     string msg;
-                    if ((msg = gameServer.WantsToPlay(player.Name, player.SelectedAi)) != "ok")
+                    if ((msg = gameServer.WantsToPlay(player.Name, player.SelectedAI)) != "ok")
                     {
                         player.PlayerState = PlayerState.Idle;
                         Context.SaveChanges();

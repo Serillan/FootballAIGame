@@ -270,8 +270,8 @@ namespace FootballAIGame.Server
                 foreach (var player in players)
                 {
                     player.PlayerState = PlayerState.Idle;
-                    player.ActiveAis = null;
-                    player.SelectedAi = null;
+                    player.ActiveAIs = null;
+                    player.SelectedAI = null;
                 }
                 context.SaveChanges();
             }
@@ -454,22 +454,22 @@ namespace FootballAIGame.Server
 
                 if (player != null)
                 {
-                    var newAis = player.ActiveAis.Split(';').Where(s => s != connection.AiName);
-                    player.ActiveAis = string.Join(";", newAis);
+                    var newAis = player.ActiveAIs.Split(';').Where(s => s != connection.AiName);
+                    player.ActiveAIs = string.Join(";", newAis);
 
                     lock (WantsToPlayConnections)
                     {
                         WantsToPlayConnections.Remove(connection);
                     }
 
-                    if (player.SelectedAi == connection.AiName)
+                    if (player.SelectedAI == connection.AiName)
                     {
-                        player.SelectedAi = "";
+                        player.SelectedAI = "";
                         player.PlayerState = PlayerState.Idle; // todo error message
                     }
 
-                    if (player.ActiveAis == "")
-                        player.ActiveAis = null;
+                    if (player.ActiveAIs == "")
+                        player.ActiveAIs = null;
                     connection.Dispose();
                 }
                 await context.SaveChangesAsync();
@@ -501,16 +501,16 @@ namespace FootballAIGame.Server
                     return "Invalid access key.";
                 }
 
-                if (player.ActiveAis == null)
-                    player.ActiveAis = message.AIName;
+                if (player.ActiveAIs == null)
+                    player.ActiveAIs = message.AIName;
                 else
                 {
-                    if (player.ActiveAis.Split(';').Contains(message.AIName))
+                    if (player.ActiveAIs.Split(';').Contains(message.AIName))
                     {
                         return "AI name is already being used.";
                     }
 
-                    player.ActiveAis += ";" + message.AIName;
+                    player.ActiveAIs += ";" + message.AIName;
                 }
 
                 await context.SaveChangesAsync();

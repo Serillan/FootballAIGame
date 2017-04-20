@@ -30,7 +30,7 @@ namespace FootballAIGame.DbModel.Models
         /// <value>
         /// The name.
         /// </value>
-        public string Name { get; set; }
+          public string Name { get; set; }
 
         /// <summary>
         /// Gets or sets the access key.
@@ -55,7 +55,7 @@ namespace FootballAIGame.DbModel.Models
         /// <value>
         /// The active AIs.
         /// </value>
-        public string ActiveAis { get; set; }
+        public string ActiveAIs { get; set; }
 
         /// <summary>
         /// Gets or sets the selected AI. This AI is selected from active AIs and used for
@@ -64,7 +64,7 @@ namespace FootballAIGame.DbModel.Models
         /// <value>
         /// The selected AI.
         /// </value>
-        public string SelectedAi { get; set; }
+        public string SelectedAI { get; set; }
 
         /// <summary>
         /// Gets or sets the state of the player.

@@ -17,7 +17,7 @@ namespace FootballAIGame.Web.Controllers.Api
         [HttpPut]
         public IHttpActionResult SelectAI(string id)
         {
-            CurrentPlayer.SelectedAi = id;
+            CurrentPlayer.SelectedAI = id;
 
             Context.SaveChanges();
 
@@ -35,7 +35,7 @@ namespace FootballAIGame.Web.Controllers.Api
         {
             var player = CurrentPlayer;
 
-            player.SelectedAi = player.SelectedAi == id ? null : id;
+            player.SelectedAI = player.SelectedAI == id ? null : id;
 
             Context.SaveChanges();
 
@@ -50,7 +50,7 @@ namespace FootballAIGame.Web.Controllers.Api
         [HttpGet]
         public IHttpActionResult GetActiveAIs()
         {
-            var activeAIs = CurrentPlayer.ActiveAis?.Split(';').ToList() ?? new List<string>();
+            var activeAIs = CurrentPlayer.ActiveAIs?.Split(';').ToList() ?? new List<string>();
             return Ok(activeAIs);
         }
     }

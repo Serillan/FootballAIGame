@@ -409,12 +409,12 @@ namespace FootballAIGame.Server
 
                 foreach (var tournamentPlayer in tournamentPlayers)
                 {
-                    if (tournamentPlayer.Player.ActiveAis == null)
+                    if (tournamentPlayer.Player.ActiveAIs == null)
                     {
                         playersToBeRemoved.Add(tournamentPlayer);
                         continue;
                     }
-                    var activeAis = tournamentPlayer.Player.ActiveAis.Split(';');
+                    var activeAis = tournamentPlayer.Player.ActiveAIs.Split(';');
                     if (!activeAis.Contains(tournamentPlayer.PlayerAi))
                         playersToBeRemoved.Add(tournamentPlayer);
                 }

@@ -64,7 +64,7 @@ namespace FootballAIGame.Web.Controllers
 
             var currentPlayer = CurrentPlayer;
 
-            var activeAIs = currentPlayer?.ActiveAis?.Split(';').ToList() ?? new List<string>();
+            var activeAIs = currentPlayer?.ActiveAIs?.Split(';').ToList() ?? new List<string>();
             var currentTournamentPlayer = tournament.Players.SingleOrDefault(tp => tp.Player == currentPlayer);
             
             var viewModel = new TournamentDetailsViewModel()

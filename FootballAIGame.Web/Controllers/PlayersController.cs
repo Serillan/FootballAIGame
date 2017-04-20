@@ -48,7 +48,7 @@ namespace FootballAIGame.Web.Controllers
             if (player == null)
                 return HttpNotFound();
 
-            var activeAIs = currentPlayer?.ActiveAis?.Split(';').ToList() ?? new List<string>();
+            var activeAIs = currentPlayer?.ActiveAIs?.Split(';').ToList() ?? new List<string>();
 
             var orderedPlayers = Context.Players.OrderByDescending(p => p.Score).ToList();
             var rank = 1 + orderedPlayers.TakeWhile(orderedPlayer => orderedPlayer.UserId != player.UserId).Count();
@@ -77,7 +77,7 @@ namespace FootballAIGame.Web.Controllers
                 LastMatches = lastMatches,
                 LastTournaments = lastTournaments,
                 ActiveAIs = activeAIs,
-                SelectedAi = currentPlayer?.SelectedAi,
+                SelectedAi = currentPlayer?.SelectedAI,
                 Rank = rank
             };
 

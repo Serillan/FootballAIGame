@@ -56,8 +56,8 @@ namespace FootballAIGame.Server
 
                 foreach (var player in players)
                 {
-                    player.SelectedAi = null;
-                    player.ActiveAis = null;
+                    player.SelectedAI = null;
+                    player.ActiveAIs = null;
                     player.PlayerState = PlayerState.Idle; // TODO show browser clients that error has occurred
                 }
 

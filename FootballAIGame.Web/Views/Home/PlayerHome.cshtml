@@ -15,7 +15,7 @@
             <tbody id="aiTableBody">
                 @foreach (var ai in Model.ActiveAIs)
                 {
-                    if (ai == Model.Player.SelectedAi)
+                    if (ai == Model.Player.SelectedAI)
                     {
                 <tr class="selectable-row success" data-selected><td>@ai</td></tr>
                     }

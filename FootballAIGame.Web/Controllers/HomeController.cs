@@ -106,7 +106,7 @@ namespace FootballAIGame.Web.Controllers
                 .TakeWhile(t => t.TournamentState == TournamentState.Unstarted ||
                                 i++ < 5).ToList();
 
-            var activeAIs = player.ActiveAis?.Split(';').ToList() ?? new List<string>();
+            var activeAIs = player.ActiveAIs?.Split(';').ToList() ?? new List<string>();
 
             var viewModel = new ViewModels.Home.PlayerHomeViewModel()
             {
@@ -117,7 +117,7 @@ namespace FootballAIGame.Web.Controllers
                     .Select(c => c.ChallengingPlayer)
                     .ToList(),
                 Player = player,
-                SelectedAi = player.SelectedAi,
+                SelectedAi = player.SelectedAI,
                 JoinedTournaments = joinedTournaments
             };
 
