@@ -8,7 +8,7 @@ using FootballAIGame.DbModel.Models;
 namespace FootballAIGame.Web.Dtos
 {
     /// <summary>
-    /// <see cref="TournamentPlayer"/> data access object that is returned from the <see cref="GameController.GetTournamentInfo"/> service as part of the
+    /// <see cref="TournamentPlayer"/> data access object that is returned from the <see cref="TournamentsController.GetTournamentInfo"/> service as part of the
     /// <see cref="TournamentInfoDto"/>.
     /// </summary>
     public class TournamentPlayerDto

@@ -1,4 +1,5 @@
-﻿using System.Data.Entity;
+﻿using System;
+using System.Data.Entity;
 using System.Linq;
 using System.ServiceModel;
 using System.Web.Http;
@@ -110,7 +111,7 @@ namespace FootballAIGame.Web.Controllers.Api
                     Context.SaveChanges();
                     return Ok();
                 }
-                catch (CommunicationObjectFaultedException) // server if offline 
+                catch (Exception ex) when (ex is CommunicationObjectFaultedException || ex is EndpointNotFoundException)
                 {
                     return BadRequest("Game Server is offline.");
                 }

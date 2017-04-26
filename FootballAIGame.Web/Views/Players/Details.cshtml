@@ -1,5 +1,4 @@
-﻿@using FootballAIGame.DbModel.Models
-@model FootballAIGame.Web.ViewModels.Players.PlayerDetailsViewModel
+﻿@model FootballAIGame.Web.ViewModels.Players.PlayerDetailsViewModel
 
 @{
     ViewBag.Title = "Player Details";
@@ -28,7 +27,7 @@
 
                 if (match.Winner == 0) // draw
                 {
-                    <tr class="clickable-row" data-href="/matches/details/@match.Id">
+                    <tr class="clickable-row" data-href="@Url.Action("Details", "Matches", new {id = match.Id})">
                         <td>@match.Time</td>
                         <td>@otherPlayer.Name</td>
                         <td>Draw</td>
@@ -37,7 +36,7 @@
                 }
                 else if (match.Winner == playerNumber)
                 {
-                    <tr class="success clickable-row" data-href="/matches/details/@match.Id">
+                    <tr class="success clickable-row" data-href="@Url.Action("Details", "Matches", new {id = match.Id})">
                         <td>@match.Time</td>
                         <td>@otherPlayer.Name</td>
                         <td>Win</td>
@@ -45,7 +44,7 @@
                 }
                 else
                 {
-                    <tr class="danger clickable-row" data-href="/matches/details/@match.Id">
+                    <tr class="danger clickable-row" data-href="@Url.Action("Details", "Matches", new {id = match.Id})">
                         <td>@match.Time</td>
                         <td>@otherPlayer.Name</td>
                         <td>Loose</td>
@@ -85,7 +84,7 @@
         <tbody>
         @foreach (var tournament in Model.LastTournaments)
         {
-            <tr class="clickable-row" data-href="/Tournaments/Details/@tournament.Id">
+            <tr class="clickable-row" data-href="@Url.Action("Details", "Tournaments", new {id = tournament.Id})">
                 <td>@tournament.StartTime</td>
                 <td>@tournament.Name</td>
                 <td>@tournament.Players.Single(t => t.Player.Name == Model.Player.Name).PlayerPosition</td>
@@ -122,14 +121,14 @@
                             }
 
                             $.ajax({
-                                url: "/api/ais/SelectAI/" + selectedAi,
+                                url: "@Url.Action("SelectAI", "AIs", new {HttpRoute="Api"})/" + selectedAi,
                                 method: "put",
                                 success: function () {
                                     $.ajax({
-                                        url: "/api/challenges/ChallengePlayer/@Model.Player.Name",
+                                        url: "@Url.Action("ChallengePlayer", "Challenges", new {HttpRoute="Api", id = Model.Player.Name})",
                                         method: "post",
                                         success: function () {
-                                            location.replace("/");
+                                            location.replace(@Url.Action("Index", "Home"));
                                         },
                                         error: function (xhr, status, error) {
                                             toastr.error(json.responseText.message);

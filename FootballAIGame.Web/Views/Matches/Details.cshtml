@@ -5,8 +5,8 @@
 }
 
 <h2 class="text-center">
-    <a href="/players/details/@Model.Match.Player1.Name">@Model.Match.Player1.Name</a> vs
-    <a href="/players/details/@Model.Match.Player2.Name">@Model.Match.Player2.Name</a>
+    @Html.ActionLink(Model.Match.Player1.Name, "Details", new { Controller = "Players", id = Model.Match.Player1.Name }) vs
+    @Html.ActionLink(Model.Match.Player2.Name, "Details", new { Controller = "Players", id = Model.Match.Player2.Name })
 </h2>
 
 <div class="container col-sm-4 text-center">
@@ -79,19 +79,18 @@
         </div>
     }
 
-    <div @if (Model.LoggedPlayerActionLatency == null)
-         {
-             <text>style = "margin-top: 6em")</text>
+    <div @if (Model.LoggedPlayerActionLatency == null) { <text> style="margin-top: 6em" )</text>
          }
          else
          {
-             <text>style = "margin-top: 2em")</text>
-         }
-         >
-        <a href="/matches/watch/@Model.Match.Id" class="btn btn-primary" style="margin-top: 1em">Watch the match</a>
-    </div>
+             <text>style="margin-top: 2em" )</text>
+         }>
+        @Html.ActionLink("Watch the match", "Watch", new { Controller = "Matches", id = Model.Match.Id },
+            new { @class = "btn btn-primary", style = "margin-top: 1em" })
+</div>
 
-    <div style="margin-top: 2em">
-        <a href="/matches/errors/@Model.Match.Id" class="btn btn-primary">Error log</a>
-    </div>
+<div style="margin-top: 2em">
+    @Html.ActionLink("Error log", "Errors", new { Controller = "Matches", id = Model.Match.Id },
+        new {@class = "btn btn-primary"})
+</div>
 </div>

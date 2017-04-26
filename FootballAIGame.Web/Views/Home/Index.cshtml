@@ -1,6 +1,6 @@
 ﻿@model FootballAIGame.Web.ViewModels.Home.IndexViewModel
 @{
-    ViewBag.Title = "Home Page";
+    ViewBag.Title = "Home";
 }
 
 <br /><br />
@@ -19,7 +19,7 @@
         <tbody>
         @foreach (var tournament in Model.NextTournaments)
         {
-            <tr class="clickable-row" data-href="/tournaments/details/@tournament.Id">
+            <tr class="clickable-row" data-href="@Url.Action("Details", "Tournaments", new {id = tournament.Id})">
                 <td>@tournament.Name</td>
                 <td>@tournament.StartTime</td>
                 <td>@tournament.Players.Count() / @tournament.MaximumNumberOfPlayers</td>
@@ -44,7 +44,7 @@
         <tbody>
             @foreach (var match in Model.LastMatches)
             {
-                <tr class="clickable-row" data-href="/matches/details/@match.Id">
+                <tr class="clickable-row" data-href="@Url.Action("Details", "Matches", new {id = match.Id})">
                     <td>@match.Time</td>
                     @if (match.Winner == 1)
                 {

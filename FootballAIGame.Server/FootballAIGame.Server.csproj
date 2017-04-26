@@ -53,7 +53,7 @@
     <OutputPath>bin\Production\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
+    <DebugType>none</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
@@ -136,7 +136,7 @@
       <Name>FootballAIGame.DbModel</Name>
     </ProjectReference>
     <ProjectReference Include="..\FootballAIGame.MatchSimulation\FootballAIGame.MatchSimulation.csproj">
-      <Project>{0FF41A2E-C156-4460-ADCF-BF4EF4E3D05C}</Project>
+      <Project>{0ff41a2e-c156-4460-adcf-bf4ef4e3d05c}</Project>
       <Name>FootballAIGame.MatchSimulation</Name>
     </ProjectReference>
   </ItemGroup>

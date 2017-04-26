@@ -1,5 +1,5 @@
 ﻿@using FootballAIGame.DbModel.Models
-@model IEnumerable<FootballAIGame.DbModel.Models.Tournament>
+@model IEnumerable<Tournament>
 @{
     ViewBag.Title = "Current Tournaments";
 }
@@ -9,8 +9,8 @@
 </h2>
 
 <div style="margin-bottom: 2em">
-    <a href="/tournaments/create" class="btn btn-success">New Tournament</a>
-    <a href="/tournaments/manage-recurring" class="btn btn-default">Manage Recurring Tournaments</a>
+    @Html.ActionLink("New Tournament", "Create", "Tournaments", null, new {@class = "btn btn-success"})
+    @Html.ActionLink("Manage Recurring Tournaments", "ManageRecurring", "Tournaments", null, new { @class = "btn btn-default" })
 </div>
 
 
@@ -38,7 +38,7 @@
             {
                 <td class="text-center"><a class="delete" data-tournament-id="@tournament.Id" role="button">Delete</a></td>
             }
-            <td><a href="/tournaments/details/@tournament.Id">Details</a></td>
+            <td>@Html.ActionLink("Details", "Details", new { Controller = "Tournaments", id = tournament.Id })</td>
         </tr>
     }
 </table>
@@ -54,7 +54,7 @@
                 var row = $(this).closest("tr");
                 var tournamentId = $(this).attr("data-tournament-id");
                 $.ajax({
-                    url: "/api/tournaments/DeleteTournament/" + tournamentId,
+                    url: "@Url.Action("DeleteTournament", "Tournaments", new {HttpRoute = "Api"})/" + tournamentId,
                     method: "delete",
                     success: function (response) {
                         toastr.success(response);

@@ -22,13 +22,13 @@ namespace FootballAIGame.Web.Controllers.Api
         [HttpPost]
         public IHttpActionResult StartRandomMatch()
         {
-            Player player = null;
+            var player = CurrentPlayer;
 
             try
             {
                 using (var gameServer = new GameServerService.GameServerServiceClient())
                 {
-                    player = CurrentPlayer;
+                    gameServer.Open();
 
                     if (player.PlayerState != PlayerState.Idle)
                         return BadRequest("Invalid player state.");
@@ -124,7 +124,10 @@ namespace FootballAIGame.Web.Controllers.Api
                     gameServer.CancelLooking(player.Name);
                 }
             }
-            catch (CommunicationObjectFaultedException) { }
+            catch (Exception ex) when (ex is CommunicationObjectFaultedException || ex is EndpointNotFoundException)
+            {
+                
+            }
 
             if (player.PlayerState == PlayerState.LookingForOpponent)
                 player.PlayerState = PlayerState.Idle;
@@ -150,7 +153,7 @@ namespace FootballAIGame.Web.Controllers.Api
                     gameServer.CancelMatch(player.Name);
                 }
             }
-            catch (CommunicationObjectFaultedException)
+            catch (Exception ex) when (ex is CommunicationObjectFaultedException || ex is EndpointNotFoundException)
             {
                 player.PlayerState = PlayerState.Idle;
             }
@@ -173,7 +176,7 @@ namespace FootballAIGame.Web.Controllers.Api
                     return Ok(gameServer.GetCurrentMatchStep(CurrentPlayer.Name));
                 }
             }
-            catch (CommunicationObjectFaultedException)
+            catch (Exception ex) when (ex is CommunicationObjectFaultedException || ex is EndpointNotFoundException)
             {
                 return BadRequest("Game Server is offline.");
             }

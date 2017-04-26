@@ -22,7 +22,7 @@
             <td>@tournament.StartTime</td>
             <td>@tournament.Name</td>
             <td>@tournament.Players.Count</td>
-            <td><a href="/tournaments/details/@tournament.Id">Details</a></td>
+            <td>@Html.ActionLink("Details", "Details", new { Controller = "Tournaments", id = tournament.Id })</td>
         </tr>
     }
 </table>

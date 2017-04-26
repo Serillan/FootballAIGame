@@ -22,7 +22,7 @@
         <tbody id="players-body">
             @foreach (var playerT in Model.Tournament.Players)
             {
-                <tr class="clickable-row" data-href="/Players/Details/@playerT.Player.Name">
+                <tr class="clickable-row" data-href="@Url.Action("Details", "Players", new {id = playerT.Player.Name})">
                     <td>@playerT.PlayerPosition</td>
                     <td>@playerT.Player.Name</td>
                     <td>@playerT.Player.Score</td>
@@ -92,7 +92,7 @@
                         function() {
                             var selectedAi = $("input#ai-selection").val();
                             $.ajax({
-                                url: "/api/tournaments/JoinTournament/@Model.Tournament.Id/" + selectedAi,
+                                url: "@Url.Action("JoinTournament", "Tournaments", new {HttpRoute = "Api"})/@Model.Tournament.Id/" + selectedAi,
                                 method: "post",
                                 success: function() {
                                     location.reload();
@@ -108,7 +108,7 @@
                     .on("click",
                         function() {
                             $.ajax({
-                                url: "/api/tournaments/LeaveTournament/@Model.Tournament.Id",
+                                url: "@Url.Action("LeaveTournament", "Tournaments", new {HttpRoute = "Api", id = Model.Tournament.Id})",
                                 method: "put",
                                 success: function() {
                                     location.reload();
@@ -126,7 +126,7 @@
                      <text>
                          function ajaxCall() {
                              $.ajax({
-                                 url: "/api/tournaments/GetTournamentInfo/@Model.Tournament.Id",
+                                 url: "@Url.Action("GetTournamentInfo", "Tournaments", new {HttpRoute = "Api", id = Model.Tournament.Id})",
                                  method: "get",
                                  success: function(response) {
                                      var state = response.tournamentState;
@@ -155,7 +155,7 @@
                                          if (player.position === null)
                                              player.position = ''; // don't show null
                                          playersTableBody +=
-                                             '<tr class="clickable-row" data-href="/Players/Details/' +
+                                             '<tr class="clickable-row" data-href="@Url.Action("Details", "Players")/' +
                                              player.name +
                                              '">' +
                                              '<td>' +
@@ -183,7 +183,7 @@
                                          for (var i = 0; i < response.matches.length; i++) {
                                              var match = response.matches[i];
                                              matchesTableBody +=
-                                                 '<tr class="clickable-row" data-href="/Matches/Details/' +
+                                                 '<tr class="clickable-row" data-href="@Url.Action("Details", "Matches")/' +
                                                  match.id +
                                                  '">' +
                                                  '<td>' +

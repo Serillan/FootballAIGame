@@ -8,7 +8,8 @@ using FootballAIGame.DbModel.Models;
 namespace FootballAIGame.Web.Dtos
 {
     /// <summary>
-    /// <see cref="Match"/> data access object that is returned from the <see cref="GameController.GetTournamentInfo"/> service as part of the
+    /// <see cref="Match"/> data access object that is returned from the 
+    /// <see cref="TournamentsController.GetTournamentInfo"/> service as part of the
     /// <see cref="TournamentInfoDto"/>.
     /// </summary>
     public class MatchDto
@@ -21,7 +22,7 @@ namespace FootballAIGame.Web.Dtos
         /// <summary>
         /// Gets or sets the name of the player1.
         /// </summary>
-        /// <value>
+        /// <value> 
         /// The name of the player1.
         /// </value>
         public string Player1Name { get; set; }

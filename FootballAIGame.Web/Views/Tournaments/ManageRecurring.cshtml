@@ -1,4 +1,5 @@
-﻿@using FootballAIGame.DbModel.Models
+﻿@using System.Web.Http.Routing
+@using FootballAIGame.DbModel.Models
 @model IEnumerable<RecurringTournament>
 @{
     ViewBag.Title = "Recurring Tournaments";
@@ -9,8 +10,8 @@
 </h2>
 
 <div style="margin-bottom: 2em">
-    <a href="/tournaments/create-recurring" class="btn btn-success">New Recurring Tournament</a>
-    <a href="/tournaments/current" class="btn btn-default">Current Tournaments</a>
+    @Html.ActionLink("New Recurring Tournament", "CreateRecurring", "Tournaments", null, new {@class = "btn btn-success"})
+    @Html.ActionLink("Current Tournaments", "Current", "Tournaments", null, new {@class = "btn btn-default"})
 </div>
 
 
@@ -65,7 +66,7 @@
                     },
                     callback: function (result) {
                         $.ajax({
-                            url: "/api/tournaments/DeleteRecurringTournament/" + tournamentId + "/" + result,
+                            url: "@Url.Action("DeleteRecurringTournament", "Tournaments", new {HttpRoute="Api"})/" + tournamentId + "/" + result,
                             method: "delete",
                             success: function () {
                                 toastr.success("The recurring tournament was deleted.");

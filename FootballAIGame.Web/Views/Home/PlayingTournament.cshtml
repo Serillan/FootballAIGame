@@ -27,7 +27,7 @@
             <tbody id="players-body">
                 @foreach (var playerT in Model.Tournament.Players)
             {
-                    <tr class="clickable-row" data-href="/players/details/@playerT.Player.Name">
+                    <tr class="clickable-row" data-href="@Url.Action("Details", "Players", new {id=playerT.Player.Name})">
                         <td>@playerT.PlayerPosition</td>
                         <td>@playerT.Player.Name</td>
                         <td>@playerT.Player.Score</td>
@@ -80,7 +80,7 @@
             <tbody id="matches-body">
                 @foreach (var match in Model.Tournament.Matches)
                 {
-                    <tr class="clickable-row" data-href="/matches/details/@match.Id">
+                    <tr class="clickable-row" data-href="@Url.Action("Details", "Matches", new {id=match.Id})">
                         <td>@match.Score</td>
                         @if (match.Winner == 1)
                         {
@@ -112,9 +112,9 @@
 
         $(document)
             .ready(function() {
-                ajaxCalls = setInterval(ajaxCall, 1000);
-                animation = setInterval(animationFunc, 1000);
-                ajaxCallsFunctions = [playerStateCall, tournamentInfoCall, matchStepCall];
+                var ajaxCalls = setInterval(ajaxCall, 1000);
+                var animation = setInterval(animationFunc, 1000);
+                var ajaxCallsFunctions = [playerStateCall, tournamentInfoCall, matchStepCall];
                 var counter = 0;
 
                 function animationFunc() {
@@ -129,7 +129,7 @@
 
                 $("#btn").on("click.leaveTournament", function() {
                     $.ajax({
-                        url: "/api/tournaments/LeaveTournament/@Model.Tournament.Id",
+                        url: "@Url.Action("LeaveTournament", "Tournaments", new {HttpRoute = "Api", id = Model.Tournament.Id})",
                         method: "put",
                         success: function() {
                             ajaxCallsFunctions.splice(ajaxCallsFunctions.indexOf(playerStateCall), 1);
@@ -143,7 +143,8 @@
                             $("#btn").removeClass("btn-danger").addClass("btn-success").text("Home");
                             $("#btn").off("click.leaveTournament"); // remove old handler (using namespace)
                             $("#btn").on("click", function() {
-                                location.replace("/");
+                                clearInterval(ajaxCalls);
+                                location.reload();
                             });
                         }
                     });
@@ -151,7 +152,7 @@
 
                 function tournamentInfoCall() {
                     $.ajax({
-                        url: "/api/tournaments/GetTournamentInfo/@Model.Tournament.Id",
+                        url: "@Url.Action("GetTournamentInfo", "Tournaments", new {HttpRoute = "Api", id = Model.Tournament.Id})",
                         method: "get",
                         success: function(response) {
                             var playersTableBody = '';
@@ -160,7 +161,7 @@
                                 if (player.position === null)
                                     player.position = '';     // don't show null
                                 playersTableBody +=
-                                    '<tr class="clickable-row" data-href="/Players/Details/' + player.name +'">' +
+                                    '<tr class="clickable-row" data-href="@Url.Action("Details", "Players")/' + player.name +'">' +
                                         '<td>' + player.position + '</td>' +
                                         '<td>' + player.name + '</td>' +
                                         '<td>' + player.score + '</td>' +
@@ -172,7 +173,7 @@
                             for (var i = 0; i < response.matches.length; i++) {
                                 var match = response.matches[i];
                                 matchesTableBody +=
-                                    '<tr class="clickable-row" data-href="/matches/details/' + match.id + '">' +
+                                    '<tr class="clickable-row" data-href="@Url.Action("Details", "Matches")/' + match.id + '">' +
                                     '<td>' + match.score + '</td>';
                                 if (match.winner === 1)
                                     matchesTableBody +=
@@ -196,7 +197,7 @@
 
                 function playerStateCall() {
                     $.ajax({
-                        url: "/api/user/GetPlayerState",
+                        url: "@Url.Action("GetPlayerState", "User", new {HttpRoute="Api"})",
                         method: "get",
                         success: function(response) {
                             switch (response) {
@@ -229,7 +230,7 @@
                                     // show final position
                                     $("div#progress-wrapper").html("");
                                     $.ajax({
-                                        url: "/api/tournaments/GetTournamentPosition/@Model.Tournament.Id",
+                                        url: "@Url.Action("GetTournamentPosition", "Tournaments", new {HttpRoute="Api", id = Model.Tournament.Id})",
                                         method: "get",
                                         success: function(response) {
                                             ajaxCallsFunctions.splice(ajaxCallsFunctions.indexOf(playerStateCall), 1);
@@ -244,7 +245,8 @@
                                             $("#btn").removeClass("btn-danger").addClass("btn-success").text("Home");
                                             $("#btn").off("click.leaveTournament"); // remove old handler (using namespace)
                                             $("#btn").on("click", function() {
-                                                location.replace("/");
+                                                clearInterval(ajaxCalls);
+                                                location.reload();
                                             });
                                         }
                                     });
@@ -256,7 +258,7 @@
 
                 function matchStepCall() {
                     $.ajax({
-                        url: "/api/matches/GetMatchStep",
+                        url: "@Url.Action("GetMatchStep", "Matches", new {HttpRoute="Api"})",
                         method: "get",
                         success: function(response) {
                             var percentage = Math.round(response / 1500 * 100);

@@ -49,6 +49,7 @@ namespace FootballAIGame.Web.Migrations
             // default admin
             var adminName = "admin";
             var adminPassword = "admin28";
+
             var adminRoles = new List<string>() { RolesNames.MainAdmin, RolesNames.TournamentAdmin };
 
             // create default admin

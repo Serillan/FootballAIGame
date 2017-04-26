@@ -1,7 +1,7 @@
 ﻿@using FootballAIGame.DbModel.Models
 
 @{
-    ViewBag.Title = "Looking For Opponent";
+    ViewBag.Title = "Waiting For Opponent";
 }
 
 <div class="container text-center" style="margin-top: 4em;">
@@ -21,7 +21,7 @@
                 var counter = 0;
 
                 function animation() {
-                    counter ++;
+                    counter++;
                     var dots = String.fromCharCode(160); //&nbsp;
                     if (counter > 3)
                         counter = 0;
@@ -32,7 +32,7 @@
 
                 function ajaxCall() {
                     $.ajax({
-                        url: "/api/user/GetPlayerState",
+                        url: "@Url.Action("GetPlayerState", "User", new {HttpRoute="Api"})",
                         success: function(response) {
                             if (@((int)PlayerState.WaitingForOpponentToAcceptChallenge) === response) {
                                 // still waiting
@@ -47,10 +47,11 @@
                                 $("#cancel")
                                     .on("click",
                                         function() {
-                                            location.replace("/");
+                                            location.reload();
                                         });
                             } else {
-                                location.replace("/");
+                                clearInterval(ajaxCalls);
+                                location.reload();
                             }
                         }
                     });
@@ -59,10 +60,11 @@
                 $("#cancel")
                     .click(function() {
                         $.ajax({
-                            url: "/api/challenges/CancelChallenge",
+                            url: "@Url.Action("CancelChallenge", "Challenges", new {HttpRoute="Api"})",
                             method: "delete",
                             success: function() {
-                                location.replace("/");
+                                clearInterval(ajaxCalls);
+                                location.reload();
                             }
                         });
                     });

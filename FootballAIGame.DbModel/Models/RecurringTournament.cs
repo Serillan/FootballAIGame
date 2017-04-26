@@ -8,7 +8,7 @@ namespace FootballAIGame.DbModel.Models
     /// Represents the recurring tournament. It keeps references to all currently
     /// planned tournaments from this recurrence.
     /// </summary>
-    /// <seealso cref="FootballAIGameServer.Models.TournamentBase" />
+    /// <seealso cref="FootballAIGame.DbModel.Models.TournamentBase" />
     public class RecurringTournament : TournamentBase
     {
         /// <summary>

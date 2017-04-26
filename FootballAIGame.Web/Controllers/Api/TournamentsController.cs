@@ -93,7 +93,7 @@ namespace FootballAIGame.Web.Controllers.Api
                             gameServer.LeaveRunningTournament(tournamentPlayer.Player.Name);
                         }
                     }
-                    catch
+                    catch (Exception ex) when (ex is CommunicationObjectFaultedException || ex is EndpointNotFoundException)
                     {
                         // ignored
                     }

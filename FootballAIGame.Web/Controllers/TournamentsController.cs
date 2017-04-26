@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
+using System.ServiceModel;
 using System.Web;
 using System.Web.Http.Results;
 using System.Web.Mvc;
@@ -128,7 +129,7 @@ namespace FootballAIGame.Web.Controllers
                         gameServer.PlanTournament(tournament.Id);
                     }
                 }
-                catch
+                catch (Exception ex) when (ex is CommunicationObjectFaultedException || ex is EndpointNotFoundException)
                 {
                     // ignored
                 }
@@ -190,7 +191,7 @@ namespace FootballAIGame.Web.Controllers
                         gameServer.PlanTournament(tournament.Id);
                     }
                 }
-                catch
+                catch (Exception ex) when (ex is CommunicationObjectFaultedException || ex is EndpointNotFoundException)
                 {
                     // ignored
                 }

@@ -19,8 +19,8 @@
     <script>
         $(document).ready(function() {
 
-            ajaxCalls = setInterval(ajaxCall, 1000);
-            anim = setInterval(animation, 1000);
+            var ajaxCalls = setInterval(ajaxCall, 1000);
+            var anim = setInterval(animation, 1000);
             var counter = 0;
 
             function animation() {
@@ -35,17 +35,15 @@
 
             function ajaxCall() {
                 $.ajax({
-                    url: "/api/user/GetPlayerState",
+                    url: "@Url.Action("GetPlayerState", "User", new {HttpRoute="Api"})",
                     success: function(response) {
-                        if (@((int)PlayerState.PlayingMatch) === response) {
-                            // playing
-                        } else {
+                        if (@((int)PlayerState.PlayingMatch) !== response) {
                             clearInterval(ajaxCalls);
                             clearInterval(anim);
                             $("#dots").text(String.fromCharCode(160)); 
 
                             $.ajax({
-                                url: "/api/matches/GetLastMatchResult",
+                                url: "@Url.Action("GetLastMatchResult", "Matches", new {HttpRoute="Api"})",
                                 success: function(response2) {
 
                                     if (response2.result === "win")
@@ -59,16 +57,15 @@
                                     $("#btn").text("Details");
                                     $("#btn").off("click"); // remove old handler
                                     $("#btn").on("click", function() {
-                                        window.location.href = "/matches/details/" + response2.matchId;
+                                        window.location.href = "@Url.Action("Details", "Matches")/" + response2.matchId;
                                     });
                                 }
                             });
-                            
                         }
                     }
                 });
                 $.ajax({
-                    url: "/api/matches/GetMatchStep",
+                    url: "@Url.Action("GetMatchStep", "Matches", new {HttpRoute="Api"})",
                     success: function(response) {
                         var percentage = Math.round(response / 1500 * 100);
                         $("#progress").css("width", percentage + "%");
@@ -78,7 +75,7 @@
             
             $("#btn").click(function() {
                 $.ajax({
-                    url: "/api/matches/CancelMatch",
+                    url: "@Url.Action("CancelMatch", "Matches", new {HttpRoute="Api"})",
                     method: "put"
                 });
                 clearInterval(anim);

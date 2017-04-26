@@ -24,7 +24,7 @@
             <td>@player.Score</td>
             <td>@player.WonGames</td>
             <td>@player.WonTournaments</td>
-            <td><a href="/players/details/@(player.Name)">Details</a></td>
+            <td>@Html.ActionLink("Details", "Details", new {Controller = "Players", id = player.Name})</td>
         </tr>
     }
     @*

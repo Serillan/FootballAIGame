@@ -20,10 +20,10 @@ namespace FootballAIGame.Web
         /// set configurations.</param>
         public static void Register(HttpConfiguration config)
         {
-            // set camel case for json objects
             var settings = config.Formatters.JsonFormatter.SerializerSettings;
+
             settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-            settings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+            settings.ContractResolver = new CamelCasePropertyNamesContractResolver(); // set camel case for JSON objects
             settings.Formatting = Formatting.Indented;
             settings.Converters.Add(new CustomDateTimeConverter());
 

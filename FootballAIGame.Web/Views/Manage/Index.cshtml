@@ -33,7 +33,7 @@
 
                 $("#GenerateKey").on("click", function() {
                     $.ajax({
-                        url: "/api/user/GenerateNewAccessKey",
+                        url: "@Url.Action("GenerateNewAccessKey", "User", new {HttpRoute="Api"})",
                         method: "post",
                         success: function () {
                             toastr.success("A new access key has been generated.");

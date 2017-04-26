@@ -17,7 +17,6 @@ namespace FootballAIGame.Web.Controllers
             return View();
         }
 
-
         /// <summary>
         /// Returns how to play view.
         /// </summary>

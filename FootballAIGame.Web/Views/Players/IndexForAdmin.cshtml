@@ -48,9 +48,9 @@
                     </div>
                 }
             </td>
-            <td><a href="/players/details/@(player.Name)">Details</a></td>
+            <td>@Html.ActionLink("Details", "Details", new { Controller = "Players", id = player.Name })</td>
         </tr>
-                    }
+    }
 </table>
 
 <input type="hidden" id="refresh" value="no">
@@ -75,10 +75,10 @@
                 $("input.tournament-admin")
                     .change(function () {
                         var userId = $(this).attr("data-user-id");
-                        var inp = $(this);
+                        var input = $(this);
 
                         $.ajax({
-                            url: "/api/user/ToggleRole/" + userId + "/@RolesNames.TournamentAdmin",
+                            url: "@Url.Action("ToggleRole", "User", new {HttpRoute="Api"})/" + userId + "/@RolesNames.TournamentAdmin",
                             method: "put",
                             error: function (xhr, status, error) {
                                 if (error !== "Bad Request") {
@@ -89,10 +89,10 @@
                                 }
 
                                 // rollback
-                                if (inp.prop("checked"))
-                                    inp.prop("checked", false);
+                                if (input.prop("checked"))
+                                    input.prop("checked", false);
                                 else
-                                    inp.prop("checked", true);
+                                    input.prop("checked", true);
                             }
                         });
                     });

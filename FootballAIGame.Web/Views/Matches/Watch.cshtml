@@ -5,8 +5,8 @@
 }
 
 <h2 class="text-center">
-    <a id="player1Name" href="/players/details/@Model.Player1.Name">@Model.Player1.Name</a> vs
-    <a id="player2Name" href="/players/details/@Model.Player2.Name">@Model.Player2.Name</a>
+    @Html.ActionLink(Model.Player1.Name, "Details", new { Controller = "Players", id = Model.Player1.Name }) vs
+    @Html.ActionLink(Model.Player2.Name, "Details", new { Controller = "Players", id = Model.Player2.Name })
 </h2>
 
 
@@ -30,7 +30,7 @@
 </div>
 
 <div class="text-center col-sm-12" style="margin-top: 1em; text-align: center">
-    <a href="/matches/details/@Model.Id" class="btn btn-default">Details</a>
+    @Html.ActionLink("Details", "Details", new {Controller = "Matches", id = Model.Id}, new {@class = "btn btn-default"})
 </div>
 
 @section scripts{
@@ -38,8 +38,8 @@
         $(document)
             .ready(function() {
                 var gameData;
-                var defaultAnimationInterval = 200; // length of 1 simulation step
-                var animationInterval = defaultAnimationInterval; // speed selection changes it
+                var defaultAnimationInterval = 200; @* length of 1 simulation step *@
+                var animationInterval = defaultAnimationInterval; @* speed selection changes it *@
                 var isRunning = false;
                 var isLoaded = false;
                 var animation;
@@ -305,7 +305,7 @@
                         });
 
                 $.ajax({
-                    url: "/api/matches/GetMatchData/@Model.Id",
+                    url: "@Url.Action("GetMatchData", "Matches", new {HttpRoute = "Api", id = Model.Id})",
                     method: "get",
                     dataType: "binary",
                     responseType: "arraybuffer",

@@ -21,10 +21,10 @@
     {
         <tr>
             <td>@match.Time</td>
-            <td><a href="/players/details/@match.Player1.Name">@match.Player1.Name</a></td>
-            <td><a href="/players/details/@match.Player2.Name">@match.Player2.Name</a></td>
+            <td>@Html.ActionLink(match.Player1.Name, "Details", new { Controller = "Players", id = match.Player1.Name })</td>
+            <td>@Html.ActionLink(match.Player2.Name, "Details", new { Controller = "Players", id = match.Player2.Name })</td>
             <td>@match.Score</td>
-            <td><a href="/Matches/Details/@(match.Id)">Details</a></td>
+            <td>@Html.ActionLink("Details", "Details", new {Controller = "Matches", id = match.Id})</td>
         </tr>
     }
 </table>
