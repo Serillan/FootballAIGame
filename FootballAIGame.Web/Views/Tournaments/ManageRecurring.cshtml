@@ -44,10 +44,7 @@
 @section scripts {
     <script>
         $(document).ready(function() {
-            $("#match-table").DataTable({
-                "order": [[0, "asc"]] // oldest first (the first that will start)
-            });
-
+            
             $(".delete").on("click", function () {
                 var row = $(this).closest("tr");
                 var tournamentId = $(this).attr("data-tournament-id");
@@ -79,6 +76,10 @@
                         });
                     }
                 });
+            });
+
+            $("#match-table").DataTable({
+                "order": [[0, "asc"]] // oldest first (the first that will start)
             });
         });
     </script>

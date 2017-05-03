@@ -50,7 +50,7 @@
             </td>
             <td>@Html.ActionLink("Details", "Details", new { Controller = "Players", id = player.Name })</td>
         </tr>
-    }
+                    }
 </table>
 
 <input type="hidden" id="refresh" value="no">
@@ -65,12 +65,6 @@
 
                 var $input = $('#refresh');
                 $input.val() === 'yes' ? location.reload(true) : $input.val('yes');
-
-                $("#match-table")
-                .DataTable({
-                 "order": [[1, "desc"]]
-                });
-
 
                 $("input.tournament-admin")
                     .change(function () {
@@ -97,6 +91,9 @@
                         });
                     });
 
+                $("#match-table").DataTable({
+                    "order": [[1, "desc"]]
+                });
 
             });
     </script>
