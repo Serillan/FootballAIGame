@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using FootballAIGame.MatchSimulation.CustomDataTypes;
 using FootballAIGame.MatchSimulation.Messages;
@@ -146,7 +147,7 @@ namespace FootballAIGame.MatchSimulation
         /// <value>
         /// The <see cref="Random"/> instance.
         /// </value>
-        public static Random Random { get; set; } = new Random();
+        public Random Random { get; set; } = new Random();
 
         /// <summary>
         /// Gets or sets the match information containing all the information about the simulated match.
@@ -392,7 +393,6 @@ namespace FootballAIGame.MatchSimulation
             {
                 task.ContinueWith((t) =>
                 {
-                    var currAverage = teamStatistics.AverageActionLatency;
                     int time = (int)stopwatch.ElapsedMilliseconds;
                     teamStatistics.AverageActionLatency += time;
                 });
@@ -505,8 +505,12 @@ namespace FootballAIGame.MatchSimulation
         /// <returns>The task that represents the asynchronous parameters retrieving operation.</returns>
         private async Task ProcessGettingParametersAsync()
         {
-            var getParameters1 = GetPlayerParametersAsync(AI1Communicator);
-            var getParameters2 = GetPlayerParametersAsync(AI2Communicator);
+            var getParametersCancellationSource1 = new CancellationTokenSource();
+            var getParametersCancellationSource2 = new CancellationTokenSource();
+
+            var getParameters1 = GetPlayerParametersAsync(AI1Communicator, getParametersCancellationSource1.Token);
+            var getParameters2 = GetPlayerParametersAsync(AI2Communicator, getParametersCancellationSource2.Token);
+
             var result1 = await Task.WhenAny(getParameters1, Task.Delay(1000));
             var result2 = await Task.WhenAny(getParameters2, Task.Delay(1000));
 
@@ -536,6 +540,8 @@ namespace FootballAIGame.MatchSimulation
             }
             else // default parameters for all players
             {
+                getParametersCancellationSource1.Cancel(); // stop waiting for parameters
+
                 for (var i = 0; i < 11; i++)
                     GameState.FootballPlayers[i] = new FootballPlayer(i)
                     {
@@ -573,6 +579,8 @@ namespace FootballAIGame.MatchSimulation
             }
             else // default parameters for all players
             {
+                getParametersCancellationSource2.Cancel(); // stop waiting for parameters
+
                 for (var i = 0; i < 11; i++)
                     GameState.FootballPlayers[i + 11] = new FootballPlayer(i + 11)
                     {
@@ -701,22 +709,29 @@ namespace FootballAIGame.MatchSimulation
         }
 
         /// <summary>
-        /// Gets the player parameters from the specified <see cref="IClientCommunicator"/> asynchronously.
+        /// Gets the player parameters from the specified <see cref="IClientCommunicator" /> asynchronously.
         /// </summary>
         /// <param name="clientCommunicator">The client communicator.</param>
-        /// <returns>The task that represents the asynchronous get operation.
-        /// The value of the task's result is an array of football players 
-        /// with their parameters set accordingly.</returns>
-        private static async Task<FootballPlayer[]> GetPlayerParametersAsync(IClientCommunicator clientCommunicator)
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>
+        /// The task that represents the asynchronous get operation.
+        /// The value of the task's result is an array of football players
+        /// with their parameters set accordingly.
+        /// </returns>
+        private static async Task<FootballPlayer[]> GetPlayerParametersAsync(IClientCommunicator clientCommunicator, CancellationToken cancellationToken)
         {
             IClientMessage message;
 
             while (true)
             {
                 await clientCommunicator.TrySendAsync("GET PARAMETERS");
+
                 message = await clientCommunicator.ReceiveClientMessageAsync();
+
                 if (message is ParametersMessage)
                     break;
+
+                cancellationToken.ThrowIfCancellationRequested();
             }
 
             return ((ParametersMessage)message).Players;

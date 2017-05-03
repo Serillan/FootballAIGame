@@ -32,6 +32,14 @@ namespace FootballAIGame.Server
         private DateTime StartTime { get; set; }
 
         /// <summary>
+        /// Gets or sets the <see cref="System.Random" /> used for generating random numbers.
+        /// </summary>
+        /// <value>
+        /// The <see cref="Random"/> instance.
+        /// </value>
+        public Random Random { get; set; } = new Random();
+
+        /// <summary>
         /// Gets or sets the players that are currently in the running tournament. It is used for
         /// simulation and is empty if the tournament is not currently running.
         /// </summary>
@@ -331,7 +339,7 @@ namespace FootballAIGame.Server
                             Players.FirstOrDefault(p => p.Player.Name == matchSimulator.AI1Communicator.PlayerName);
                         var player2 =
                             Players.FirstOrDefault(p => p.Player.Name == matchSimulator.AI2Communicator.PlayerName);
-                        var rndWinner = MatchSimulator.Random.Next(2);
+                        var rndWinner = Random.Next(2);
 
                         // in tournament winner is chosen randomly in case of draw !
                         winner = rndWinner == 0 ? player1 : player2;
