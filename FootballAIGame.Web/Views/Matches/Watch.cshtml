@@ -5,8 +5,8 @@
 }
 
 <h2 class="text-center">
-    @Html.ActionLink(Model.Player1.Name, "Details", new { Controller = "Players", id = Model.Player1.Name }) vs
-    @Html.ActionLink(Model.Player2.Name, "Details", new { Controller = "Players", id = Model.Player2.Name })
+    @Html.ActionLink(Model.Player1.Name, "Details", new { Controller = "Players", id = Model.Player1.Name }, new { id = "player1Name" }) vs
+    @Html.ActionLink(Model.Player2.Name, "Details", new { Controller = "Players", id = Model.Player2.Name }, new { id = "player2Name" })
 </h2>
 
 

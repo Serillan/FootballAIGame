@@ -16,7 +16,7 @@ Only first 5 errors of the same kind are shown.
 <hr/>
 
 <div class="container col-sm-6">
-    <h4>@Model.Player1.Name's errors</h4>
+    <h4>@Model.Player1.Name</h4>
     <ul>
         @{
             var messages = Model.Player1ErrorLog?.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
@@ -32,7 +32,7 @@ Only first 5 errors of the same kind are shown.
 
 </div>
 <div class="container col-sm-6">
-    <h4>@Model.Player2.Name's errors</h4>
+    <h4>@Model.Player2.Name</h4>
     <ul>
         @{
             messages = Model.Player2ErrorLog?.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);

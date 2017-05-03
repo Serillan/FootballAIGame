@@ -128,7 +128,7 @@
                                         url: "@Url.Action("ChallengePlayer", "Challenges", new {HttpRoute="Api", id = Model.Player.Name})",
                                         method: "post",
                                         success: function () {
-                                            location.replace(@Url.Action("Index", "Home"));
+                                            location.replace("@Url.Action("Index", "Home")");
                                         },
                                         error: function (xhr, status, error) {
                                             toastr.error(json.responseText.message);
