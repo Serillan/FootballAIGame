@@ -294,8 +294,6 @@ namespace FootballAIGame.MatchSimulation
 
                     CurrentStep = step;
                     await ProcessSimulationStepAsync(step);
-                    //if (step % 100 == 0)
-                    //    Console.WriteLine(step);
                 }
 
                 // second half
@@ -312,8 +310,6 @@ namespace FootballAIGame.MatchSimulation
 
                     CurrentStep = step;
                     await ProcessSimulationStepAsync(step);
-                    //if (step % 100 == 0)
-                    //    Console.WriteLine(step);
                 }
 
                 ProcessSimulationEnd(NumberOfSimulationSteps);
@@ -369,69 +365,20 @@ namespace FootballAIGame.MatchSimulation
         /// <returns>The task that represents the asynchronous process operation.</returns>
         private async Task ProcessSimulationStepAsync(int step)
         {
-            ActionMessage actionMessage1 = null;
-            ActionMessage actionMessage2 = null;
             GameState.Step = step;
             GameState.IsKickOff = GameState.IsKickOff || GameState.Step == NumberOfSimulationSteps / 2 ||
                 GameState.Step == 0;
 
-            var receiveActionMessage1 = AI1Communicator.ReceiveActionMessageAsync(step);
-            var receiveActionMessage2 = AI2Communicator.ReceiveActionMessageAsync(step);
+            var getAction1Task = GetActionAsync(Team.FirstPlayer, step);
+            var getAction2Task = GetActionAsync(Team.SecondPlayer, step);
 
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
+            var actionMessage1 = await getAction1Task;
+            var actionMessage2 = await getAction2Task;
 
-            await AI1Communicator.TrySendAsync("GET ACTION");
-            await AI1Communicator.TrySendAsync(GameState, Team.FirstPlayer);
-
-            await AI2Communicator.TrySendAsync("GET ACTION");
-            await AI2Communicator.TrySendAsync(GameState, Team.SecondPlayer);
-
-            GameState.IsKickOff = false; // reset for next step!
-
-            Action<Task, TeamStatistics> logLatency = (task, teamStatistics) =>
-            {
-                task.ContinueWith((t) =>
-                {
-                    int time = (int)stopwatch.ElapsedMilliseconds;
-                    teamStatistics.AverageActionLatency += time;
-                });
-            };
-
-            logLatency(receiveActionMessage1, MatchInfo.Team1Statistics);
-            logLatency(receiveActionMessage2, MatchInfo.Team2Statistics);
-
-            var getMessage1Task = Task.WhenAny(receiveActionMessage1, Task.Delay(PlayerTimeForOneStep));
-            var getMessage2Task = Task.WhenAny(receiveActionMessage2, Task.Delay(PlayerTimeForOneStep));
-
-            var getMessage1Result = await getMessage1Task;
-            var getMessage2Result = await getMessage2Task;
-
-            if (AI1ReceiveMessage.IsFaulted || !AI1Communicator.IsLoggedIn || AI2ReceiveMessage.IsFaulted ||
-                !AI2Communicator.IsLoggedIn)
-            {
+            if (actionMessage1 == null || actionMessage2 == null) // disconnection
                 return;
-            }
 
-            if (getMessage1Result == receiveActionMessage1 && !receiveActionMessage1.IsFaulted)
-            {
-                actionMessage1 = AI1ReceiveMessage.Result as ActionMessage;
-
-                if (step < NumberOfSimulationSteps - 1)
-                {
-                    AI1ReceiveMessage = AI1Communicator.ReceiveClientMessageAsync();
-                }
-            }
-
-            if (getMessage2Result == receiveActionMessage2 && !receiveActionMessage2.IsFaulted)
-            {
-                actionMessage2 = AI2ReceiveMessage.Result as ActionMessage;
-
-                if (step < NumberOfSimulationSteps - 1)
-                {
-                    AI2ReceiveMessage = AI2Communicator.ReceiveClientMessageAsync();
-                }
-            }
+            GameState.IsKickOff = false; // reset to false, UpdateMatch might set it to true
 
             UpdateMatch(actionMessage1, actionMessage2);
             SaveState();
@@ -502,87 +449,82 @@ namespace FootballAIGame.MatchSimulation
         /// <summary>
         /// Processes the getting of the players parameters from both AIs.
         /// </summary>
-        /// <returns>The task that represents the asynchronous parameters retrieving operation.</returns>
+        /// <returns>
+        /// The task that represents the asynchronous parameters retrieving operation.
+        /// </returns>
         private async Task ProcessGettingParametersAsync()
         {
-            var getParametersCancellationSource1 = new CancellationTokenSource();
-            var getParametersCancellationSource2 = new CancellationTokenSource();
+            await Task.WhenAll(ProcessGettingParametersAsync(Team.FirstPlayer),
+                ProcessGettingParametersAsync(Team.SecondPlayer));
+        }
 
-            var getParameters1 = GetPlayerParametersAsync(AI1Communicator, getParametersCancellationSource1.Token);
-            var getParameters2 = GetPlayerParametersAsync(AI2Communicator, getParametersCancellationSource2.Token);
+        /// <summary>
+        /// Processes the getting of the players parameters from the specified team.
+        /// </summary>
+        /// <param name="team">The team.</param>
+        /// <returns>
+        /// The task that represents the asynchronous parameters retrieving operation.
+        /// </returns>
+        private async Task ProcessGettingParametersAsync(Team team)
+        {
+            var getParametersCancellationSource = new CancellationTokenSource();
 
-            var result1 = await Task.WhenAny(getParameters1, Task.Delay(1000));
-            var result2 = await Task.WhenAny(getParameters2, Task.Delay(1000));
+            var communicator = team == Team.FirstPlayer ? AI1Communicator : AI2Communicator;
+            var getParameters = GetPlayerParametersFromAIAsync(communicator, getParametersCancellationSource.Token);
 
-            // player 1
-            if (result1 == getParameters1 && !getParameters1.IsFaulted)
+            var result = await Task.WhenAny(getParameters, Task.Delay(1000));
+
+            var playersOffset = team == Team.FirstPlayer ? 0 : 11;
+
+            if (result == getParameters && !getParameters.IsFaulted)
             {
                 for (var i = 0; i < 11; i++)
                 {
-                    var par = getParameters1.Result[i];
+                    var par = getParameters.Result[i];
                     if (par.Speed <= 0.4001 && par.KickPower <= 0.4001 &&
                         par.Possession <= 0.4001 && par.Precision <= 0.4001 &&
-                        par.Speed + par.KickPower + par.Possession + par.Precision - 1 <= 0.01) // todo improve
-                    {
-                        GameState.FootballPlayers[i] = getParameters1.Result[i];
-                    }
-                    else // default parameters
-                    {
-                        GameState.FootballPlayers[i] = new FootballPlayer(i)
-                        {
-                            Speed = 0.25f,
-                            KickPower = 0.25f,
-                            Possession = 0.25f,
-                            Precision = 0.25f
-                        };
-                    }
-                }
-            }
-            else // default parameters for all players
-            {
-                getParametersCancellationSource1.Cancel(); // stop waiting for parameters
-
-                for (var i = 0; i < 11; i++)
-                    GameState.FootballPlayers[i] = new FootballPlayer(i)
-                    {
-                        Speed = 0.25f,
-                        KickPower = 0.25f,
-                        Possession = 0.25f,
-                        Precision = 0.25f
-                    };
-            }
-
-            // player 2
-            if (result2 == getParameters2 && !getParameters2.IsFaulted)
-            {
-                for (var i = 0; i < 11; i++)
-                {
-                    var par = getParameters2.Result[i];
-                    if (par.Speed <= 0.4001 && par.KickPower <= 0.4001 &&
-                        par.Possession <= 0.4001 && par.Precision <= 0.4001 &&
+                        par.Speed >= 0 && par.KickPower >= 0 && par.Possession >= 0 && par.Precision >= 0 &&
                         par.Speed + par.KickPower + par.Possession + par.Precision - 1 <= 0.01)
                     {
-                        GameState.FootballPlayers[i + 11] = getParameters2.Result[i];
-                        GameState.FootballPlayers[i + 11].Id = i + 11; // parse message will assigns i !
+                        GameState.FootballPlayers[i + playersOffset] = getParameters.Result[i];
                     }
                     else // default parameters
                     {
-                        GameState.FootballPlayers[i + 11] = new FootballPlayer(i + 11)
+                        GameState.FootballPlayers[i + playersOffset] = new FootballPlayer(i + playersOffset)
                         {
                             Speed = 0.25f,
                             KickPower = 0.25f,
                             Possession = 0.25f,
                             Precision = 0.25f
                         };
+
+                        if ((team == Team.FirstPlayer && NumberOfPlayer1Errors[SimulationErrorReason.InvalidParameters]++ < MaximumNumberOfSameReasonErrorInLog) ||
+                            (team == Team.SecondPlayer && NumberOfPlayer2Errors[SimulationErrorReason.InvalidParameters]++ < MaximumNumberOfSameReasonErrorInLog))
+                        {
+                            MatchInfo.Errors.Add(new SimulationError()
+                            {
+                                Time = CurrentTime,
+                                Team = team,
+                                Reason = SimulationErrorReason.InvalidParameters,
+                                AffectedPlayerNumber = i
+                            });
+                        }
                     }
                 }
             }
             else // default parameters for all players
             {
-                getParametersCancellationSource2.Cancel(); // stop waiting for parameters
+                getParametersCancellationSource.Cancel(); // stop waiting for parameters
+
+                MatchInfo.Errors.Add(new SimulationError()
+                {
+                    Time = CurrentTime,
+                    Team = team,
+                    Reason = SimulationErrorReason.GetParametersTimeout
+                });
 
                 for (var i = 0; i < 11; i++)
-                    GameState.FootballPlayers[i + 11] = new FootballPlayer(i + 11)
+                    GameState.FootballPlayers[i + playersOffset] = new FootballPlayer(i + playersOffset)
                     {
                         Speed = 0.25f,
                         KickPower = 0.25f,
@@ -590,6 +532,86 @@ namespace FootballAIGame.MatchSimulation
                         Precision = 0.25f
                     };
             }
+
+        }
+
+        /// <summary>
+        /// Gets the AI's action asynchronously. In case of timeout, the default action is used.
+        /// </summary>
+        /// <param name="team">The AI's team.</param>
+        /// <param name="step">The simulation step.</param>
+        /// <returns>
+        /// The task that represents the asynchronous action retrieving operation.
+        /// </returns>
+        private async Task<ActionMessage> GetActionAsync(Team team, int step)
+        {
+            ActionMessage actionMessage = null;
+
+            var communicator = team == Team.FirstPlayer ? AI1Communicator : AI2Communicator;
+            var cancellationTokenSource = new CancellationTokenSource();
+            var stopwatch = new Stopwatch();
+
+            var receiveActionMessage = GetActionFromAIAsync(team, step, cancellationTokenSource.Token);
+
+            var waitingTask = Task.Delay(PlayerTimeForOneStep);
+            stopwatch.Start();
+
+            var teamStatistics = team == Team.FirstPlayer ? MatchInfo.Team1Statistics : MatchInfo.Team2Statistics;
+
+            var logTimeTask = receiveActionMessage.ContinueWith((t) =>
+            {
+                int time = (int)stopwatch.ElapsedMilliseconds;
+                teamStatistics.AverageActionLatency += time;
+            });
+
+            var getMessageTask = Task.WhenAny(receiveActionMessage, waitingTask);
+            var getMessageResult = await getMessageTask;
+
+            var receiveMessage = team == Team.FirstPlayer ? AI1ReceiveMessage : AI2ReceiveMessage;
+            if (receiveMessage.IsFaulted || !communicator.IsLoggedIn)
+            {
+                cancellationTokenSource.Cancel();
+                await logTimeTask;
+                return null;
+            }
+
+            if (getMessageResult == receiveActionMessage && !receiveActionMessage.IsFaulted)
+            {
+                await logTimeTask;
+                actionMessage = receiveActionMessage.Result;
+
+                if (step < NumberOfSimulationSteps - 1)
+                {
+                    if (team == Team.FirstPlayer)
+                        AI1ReceiveMessage = communicator.ReceiveClientMessageAsync();
+                    else
+                        AI2ReceiveMessage = communicator.ReceiveClientMessageAsync();
+                }
+            }
+            else // default action
+            {
+                cancellationTokenSource.Cancel();
+                await logTimeTask;
+
+                if ((team == Team.FirstPlayer && NumberOfPlayer1Errors[SimulationErrorReason.GetActionTimeout]++ < MaximumNumberOfSameReasonErrorInLog) ||
+                    (team == Team.SecondPlayer && NumberOfPlayer2Errors[SimulationErrorReason.GetActionTimeout]++ < MaximumNumberOfSameReasonErrorInLog))
+                {
+                    lock (MatchInfo.Errors)
+                    {
+                        MatchInfo.Errors.Add(new SimulationError()
+                        {
+                            Time = CurrentTime,
+                            Team = team,
+                            Reason = SimulationErrorReason.GetActionTimeout,
+                        });
+                    }
+                    //Console.WriteLine(AI1Communicator.PlayerName + " timeout.");
+                }
+
+                actionMessage = GetDefaultAction(team);
+            }
+
+            return actionMessage;
         }
 
         /// <summary>
@@ -683,10 +705,65 @@ namespace FootballAIGame.MatchSimulation
         /// <param name="ai2Action">The second AI's action.</param>
         private void UpdateMatch(ActionMessage ai1Action, ActionMessage ai2Action)
         {
-            UpdateBall(ai1Action, ai2Action);
-            UpdatePlayers(ai1Action, ai2Action);
-            ProcessOut();
-            ProcessGoal();
+            try
+            {
+                UpdateBall(ai1Action, ai2Action);
+
+                UpdatePlayers(Team.FirstPlayer, ai1Action);
+                UpdatePlayers(Team.SecondPlayer, ai2Action);
+
+                ProcessOut();
+                ProcessGoal();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                Console.WriteLine("HERE");
+            }
+        }
+
+        /// <summary>
+        /// Sets the default action.
+        /// </summary>
+        /// <param name="team">The team.</param>
+        /// <returns>The default action's <see cref="ActionMessage"/></returns>
+        private ActionMessage GetDefaultAction(Team team)
+        {
+            var result = new ActionMessage { PlayersActions = new PlayerAction[11] };
+
+            for (int i = 0; i < 11; i++)
+            {
+                var action = result.PlayersActions[i] = new PlayerAction(); // default
+                var player = team == Team.FirstPlayer ? GameState.FootballPlayers[i] : GameState.FootballPlayers[i + 11];
+
+                // --- corrections without error message
+
+                // acceleration correction
+                var acceleration = new Vector(action.Movement.X - player.Movement.X,
+                    action.Movement.Y - player.Movement.Y);
+
+                var accelerationValue = acceleration.Length * Math.Pow(1000.0 / StepInterval, 2); // [m/s/s]
+                if (accelerationValue > MaxAcceleration)
+                {
+                    var q = MaxAcceleration / accelerationValue;
+                    var fixedAcceleration = new Vector(acceleration.X * q, acceleration.Y * q);
+
+                    action.Movement.X = player.Movement.X + fixedAcceleration.X;
+                    action.Movement.Y = player.Movement.Y + fixedAcceleration.Y;
+                }
+
+                // speed correction
+                var newSpeed = action.Movement.Length * 1000 / MatchSimulator.StepInterval;
+                if (newSpeed > player.MaxSpeed)
+                {
+                    // too high speed
+                    action.Movement.X *= player.MaxSpeed / newSpeed;
+                    action.Movement.Y *= player.MaxSpeed / newSpeed;
+                }
+
+            }
+
+            return result;
         }
 
         /// <summary>
@@ -718,197 +795,161 @@ namespace FootballAIGame.MatchSimulation
         /// The value of the task's result is an array of football players
         /// with their parameters set accordingly.
         /// </returns>
-        private static async Task<FootballPlayer[]> GetPlayerParametersAsync(IClientCommunicator clientCommunicator, CancellationToken cancellationToken)
+        private static async Task<FootballPlayer[]> GetPlayerParametersFromAIAsync(IClientCommunicator clientCommunicator, CancellationToken cancellationToken)
         {
             IClientMessage message;
 
+            var receiveTask = clientCommunicator.ReceiveClientMessageAsync();
+
+            await clientCommunicator.TrySendAsync("GET PARAMETERS");
+
             while (true)
             {
-                await clientCommunicator.TrySendAsync("GET PARAMETERS");
-
-                message = await clientCommunicator.ReceiveClientMessageAsync();
+                message = await receiveTask;
 
                 if (message is ParametersMessage)
                     break;
 
                 cancellationToken.ThrowIfCancellationRequested();
+
+                receiveTask = clientCommunicator.ReceiveClientMessageAsync();
             }
 
             return ((ParametersMessage)message).Players;
         }
 
         /// <summary>
-        /// Updates the players' movements in accordance with the specified actions.
+        /// Gets the AI's action asynchronously.
         /// </summary>
-        /// <param name="ai1Action">The first AI's action.</param>
-        /// <param name="ai2Action">The second AI's action.</param>
-        private void UpdatePlayers(ActionMessage ai1Action, ActionMessage ai2Action)
+        /// <param name="team">The AI's team.</param>
+        /// <param name="step">The simulation step.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>
+        /// The task that represents the asynchronous action retrieving operation.
+        /// </returns>
+        private async Task<ActionMessage> GetActionFromAIAsync(Team team, int step, CancellationToken cancellationToken)
         {
-            if (ai1Action != null)
+            ActionMessage message;
+
+            var communicator = team == Team.FirstPlayer ? AI1Communicator : AI2Communicator;
+
+            var receiveTask = communicator.ReceiveActionMessageAsync(step);
+
+
+            await communicator.TrySendAsync("GET ACTION");
+            await communicator.TrySendAsync(GameState, team);
+
+            while (true)
             {
-                // movement
-                for (var i = 0; i < 11; i++)
+                message = await receiveTask;
+
+                if (message != null)
+                    break;
+
+                cancellationToken.ThrowIfCancellationRequested();
+
+                receiveTask = communicator.ReceiveActionMessageAsync(step);
+            }
+
+            return message;
+        }
+
+        /// <summary>
+        /// Updates the players' movements in accordance with the specified action.
+        /// </summary>
+        /// <param name="team">The players' team.</param>
+        /// <param name="aiAction">The AI's action.</param>
+        private void UpdatePlayers(Team team, ActionMessage aiAction)
+        {
+            // movement
+            for (var i = 0; i < 11; i++)
+            {
+                var player = team == Team.FirstPlayer ? GameState.FootballPlayers[i] : GameState.FootballPlayers[i + 11];
+                var action = aiAction.PlayersActions[i];
+
+                if (double.IsNaN(action.Movement.X) || double.IsNaN(action.Movement.Y) ||
+                    double.IsInfinity(action.Movement.X) || double.IsInfinity(action.Movement.Y))
                 {
-                    var player = GameState.FootballPlayers[i];
-                    var action = ai1Action.PlayersActions[i];
+                    action.Movement = new Vector(0, 0);
 
-                    if (double.IsNaN(action.Movement.X) || double.IsNaN(action.Movement.Y) ||
-                        double.IsInfinity(action.Movement.X) || double.IsInfinity(action.Movement.Y))
+                    if ((team == Team.FirstPlayer &&
+                         NumberOfPlayer1Errors[SimulationErrorReason.InvalidMovementVector]++ <
+                         MaximumNumberOfSameReasonErrorInLog) ||
+                        (team == Team.SecondPlayer &&
+                         NumberOfPlayer2Errors[SimulationErrorReason.InvalidMovementVector]++ <
+                         MaximumNumberOfSameReasonErrorInLog))
                     {
-                        action.Movement = new Vector(0, 0);
-                        if (NumberOfPlayer1Errors[SimulationErrorReason.InvalidMovementVector]++ < MaximumNumberOfSameReasonErrorInLog)
-                            MatchInfo.Errors.Add(new SimulationError()
-                            {
-                                Time = CurrentTime,
-                                Team = Team.FirstPlayer,
-                                AffectedPlayerNumber = i,
-                                Reason = SimulationErrorReason.InvalidMovementVector
-                            });
+                        MatchInfo.Errors.Add(new SimulationError()
+                        {
+                            Time = CurrentTime,
+                            Team = team,
+                            AffectedPlayerNumber = i,
+                            Reason = SimulationErrorReason.InvalidMovementVector
+                        });
                     }
-
-                    var acceleration = new Vector(action.Movement.X - player.Movement.X,
-                        action.Movement.Y - player.Movement.Y);
-
-                    var accelerationValue = acceleration.Length * Math.Pow(1000.0 / StepInterval, 2); // [m/s/s]
-
-                    if (accelerationValue > MaxAcceleration)
-                    {
-                        var q = MaxAcceleration / accelerationValue;
-                        var fixedAcceleration = new Vector(acceleration.X * q, acceleration.Y * q);
-
-                        action.Movement.X = player.Movement.X + fixedAcceleration.X;
-                        action.Movement.Y = player.Movement.Y + fixedAcceleration.Y;
-
-                        if (accelerationValue > MaxAcceleration * MinReportableCorrection &&
-                            NumberOfPlayer1Errors[SimulationErrorReason.TooHighAcceleration]++ < MaximumNumberOfSameReasonErrorInLog)
-                            MatchInfo.Errors.Add(new SimulationError()
-                            {
-                                Time = CurrentTime,
-                                Team = Team.FirstPlayer,
-                                AffectedPlayerNumber = i,
-                                Reason = SimulationErrorReason.TooHighAcceleration
-                            });
-
-                    }
-
-
-                    player.Movement.X = action.Movement.X;
-                    player.Movement.Y = action.Movement.Y;
-                    var newSpeed = player.CurrentSpeed;
-
-                    if (newSpeed > player.MaxSpeed)
-                    {
-                        // too high speed
-                        player.Movement.X *= player.MaxSpeed / newSpeed;
-                        player.Movement.Y *= player.MaxSpeed / newSpeed;
-
-                        if (newSpeed > player.MaxSpeed * MinReportableCorrection &&
-                            NumberOfPlayer1Errors[SimulationErrorReason.TooHighSpeed]++ < MaximumNumberOfSameReasonErrorInLog)
-                            MatchInfo.Errors.Add(new SimulationError()
-                            {
-                                Time = CurrentTime,
-                                Team = Team.FirstPlayer,
-                                AffectedPlayerNumber = i,
-                                Reason = SimulationErrorReason.TooHighSpeed
-                            });
-                    }
-
-                    // stop player from going too far from field
-                    StopPlayerFromGoingOutside(player);
-
-                    // apply
-                    player.Position.X += player.Movement.X;
-                    player.Position.Y += player.Movement.Y;
                 }
-            }
-            else
-            {
-                // default (nothing for now)
-                // todo add error message
-                Console.WriteLine(AI1Communicator.PlayerName + " timeout.");
-            }
 
-            if (ai2Action != null)
-            {
-                // movement
-                for (var i = 0; i < 11; i++)
+                var acceleration = new Vector(action.Movement.X - player.Movement.X,
+                    action.Movement.Y - player.Movement.Y);
+
+                var accelerationValue = acceleration.Length * Math.Pow(1000.0 / StepInterval, 2); // [m/s/s]
+
+                if (accelerationValue > MaxAcceleration)
                 {
-                    var player = GameState.FootballPlayers[i + 11];
-                    var action = ai2Action.PlayersActions[i];
+                    var q = MaxAcceleration / accelerationValue;
+                    var fixedAcceleration = new Vector(acceleration.X * q, acceleration.Y * q);
 
-                    if (double.IsNaN(action.Movement.X) || double.IsNaN(action.Movement.Y) ||
-                      double.IsInfinity(action.Movement.X) || double.IsInfinity(action.Movement.Y))
+                    action.Movement.X = player.Movement.X + fixedAcceleration.X;
+                    action.Movement.Y = player.Movement.Y + fixedAcceleration.Y;
+
+                    if (accelerationValue > MaxAcceleration * MinReportableCorrection &&
+                        ((team == Team.FirstPlayer &&
+                         NumberOfPlayer1Errors[SimulationErrorReason.TooHighAcceleration]++ <
+                         MaximumNumberOfSameReasonErrorInLog) ||
+                        (team == Team.SecondPlayer &&
+                         NumberOfPlayer2Errors[SimulationErrorReason.TooHighAcceleration]++ <
+                         MaximumNumberOfSameReasonErrorInLog)))
                     {
-                        action.Movement = new Vector(0, 0);
-                        if (NumberOfPlayer2Errors[SimulationErrorReason.InvalidMovementVector]++ < MaximumNumberOfSameReasonErrorInLog)
-                            MatchInfo.Errors.Add(new SimulationError()
-                            {
-                                Time = CurrentTime,
-                                Team = Team.SecondPlayer,
-                                AffectedPlayerNumber = i,
-                                Reason = SimulationErrorReason.InvalidMovementVector
-                            });
+                        MatchInfo.Errors.Add(new SimulationError()
+                        {
+                            Time = CurrentTime,
+                            Team = team,
+                            AffectedPlayerNumber = i,
+                            Reason = SimulationErrorReason.TooHighAcceleration
+                        });
                     }
-
-                    var acceleration = new Vector(action.Movement.X - player.Movement.X,
-                        action.Movement.Y - player.Movement.Y);
-
-                    var accelerationValue = acceleration.Length * Math.Pow(1000.0 / StepInterval, 2); // [m/s]
-
-                    if (accelerationValue > MaxAcceleration)
-                    {
-                        var q = MaxAcceleration / accelerationValue;
-                        var fixedAcceleration = new Vector(acceleration.X * q, acceleration.Y * q);
-
-                        action.Movement.X = (float)(player.Movement.X + fixedAcceleration.X);
-                        action.Movement.Y = (float)(player.Movement.Y + fixedAcceleration.Y);
-
-                        if (accelerationValue > MaxAcceleration * MinReportableCorrection &&
-                            NumberOfPlayer2Errors[SimulationErrorReason.TooHighAcceleration]++ < MaximumNumberOfSameReasonErrorInLog)
-                            MatchInfo.Errors.Add(new SimulationError()
-                            {
-                                Time = CurrentTime,
-                                Team = Team.SecondPlayer,
-                                AffectedPlayerNumber = i,
-                                Reason = SimulationErrorReason.TooHighAcceleration
-                            });
-                    }
-
-
-                    player.Movement.X = action.Movement.X;
-                    player.Movement.Y = action.Movement.Y;
-                    var newSpeed = player.CurrentSpeed;
-
-                    if (newSpeed > player.MaxSpeed)
-                    {
-                        player.Movement.X *= (float)(player.MaxSpeed / newSpeed);
-                        player.Movement.Y *= (float)(player.MaxSpeed / newSpeed);
-
-                        if (newSpeed > player.MaxSpeed * MinReportableCorrection &&
-                            NumberOfPlayer2Errors[SimulationErrorReason.TooHighSpeed]++ < MaximumNumberOfSameReasonErrorInLog)
-                            MatchInfo.Errors.Add(new SimulationError()
-                            {
-                                Time = CurrentTime,
-                                Team = Team.SecondPlayer,
-                                AffectedPlayerNumber = i,
-                                Reason = SimulationErrorReason.TooHighSpeed
-                            });
-                    }
-
-                    // stop player from going too far from field
-                    StopPlayerFromGoingOutside(player);
-
-                    // apply
-                    player.Position.X += player.Movement.X;
-                    player.Position.Y += player.Movement.Y;
 
                 }
-            }
-            else
-            {
-                // default (nothing for now)
-                // todo add error message
-                Console.WriteLine(AI2Communicator.PlayerName + " timeout.");
+
+
+                player.Movement.X = action.Movement.X;
+                player.Movement.Y = action.Movement.Y;
+                var newSpeed = player.CurrentSpeed;
+
+                if (newSpeed > player.MaxSpeed)
+                {
+                    // too high speed
+                    player.Movement.X *= player.MaxSpeed / newSpeed;
+                    player.Movement.Y *= player.MaxSpeed / newSpeed;
+
+                    if (newSpeed > player.MaxSpeed * MinReportableCorrection &&
+                        ((team == Team.FirstPlayer && NumberOfPlayer1Errors[SimulationErrorReason.TooHighSpeed]++ < MaximumNumberOfSameReasonErrorInLog) ||
+                        (team == Team.SecondPlayer && NumberOfPlayer2Errors[SimulationErrorReason.TooHighSpeed]++ < MaximumNumberOfSameReasonErrorInLog)))
+                        MatchInfo.Errors.Add(new SimulationError()
+                        {
+                            Time = CurrentTime,
+                            Team = team,
+                            AffectedPlayerNumber = i,
+                            Reason = SimulationErrorReason.TooHighSpeed
+                        });
+                }
+
+                // stop player from going too far from field
+                StopPlayerFromGoingOutside(player);
+
+                // apply
+                player.Position.X += player.Movement.X;
+                player.Position.Y += player.Movement.Y;
             }
         }
 

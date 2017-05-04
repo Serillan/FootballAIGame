@@ -342,8 +342,6 @@ namespace FootballAIGame.MatchSimulation
 
                 if (firstLine.Length >= 6 && firstLine.Substring(firstLine.Length - 6) == "ACTION")
                 {
-                    if (firstLine != "ACTION")
-                        Console.WriteLine("line ending with action");
 
                     var data = new byte[180];
                     await NetworkStream.ReadAsync(data, 0, data.Length);
@@ -393,9 +391,10 @@ namespace FootballAIGame.MatchSimulation
         /// The task's result is null if the connection is dropped.
         /// </summary>
         /// <param name="step">The simulation step which a received <see cref="ActionMessage"/> must have.</param>
-        /// <returns>The task that represents the asynchronous receive operation. 
-        /// The value of the task's result is null if the connection is dropped or invalid message
-        /// is received; otherwise, the received <see cref="ActionMessage"/>.</returns>
+        /// <returns>
+        /// The task that represents the asynchronous receive operation. The value of the task's result is null 
+        /// if the connection is dropped; otherwise, the received <see cref="ActionMessage"/>.
+        /// </returns>
         public async Task<ActionMessage> ReceiveActionMessageAsync(int step)
         {
             while (true)

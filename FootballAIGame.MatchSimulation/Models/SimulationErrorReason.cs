@@ -33,10 +33,28 @@ namespace FootballAIGame.MatchSimulation.Models
         InvalidMovementVector,
 
         /// <summary>
-        /// The player's kick vector is not set 
+        /// The player's kick vector is not set.
         /// </summary>
         [EnumMember]
         InvalidKickVector,
+
+        /// <summary>
+        /// The player's parameters are invalid.
+        /// </summary>
+        [EnumMember]
+        InvalidParameters,
+
+        /// <summary>
+        /// The parameters message was not received in time.
+        /// </summary>
+        [EnumMember]
+        GetParametersTimeout,
+
+        /// <summary>
+        /// The action message was not received in time.
+        /// </summary>
+        [EnumMember]
+        GetActionTimeout,
 
         /// <summary>
         /// The client has disconnected.

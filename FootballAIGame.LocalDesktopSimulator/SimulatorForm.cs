@@ -184,7 +184,8 @@ namespace FootballAIGame.LocalDesktopSimulator
 
             try
             {
-                var simulationTask = SimulationManager.Instance.SimulateAsync(ai1, ai2);
+                // run on thread pool, not on UI thread !!!
+                var simulationTask = Task.Run(async () => await SimulationManager.Instance.SimulateAsync(ai1, ai2));
 
                 var progressBarUpdateCancelleration = new CancellationTokenSource();
                 var progressBarUpdatingTask = StartUpdatingProgressBarAsync(ai1, ai2, progressBarUpdateCancelleration.Token);
@@ -263,6 +264,8 @@ namespace FootballAIGame.LocalDesktopSimulator
             GoalsListBox.Items.AddRange(goalsEnumerable.Cast<object>().ToArray());
 
             ErrorsListBox.Items.Clear();
+            if(matchInfo.Errors.Contains(null))
+                Console.WriteLine("HERE");
             ErrorsListBox.Items.AddRange(matchInfo.Errors
                 .Select(e => GetErrorMessage(e, match.Ai1Name, match.Ai2Name))
                 .Cast<object>()
@@ -311,6 +314,12 @@ namespace FootballAIGame.LocalDesktopSimulator
                     return $"{error.Time} : {ai} - Player{error.AffectedPlayerNumber} has invalid movement vector set.";
                 case SimulationErrorReason.InvalidKickVector:
                     return $"{error.Time} : {ai} - Player{error.AffectedPlayerNumber} has invalid kick vector set.";
+                case SimulationErrorReason.InvalidParameters:
+                    return $"{error.Time} : {ai} - Player{error.AffectedPlayerNumber} has invalid parameters.";
+                case SimulationErrorReason.GetParametersTimeout:
+                    return $"{error.Time} : {ai} - Get parameters request timeout.";
+                case SimulationErrorReason.GetActionTimeout:
+                    return $"{error.Time} : {ai} - Get action request timeout.";
                 case SimulationErrorReason.Disconnection:
                     return $"{error.Time} : {ai} - Player has disconnected.";
                 case SimulationErrorReason.Cancellation:

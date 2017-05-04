@@ -240,6 +240,12 @@ namespace FootballAIGame.LocalConsoleSimulator.Commands
                     return $"{error.Time} : {ai} - Player{error.AffectedPlayerNumber} has invalid movement vector set.";
                 case SimulationErrorReason.InvalidKickVector:
                     return $"{error.Time} : {ai} - Player{error.AffectedPlayerNumber} has invalid kick vector set.";
+                case SimulationErrorReason.InvalidParameters:
+                    return $"{error.Time} : {ai} - Player{error.AffectedPlayerNumber} has invalid parameters.";
+                case SimulationErrorReason.GetParametersTimeout:
+                    return $"{error.Time} : {ai} - Get parameters request timeout.";
+                case SimulationErrorReason.GetActionTimeout:
+                    return $"{error.Time} : {ai} - Get action request timeout.";
                 case SimulationErrorReason.Disconnection:
                     return $"{error.Time} : {ai} - Player has disconnected.";
                 case SimulationErrorReason.Cancellation:

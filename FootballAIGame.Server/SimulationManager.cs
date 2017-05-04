@@ -201,7 +201,7 @@ namespace FootballAIGame.Server
                 if (player1 == null)
                     return $"{connection.PlayerName} is not valid name";
                 if (player2 == null)
-                    return $"{connection.PlayerName} is not valid name";
+                    return $"{otherPlayerConnection.PlayerName} is not valid name";
 
                 if (otherPlayerConnection == connection)
                     return "Player is already looking for opponent.";
@@ -417,6 +417,15 @@ namespace FootballAIGame.Server
                         break;
                     case SimulationErrorReason.InvalidKickVector:
                         errorMessage = $"{error.Time} - Player{error.AffectedPlayerNumber} has invalid kick vector set.";
+                        break;
+                    case SimulationErrorReason.InvalidParameters:
+                        errorMessage = $"{error.Time} - Player{error.AffectedPlayerNumber} has invalid parameters.";
+                        break;
+                    case SimulationErrorReason.GetParametersTimeout:
+                        errorMessage = $"{error.Time} - Get parameters request timeout.";
+                        break;
+                    case SimulationErrorReason.GetActionTimeout:
+                        errorMessage = $"{error.Time} - Get action request timeout.";
                         break;
                     case SimulationErrorReason.Disconnection:
                         errorMessage = $"{error.Time} - Player has disconnected.";
