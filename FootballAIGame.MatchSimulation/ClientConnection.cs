@@ -119,34 +119,6 @@ namespace FootballAIGame.MatchSimulation
         }
 
         /// <summary>
-        /// Pings the connected client several times and computes average round trip time in milliseconds.
-        /// If the client doesn't allow pinging, returns default round trip time.
-        /// </summary>
-        /// <returns>The average round trip time if client allows pings; otherwise returns the default 
-        /// round trip time.</returns>
-        public int ComputeAveragePingTime()
-        {
-            long totalTime = 0;
-            var timeout = 500;
-            var echoNum = 5;
-            var succNum = 0;
-            var pingSender = new Ping();
-
-            for (int i = 0; i < echoNum; i++)
-            {
-                var reply = pingSender.Send(((IPEndPoint)TcpClient.Client.RemoteEndPoint).Address, timeout);
-                if (reply != null && reply.Status != IPStatus.BadDestination && reply.Status != IPStatus.TimedOut)
-                {
-                    succNum++;
-                    totalTime += reply.RoundtripTime;
-                }
-            }
-            if (succNum == 0)
-                return 100; // default
-            return (int)(totalTime / succNum);
-        }
-
-        /// <summary>
         /// Sends the specified message to the client asynchronously.
         /// </summary>
         /// <param name="message">The message.</param>

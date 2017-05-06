@@ -336,12 +336,6 @@ namespace FootballAIGame.MatchSimulation
                                   $"and {AI2Communicator.PlayerName}");
             }
 
-            // 1. check pings
-            //Ping1 = Player1AiConnection.PingTimeAverage();
-            //Ping2 = Player2AiConnection.PingTimeAverage();
-            //Console.WriteLine($"{Player1Connection.PlayerName} ping = {Ping1}\n" +
-            //                  $"{Player2Connection.PlayerName} ping = {Ping2}");
-
             MatchInfo = new MatchInfo();
 
             GameState = new GameState

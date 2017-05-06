@@ -1,0 +1,67 @@
+﻿@{
+    ViewBag.Title = "Rules";
+}
+
+<h2>
+    Rules
+</h2>
+
+<h3>Football field</h3>
+
+<p>
+    On the following image we can see the football field, on which the game is played, with it's parts.
+</p>
+
+<img style="margin: 1em" alt="Football Field" src="~/Content/Images/FootballField.svg" />
+
+
+<h3>Starting positions</h3>
+<p>
+    The match is divided into two half-times. At the start of the half-time the players are set placed on their
+    starting positions. One team opens the game. The team that opens the beginning of the game (first half-time) is
+    chosen randomly. In the following picture we can see the starting locations of the players with the player on the left
+    side (first player) opening the game.
+</p>
+<img style="margin: 1em" alt="Starting Positions" src="~/Content/Images/StartingPositions.svg" />
+<p>
+    At the beginning of the next half-time (in the middle of the match) the players switch sides and the player
+    that was on the right (second player) during the first half-time is now opening the game.
+    If the second player is chosen to open the game at the beginning, then the symmetric situation happens.
+</p>
+
+<p>
+    After a goal is scored, the players are placed on their current starting positions. The team that got the goal opens the game.
+</p>
+
+<h3>Goal</h3>
+The goals is scored when the ball crosses the goal line in the goal. The goal is credited to the opposite team to the team to whom the 
+crossed goal line belongs. The team with the most goals at the end wins. If the teams have a same number of goals, then the draw
+happens.
+
+<h3>Ball out of play</h3>
+<p>
+    If the ball leaves the field by crossing a touch line, then the ball is placed on the place where the crossing happened.
+    The nearest player to the ball from the opposite team to the team of the player who was the last one to kick the ball is chosen.
+    This player is placed next to the ball.
+    If there is a opponent of this player who is in less than 6 meters distance from the ball, then the opponent is 
+    pushed from the ball to be exactly 6 meters away from the ball.
+</p>
+
+<p>
+    If the ball leaves the field by crossing a goal line but now crossing goal (a goal isn't scored), then two cases can happen:
+    <ol>
+        <li>
+            If the last player who kicked the ball is from the team to whom
+            the crossed line belongs, a corner kick occurs. The ball is placed on the nearest
+            corner to it and the nearest player from the opposite team to the team to whom
+            the crossed line belongs is chosen. That player is placed next to the ball.
+            Players from the opposite team are moved from the ball just like in the last case.
+        </li>
+        <li>
+            If the last player who kicked the ball is from the opposite team to the team to whom
+            the crossed line belongs, a goal kick occurs. The goalkeeper (Player0) from the team to whom
+            the crossed line belongs is placed 16.5 meters in front of the center of his goal and ball is placed next to him.
+            Players from the opposite team are moved from the ball just like in other cases.
+        </li>
+    </ol>
+</p>

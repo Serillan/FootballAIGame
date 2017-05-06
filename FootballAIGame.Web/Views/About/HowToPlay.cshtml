@@ -10,28 +10,34 @@
     <h4>Competition</h4>
     <p>
         In order to compete against other players you need to have an active TCP Client application
-        that will be connected to the game server and that will be sending AI actions during match simulation to the
-        game server as the response to the received request from the server.
+        that will be connected to the game server and that will be sending AI actions during a match simulation to the
+        game server as a response to a received request.
     </p>
-    
+
     <img style="margin: 1em" alt="Client-Server Schema" src="~/Content/Images/ClientServerSchema.svg" />
     <p>
-        You can have more than one connected AI application. When you choose to play a match you select
-        an AI with which you will play.
+        You can have more than one connected AI application. On the home page you choose AI with which you want
+        to participate in a match.
     </p>
     <p>
         There are prepared projects that implement the communication with the server
-        in accordance to the protocol, so you can focus just on implementing the AI behavior.
+        in accordance with the @Html.ActionLink("protocol", "Protocol", "About"). By using these projects you can focus completely on implementing an AI behavior.
+    </p>
+
+    <p>
+        You can also create your own AI client application (in case you want to write your AI in programming language
+        that doesn't have prepared project). You just need to make sure that it
+        will follow the @Html.ActionLink("communication protocol between game server and AI client", "Protocol", "About").
     </p>
 
     <h4>Development</h4>
     <p>
         During AI development you can use the desktop simulator application for fast testing of your AI.
-        This application acts as the server to which you can connect with your AI application. It
-        gives you possibility to simulate matches, watch matches and save/load matches to your file system
+        This application acts as a server to which you can connect with your AI application. It
+        gives you possibility to simulate matches, watch matches, save matches to your file system and load saved matches.
     </p>
     <p>
-        You can also use console simulator application which provides the possibility to simulate and analyze multiple
+        You can also use the console simulator application which provides a possibility to simulate and analyze multiple
         matches at once (you can use this application to create machine learning based AI).
     </p>
     <p>@Html.ActionLink("Simulators", "Simulators", "About")</p>
@@ -40,8 +46,8 @@
 <section>
     <h3>AI Projects</h3>
     <p>
-        The prepared AI projects that implement the communication with the server
-        in accordance with the protocol, so you can focus on implementing the AI behavior.
+        Prepared AI projects that implement the communication with the server
+        in accordance with the protocol. By using these projects you can focus completely on implementing an AI behavior.
         They also include two sample AIs.
     </p>
 
@@ -52,8 +58,8 @@
     <p>
         The second AI (FsmAI) is finite state machine based AI. It is implemented using the state pattern. It can be easily modified and extended to create a custom AI.
     </p>
-    
-    
+
+
     <p>@Html.ActionLink("C# project", "CSharp", "Projects")</p>
     <p>@Html.ActionLink("Java project", "Java", "Projects")</p>
 
@@ -65,30 +71,86 @@
         The football match overview
     </h3>
     <p>
-        The football match in the game has 5 minutes length. Each game step is 200ms long, so the total number of
+        The football match has 5 minutes length. Each game step is 200 milliseconds long, so the total number of
         game steps is 1500.
-        Before the match starts, the server will ask clients for the parameters settings for the football players.
-        After the server has received the responses it will start the game simulation.
-        In each game step the server will request action from both AI clients.
-        In the request the server also sends the current game state.
-        Clients have 600ms to send their actions back to the server. If server doesn't receive the
-        actions in time, it uses default behavior for the football team.
-        After the game ends, the players are notified and everyone can see the match in statistics and watch it.
+    </p>
+    <p>
+        Each team has 11 players that are represented by points on the football field.
+        Each football player has assigned a number (from 0 to 10) which represents his starting position.
+        The starting positions are described in the @Html.ActionLink("rules", "Rules", "About").
+    </p>
+    <p>
+        Before a match starts, the server requests from AI clients parameters settings for their football players.
+        These parameters affect players' speed, possession ability, precision and kick power.
+        After the server receives responses or the time limit (1 second) is reached the game simulation is started.
+        If the server doesn't receive parameters settings from a client in time, the default settings are used.
+    </p>
+    <p>
+        In each simulation step the server requests actions from both AI clients.
+        Request includes the information about a state of the game, game step number and certain flags (e.g. is kickoff happening).
+        Clients have certain time (600 milliseconds) to send their actions back to the server. If server doesn't receive
+        actions in time, the default action is used.
+    </p>
+    <p>
+        After the game ends everyone can access the match details in Matches section and watch it's replay.
     </p>
     <p>
         The football field is two-dimensional with 110 meters width and 75 meters height.
-        The rules are different than in the real football match. There is no offside rule for
-        now and fouls don't exist. The positions where players are placed during kickoffs, goals or
-        match starts are set by the server.
+        The @Html.ActionLink("rules", "Rules", "About") are simpler than in a real football match. There is no offside rule and fouls don't exist.
     </p>
+
+    <h4>Football player parameters</h4>
+    <p>
+        The football player parameters describe how good the player is in certain game aspects.
+        There are 4 modifiable parameters: speed, possession, precision and kick power.
+    </p>
+    <p>
+        Every football player has value 1 that can be divided between these parameters.
+        Every parameter has the maximum allowed value 0.4 and the minimum value 0.
+    </p>
+    <p>
+        If the football player value of some parameter is set to invalid number or the parameters don't add up to 1, then the default parameters' settings are applied - 0.25 to every parameter.
+    </p>
+    <h4>Game State</h4>
+    <p>
+        The game state, that server sends in the action request to the client, contains the position
+        and movement vectors of the players and the ball. The position vector holds coordinates on the field in meters.
+        The movement vector holds a change of the position in meters per one simulation step.
+    </p>
+
+    <h4>Action</h4>
+    <p>
+        The action consists of movement and kick vectors of the football players. The movement vector has the same meaning as in the game state.
+        If a player is near the ball and successfully kicks the ball, he transfers his kick vector to the
+        ball's movement vector with certain modifications. The vector is deviated by a random angle in accordance
+        with the player's precision parameter. With higher precision there is a smaller maximum deviation angle.
+    </p>
+    <p>
+        AI clients' actions have certain @Html.ActionLink("restrictions", "Restrictions", "About"). If the client sends an action that violates them, it is
+        corrected by the server accordingly.
+    </p>
+
+    <h4>Important notes</h4>
+    <ul>
+        <li>The movement is applied instantaneously at the beginning of the step.</li>
+        <li>
+            Ball decelerates by 1.5 meters per second squared.
+            The deceleration is applied instantaneously at the beginning of the step before the movements are applied.
+        </li>
+    </ul>
+
+
+
 </section>
 
 <section>
     <h3>
         Details
     </h3>
-    @Html.ActionLink("Communication protocol between game server and AI client", "Protocol", "About")<br />
-    @Html.ActionLink("Simulation Restrictions", "Restrictions", "About")
+
+    @Html.ActionLink("Football Match Rules", "Rules", "About") <br />
+    @Html.ActionLink("Action Restrictions", "Restrictions", "About") <br />
+    @Html.ActionLink("Communication protocol between game server and AI client", "Protocol", "About")
 </section>
 
 

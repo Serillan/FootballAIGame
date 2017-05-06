@@ -264,8 +264,6 @@ namespace FootballAIGame.LocalDesktopSimulator
             GoalsListBox.Items.AddRange(goalsEnumerable.Cast<object>().ToArray());
 
             ErrorsListBox.Items.Clear();
-            if(matchInfo.Errors.Contains(null))
-                Console.WriteLine("HERE");
             ErrorsListBox.Items.AddRange(matchInfo.Errors
                 .Select(e => GetErrorMessage(e, match.Ai1Name, match.Ai2Name))
                 .Cast<object>()

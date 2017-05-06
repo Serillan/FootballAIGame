@@ -55,6 +55,15 @@ namespace FootballAIGame.Web.Controllers
         }
 
         /// <summary>
+        /// Returns rules view.
+        /// </summary>
+        /// <returns>The rules view.</returns>
+        public ActionResult Rules()
+        {
+            return View();
+        }
+
+        /// <summary>
         /// Returns the simulator save structure view.
         /// </summary>
         /// <returns>The simulator save structure view.</returns>

@@ -501,6 +501,8 @@
     <Content Include="Content\DataTables\images\sort_desc.png" />
     <Content Include="Content\DataTables\images\sort_desc_disabled.png" />
     <Content Include="Content\DataTables\swf\flashExport.swf" />
+    <Content Include="Content\Images\FootballField.svg" />
+    <Content Include="Content\Images\StartingPositions.svg" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Content\Images\ClientServerSchema.svg" />
     <Content Include="Content\jquery-editable-select.css" />
@@ -764,6 +766,7 @@
     <Content Include="Views\Projects\Java.cshtml" />
     <Content Include="Views\About\Simulators.cshtml" />
     <Content Include="Views\About\SimulatorSaveStructure.cshtml" />
+    <Content Include="Views\About\Rules.cshtml" />
     <None Include="Web.Production.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
