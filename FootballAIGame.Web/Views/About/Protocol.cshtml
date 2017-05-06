@@ -9,8 +9,10 @@
 <section>
     <p>If you want to create the AI client application, you need to satisfy this communication protocol.</p>
     <p>
-        All string messages from the server and string messages that server expects are encoded in UTF-8.
-        Every string message ends with the newline character.
+        All messages from the server and messages that the server expects consist of the string messages in UTF-8 and binary data.
+        Every string message ends with the newline character. In the following text we use [newline] to represent
+        the new line character. The binary data contain 32b signed integers, that use two's complement, and 32b real numbers (floats, IEEE754).
+        The binary data use little-endian order of bytes.
     </p>
 </section>
 
@@ -20,19 +22,19 @@
         The game server is listening on the IP address 13.69.197.216 (gameserver.footballaigame.com) on port 50030.
     </p>
     <p>
-        You need to connect on the server using TCP.
-        After you are connected you will be regularly receiving <code>keepalive</code> messages,
-        ignore those.
+        You need to connect to the server using TCP.
+        After you are connected you will be regularly receiving <code>keepalive[newline]</code> messages.
+        You can ignore them.
     </p>
     <p>
-        You need to log in with the AI.
-        The server expects message in the form: <code>LOGIN UserName AIName AccessKey</code> on a separate line (ending with the newline character).
-        The access key is shown on your application home page when you are logged in. The access key is used instead of password
+        After you have connected, you need to log in.
+        The server expects a message in the form: <code>LOGIN UserName AIName AccessKey[newline]</code>.
+        The access key is shown on the home page when you are logged in. The access key is used instead of password
         because the communication between your AI application and the server is not encrypted. You can also
         generate a new access key in the account manager.
     </p>
     <p>
-        If your log in is successful you will receive <code>CONNECTED</code> otherwise you will receive the message with a reason why your log in failed.
+        If your log in is successful, you will receive <code>CONNECTED[newline]</code> otherwise you will receive the message with a reason why your log in failed.
     </p>
 
 </section>
@@ -40,11 +42,11 @@
     <h3>Match simulation</h3>
     <h4>Parameters</h4>
     <p>
-        When your application receives <code>GET PARAMETERS</code>, that means that the new match simulation is starting and that
-        you need to send your football team parameters settings.
+        When your application receives <code>GET PARAMETERS[newline]</code>, it means that a new match simulation is starting and that
+        you need to send to server your football players' parameters' settings.
     </p>
     <p>
-        Your response should be in the following format:
+        Your response is expected to be in the following format:
     <p>
         <code>
             PARAMATERS[newLine][player1Speed][player1Precision][player1Possession][player1KickPower][player2Speed]...[player11KickPower]
@@ -52,40 +54,39 @@
     </p>
     </p>
     <p>
-        <code>PARAMATERS</code> followed by new line character should be encoded in UTF8.
-        Immediately after it there should be 44 float numbers (4B each) in binary format
-        that describe all team players parameters.
-        The first player is goalkeeper. Next 4 players are defenders, next 4 are midfielders and the last 2 are forwards.
-        That's how they will be placed when the match starts, but except for goalkeeper, they can have any roles in your AI.
+        <code>PARAMATERS[newline]</code> should be encoded in UTF8.
+        Immediately after it, there should be 44 floats in the binary format.
+        They describe football players' parameters. Players are ordered by their numbers (that represent their starting positions as
+        described in the @Html.ActionLink("rules", "Rules", "About")).
     </p>
     <h4>Actions</h4>
     <p>
-        After the parameters have been send there will be regular requests from the server for the action with the current game state in the following format:
-    <p>
+        In each simulation step the server requests actions from the both AI clients. The request has the following format:
         <code>
             GET ACTION[newLine][stepNumber][flagsByte][ballPositionX][ballPositionY][ballMovementX][ballMovementY][player1X][player1Y][player1MovementX][player1MovementY][player2X]...[player22MovementY]
         </code>
     </p>
+    <p>
+        The step number is an integer. All position and movement vectors' coordinates are floats.
+        The first 11 players are your players and other 11 players are the opponent players.
+        The least significant bit in flagsByte indicates whether a kickoff is happening.
+        The kickoff happens at the start of the halftime and after a goal has been scored.
+        We also treat every kick after out of play (corner kicks etc.) as the kickoff.
     </p>
     <p>
-        The step number is signed 32-bit integer.
-        All position and movement vector coordinates are float numbers in binary format (4B for each).
-        First 11 players are your players and the second half are opponent players.
-        The least significant bit in flagsByte indicates whether a kick-off is happening.
+        Server expects action response in the following format:
+    <p>
+        <code>
+            ACTION[newLine][stepNumber][player1MovementX][player1MovementY][player1KickX][player1KickY]...[player11KickY]
+        </code>
     </p>
     <p>
-        Server expects AI Action response in the following format:
-        <p>
-            <code>
-                ACTION[newLine][stepNumber][player1MovementX][player1MovementY][player1KickX][player1KickY]...[player11KickY]
-            </code>
-        </p>
-    <p>
-        Movement vector of the football player describes the change of player position per one simulation step (200ms).
-        Kick vector describes the movement vector that ball would ideally get if the kick was successful.
+        The step number is an integer. All movement and kick vectors' coordinates are floats.
+        Movement vector of the football player describes the change of the player's position per one simulation step (200ms).
+        Kick vector describes the movement vector that ball would ideally get if the kick was successful with the perfect precision.
         If the kick is not successful, it's the same case as if the kick hasn't happened.
-        If the kick vectors are (0,0) it means that the player didn't do any kick in current step
-        (to stop the ball player needs to do small kick (0.001, 0.001))
+        If the kick vectors are (0,0), then it means that the player didn't do any kick
+        (to stop the ball a player needs to do a small kick (e.g. 0.001, 0.001).
     </p>
 </section>
 

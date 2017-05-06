@@ -9,11 +9,11 @@
 <section>
     <h3>Basic information</h3>
     <p>
-        The project includes two sample AIs. To create a custom AI you can either modify one of the
+        The project contains two sample AIs. To create a custom AI you can either modify one of the
         prepared AIs or implement your own AI behavior by implementing the IFootballAI interface.
     </p>
     <p>
-        In the program's main located in the Program class you set an IFootballAI's
+        In the program's main method located in the Program class you set an IFootballAI's
         implementation that will be used.
     </p>
 
@@ -31,121 +31,175 @@
         .NET 4.5. You can change it to .NET 3.5 or higher.
     </p>
 
+    <p>
+        When you start the application, you will be asked to write your user name, desired AI name and your access key.
+        The access key is shown on the home page of this web when you are logged in.
+        The access key is used instead of password because the communication between the
+        application and the server is not encrypted. You can also generate a new access key in the account manager.
+    </p>
+
     <br />
-        <h4><a href="https://github.com/Serillan/FootballAIGame.Client.CSharp" style="font-size: 1.1em">Get Project</a></h4>
+    <h4><a href="https://github.com/Serillan/FootballAIGame.Client.CSharp" style="font-size: 1.1em">Get Project</a></h4>
     <br />
 
 </section>
 
-<section>
-    <h3>IFootballAI overview</h3>
+<h3>Parts of the project</h3>
+
+<p>
+    The brief description of the parts of the project follows.
+</p>
+
+<section style="margin-bottom: 2em; margin-top: 2em">
+    <h4>CustomDataTypes</h4>
     <p>
-        Contains methods that are necessary to define the AI behavior.
+        This folder contains class Vector for representing two-dimensional vector and class Region for representing
+        a region of the football field. Vector contains multiple helper methods for performing a variety of
+        vector operations. Region can be configured by modifying its constants.
+    </p>
+</section>
+
+<section style="margin-bottom: 2em">
+    <h4>SimulationEntities</h4>
+    <p>
+        Contains classes for representing the game state (MovableEntity, FootballBall,
+        FootballPlayer, GameState) and AI actions (PlayerAction, AIAction).
+
+        Classes for representing the game entities contain multiple properties and methods for calculating
+        its speed and future movement.
+    </p>
+</section>
+
+<section style="margin-bottom: 2em">
+    <h4>IFootballAI</h4>
+    <p>
+        This interface contains methods that are necessary to define the AI behavior.
         You can also create a custom AI by implementing this interface and configuring application to use
-        your implementation instead of FsmAI class in the Main method located in the Program class
-        (in Program.cs file).
+        your implementation instead of FsmAI in the Main method located in Program class.
     </p>
-    <h4>Methods</h4>
-    <section>
-        <h5>Initialize</h5>
-        <p>
-            This method is called every time the new match simulation with this AI starts.
-            You can use this methods to initialize your AI behavior.
-        </p>
-        <h5>GetParameters</h5>
-        <p>
-            This method is used to set your football team parameters. You can customize football players
-            speed, precision, kick power and possession abilities.
-            For each player you have value 1, which you can be divided between these abilities. There is one rule -
-            you can put maximally 0.4 value to one ability.
-            You set these abilities by creating new array of football players (with length 11) and by
-            modifying their properties. The first player in the array is goalkeeper.
-            Next 4 players are defenders, next 4 are midfielders and the last 2 are forwards.
-            That's how they will be placed when the match starts. However except for goalkeeper
-            they can have any roles in your AI.
-            The method is called before the match starts.
-        </p>
-        <h5>GetAction</h5>
-        <p>
-            This method is called every simulation step to get the football team actions.
-            This method gets the Game State as parameter with the number of simulation step
-            to which this state belongs as its property. In the game state we have all informations
-            about players and ball positions and their current movement vectors. The first 11
-            players in the FootballPlayers array are current team players and the next 11 players are from
-            the opponent team. They are ordered in the same manner as in GetParamaters method.
-            Important note: football players in the given game state don't have their ability properties set but
-            we know from our GetParameters method our team properties. As a result we need to
-            return PlayerAction instance with the actions of our players set. Every PlayerAction consists
-            of the movement and kick vector. The movement vector describes how the position of the player
-            should change during the current simulation step. The acceleration is applied
-            instantaneously at the beginning of the step. The kick vector describes what would be the
-            desired movement vector of the ball if the kick of the ball was successful and absolutely precise.
-        </p>
-        <p>
-            Beside player positions FootballPlayer entity has CurrentSpeed public property
-            that returns the current player speed in meters per second and MaxSpeed property which returns
-            the maximum speed of the player in meters per second if the speed parameter of the player is set
-            correctly. Also there is MaxAcceleration public constant which holds the maximum allowed acceleration
-            of the player. Similarly you can access CurrentSpeed and BallDeceralation in Ball class.
-        </p>
-        <p>
-            The last public constant that you can access is StepInterval in GameClient class. It holds the
-            time of one simulation step in milliseconds (200).
-        </p>
-    </section>
-    
-    <h3>FSM AI architecture overview</h3>
+
+    <h5 style="margin-top: 1em">Initialize</h5>
     <p>
-        <h5>Entities</h5>
-        The entities are the extensions of the basic simulation entities classes.
-        There is the team class which represents the team and abstract player class with
-        its subclasses that represent certain player roles. Every player and team has GetAction(s) method
-        that retrieve the player desired actions. Team's LoadState method is called every simulation step
-        before GetActions is called so that the team properties (players...) are correctly updated. Also
-        entities provide many useful utility functions and properties.
-
-        <h5>States</h5>
-        Every entity is always in one normal state that can be changed to other state during the execution.
-        Also every entity has its global state that never changes. States have methods for entering the
-        state, exiting the state and methods that will execute each simulation step while the player is
-        in the given state. State might have it's own local data.
-
-        <h5>FiniteStateMachine</h5>
-        Every entity owns an instance of this class. It keeps the entity current and global state and provides methods
-        for correct state transitions and updates. Update method is called each simulation step.
-
-        <h5>SteeringBehaviors</h5>
-        These classes define variety of movements that football player might do. They have methods for computing
-        the desired movement vector of the behavior.
-
-        <h5>SteeringBehaviorManager</h5>
-        Every player owns an instance of this class. It provides methods for adding and removing steering behavior
-        of the player. Its CalculateAccelerationVector is used every simulation step to get the player's movement action.
-
-        <h5>Messages</h5>
-        Messages are used for sending requests between entities. For example player might request pass from another player.
-        Messages are sent through MessageDispatcher. States have OnMessage method that handles these messages. Firstly
-        the current state OnMessage method is called and if it doesn't handle the message, then it is handled by the global
-        state OnMessage method (this is the main reason for global state hierarchy - goalkeepers might handle messages differently
-        than forwards etc.).
-
-        <h5>Region</h5>
-        This class is located in CustomDataTypes.  It is used for defining home regions of the players. Every player
-        has its home region (used by MoveToHomeRegion player state). Usually team states set the home region accordingly.
-
-        <h5>SupportPositionManager</h5>
-        Located in Utilities. It is the AI class property that is used for evaluating positions by certain criteria (safe pass/shot possible ...).
-        It is used by SupportControlling player state. Its update method is called every simulation step.
-
-        <h5>FootballAI</h5>
-        On top of the basic IFootballAI responsibilities this class is also responsible for holding team entities and calling appropriate entities methods to
-        get the correct AI action in every simulation step. Every state has reference on this class so that it can access
-        the information about the current state and all the created entities.
-
-        <h5>Parameters</h5>
-        Holds all the AI constants that control the AI behavior.
+        This method is called every time a new match simulation with this AI starts.
+        You can use this methods to initialize your AI behavior.
+    </p>
+    <h5 style="margin-top: 1em">GetParameters</h5>
+    <p>
+        This method is used to set your football players' parameters. You can customize football players'
+        speed, precision, kick power and possession abilities.
+        For each player you have value 1, which you can be divided between these abilities. There is one rule -
+        you can put maximally 0.4 value to single ability.
+        You set these abilities by creating a new array of football players (with length 11) and by
+        modifying their properties. Players are ordered by their numbers (that represent their starting positions as
+        described in the @Html.ActionLink("rules", "Rules", "About")).
+        The method is called before the match starts.
+    </p>
+    <p>
+        The server waits 1 second for your response after it sends the request. If it doesn't receive
+        the response in time, then the default settings are used (0.25 to every parameter).
+    </p>
+    <h5 style="margin-top: 1em">GetAction</h5>
+    <p>
+        This method is called every simulation step to get the football players' actions.
+    </p>
+    <p>
+        This method gets the game state as parameter with the number of simulation step
+        to which this state belongs as its property. In the game state we have all informations
+        about players and ball positions and their current movement vectors. The first 11
+        players in FootballPlayers array are the current team players and the next 11 players are from
+        the opponent team. They are ordered in the same manner as in GetParamaters method.
+    </p>
+    <p>
+        <b>Important note:</b> Football players in the received game state (from the parameter)
+        don't have their parameters properties set but we know our team properties
+        from our GetParameters method.
+    </p>
+    <p>
+        As a result we need to return PlayerAction instance with the desired actions of our players set.
+        Every PlayerAction consists of the movement and kick vector. The movement vector describes
+        how the position of the player should change during the simulation step.
+        The acceleration (change of the movement vector) is applied instantaneously at the beginning of the step.
+        The kick vector describes what would be the desired movement vector of the ball
+        if the kick of the ball was successful and absolutely precise.
     </p>
 </section>
+
+<section style="margin-bottom: 2em">
+    <h4>AIs</h4>
+    <p>
+        The folder contains separate folder for each AI.
+        Each AI has one (main) class that implements IFootballAI interface.
+    </p>
+
+    <p>
+        There is folder for Basic (Random) AI and Finite State Machine AI (FSM AI).
+        Basic AI implements simple random behavior for demonstration.
+        The FSM AI implements finite state machine based AI using the state pattern.
+        It can be easily modified and extended to create a custom AI.
+    </p>
+</section>
+
+<section style="margin-bottom: 2em">
+    <h4>GameClient</h4>
+    <p>
+        It is the main class of the application that controls all other parts of the application.
+        In <b>Main</b> method in <b>Program</b> class we create an instance of this class and
+        use Start method to start the client.
+    </p>
+    <p>
+        It also contains some public constants (field dimensions and step interval) that can be used by the AIs.
+    </p>
+</section>
+
+<h4 style="margin-bottom: 2em">FSM AI architecture overview</h4>
+<p>
+    <h5>Entities</h5>
+    Entities contain extensions of the basic simulation entity classes that are located in the SimulationEntities folder.
+    There is the team class that represents the team and abstract player class with
+    its subclasses which represent certain player roles. Every player has GetAction method
+    that retrieves the player desired actions. The team has GetActions method which retrieves the desired
+    actions from all players of the team (calls their GetAction).
+    Team's LoadState method is called every simulation step
+    before GetActions is called so that the team inner state (which contains its players) is correctly updated. Also
+    entities provide many useful utility functions and properties.
+
+    <h5>States</h5>
+    Every entity is always in one (normal/current) state that can be changed to other state during the execution.
+    Also every entity has its global state that never changes. States have methods for entering the
+    state, exiting the state and methods that will execute each simulation step while the player is
+    in the given state. A state might have its own local data.
+
+    <h5>FiniteStateMachine</h5>
+    Every entity owns an instance of this class. It keeps the entity current and global state and provides methods
+    for correct state transitions and updates. Update method is called each simulation step.
+
+    <h5>SteeringBehaviors</h5>
+    These classes define variety of movements that football player might do. They have methods for computing
+    the desired acceleration vector (change of the movement vector) of the behavior.
+
+    <h5>SteeringBehaviorManager</h5>
+    Every player owns an instance of this class. It provides methods for adding and removing steering behavior
+    of the player. Its GetAccelerationVector is used every simulation step to get the player's movement action.
+
+    <h5>Messages</h5>
+    Messages are used for sending requests between entities. For example player might request pass from another player.
+    Messages are sent through MessageDispatcher. States have OnMessage method that handles these messages. Firstly
+    the current state OnMessage method is called and if it doesn't handle the message, then it is handled by the global
+    state OnMessage method (this is the main reason for global state hierarchy - goalkeepers might handle messages differently
+    than forwards etc.).
+
+    <h5>SupportPositionManager</h5>
+    Located in Utilities. It is the FsmAI class property that is used for evaluating positions by certain criteria (safe pass/shot possible ...).
+    It is used by SupportControlling player state. Its update method is called every simulation step.
+
+    <h5>FsmAI</h5>
+    On top of the basic IFootballAI responsibilities this class is also responsible for holding team's entities and calling appropriate entities methods to
+    get the correct AI action in every simulation step. Every state has reference on this class so that it can access
+    the information about the current state and all the created entities.
+
+    <h5>Parameters</h5>
+    Holds all AI constants that control the AI behavior.
+</p>
 
 
 

@@ -196,10 +196,10 @@ namespace FootballAIGame.LocalConsoleSimulator.Commands
                             let matchInfo = match.MatchInfo
                             let team1 = matchInfo.Team1Statistics
                             let team2 = matchInfo.Team2Statistics
-                            let goals = string.Join(";", matchInfo.Goals.Select(g => $"{g.ScoreTime}," +
-                                                                    $"{(g.TeamThatScored == Team.FirstPlayer ? match.Ai1Name : match.Ai2Name)}," +
+                            let goals = string.Join("; ", matchInfo.Goals.Select(g => $"{g.ScoreTime}, " +
+                                                                    $"{(g.TeamThatScored == Team.FirstPlayer ? match.Ai1Name : match.Ai2Name)}, " +
                                                                     $"Player{g.ScorerNumber}"))
-                            let errors = string.Join(";", matchInfo.Errors.Select(e => GetErrorMessage(e, match.Ai1Name, match.Ai2Name)))
+                            let errors = string.Join("; ", matchInfo.Errors.Select(e => GetErrorMessage(e, match.Ai1Name, match.Ai2Name)))
                             select $"({team1.Goals}:{team2.Goals}, {team1.Shots}:{team2.Shots}, {team1.ShotsOnTarget}:{team2.ShotsOnTarget}, " +
                                    $"[{goals}], [{errors}])").ToArray();
 

@@ -21,7 +21,7 @@
     </p>
     <p>
         There are prepared projects that implement the communication with the server
-        in accordance with the @Html.ActionLink("protocol", "Protocol", "About"). By using these projects you can focus completely on implementing an AI behavior.
+        in accordance with the protocol. By using these projects you can completely focus on implementing an AI behavior.
     </p>
 
     <p>
@@ -86,7 +86,7 @@
         If the server doesn't receive parameters settings from a client in time, the default settings are used.
     </p>
     <p>
-        In each simulation step the server requests actions from both AI clients.
+        In each simulation step the server requests actions from the both AI clients.
         Request includes the information about a state of the game, game step number and certain flags (e.g. is kickoff happening).
         Clients have certain time (600 milliseconds) to send their actions back to the server. If server doesn't receive
         actions in time, the default action is used.

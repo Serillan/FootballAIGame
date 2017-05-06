@@ -756,31 +756,29 @@
     <Content Include="Views\Tournaments\Create.cshtml" />
     <Content Include="Views\Tournaments\CreateRecurring.cshtml" />
     <Content Include="Views\Players\IndexForAdmin.cshtml" />
-    <None Include="Service References\GameServerService\service.wsdl" />
+    <Content Include="Views\Projects\Java.cshtml" />
+    <Content Include="Views\About\Simulators.cshtml" />
+    <Content Include="Views\About\SimulatorSaveStructure.cshtml" />
+    <Content Include="Views\About\Rules.cshtml" />
+    <None Include="Service References\GameServerService\service.wsdl">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Service References\GameServerService\service.xsd">
       <SubType>Designer</SubType>
     </None>
     <None Include="Service References\GameServerService\service1.xsd">
       <SubType>Designer</SubType>
     </None>
-    <Content Include="Views\Projects\Java.cshtml" />
-    <Content Include="Views\About\Simulators.cshtml" />
-    <Content Include="Views\About\SimulatorSaveStructure.cshtml" />
-    <Content Include="Views\About\Rules.cshtml" />
     <None Include="Web.Production.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <Content Include="packages.config" />
     <Content Include="Scripts\jquery-1.10.2.min.map" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
-  </ItemGroup>
-  <ItemGroup>
-    <WCFMetadataStorage Include="Service References\GameServerService\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FootballAIGame.DbModel\FootballAIGame.DbModel.csproj">
@@ -882,6 +880,9 @@
     <EmbeddedResource Include="Migrations\201704201709110_UpdatePlayerPropertyNames.resx">
       <DependentUpon>201704201709110_UpdatePlayerPropertyNames.cs</DependentUpon>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadataStorage Include="Service References\GameServerService\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

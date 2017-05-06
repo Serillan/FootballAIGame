@@ -15,17 +15,23 @@ namespace FootballAIGame.Web.GameServerService {
     [System.ServiceModel.ServiceContractAttribute(ConfigurationName="GameServerService.IGameServerService")]
     public interface IGameServerService {
         
-        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameServerService/WantsToPlay", ReplyAction="http://tempuri.org/IGameServerService/WantsToPlayResponse")]
-        string WantsToPlay(string userName, string ai);
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameServerService/AddToLookingForRandomOpponent", ReplyAction="http://tempuri.org/IGameServerService/AddToLookingForRandomOpponentResponse")]
+        string AddToLookingForRandomOpponent(string userName, string ai);
         
-        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameServerService/WantsToPlay", ReplyAction="http://tempuri.org/IGameServerService/WantsToPlayResponse")]
-        System.Threading.Tasks.Task<string> WantsToPlayAsync(string userName, string ai);
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameServerService/AddToLookingForRandomOpponent", ReplyAction="http://tempuri.org/IGameServerService/AddToLookingForRandomOpponentResponse")]
+        System.Threading.Tasks.Task<string> AddToLookingForRandomOpponentAsync(string userName, string ai);
         
-        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameServerService/StartGame", ReplyAction="http://tempuri.org/IGameServerService/StartGameResponse")]
-        string StartGame(string userName1, string ai1, string userName2, string ai2);
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameServerService/RemoveFromLookingForRandomOpponent", ReplyAction="http://tempuri.org/IGameServerService/RemoveFromLookingForRandomOpponentResponse")]
+        void RemoveFromLookingForRandomOpponent(string playerName);
         
-        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameServerService/StartGame", ReplyAction="http://tempuri.org/IGameServerService/StartGameResponse")]
-        System.Threading.Tasks.Task<string> StartGameAsync(string userName1, string ai1, string userName2, string ai2);
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameServerService/RemoveFromLookingForRandomOpponent", ReplyAction="http://tempuri.org/IGameServerService/RemoveFromLookingForRandomOpponentResponse")]
+        System.Threading.Tasks.Task RemoveFromLookingForRandomOpponentAsync(string playerName);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameServerService/StartMatch", ReplyAction="http://tempuri.org/IGameServerService/StartMatchResponse")]
+        string StartMatch(string userName1, string ai1, string userName2, string ai2);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameServerService/StartMatch", ReplyAction="http://tempuri.org/IGameServerService/StartMatchResponse")]
+        System.Threading.Tasks.Task<string> StartMatchAsync(string userName1, string ai1, string userName2, string ai2);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameServerService/CancelMatch", ReplyAction="http://tempuri.org/IGameServerService/CancelMatchResponse")]
         void CancelMatch(string playerName);
@@ -33,11 +39,11 @@ namespace FootballAIGame.Web.GameServerService {
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameServerService/CancelMatch", ReplyAction="http://tempuri.org/IGameServerService/CancelMatchResponse")]
         System.Threading.Tasks.Task CancelMatchAsync(string playerName);
         
-        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameServerService/LeaveRunningTournament", ReplyAction="http://tempuri.org/IGameServerService/LeaveRunningTournamentResponse")]
-        void LeaveRunningTournament(string playerName);
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameServerService/GetPlayerCurrentMatchStep", ReplyAction="http://tempuri.org/IGameServerService/GetPlayerCurrentMatchStepResponse")]
+        int GetPlayerCurrentMatchStep(string playerName);
         
-        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameServerService/LeaveRunningTournament", ReplyAction="http://tempuri.org/IGameServerService/LeaveRunningTournamentResponse")]
-        System.Threading.Tasks.Task LeaveRunningTournamentAsync(string playerName);
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameServerService/GetPlayerCurrentMatchStep", ReplyAction="http://tempuri.org/IGameServerService/GetPlayerCurrentMatchStepResponse")]
+        System.Threading.Tasks.Task<int> GetPlayerCurrentMatchStepAsync(string playerName);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameServerService/PlanTournament", ReplyAction="http://tempuri.org/IGameServerService/PlanTournamentResponse")]
         void PlanTournament(int tournamentId);
@@ -45,17 +51,11 @@ namespace FootballAIGame.Web.GameServerService {
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameServerService/PlanTournament", ReplyAction="http://tempuri.org/IGameServerService/PlanTournamentResponse")]
         System.Threading.Tasks.Task PlanTournamentAsync(int tournamentId);
         
-        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameServerService/CancelLooking", ReplyAction="http://tempuri.org/IGameServerService/CancelLookingResponse")]
-        void CancelLooking(string playerName);
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameServerService/RemoveFromRunningTournament", ReplyAction="http://tempuri.org/IGameServerService/RemoveFromRunningTournamentResponse")]
+        void RemoveFromRunningTournament(string playerName);
         
-        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameServerService/CancelLooking", ReplyAction="http://tempuri.org/IGameServerService/CancelLookingResponse")]
-        System.Threading.Tasks.Task CancelLookingAsync(string playerName);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameServerService/GetCurrentMatchStep", ReplyAction="http://tempuri.org/IGameServerService/GetCurrentMatchStepResponse")]
-        int GetCurrentMatchStep(string playerName);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameServerService/GetCurrentMatchStep", ReplyAction="http://tempuri.org/IGameServerService/GetCurrentMatchStepResponse")]
-        System.Threading.Tasks.Task<int> GetCurrentMatchStepAsync(string playerName);
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameServerService/RemoveFromRunningTournament", ReplyAction="http://tempuri.org/IGameServerService/RemoveFromRunningTournamentResponse")]
+        System.Threading.Tasks.Task RemoveFromRunningTournamentAsync(string playerName);
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
@@ -85,20 +85,28 @@ namespace FootballAIGame.Web.GameServerService {
                 base(binding, remoteAddress) {
         }
         
-        public string WantsToPlay(string userName, string ai) {
-            return base.Channel.WantsToPlay(userName, ai);
+        public string AddToLookingForRandomOpponent(string userName, string ai) {
+            return base.Channel.AddToLookingForRandomOpponent(userName, ai);
         }
         
-        public System.Threading.Tasks.Task<string> WantsToPlayAsync(string userName, string ai) {
-            return base.Channel.WantsToPlayAsync(userName, ai);
+        public System.Threading.Tasks.Task<string> AddToLookingForRandomOpponentAsync(string userName, string ai) {
+            return base.Channel.AddToLookingForRandomOpponentAsync(userName, ai);
         }
         
-        public string StartGame(string userName1, string ai1, string userName2, string ai2) {
-            return base.Channel.StartGame(userName1, ai1, userName2, ai2);
+        public void RemoveFromLookingForRandomOpponent(string playerName) {
+            base.Channel.RemoveFromLookingForRandomOpponent(playerName);
         }
         
-        public System.Threading.Tasks.Task<string> StartGameAsync(string userName1, string ai1, string userName2, string ai2) {
-            return base.Channel.StartGameAsync(userName1, ai1, userName2, ai2);
+        public System.Threading.Tasks.Task RemoveFromLookingForRandomOpponentAsync(string playerName) {
+            return base.Channel.RemoveFromLookingForRandomOpponentAsync(playerName);
+        }
+        
+        public string StartMatch(string userName1, string ai1, string userName2, string ai2) {
+            return base.Channel.StartMatch(userName1, ai1, userName2, ai2);
+        }
+        
+        public System.Threading.Tasks.Task<string> StartMatchAsync(string userName1, string ai1, string userName2, string ai2) {
+            return base.Channel.StartMatchAsync(userName1, ai1, userName2, ai2);
         }
         
         public void CancelMatch(string playerName) {
@@ -109,12 +117,12 @@ namespace FootballAIGame.Web.GameServerService {
             return base.Channel.CancelMatchAsync(playerName);
         }
         
-        public void LeaveRunningTournament(string playerName) {
-            base.Channel.LeaveRunningTournament(playerName);
+        public int GetPlayerCurrentMatchStep(string playerName) {
+            return base.Channel.GetPlayerCurrentMatchStep(playerName);
         }
         
-        public System.Threading.Tasks.Task LeaveRunningTournamentAsync(string playerName) {
-            return base.Channel.LeaveRunningTournamentAsync(playerName);
+        public System.Threading.Tasks.Task<int> GetPlayerCurrentMatchStepAsync(string playerName) {
+            return base.Channel.GetPlayerCurrentMatchStepAsync(playerName);
         }
         
         public void PlanTournament(int tournamentId) {
@@ -125,20 +133,12 @@ namespace FootballAIGame.Web.GameServerService {
             return base.Channel.PlanTournamentAsync(tournamentId);
         }
         
-        public void CancelLooking(string playerName) {
-            base.Channel.CancelLooking(playerName);
+        public void RemoveFromRunningTournament(string playerName) {
+            base.Channel.RemoveFromRunningTournament(playerName);
         }
         
-        public System.Threading.Tasks.Task CancelLookingAsync(string playerName) {
-            return base.Channel.CancelLookingAsync(playerName);
-        }
-        
-        public int GetCurrentMatchStep(string playerName) {
-            return base.Channel.GetCurrentMatchStep(playerName);
-        }
-        
-        public System.Threading.Tasks.Task<int> GetCurrentMatchStepAsync(string playerName) {
-            return base.Channel.GetCurrentMatchStepAsync(playerName);
+        public System.Threading.Tasks.Task RemoveFromRunningTournamentAsync(string playerName) {
+            return base.Channel.RemoveFromRunningTournamentAsync(playerName);
         }
     }
 }

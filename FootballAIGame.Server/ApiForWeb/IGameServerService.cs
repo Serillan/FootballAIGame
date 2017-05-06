@@ -9,16 +9,25 @@ namespace FootballAIGame.Server.ApiForWeb
     public interface IGameServerService
     {
         /// <summary>
-        /// Add player with a specified name and AI to the queue for a random match.
+        /// Adds player with the specified AI to the queue for a random match.
         /// </summary>
-        /// <param name="userName">Name of the user.</param>
+        /// <param name="userName">Name of the player.</param>
         /// <param name="ai">The AI's name.</param>
-        /// <returns>"ok" if the operation was successful; otherwise, an error message.</returns>
+        /// <returns>
+        /// "ok" if the operation was successful; otherwise, an error message.
+        /// </returns>
         [OperationContract]
-        string WantsToPlay(string userName, string ai);
+        string AddToLookingForRandomOpponent(string userName, string ai);
 
         /// <summary>
-        /// Starts the game between specified players' AIs.
+        /// Removes player from the random match queue.
+        /// </summary>
+        /// <param name="playerName">The player's name.</param>
+        [OperationContract]
+        void RemoveFromLookingForRandomOpponent(string playerName);
+
+        /// <summary>
+        /// Starts the match between specified players' AIs.
         /// </summary>
         /// <param name="userName1">The player1's name.</param>
         /// <param name="ai1">The player1's AI name.</param>
@@ -26,22 +35,25 @@ namespace FootballAIGame.Server.ApiForWeb
         /// <param name="ai2">The player2's AI name.</param>
         /// <returns>"ok" if the operation was successful; otherwise, an error message.</returns>
         [OperationContract]
-        string StartGame(string userName1, string ai1, string userName2, string ai2);
+        string StartMatch(string userName1, string ai1, string userName2, string ai2);
 
         /// <summary>
-        /// Cancels the game match in which the specified player is.
+        /// Cancels the match in which the specified player is.
         /// </summary>
         /// <param name="playerName">The name of the player.</param>
+        /// <returns>
+        /// The match step of the match in which the specified player is or 1500 if the player
+        /// isn't in any running match.
+        /// </returns>   
         [OperationContract]
         void CancelMatch(string playerName);
 
         /// <summary>
-        /// Player will leave a running tournament in which he currently is.
-        /// If there is not such tournament, then it does nothing.
+        /// Gets the current simulation step of the match in which the specified player currently is.
         /// </summary>
-        /// <param name="playerName">The player's name.</param>
+        /// <param name="playerName">The name of the player.</param>
         [OperationContract]
-        void LeaveRunningTournament(string playerName);
+        int GetPlayerCurrentMatchStep(string playerName);
 
         /// <summary>
         /// Plans the tournament.
@@ -51,17 +63,11 @@ namespace FootballAIGame.Server.ApiForWeb
         void PlanTournament(int tournamentId);
 
         /// <summary>
-        /// Removes player from the random match queue.
+        /// Remove player from a running tournament in which he currently is.
+        /// If there is not such tournament, then it does nothing.
         /// </summary>
         /// <param name="playerName">The player's name.</param>
         [OperationContract]
-        void CancelLooking(string playerName);
-
-        /// <summary>
-        /// Gets the current simulation step of the match in which the specified player currently is.
-        /// </summary>
-        /// <param name="playerName">The name of the player.</param>
-        [OperationContract]
-        int GetCurrentMatchStep(string playerName);
+        void RemoveFromRunningTournament(string playerName);
     }
 }

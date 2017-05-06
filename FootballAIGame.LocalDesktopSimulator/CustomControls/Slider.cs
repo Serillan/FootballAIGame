@@ -171,6 +171,20 @@ namespace FootballAIGame.LocalDesktopSimulator.CustomControls
         }
 
         /// <summary>
+        /// Occurs when this instance is redrawn.
+        /// Raises the <see cref="E:System.Windows.Forms.Control.Paint" /> event.
+        /// Draws the current progress.
+        /// </summary>
+        /// <param name="e">A <see cref="T:System.Windows.Forms.PaintEventArgs" /> that contains the event data.</param>
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            base.OnPaint(e);
+            DrawCurrentProgress(e.Graphics);
+            e.Graphics.Flush();
+        }
+
+        /// <summary>
         /// Adjusts the value in accordance with the specified mouse position.
         /// </summary>
         /// <param name="mouseX">The mouse x-coordinate relative to this instance client area.</param>
@@ -193,20 +207,6 @@ namespace FootballAIGame.LocalDesktopSimulator.CustomControls
         private bool IsInCircle(int x, int y)
         {
             return Math.Sqrt(Math.Pow(x - CircleCenterX, 2) + Math.Pow(y - CircleCenterY, 2)) <= CircleRadius;
-        }
-
-        /// <summary>
-        /// Occurs when this instance is redrawn.
-        /// Raises the <see cref="E:System.Windows.Forms.Control.Paint" /> event.
-        /// Draws the current progress.
-        /// </summary>
-        /// <param name="e">A <see cref="T:System.Windows.Forms.PaintEventArgs" /> that contains the event data.</param>
-        protected override void OnPaint(PaintEventArgs e)
-        {
-            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-            base.OnPaint(e);
-            DrawCurrentProgress(e.Graphics);
-            e.Graphics.Flush();
         }
 
         /// <summary>

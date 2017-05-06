@@ -37,7 +37,7 @@ namespace FootballAIGame.Web.Controllers.Api
                     Context.SaveChanges(); // must be done before calling service!
 
                     string msg;
-                    if ((msg = gameServer.WantsToPlay(player.Name, player.SelectedAI)) != "ok")
+                    if ((msg = gameServer.AddToLookingForRandomOpponent(player.Name, player.SelectedAI)) != "ok")
                     {
                         player.PlayerState = PlayerState.Idle;
                         Context.SaveChanges();
@@ -121,7 +121,7 @@ namespace FootballAIGame.Web.Controllers.Api
             {
                 using (var gameServer = new GameServerService.GameServerServiceClient())
                 {
-                    gameServer.CancelLooking(player.Name);
+                    gameServer.RemoveFromLookingForRandomOpponent(player.Name);
                 }
             }
             catch (Exception ex) when (ex is CommunicationObjectFaultedException || ex is EndpointNotFoundException)
@@ -173,7 +173,7 @@ namespace FootballAIGame.Web.Controllers.Api
             {
                 using (var gameServer = new GameServerService.GameServerServiceClient())
                 {
-                    return Ok(gameServer.GetCurrentMatchStep(CurrentPlayer.Name));
+                    return Ok(gameServer.GetPlayerCurrentMatchStep(CurrentPlayer.Name));
                 }
             }
             catch (Exception ex) when (ex is CommunicationObjectFaultedException || ex is EndpointNotFoundException)

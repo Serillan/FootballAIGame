@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xs:schema xmlns:tns="http://tempuri.org/" elementFormDefault="qualified" targetNamespace="http://tempuri.org/" xmlns:xs="http://www.w3.org/2001/XMLSchema">
-  <xs:element name="WantsToPlay">
+  <xs:element name="AddToLookingForRandomOpponent">
     <xs:complexType>
       <xs:sequence>
         <xs:element minOccurs="0" name="userName" nillable="true" type="xs:string" />
@@ -8,14 +8,26 @@
       </xs:sequence>
     </xs:complexType>
   </xs:element>
-  <xs:element name="WantsToPlayResponse">
+  <xs:element name="AddToLookingForRandomOpponentResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element minOccurs="0" name="WantsToPlayResult" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="AddToLookingForRandomOpponentResult" nillable="true" type="xs:string" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
-  <xs:element name="StartGame">
+  <xs:element name="RemoveFromLookingForRandomOpponent">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="playerName" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="RemoveFromLookingForRandomOpponentResponse">
+    <xs:complexType>
+      <xs:sequence />
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="StartMatch">
     <xs:complexType>
       <xs:sequence>
         <xs:element minOccurs="0" name="userName1" nillable="true" type="xs:string" />
@@ -25,10 +37,10 @@
       </xs:sequence>
     </xs:complexType>
   </xs:element>
-  <xs:element name="StartGameResponse">
+  <xs:element name="StartMatchResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element minOccurs="0" name="StartGameResult" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="StartMatchResult" nillable="true" type="xs:string" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -44,16 +56,18 @@
       <xs:sequence />
     </xs:complexType>
   </xs:element>
-  <xs:element name="LeaveRunningTournament">
+  <xs:element name="GetPlayerCurrentMatchStep">
     <xs:complexType>
       <xs:sequence>
         <xs:element minOccurs="0" name="playerName" nillable="true" type="xs:string" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
-  <xs:element name="LeaveRunningTournamentResponse">
+  <xs:element name="GetPlayerCurrentMatchStepResponse">
     <xs:complexType>
-      <xs:sequence />
+      <xs:sequence>
+        <xs:element minOccurs="0" name="GetPlayerCurrentMatchStepResult" type="xs:int" />
+      </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="PlanTournament">
@@ -68,30 +82,16 @@
       <xs:sequence />
     </xs:complexType>
   </xs:element>
-  <xs:element name="CancelLooking">
+  <xs:element name="RemoveFromRunningTournament">
     <xs:complexType>
       <xs:sequence>
         <xs:element minOccurs="0" name="playerName" nillable="true" type="xs:string" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
-  <xs:element name="CancelLookingResponse">
+  <xs:element name="RemoveFromRunningTournamentResponse">
     <xs:complexType>
       <xs:sequence />
-    </xs:complexType>
-  </xs:element>
-  <xs:element name="GetCurrentMatchStep">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element minOccurs="0" name="playerName" nillable="true" type="xs:string" />
-      </xs:sequence>
-    </xs:complexType>
-  </xs:element>
-  <xs:element name="GetCurrentMatchStepResponse">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element minOccurs="0" name="GetCurrentMatchStepResult" type="xs:int" />
-      </xs:sequence>
     </xs:complexType>
   </xs:element>
 </xs:schema>

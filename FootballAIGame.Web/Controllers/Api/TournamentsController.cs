@@ -90,7 +90,7 @@ namespace FootballAIGame.Web.Controllers.Api
                     {
                         using (var gameServer = new GameServerServiceClient())
                         {
-                            gameServer.LeaveRunningTournament(tournamentPlayer.Player.Name);
+                            gameServer.RemoveFromRunningTournament(tournamentPlayer.Player.Name);
                         }
                     }
                     catch (Exception ex) when (ex is CommunicationObjectFaultedException || ex is EndpointNotFoundException)

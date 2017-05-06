@@ -6,7 +6,7 @@
     Save Structure
 </h2>
 
-The match save is in JSON format. Here you can see an example of a match save without the match data (described under example).
+The match save is in JSON format. Here you can see an example of a match save with empty match data (described under example).
 
 <br/>
 <br/>
@@ -54,7 +54,7 @@ The match save is in JSON format. Here you can see an example of a match save wi
 
 <p>
     <b>MatchData</b> is empty in this example, in the save it will be filled with the player's and ball's positions (floats) for every simulation
-    step in the following order: ballX, ballY, player1X, player1Y, ..., player22X, player22Y.
+    step in the following order: <code>ballX, ballY, player1X, player1Y, ..., player22X, player22Y</code>.
     First 11 players are from the first team and the rest is from the second.
 </p>
 
@@ -63,19 +63,21 @@ The match save is in JSON format. Here you can see an example of a match save wi
 </p>
 
 <p>
-    <b>Winner</b> is equal to null if the draw happens otherwise it is equal the winner team number.
+    <b>Winner</b> is equal to null if the draw happens otherwise it is equal the winner's team number.
 </p>
 
 <p>
     <b>Errors Reason</b> has following meaning:
-    0: Too high speed,
-    1: Too high acceleration,
-    2: Too strong kick,
-    3: Invalid movement,
-    4: Invalid kick,
-    5: Invalid parameters,
-    6: Get parameters timeout,
-    7: Get action timeout,
-    8: Disconnection,
-    9: Cancellation,
+    <ol start="0">
+        <li>Too high speed.</li>
+        <li>Too high acceleration.</li>
+        <li>Too strong kick.</li>
+        <li>Invalid movement.</li>
+        <li>Invalid kick.</li>
+        <li>Invalid parameters</li>
+        <li>Get parameters timeout.</li>
+        <li>Get action timeout.</li>
+        <li>Disconnection.</li>
+        <li>Cancellation.</li>
+    </ol>
 </p>

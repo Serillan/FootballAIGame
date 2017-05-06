@@ -95,7 +95,7 @@ namespace FootballAIGame.Web.Controllers.Api
                 {
                     using (var gameServer = new GameServerService.GameServerServiceClient())
                     {
-                        var msg = gameServer.StartGame(player.Name, player.SelectedAI,
+                        var msg = gameServer.StartMatch(player.Name, player.SelectedAI,
                             challengeInDb.ChallengingPlayer.Name, challengeInDb.ChallengingPlayer.SelectedAI);
 
                         if (msg != "ok")
