@@ -17,21 +17,24 @@ namespace FootballAIGame.Web.Dtos
         /// <summary>
         /// Gets or sets the identifier.
         /// </summary>
+        /// <value>
+        /// The identifier.
+        /// </value>
         public int Id { get; set; }
 
         /// <summary>
-        /// Gets or sets the name of the player1.
+        /// Gets or sets the name of the first player.
         /// </summary>
         /// <value> 
-        /// The name of the player1.
+        /// The name of the first player.
         /// </value>
         public string Player1Name { get; set; }
 
         /// <summary>
-        /// Gets or sets the name of the player2.
+        /// Gets or sets the name of the second player.
         /// </summary>
         /// <value>
-        /// The name of the player2.
+        /// The name of the second player.
         /// </value>
         public string Player2Name { get; set; }
 
@@ -40,7 +43,7 @@ namespace FootballAIGame.Web.Dtos
         /// Format: "NumberOfUser1Goals:NumberOfUser2Goals".
         /// </summary>
         /// <value>
-        /// The score.
+        /// The final match score in the format "NumberOfUser1Goals:NumberOfUser2Goals".
         /// </value>
         public string Score { get; set; }
 

@@ -5,6 +5,9 @@ using FootballAIGame.DbModel.Utilities;
 
 namespace FootballAIGame.DbModel.Models
 {
+    /// <summary>
+    /// Represents the player.
+    /// </summary>
     public class Player
     {
         /// <summary>

@@ -4,6 +4,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace FootballAIGame.DbModel.Models
 {
+    /// <summary>
+    /// Represents the tournament.
+    /// </summary>
+    /// <seealso cref="FootballAIGame.DbModel.Models.TournamentBase" />
     public class Tournament : TournamentBase
     {
         /// <summary>

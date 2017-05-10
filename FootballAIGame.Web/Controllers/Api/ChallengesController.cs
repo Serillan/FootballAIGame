@@ -13,10 +13,11 @@ namespace FootballAIGame.Web.Controllers.Api
     {
         /// <summary>
         /// Declines the specified challenge. If the specified challenge doesn't
-        /// exist, it does nothing.
+        /// exist, then does nothing.
         /// </summary>
         /// <param name="id">The challenge identifier.</param>
-        /// <returns>Ok http response.</returns>
+        /// <returns>OK <see cref="IHttpActionResult"/> if the action was successful; otherwise
+        /// returns a bad request with an error message.</returns>
         [HttpDelete]
         public IHttpActionResult Decline(string id)
         {
@@ -38,8 +39,8 @@ namespace FootballAIGame.Web.Controllers.Api
         /// Challenges the player.
         /// </summary>
         /// <param name="id">The player name.</param>
-        /// <returns>Ok http response if the challenge was succesfully created;
-        /// otherwise returns BadRequest response with a corresponding error message.</returns>
+        /// <returns>OK <see cref="IHttpActionResult"/> if the action was successful; otherwise
+        /// returns a bad request with an error message.</returns>
         [HttpPost]
         public IHttpActionResult ChallengePlayer(string id)
         {
@@ -123,7 +124,9 @@ namespace FootballAIGame.Web.Controllers.Api
         /// <summary>
         /// Gets the names of challengers that are challenging current player.
         /// </summary>
-        /// <returns>Ok Http response with opponent names in it's body.</returns>
+        /// <returns>OK <see cref="IHttpActionResult"/> with the challengers' names 
+        /// if the action was successful; otherwise
+        /// returns a bad request with an error message.</returns>
         [HttpGet]
         public IHttpActionResult GetChallengersNames()
         {
@@ -141,7 +144,7 @@ namespace FootballAIGame.Web.Controllers.Api
         /// <summary>
         /// Cancels the current player challenge.
         /// </summary>
-        /// <returns>Ok http response.</returns>
+        /// <returns>OK <see cref="IHttpActionResult"/>.</returns>
         [HttpDelete]
         public IHttpActionResult CancelChallenge()
         {

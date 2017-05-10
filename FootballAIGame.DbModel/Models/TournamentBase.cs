@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 namespace FootballAIGame.DbModel.Models
 {
     /// <summary>
-    /// Represents the information about tournament that is shared between
+    /// Represents the tournaments' information that is shared between
     /// <see cref="Tournament"/> and <see cref="RecurringTournament"/>.
     /// </summary>
     public abstract class TournamentBase

@@ -17,8 +17,8 @@ namespace FootballAIGame.Web.Controllers.Api
         /// <summary>
         /// Starts looking for a random match.
         /// </summary>
-        /// <returns>Ok http response if looking for random match has succesfully started;
-        /// otherwise returns BadRequest response with a corresponding error message.</returns>
+        /// <returns>OK <see cref="IHttpActionResult"/> if the action was successful; otherwise
+        /// returns a bad request with an error message.</returns>
         [HttpPost]
         public IHttpActionResult StartRandomMatch()
         {
@@ -58,9 +58,9 @@ namespace FootballAIGame.Web.Controllers.Api
         /// <summary>
         /// Gets the current player last match result.
         /// </summary>
-        /// <returns>The http ok response with the match Id and the result string
-        /// in it's body if the current player has played at least one match; 
-        /// otherwise returns HttpNotFound response. </returns>
+        /// <returns>OK <see cref="IHttpActionResult"/> with the match ID and the result
+        /// if the action was successful; otherwise
+        /// returns a bad request with an error message.</returns>
         [HttpGet]
         public IHttpActionResult GetLastMatchResult()
         {
@@ -90,7 +90,7 @@ namespace FootballAIGame.Web.Controllers.Api
         /// Everything is encoded as float. So each step takes 23*4 = 92 floats = 368 Bytes
         /// </summary>
         /// <param name="id">The match identifier.</param>
-        /// <returns>The http ok response with the match data in binary form in it's body if the match with
+        /// <returns>The OK <see cref="IHttpActionResult"/> with the match data in binary form in it's body if the match with
         /// the specified identifier exists; otherwise returns HttpNotFound response. </returns>
         [AllowAnonymous]
         [HttpGet]
@@ -111,7 +111,7 @@ namespace FootballAIGame.Web.Controllers.Api
         /// <summary>
         /// Cancels looking for opponent. Does nothing it the player is not currently looking for opponent.
         /// </summary>
-        /// <returns>Ok http response.</returns>
+        /// <returns>Ok <see cref="IHttpActionResult"/>.</returns>
         [HttpPut]
         public IHttpActionResult CancelLooking()
         {
@@ -139,13 +139,12 @@ namespace FootballAIGame.Web.Controllers.Api
         /// Cancels the match in which the current player currently is. Does nothing if the player
         /// is not currently in any match.
         /// </summary>
-        /// <returns>Ok http response.</returns>
+        /// <returns>OK <see cref="IHttpActionResult"/></returns>
         [HttpPut]
         public IHttpActionResult CancelMatch()
         {
             var player = CurrentPlayer;
 
-            // TODO check that game server looks on state
             try
             {
                 using (var gameServer = new GameServerService.GameServerServiceClient())
@@ -164,8 +163,11 @@ namespace FootballAIGame.Web.Controllers.Api
 
         /// <summary>
         /// Gets the current simulation step of the match in which the player currently is.
-        /// If he is not in any match then it returns the maximum step number.
+        /// If he is not in any match, then it returns the maximum step number.
         /// </summary>
+        /// <returns>OK <see cref="IHttpActionResult"/> with the simulation step 
+        /// if the action was successful; otherwise returns a bad request with 
+        /// an error message.</returns>
         [HttpGet]
         public IHttpActionResult GetMatchStep()
         {

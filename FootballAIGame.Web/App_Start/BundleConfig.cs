@@ -3,6 +3,9 @@ using System.Web.Optimization;
 
 namespace FootballAIGame.Web
 {
+    /// <summary>
+    /// Provides the method to register bundles.
+    /// </summary>
     public class BundleConfig
     {
         /// <summary>

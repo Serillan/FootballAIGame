@@ -19,6 +19,8 @@ namespace FootballAIGame.Web.Controllers.Api
         /// </summary>
         /// <param name="tournamentId">The tournament identifier.</param>
         /// <param name="aiName">Name of the AI.</param>
+        /// <returns>OK <see cref="IHttpActionResult"/> if the action was successful; otherwise
+        /// returns a bad request with an error message.</returns>
         [HttpPost]
         [Route("api/tournaments/JoinTournament/{tournamentId}/{aiName}")]
         public IHttpActionResult JoinTournament(int tournamentId, string aiName)
@@ -63,6 +65,8 @@ namespace FootballAIGame.Web.Controllers.Api
         /// Leaves the tournament.
         /// </summary>
         /// <param name="id">The identifier.</param>
+        /// <returns>OK <see cref="IHttpActionResult"/> if the action was successful; otherwise
+        /// returns a bad request with an error message.</returns>
         [HttpPut]
         public IHttpActionResult LeaveTournament(int id)
         {
@@ -110,7 +114,8 @@ namespace FootballAIGame.Web.Controllers.Api
         /// Gets the tournament position.
         /// </summary>
         /// <param name="id">The tournament identifier.</param>
-        /// <returns></returns>
+        /// <returns>OK <see cref="IHttpActionResult"/> with the tournament position 
+        /// if the action was successful; otherwise returns a bad request with an error message.</returns>
         [HttpGet]
         public IHttpActionResult GetTournamentPosition(int id)
         {
@@ -136,6 +141,8 @@ namespace FootballAIGame.Web.Controllers.Api
         /// <summary>
         /// Gets the joined tournaments.
         /// </summary>
+        /// <returns>OK <see cref="IHttpActionResult"/> with the list of
+        /// <see cref="TournamentTableEntryDto"/> instances.</returns>
         [HttpGet]
         public IHttpActionResult GetJoinedTournaments()
         {
@@ -176,7 +183,7 @@ namespace FootballAIGame.Web.Controllers.Api
         /// Gets the tournament information contained in <see cref="TournamentInfoDto"/>.
         /// </summary>
         /// <param name="id">The tournament identifier.</param>
-        /// <returns><see cref="TournamentInfoDto"/> contained in OK response if the specified
+        /// <returns><see cref="TournamentInfoDto"/> contained in OK <see cref="IHttpActionResult"/> if the specified
         /// tournament exists; otherwise returns NotFound response.</returns>
         [HttpGet]
         [AllowAnonymous]
@@ -248,19 +255,20 @@ namespace FootballAIGame.Web.Controllers.Api
                 return Ok("The tournament was deleted, but because it is a part of a recurring tournament, a next" +
                           " tournament was planned. (reload page to see the new one)");
 
-            return Ok("The tournament was deleted."); // todo maybe inform if the reccuring tournament was planned
+            return Ok("The tournament was deleted.");
         }
 
         /// <summary>
         /// Deletes the tournament.
         /// </summary>
         /// <param name="tournament">The tournament.</param>
+        /// <returns>OK <see cref="IHttpActionResult"/> if the action was successful; otherwise
+        /// returns a bad request with an error message.</returns>
         private string DeleteTournament(Tournament tournament)
         {
             if (tournament == null)
                 return "A tournament with the specified ID doesn't exist.";
 
-            // TODO let server know (if the server is not yet running it won't start the tournament)
             if (tournament.TournamentState == TournamentState.Running) // if it was already running
                 return "The tournament has already started and cannot be deleted anymore.";
 
@@ -268,7 +276,7 @@ namespace FootballAIGame.Web.Controllers.Api
             Context.Matches.RemoveRange(
                 Context.Matches.Where(m => m.TournamentId == tournament.Id));
 
-            Context.Tournaments.Remove(tournament); // todo check if tournamentplayers are deleted
+            Context.Tournaments.Remove(tournament);
 
             return "";
         }
@@ -279,6 +287,8 @@ namespace FootballAIGame.Web.Controllers.Api
         /// <param name="id">The recurring tournament identifier.</param>
         /// <param name="deleteUnstarted">if set to <c>true</c> then it also deletes all created unstarted tournaments
         /// belonging to the specified recurring tournament.</param>
+        /// <returns>OK <see cref="IHttpActionResult"/> if the action was successful; otherwise
+        /// returns a bad request with an error message.</returns>
         [Route("api/tournaments/DeleteRecurringTournament/{id}/{deleteUnstarted}")]
         [HttpDelete]
         [Authorize(Roles = RolesNames.TournamentAdmin)]
@@ -316,7 +326,6 @@ namespace FootballAIGame.Web.Controllers.Api
         /// Creates and plans the next tournament from the specified <see cref="RecurringTournament"/>.
         /// </summary>
         /// <param name="id">The recurring tournament's ID.</param>
-        /// <returns>The created tournament.</returns>
         private void PlanNextRecurring(int id)
         {
             var recurringTournament =

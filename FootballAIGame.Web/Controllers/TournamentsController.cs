@@ -154,7 +154,7 @@ namespace FootballAIGame.Web.Controllers
         /// Creates the specified tournament if it's valid; otherwise returns 
         /// the create recurring tournament view with the specified tournament as it's model.
         /// </summary>
-        /// <param name="tournament">The recurring tournament.</param>
+        /// <param name="recurringTournament">The recurring tournament.</param>
         [HttpPost]
         [Authorize(Roles = RolesNames.TournamentAdmin)]
         [ValidateAntiForgeryToken]

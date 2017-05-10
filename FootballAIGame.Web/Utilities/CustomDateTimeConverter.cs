@@ -6,7 +6,7 @@ using Newtonsoft.Json.Converters;
 namespace FootballAIGame.Web.Utilities
 {
     /// <summary>
-    /// Used for converting <see cref="DateTime"/> to JSON and parsing from JSON.
+    /// Provides the methods for converting <see cref="DateTime"/> to JSON and parsing from JSON.
     /// </summary>
     /// <seealso cref="Newtonsoft.Json.Converters.DateTimeConverterBase" />
     public class CustomDateTimeConverter : DateTimeConverterBase

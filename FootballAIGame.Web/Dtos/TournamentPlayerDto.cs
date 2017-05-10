@@ -22,10 +22,10 @@ namespace FootballAIGame.Web.Dtos
         public int? Position { get; set; }
 
         /// <summary>
-        /// Gets or sets the player name.
+        /// Gets or sets the current player name.
         /// </summary>
         /// <value>
-        /// The player name.
+        /// The current player name.
         /// </value>
         public string Name { get; set; }
 

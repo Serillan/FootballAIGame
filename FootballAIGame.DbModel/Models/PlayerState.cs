@@ -1,5 +1,8 @@
 ﻿namespace FootballAIGame.DbModel.Models
 {
+    /// <summary>
+    /// Identifies player's states.
+    /// </summary>
     public enum PlayerState
     {
         /// <summary>

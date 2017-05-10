@@ -2,6 +2,9 @@
 
 namespace FootballAIGame.DbModel.Models
 {
+    /// <summary>
+    /// Represents the football match.
+    /// </summary>
     public class Match
     {
         /// <summary>

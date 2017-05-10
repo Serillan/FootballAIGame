@@ -6,7 +6,7 @@ namespace FootballAIGame.DbModel.Models
     /// <summary>
     /// Represents the relation entity between <see cref="Player"/>
     /// and <see cref="Tournament"/>. It also holds it's own properties
-    /// corresponding to this relation.
+    /// corresponding to the relation.
     /// </summary>
     public class TournamentPlayer
     {

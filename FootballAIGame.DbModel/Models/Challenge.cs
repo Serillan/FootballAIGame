@@ -1,6 +1,9 @@
 ﻿
 namespace FootballAIGame.DbModel.Models
 {
+    /// <summary>
+    /// Represents the challenge between players.
+    /// </summary>
     public class Challenge
     {
         /// <summary>

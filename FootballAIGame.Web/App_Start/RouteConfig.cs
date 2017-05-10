@@ -7,6 +7,9 @@ using System.Web.Routing;
 
 namespace FootballAIGame.Web
 {
+    /// <summary>
+    /// Provides the method to register routes.
+    /// </summary>
     public class RouteConfig
     {
         /// <summary>

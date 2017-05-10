@@ -13,7 +13,7 @@ namespace FootballAIGame.Web.Controllers.Api
         /// Selects the specified AI.
         /// </summary>
         /// <param name="id">The AI name.</param>
-        /// <returns>Ok HTTP response.</returns>
+        /// <returns>OK <see cref="IHttpActionResult"/>.</returns>
         [HttpPut]
         public IHttpActionResult SelectAI(string id)
         {
@@ -26,10 +26,10 @@ namespace FootballAIGame.Web.Controllers.Api
 
         /// <summary>
         /// If the specified AI is not currently selected, select it. Otherwise
-        /// unselect it.
+        /// deselects it.
         /// </summary>
         /// <param name="id">The AI name.</param>
-        /// <returns>Ok http response.</returns>
+        /// <returns>OK <see cref="IHttpActionResult"/>.</returns>
         [HttpPut]
         public IHttpActionResult ToggleAI(string id)
         {
@@ -46,7 +46,7 @@ namespace FootballAIGame.Web.Controllers.Api
         /// Gets the active AIs names that are connected to the game server
         /// with the current player name.
         /// </summary>
-        /// <returns>Ok HTTP response with player's active AI names in it's body.</returns>
+        /// <returns>OK <see cref="IHttpActionResult"/> with the player's active AIs' names.</returns>
         [HttpGet]
         public IHttpActionResult GetActiveAIs()
         {

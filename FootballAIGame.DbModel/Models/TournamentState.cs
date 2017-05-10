@@ -1,5 +1,8 @@
 ﻿namespace FootballAIGame.DbModel.Models
 {
+    /// <summary>
+    /// Identifies tournament's states.
+    /// </summary>
     public enum TournamentState
     {
         /// <summary>

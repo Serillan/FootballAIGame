@@ -26,11 +26,10 @@ namespace FootballAIGame.Server
         private List<MatchSimulator> RunningSimulations { get; set; } = new List<MatchSimulator>();
 
         /// <summary>
-        /// Gets or sets the list of connections that belong to player that is currently looking
-        /// for a new match.
+        /// Gets or sets the list of connections with which players are currently looking for a random match.
         /// </summary>
         /// <value>
-        /// The list of wants to play connections.
+        /// The list of connections with which players are currently looking for a random match.
         /// </value>
         private List<ClientConnection> WantsToPlayConnections { get; set; } = new List<ClientConnection>();
 
@@ -347,6 +346,14 @@ namespace FootballAIGame.Server
 
         }
 
+        /// <summary>
+        /// Creates a new <see cref="Match"/>.
+        /// </summary>
+        /// <param name="simulator">The simulator that simulated the match.</param>
+        /// <param name="startTime">The start time of the match.</param>
+        /// <param name="player1">The first player.</param>
+        /// <param name="player2">The second player.</param>
+        /// <returns>A new <see cref="Match"/>.</returns>
         private Match CreateMatch(MatchSimulator simulator, DateTime startTime, Player player1, Player player2)
         {
             var matchInfo = simulator.MatchInfo;
@@ -392,6 +399,11 @@ namespace FootballAIGame.Server
             return match;
         }
 
+        /// <summary>
+        /// Sets the errors' logs in the specified match.
+        /// </summary>
+        /// <param name="match">The match.</param>
+        /// <param name="errors">The errors.</param>
         private void SetErrorsLogs(Match match, IEnumerable<SimulationError> errors)
         {
             var player1Errors = new List<string>();

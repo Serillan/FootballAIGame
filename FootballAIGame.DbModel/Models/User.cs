@@ -12,7 +12,7 @@ using Microsoft.AspNet.Identity.EntityFramework;
 namespace FootballAIGame.DbModel.Models
 {
     /// <summary>
-    /// Asp.NET identity user class.
+    /// Represents the Asp.NET Identity user.
     /// Also stores reference to the corresponding <see cref="DbModel.Models.Player"/> class.
     /// </summary>
     /// <seealso cref="Microsoft.AspNet.Identity.EntityFramework.IdentityUser" />
@@ -21,6 +21,7 @@ namespace FootballAIGame.DbModel.Models
         /// <summary>
         /// Gets or sets user name.
         /// </summary>
+        /// <returns>The user name.</returns>
         [Required]
         [RegularExpression(@"^[^\s]+$", ErrorMessage = "Space is not allowed in User Name.")]
         public override string UserName { get; set; }
@@ -29,7 +30,7 @@ namespace FootballAIGame.DbModel.Models
         /// Gets or sets the <see cref="DbModel.Models.Player"/> class corresponding to the user.
         /// </summary>
         /// <value>
-        /// The player.
+        /// The <see cref="DbModel.Models.Player"/> class corresponding to the user.
         /// </value>
         public Player Player { get; set; }
 

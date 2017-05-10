@@ -9,21 +9,33 @@ using Microsoft.AspNet.Identity;
 
 namespace FootballAIGame.Web.Controllers.Api
 {
+    /// <summary>
+    /// The wrapper on ApiController. Provides the base class from which other API controllers
+    /// are derived. We use it to define methods and properties that are shared between
+    /// controllers.
+    /// </summary>
+    /// <seealso cref="System.Web.Http.ApiController" />
     public abstract class BaseApiController : ApiController
     {
         /// <summary>
-        /// The application database context used for accessing the database using entity framework.
+        /// The application database context used for accessing the database using Entity Framework.
         /// </summary>
         private ApplicationDbContext _context;
 
         /// <summary>
-        /// Gets the application database context used for accessing the database using entity framework.
+        /// Gets the application database context used for accessing the database using Entity Framework.
         /// </summary>
         /// <value>
-        /// The <see cref="ApplicationDbContext"/> used for accessing the database using entity framework.
+        /// The <see cref="ApplicationDbContext"/> used for accessing the database using Entity Framework.
         /// </value>
         protected ApplicationDbContext Context => _context ?? (_context = new ApplicationDbContext());
 
+        /// <summary>
+        /// Gets the current logged player.
+        /// </summary>
+        /// <value>
+        /// The current logged <see cref="Player"/> if there is one; otherwise returns null.
+        /// </value>
         protected Player CurrentPlayer
         {
             get

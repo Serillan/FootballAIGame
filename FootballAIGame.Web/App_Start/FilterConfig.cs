@@ -3,6 +3,9 @@ using System.Web.Mvc;
 
 namespace FootballAIGame.Web
 {
+    /// <summary>
+    /// Provides the method to register global filters.
+    /// </summary>
     public class FilterConfig
     {
         /// <summary>

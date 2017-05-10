@@ -16,7 +16,7 @@ namespace FootballAIGame.Web.Controllers.Api
         /// <summary>
         /// Gets the player's state of the current connected user.
         /// </summary>
-        /// <returns>OK <see cref="IHttpActionResult"/> with the player's state in it's body.</returns>
+        /// <returns>OK <see cref="IHttpActionResult"/> with the player's state in its body.</returns>
         [HttpGet]
         public IHttpActionResult GetPlayerState()
         {
@@ -25,11 +25,13 @@ namespace FootballAIGame.Web.Controllers.Api
         }
 
         /// <summary>
-        /// If the specified user doesn't have the specified role then adds the role to the user; otherwise
+        /// If the specified user doesn't have the specified role, then adds the role to the user; otherwise
         /// removes it.
         /// </summary>
         /// <param name="userId">The user identifier.</param>
         /// <param name="roleName">Name of the role.</param>
+        /// <returns>OK <see cref="IHttpActionResult"/> if the action was successful; otherwise
+        /// returns a bad request with an error message.</returns>
         [Route("api/user/ToggleRole/{userId}/{roleName}")]
         [HttpPut]
         [Authorize(Roles = RolesNames.MainAdmin)]
@@ -68,6 +70,9 @@ namespace FootballAIGame.Web.Controllers.Api
         /// <summary>
         /// Generates the new access key for the connected player.
         /// </summary>
+        /// <returns>
+        /// OK <see cref="IHttpActionResult"/> with the access key in its body.
+        /// </returns>
         [HttpPost]
         public IHttpActionResult GenerateNewAccessKey()
         {
