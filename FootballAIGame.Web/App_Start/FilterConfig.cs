@@ -1,4 +1,6 @@
-﻿using System.Web;
+﻿using System.Data.Entity.Core;
+using System.Data.SqlClient;
+using System.Web;
 using System.Web.Mvc;
 
 namespace FootballAIGame.Web
@@ -14,7 +16,24 @@ namespace FootballAIGame.Web
         /// <param name="filters">The filters.</param>
         public static void RegisterGlobalFilters(GlobalFilterCollection filters)
         {
-            filters.Add(new HandleErrorAttribute());
+            filters.Add(new HandleErrorAttribute()
+            {
+                Order = 1
+            });
+
+            filters.Add(new HandleErrorAttribute()
+            {
+                ExceptionType = typeof(SqlException),
+                View = "SqlError",
+                Order = 2
+            });
+
+            filters.Add(new HandleErrorAttribute()
+            {
+                ExceptionType = typeof(EntityException),
+                View = "SqlError",
+                Order = 3
+            });
         }
     }
 }

@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Data.Entity.Core;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.ServiceModel;
+using System.Threading.Tasks;
 using FootballAIGame.MatchSimulation;
 using FootballAIGame.Server.ApiForWeb;
 using FootballAIGame.DbModel.Models;
@@ -20,22 +23,33 @@ namespace FootballAIGame.Server
         /// </summary>
         public static void Main()
         {
-            // start simulating
-            var simulatingTask = SimulationManager.Instance.StartsAcceptingConnectionsAsync();
+            try
+            {
+                // start simulating
+                var simulatingTask = SimulationManager.Instance.StartsAcceptingConnectionsAsync();
 
-            // start tournaments
-            TournamentManager.PlanUnstartedTournaments();
+                // start tournaments
+                TournamentManager.PlanUnstartedTournaments();
 
-            // start services
-            var host = new ServiceHost(typeof(GameServerService));
-            host.Open();
-            Console.WriteLine("Services have started.");
+                // start services
+                var host = new ServiceHost(typeof(GameServerService));
+                host.Open();
+                Console.WriteLine("Services have started.");
 
-            // set console exit handler
-            _handler = ConsoleEventHandler;
-            SetConsoleCtrlHandler(_handler, true);
+                // set console exit handler
+                _handler = ConsoleEventHandler;
+                SetConsoleCtrlHandler(_handler, true);
 
-            simulatingTask.Wait();
+                // start regular checks (every 30s) of the database
+                var databaseChecks = CheckDatabaseStateRegularlyAsync(10000);
+
+                // stay on while the database is online
+                databaseChecks.Wait();
+            }
+            catch (Exception ex) when (ex is SqlException || ex is EntityException)
+            {
+                Console.Error.WriteLine("Error: Cannot connect to the database.");
+            }
         }
 
         /// <summary>
@@ -83,6 +97,28 @@ namespace FootballAIGame.Server
         /// <returns>If it returns <c>false</c>, 
         /// the next handler function in the list of handlers for this process is used.</returns>
         private delegate bool ConsoleEventDelegate(int eventType);
+
+        /// <summary>
+        /// Regularly checks the database state asynchronously.
+        /// Returns when the database isn't online anymore.
+        /// </summary>
+        /// <returns>The task that represents the asynchronous regular checks.
+        /// The task is completed when the database goes offline.</returns>
+        private static async Task CheckDatabaseStateRegularlyAsync(int checkInterval)
+        {
+            var context = new ApplicationDbContext();
+
+            while (true)
+            {
+                if (!context.Database.Exists())
+                {
+                    Console.Error.WriteLine("Error: Cannot connect to the database.");
+                    return;
+                }
+
+                await Task.Delay(checkInterval);
+            }
+        }
 
         /// <summary>
         /// Adds or removes an application-defined HandlerRoutine function from the list of handler functions for the calling process.
