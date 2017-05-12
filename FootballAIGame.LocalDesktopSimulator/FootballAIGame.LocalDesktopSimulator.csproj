@@ -47,6 +47,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Release\FootballAIGame.LocalDesktopSimulator.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject>FootballAIGame.LocalDesktopSimulator.Program</StartupObject>

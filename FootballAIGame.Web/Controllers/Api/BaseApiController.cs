@@ -10,9 +10,9 @@ using Microsoft.AspNet.Identity;
 namespace FootballAIGame.Web.Controllers.Api
 {
     /// <summary>
-    /// The wrapper on ApiController. Provides the base class from which other API controllers
-    /// are derived. We use it to define methods and properties that are shared between
-    /// controllers.
+    /// Provides the base class from which other API controllers
+    /// are derived. Extends <see cref="ApiController"/>. 
+    /// We use it to define methods and properties that are shared between controllers.
     /// </summary>
     /// <seealso cref="System.Web.Http.ApiController" />
     public abstract class BaseApiController : ApiController

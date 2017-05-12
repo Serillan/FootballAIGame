@@ -11,6 +11,9 @@ using FootballAIGame.Web.Utilities;
 
 namespace FootballAIGame.Web.Controllers.Api
 {
+    /// <summary>
+    /// Provides services for managing the user's tournaments.
+    /// </summary>
     [Authorize]
     public class TournamentsController : BaseApiController
     {

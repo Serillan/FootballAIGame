@@ -11,7 +11,7 @@ namespace FootballAIGame.Server
     /// <summary>
     /// Provides the functionality to manage tournament simulations. Implemented as singleton.
     /// </summary>
-    public class TournamentManager
+    class TournamentManager
     {
         /// <summary>
         /// Gets or sets the running tournaments.

@@ -6,6 +6,9 @@ using System.Web.Mvc;
 
 namespace FootballAIGame.Web.Controllers
 {
+    /// <summary>
+    /// The projects section controller.
+    /// </summary>
     public class ProjectsController : BaseController
     {
         /// <summary>

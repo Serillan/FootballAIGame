@@ -32,9 +32,11 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Release\FootballAIGame.LocalConsoleSimulator.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>FootballAIGame.LocalConsoleSimulator.Program</StartupObject>
+    <StartupObject>
+    </StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />

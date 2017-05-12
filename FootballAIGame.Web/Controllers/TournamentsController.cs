@@ -14,6 +14,9 @@ using Microsoft.AspNet.Identity;
 
 namespace FootballAIGame.Web.Controllers
 {
+    /// <summary>
+    /// The tournaments section controller.
+    /// </summary>
     public class TournamentsController : BaseController
     {
         /// <summary>

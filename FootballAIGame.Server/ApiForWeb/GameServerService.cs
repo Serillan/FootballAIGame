@@ -5,7 +5,7 @@ namespace FootballAIGame.Server.ApiForWeb
     /// Represents the WCF service for application web server.
     /// </summary>
     /// <seealso cref="FootballAIGame.Server.ApiForWeb.IGameServerService" />
-    public class GameServerService : IGameServerService
+    class GameServerService : IGameServerService
     {
         /// <summary>
         /// Adds player with the specified AI to the queue for a random match.

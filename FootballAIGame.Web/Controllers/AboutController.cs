@@ -6,6 +6,10 @@ using System.Web.Mvc;
 
 namespace FootballAIGame.Web.Controllers
 {
+    /// <summary>
+    /// The about section controller.
+    /// </summary>
+    /// <seealso cref="FootballAIGame.Web.Controllers.BaseController" />
     public class AboutController : BaseController
     {
         /// <summary>

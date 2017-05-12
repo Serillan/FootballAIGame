@@ -13,6 +13,9 @@ using Microsoft.AspNet.Identity;
 
 namespace FootballAIGame.Web.Controllers
 {
+    /// <summary>
+    /// The home section controller.
+    /// </summary>
     public class HomeController : BaseController
     {
         /// <summary>

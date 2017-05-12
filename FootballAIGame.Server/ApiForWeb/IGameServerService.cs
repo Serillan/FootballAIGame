@@ -6,7 +6,7 @@ namespace FootballAIGame.Server.ApiForWeb
     /// Represents the WCF service contract for application web server.
     /// </summary>
     [ServiceContract]
-    public interface IGameServerService
+    interface IGameServerService
     {
         /// <summary>
         /// Adds player with the specified AI to the queue for a random match.

@@ -12,7 +12,7 @@ namespace FootballAIGame.LocalConsoleSimulator.Commands
     /// <summary>
     /// Represents the simulation command.
     /// </summary>
-    public class SimulateMatchesCommand : ICommand
+    class SimulateMatchesCommand : ICommand
     {
         /// <summary>
         /// Gets or sets a value indicating whether the extended match result should be shown.

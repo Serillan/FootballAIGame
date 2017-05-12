@@ -29,6 +29,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Release\FootballAIGame.DbModel.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
     <ProjectConfigFileName>App.config</ProjectConfigFileName>

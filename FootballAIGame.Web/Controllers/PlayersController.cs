@@ -11,6 +11,9 @@ using Microsoft.AspNet.Identity;
 
 namespace FootballAIGame.Web.Controllers
 {
+    /// <summary>
+    /// The players section controller.
+    /// </summary>
     public class PlayersController : BaseController
     {
         /// <summary>

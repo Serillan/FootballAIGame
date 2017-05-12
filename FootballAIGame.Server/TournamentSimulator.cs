@@ -12,7 +12,7 @@ namespace FootballAIGame.Server
     /// <summary>
     /// Provides the functionality to simulate a tournament.
     /// </summary>
-    public class TournamentSimulator
+    class TournamentSimulator
     {
         /// <summary>
         /// Gets or sets the tournament's ID of the tournament that

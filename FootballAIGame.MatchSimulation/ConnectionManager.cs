@@ -32,7 +32,8 @@ namespace FootballAIGame.MatchSimulation
 
     /// <summary>
     /// Responsible for managing client connections.
-    /// Provides the method to start listening for new connections and public properties to access these connections. Implemented as singleton. 
+    /// Provides the method to start listening for new connections and public properties to access these connections. 
+    /// Implemented as singleton. 
     /// </summary>
     public class ConnectionManager
     {

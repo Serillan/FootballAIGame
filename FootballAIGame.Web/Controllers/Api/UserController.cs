@@ -10,6 +10,9 @@ using Microsoft.Owin.Security;
 
 namespace FootballAIGame.Web.Controllers.Api
 {
+    /// <summary>
+    /// Provides services for managing the user's account.
+    /// </summary>
     [Authorize]
     public class UserController : BaseApiController
     {

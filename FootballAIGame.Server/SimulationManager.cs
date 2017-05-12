@@ -15,7 +15,7 @@ namespace FootballAIGame.Server
     /// Provides functionality to manage match simulations. Implemented as singleton.
     /// Serves as the bridge between the server's service and the simulation library.
     /// </summary>
-    public class SimulationManager
+    class SimulationManager
     {
         /// <summary>
         /// Gets or sets the list of currently running simulations.

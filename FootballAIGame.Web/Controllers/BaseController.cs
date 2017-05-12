@@ -8,6 +8,12 @@ using Microsoft.AspNet.Identity;
 
 namespace FootballAIGame.Web.Controllers
 {
+    /// <summary>
+    /// Provides the base class from which other controllers
+    /// are derived. Extends <see cref="Controller"/>. 
+    /// We use it to define methods and properties that are shared between controllers.
+    /// </summary>
+    /// <seealso cref="System.Web.Mvc.Controller" />
     public abstract class BaseController : Controller
     {
         /// <summary>

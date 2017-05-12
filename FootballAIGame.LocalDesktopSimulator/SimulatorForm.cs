@@ -15,7 +15,7 @@ namespace FootballAIGame.LocalDesktopSimulator
     /// Represents a window that makes up an application's user interface.
     /// </summary>
     /// <seealso cref="System.Windows.Forms.Form" />
-    public partial class SimulatorForm : Form
+    partial class SimulatorForm : Form
     {
         /// <summary>
         /// The progress bar update interval in which the progress bar will be updated during
