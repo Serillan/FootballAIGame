@@ -24,14 +24,6 @@ namespace FootballAIGame.Server
         public int TournamentId { get; }
 
         /// <summary>
-        /// Gets or sets the start time of the tournament.
-        /// </summary>
-        /// <value>
-        /// The start time.
-        /// </value>
-        private DateTime StartTime { get; set; }
-
-        /// <summary>
         /// Gets or sets the <see cref="System.Random" /> used for generating random numbers.
         /// </summary>
         /// <value>
@@ -47,6 +39,14 @@ namespace FootballAIGame.Server
         /// The list of players that are currently in the running tournament.
         /// </value>
         public List<TournamentPlayer> Players { get; set; }
+
+        /// <summary>
+        /// Gets or sets the start time of the tournament.
+        /// </summary>
+        /// <value>
+        /// The start time.
+        /// </value>
+        private DateTime StartTime { get; set; }
 
         /// <summary>
         /// Gets the time until the start of the tournament.
@@ -437,6 +437,5 @@ namespace FootballAIGame.Server
                 context.SaveChanges();
             }
         }
-
     }
 }

@@ -241,6 +241,5 @@ namespace FootballAIGame.LocalConsoleSimulator.CommandParsing
 
             return null;
         }
-
     }
 }

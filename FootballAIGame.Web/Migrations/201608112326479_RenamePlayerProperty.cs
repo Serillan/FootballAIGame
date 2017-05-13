@@ -9,7 +9,7 @@ namespace FootballAIGame.Web.Migrations
             AddColumn("dbo.Players", "SelectedAi", c => c.String());
             DropColumn("dbo.Players", "ActiveAi");
         }
-        
+
         public override void Down()
         {
             AddColumn("dbo.Players", "ActiveAi", c => c.String());

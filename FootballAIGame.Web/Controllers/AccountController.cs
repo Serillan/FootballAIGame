@@ -24,16 +24,6 @@ namespace FootballAIGame.Web.Controllers
         private ApplicationSignInManager _signInManager;
         private ApplicationUserManager _userManager;
 
-        public AccountController()
-        {
-        }
-
-        public AccountController(ApplicationUserManager userManager, ApplicationSignInManager signInManager)
-        {
-            UserManager = userManager;
-            SignInManager = signInManager;
-        }
-
         public ApplicationSignInManager SignInManager
         {
             get
@@ -56,6 +46,16 @@ namespace FootballAIGame.Web.Controllers
             {
                 _userManager = value;
             }
+        }
+
+        public AccountController()
+        {
+        }
+
+        public AccountController(ApplicationUserManager userManager, ApplicationSignInManager signInManager)
+        {
+            UserManager = userManager;
+            SignInManager = signInManager;
         }
 
         [AllowAnonymous]
@@ -165,6 +165,7 @@ namespace FootballAIGame.Web.Controllers
         }
 
         #region Helpers
+
         // Used for XSRF protection when adding external logins
         private const string XsrfKey = "XsrfId";
 
@@ -195,6 +196,10 @@ namespace FootballAIGame.Web.Controllers
 
         internal class ChallengeResult : HttpUnauthorizedResult
         {
+            public string LoginProvider { get; set; }
+            public string RedirectUri { get; set; }
+            public string UserId { get; set; }
+
             public ChallengeResult(string provider, string redirectUri)
                 : this(provider, redirectUri, null)
             {
@@ -207,10 +212,6 @@ namespace FootballAIGame.Web.Controllers
                 UserId = userId;
             }
 
-            public string LoginProvider { get; set; }
-            public string RedirectUri { get; set; }
-            public string UserId { get; set; }
-
             public override void ExecuteResult(ControllerContext context)
             {
                 var properties = new AuthenticationProperties { RedirectUri = RedirectUri };
@@ -221,6 +222,7 @@ namespace FootballAIGame.Web.Controllers
                 context.HttpContext.GetOwinContext().Authentication.Challenge(properties, LoginProvider);
             }
         }
+
         #endregion
     }
 }

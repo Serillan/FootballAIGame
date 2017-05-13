@@ -40,6 +40,5 @@ namespace FootballAIGame.DbModel.Models
         /// The tournament's matches.
         /// </value>
         public ICollection<Match> Matches { get; set; }
-
     }
 }

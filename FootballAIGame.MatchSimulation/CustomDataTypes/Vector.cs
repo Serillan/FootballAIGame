@@ -24,6 +24,15 @@ namespace FootballAIGame.MatchSimulation.CustomDataTypes
         public double Y { get; set; }
 
         /// <summary>
+        /// Gets the vector's length.
+        /// </summary>
+        /// <value>
+        /// The vector's length.
+        /// </value>
+        public double Length =>
+            Math.Sqrt(X * X + Y * Y);
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="Vector"/> class.
         /// </summary>
         public Vector() { }
@@ -38,15 +47,6 @@ namespace FootballAIGame.MatchSimulation.CustomDataTypes
             X = x;
             Y = y;
         }
-
-        /// <summary>
-        /// Gets the vector's length.
-        /// </summary>
-        /// <value>
-        /// The vector's length.
-        /// </value>
-        public double Length =>
-            Math.Sqrt(X * X + Y * Y);
 
         /// <summary>
         /// Gets the distances between the specified vectors.

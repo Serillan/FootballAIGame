@@ -9,7 +9,7 @@ namespace FootballAIGame.Web.Migrations
             AddColumn("dbo.Matches", "Time", c => c.DateTime(nullable: false));
             AddColumn("dbo.Matches", "Winner", c => c.Int(nullable: false));
         }
-        
+
         public override void Down()
         {
             DropColumn("dbo.Matches", "Winner");

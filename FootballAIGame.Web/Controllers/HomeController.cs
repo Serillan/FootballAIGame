@@ -153,6 +153,5 @@ namespace FootballAIGame.Web.Controllers
 
             return viewModel;
         }
-
     }
 }

@@ -10,7 +10,7 @@ namespace FootballAIGame.Web.Migrations
             AddColumn("dbo.Matches", "Player1AverageActionLatency", c => c.Int(nullable: false, defaultValue: 0));
             AddColumn("dbo.Matches", "Player2AverageActionLatency", c => c.Int(nullable: false, defaultValue: 0));
         }
-        
+
         public override void Down()
         {
             DropColumn("dbo.Matches", "Player2AverageActionLatency");

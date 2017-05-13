@@ -15,7 +15,7 @@ namespace FootballAIGame.MatchSimulation
     /// </summary>
     public class MatchSimulator
     {
-        #region Simulation constants
+        #region Constants
 
         /// <summary>
         /// The total number of simulation steps.
@@ -263,6 +263,114 @@ namespace FootballAIGame.MatchSimulation
         {
             CurrentSimulationTask = SimulateAsync();
             await CurrentSimulationTask;
+        }
+
+        /// <summary>
+        /// Gets the player parameters from the specified <see cref="IClientCommunicator" /> asynchronously.
+        /// </summary>
+        /// <param name="clientCommunicator">The client communicator.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>
+        /// The task that represents the asynchronous get operation.
+        /// The value of the task's result is an array of football players
+        /// with their parameters set accordingly.
+        /// </returns>
+        private static async Task<FootballPlayer[]> GetPlayerParametersFromAIAsync(IClientCommunicator clientCommunicator, CancellationToken cancellationToken)
+        {
+            IClientMessage message;
+
+            var receiveTask = clientCommunicator.ReceiveClientMessageAsync();
+
+            await clientCommunicator.TrySendAsync("GET PARAMETERS");
+
+            while (true)
+            {
+                message = await receiveTask;
+
+                if (message is ParametersMessage)
+                    break;
+
+                cancellationToken.ThrowIfCancellationRequested();
+
+                receiveTask = clientCommunicator.ReceiveClientMessageAsync();
+            }
+
+            return ((ParametersMessage)message).Players;
+        }
+
+        /// <summary>
+        /// Stops the player from going too far outside of the playing field.
+        /// </summary>
+        /// <param name="player">The player.</param>
+        private static void StopPlayerFromGoingOutside(FootballPlayer player)
+        {
+            var y0 = player.Position.Y;
+            var y1 = player.Position.Y + player.Movement.Y;
+            var x0 = player.Position.X;
+            var x1 = player.Position.X + player.Movement.X;
+
+            var k = 1.0;
+
+            if (y1 < -MaximumPlayerManhattanDistanceFromField)
+                k = (-MaximumPlayerManhattanDistanceFromField - y0) / y1;
+            if (y1 > FieldHeight + MaximumPlayerManhattanDistanceFromField)
+                k = (FieldHeight + MaximumPlayerManhattanDistanceFromField - y0) / y1;
+            if (x1 < -MaximumPlayerManhattanDistanceFromField)
+                k = (-MaximumPlayerManhattanDistanceFromField - x0) / x1;
+            if (x1 > FieldWidth + MaximumPlayerManhattanDistanceFromField)
+                k = (FieldWidth + MaximumPlayerManhattanDistanceFromField - x0) / x1;
+
+            player.Movement = new Vector(player.Movement.X * k, player.Movement.Y * k);
+        }
+
+        /// <summary>
+        /// Gets the intersection that the ball would have with the goal line if it wasn't stopped by any player.
+        /// </summary>
+        /// <param name="ball">The ball.</param>
+        /// <param name="leftGoalLine">If set to true then the intersection with the left goal line is
+        /// retrieved; otherwise the intersection with the right goal line is retrieved.</param>
+        /// <returns>The intersection with the goal line point. Null if there is no such intersection (ball 
+        /// is not moving to the goal line or it is moving too slow).</returns>
+        private static Vector GetIntersectionWithGoalLine(Ball ball, bool leftGoalLine)
+        {
+            double ballMovementToIntersectionVectorRatio;
+            if (Math.Abs(ball.Movement.X) < 0.0001) // doesn't move
+                return null;
+
+            if (leftGoalLine)
+                ballMovementToIntersectionVectorRatio = -ball.Position.X / ball.Movement.X;
+            else
+                ballMovementToIntersectionVectorRatio = (110 - ball.Position.X) / ball.Movement.X;
+
+            if (ballMovementToIntersectionVectorRatio < 0)
+                return null;
+
+            var intersection = new Vector
+            {
+                X = ball.Position.X + ballMovementToIntersectionVectorRatio * ball.Movement.X,
+                Y = ball.Position.Y + ballMovementToIntersectionVectorRatio * ball.Movement.Y
+            };
+
+            // calculate speed at intersection
+            var distanceFromIntersection =
+                Math.Sqrt(Math.Pow(intersection.X - ball.Position.X, 2) - Math.Pow(intersection.Y - ball.Position.Y, 2));
+
+            // at^2 + 2(v_0)t -s = 0, where v_0 = start ball speed, a = acceleration, s = distance, t = time
+            // from that equation we calculate t
+            var discriminant = 4 * Math.Pow(ball.CurrentSpeed, 2) - 8 * BallDeceleration * distanceFromIntersection;
+            if (discriminant < 0)
+                return null; // ball will stop -> no intersection reached
+
+            var time = (ball.CurrentSpeed - Math.Sqrt(discriminant)) / BallDeceleration;
+
+            // final speed = v + a * t
+            var speedAtIntersection = ball.CurrentSpeed + BallDeceleration * time;
+
+            // is speed higher than minimal shot speed (4 for now)
+            if (speedAtIntersection <= 4)
+                return null;
+
+            return intersection;
         }
 
         /// <summary>
@@ -780,39 +888,6 @@ namespace FootballAIGame.MatchSimulation
         }
 
         /// <summary>
-        /// Gets the player parameters from the specified <see cref="IClientCommunicator" /> asynchronously.
-        /// </summary>
-        /// <param name="clientCommunicator">The client communicator.</param>
-        /// <param name="cancellationToken">The cancellation token.</param>
-        /// <returns>
-        /// The task that represents the asynchronous get operation.
-        /// The value of the task's result is an array of football players
-        /// with their parameters set accordingly.
-        /// </returns>
-        private static async Task<FootballPlayer[]> GetPlayerParametersFromAIAsync(IClientCommunicator clientCommunicator, CancellationToken cancellationToken)
-        {
-            IClientMessage message;
-
-            var receiveTask = clientCommunicator.ReceiveClientMessageAsync();
-
-            await clientCommunicator.TrySendAsync("GET PARAMETERS");
-
-            while (true)
-            {
-                message = await receiveTask;
-
-                if (message is ParametersMessage)
-                    break;
-
-                cancellationToken.ThrowIfCancellationRequested();
-
-                receiveTask = clientCommunicator.ReceiveClientMessageAsync();
-            }
-
-            return ((ParametersMessage)message).Players;
-        }
-
-        /// <summary>
         /// Gets the AI's action asynchronously.
         /// </summary>
         /// <param name="team">The AI's team.</param>
@@ -945,31 +1020,6 @@ namespace FootballAIGame.MatchSimulation
                 player.Position.X += player.Movement.X;
                 player.Position.Y += player.Movement.Y;
             }
-        }
-
-        /// <summary>
-        /// Stops the player from going too far outside of the playing field.
-        /// </summary>
-        /// <param name="player">The player.</param>
-        private static void StopPlayerFromGoingOutside(FootballPlayer player)
-        {
-            var y0 = player.Position.Y;
-            var y1 = player.Position.Y + player.Movement.Y;
-            var x0 = player.Position.X;
-            var x1 = player.Position.X + player.Movement.X;
-
-            var k = 1.0;
-
-            if (y1 < -MaximumPlayerManhattanDistanceFromField)
-                k = (-MaximumPlayerManhattanDistanceFromField - y0) / y1;
-            if (y1 > FieldHeight + MaximumPlayerManhattanDistanceFromField)
-                k = (FieldHeight + MaximumPlayerManhattanDistanceFromField - y0) / y1;
-            if (x1 < -MaximumPlayerManhattanDistanceFromField)
-                k = (-MaximumPlayerManhattanDistanceFromField - x0) / x1;
-            if (x1 > FieldWidth + MaximumPlayerManhattanDistanceFromField)
-                k = (FieldWidth + MaximumPlayerManhattanDistanceFromField - x0) / x1;
-
-            player.Movement = new Vector(player.Movement.X * k, player.Movement.Y * k);
         }
 
         /// <summary>
@@ -1479,56 +1529,6 @@ namespace FootballAIGame.MatchSimulation
             }
 
             return nearestPlayer;
-        }
-
-        /// <summary>
-        /// Gets the intersection that the ball would have with the goal line if it wasn't stopped by any player.
-        /// </summary>
-        /// <param name="ball">The ball.</param>
-        /// <param name="leftGoalLine">If set to true then the intersection with the left goal line is
-        /// retrieved; otherwise the intersection with the right goal line is retrieved.</param>
-        /// <returns>The intersection with the goal line point. Null if there is no such intersection (ball 
-        /// is not moving to the goal line or it is moving too slow).</returns>
-        private static Vector GetIntersectionWithGoalLine(Ball ball, bool leftGoalLine)
-        {
-            double ballMovementToIntersectionVectorRatio;
-            if (Math.Abs(ball.Movement.X) < 0.0001) // doesn't move
-                return null;
-
-            if (leftGoalLine)
-                ballMovementToIntersectionVectorRatio = -ball.Position.X / ball.Movement.X;
-            else
-                ballMovementToIntersectionVectorRatio = (110 - ball.Position.X) / ball.Movement.X;
-
-            if (ballMovementToIntersectionVectorRatio < 0)
-                return null;
-
-            var intersection = new Vector
-            {
-                X = ball.Position.X + ballMovementToIntersectionVectorRatio * ball.Movement.X,
-                Y = ball.Position.Y + ballMovementToIntersectionVectorRatio * ball.Movement.Y
-            };
-
-            // calculate speed at intersection
-            var distanceFromIntersection =
-                Math.Sqrt(Math.Pow(intersection.X - ball.Position.X, 2) - Math.Pow(intersection.Y - ball.Position.Y, 2));
-
-            // at^2 + 2(v_0)t -s = 0, where v_0 = start ball speed, a = acceleration, s = distance, t = time
-            // from that equation we calculate t
-            var discriminant = 4 * Math.Pow(ball.CurrentSpeed, 2) - 8 * BallDeceleration * distanceFromIntersection;
-            if (discriminant < 0)
-                return null; // ball will stop -> no intersection reached
-
-            var time = (ball.CurrentSpeed - Math.Sqrt(discriminant)) / BallDeceleration;
-
-            // final speed = v + a * t
-            var speedAtIntersection = ball.CurrentSpeed + BallDeceleration * time;
-
-            // is speed higher than minimal shot speed (4 for now)
-            if (speedAtIntersection <= 4)
-                return null;
-
-            return intersection;
         }
 
         /// <summary>

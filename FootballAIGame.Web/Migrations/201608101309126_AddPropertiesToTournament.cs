@@ -10,7 +10,7 @@ namespace FootballAIGame.Web.Migrations
             AddColumn("dbo.Tournaments", "StartTime", c => c.DateTime(nullable: false));
             AddColumn("dbo.Tournaments", "MaximumNumberOfPlayers", c => c.Int(nullable: false));
         }
-        
+
         public override void Down()
         {
             DropColumn("dbo.Tournaments", "MaximumNumberOfPlayers");

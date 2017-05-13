@@ -19,14 +19,6 @@ namespace FootballAIGame.MatchSimulation
     public class ClientConnection : IDisposable, IClientCommunicator
     {
         /// <summary>
-        /// Gets or sets a value indicating whether the client is logged in.
-        /// </summary>
-        /// <value>
-        ///   <c>true</c> if the client is logged in; otherwise, <c>false</c>.
-        /// </value>
-        public bool IsLoggedIn { get; set; }
-
-        /// <summary>
         /// Gets a value indicating whether the connection is still on.
         /// </summary>
         /// <value>
@@ -66,20 +58,28 @@ namespace FootballAIGame.MatchSimulation
         public bool IsInMatch { get; set; }
 
         /// <summary>
-        /// Gets or sets the name of the player with which the client has log on.
-        /// </summary>
-        /// <value>
-        /// The name of the player.
-        /// </value>
-        public string PlayerName { get; set; }
-
-        /// <summary>
         /// Gets or sets the name of the AI with which the client has log on.
         /// </summary>
         /// <value>
         /// The name of the AI.
         /// </value>
         public string AiName { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the client is logged in.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if the client is logged in; otherwise, <c>false</c>.
+        /// </value>
+        public bool IsLoggedIn { get; set; }
+
+        /// <summary>
+        /// Gets or sets the name of the player with which the client has log on.
+        /// </summary>
+        /// <value>
+        /// The name of the player.
+        /// </value>
+        public string PlayerName { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="TcpClient"/> associated with the connected client.
@@ -215,6 +215,82 @@ namespace FootballAIGame.MatchSimulation
         }
 
         /// <summary>
+        /// Receives a client message asynchronously.
+        /// The task's result is null if the connection is dropped.
+        /// </summary>
+        /// <returns>The task that represents the asynchronous receive operation. 
+        /// The value of the task's result is null if the connection is dropped; otherwise,
+        /// the received <see cref="IClientMessage"/>.</returns>
+        public async Task<IClientMessage> ReceiveClientMessageAsync()
+        {
+            if (CurrentReceiveTask == null || CurrentReceiveTask.IsCanceled || CurrentReceiveTask.IsCompleted ||
+                CurrentReceiveTask.IsFaulted)
+                CurrentReceiveTask = StartReceivingClientMessageAsync();
+
+            try
+            {
+                return await CurrentReceiveTask;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Receives the <see cref="ActionMessage"/> asynchronously.
+        /// The task's result is null if the connection is dropped.
+        /// </summary>
+        /// <param name="step">The simulation step which a received <see cref="ActionMessage"/> must have.</param>
+        /// <returns>
+        /// The task that represents the asynchronous receive operation. The value of the task's result is null 
+        /// if the connection is dropped; otherwise, the received <see cref="ActionMessage"/>.
+        /// </returns>
+        public async Task<ActionMessage> ReceiveActionMessageAsync(int step)
+        {
+            while (true)
+            {
+                var message = await ReceiveClientMessageAsync();
+
+                if (message == null) //connection dropped
+                    return null;
+
+                var actionMessage = message as ActionMessage;
+
+                if (actionMessage == null)
+                {
+                    //Console.WriteLine("Invalid message received.");
+                    continue;
+                }
+
+                if (actionMessage.Step == step)
+                    return actionMessage;
+                else if (actionMessage.Step > step)
+                {
+                    //Console.WriteLine($"Wrong action received! Received {actionMessage.Step} instead of {step}");
+                    return null;
+                }
+                else if (actionMessage.Step < step)
+                {
+                    //Console.WriteLine($"Wrong action received! Received {actionMessage.Step} instead of {step}");
+                    return null;
+                }
+                else
+                {
+                    //Console.WriteLine($"Wrong action received! actionMessage.Step == null, expected step - {step}");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Closes the connection. Releases all allocated resources.
+        /// </summary>
+        public void Dispose()
+        {
+            TcpClient.Close();
+        }
+
+        /// <summary>
         /// Sends the specified data to the client asynchronously.
         /// </summary>
         /// <param name="data">The data.</param>
@@ -242,29 +318,6 @@ namespace FootballAIGame.MatchSimulation
             }
 
             return true;
-        }
-
-        /// <summary>
-        /// Receives a client message asynchronously.
-        /// The task's result is null if the connection is dropped.
-        /// </summary>
-        /// <returns>The task that represents the asynchronous receive operation. 
-        /// The value of the task's result is null if the connection is dropped; otherwise,
-        /// the received <see cref="IClientMessage"/>.</returns>
-        public async Task<IClientMessage> ReceiveClientMessageAsync()
-        {
-            if (CurrentReceiveTask == null || CurrentReceiveTask.IsCanceled || CurrentReceiveTask.IsCompleted ||
-                CurrentReceiveTask.IsFaulted)
-                CurrentReceiveTask = StartReceivingClientMessageAsync();
-
-            try
-            {
-                return await CurrentReceiveTask;
-            }
-            catch (Exception)
-            {
-                return null;
-            }
         }
 
         /// <summary>
@@ -349,59 +402,5 @@ namespace FootballAIGame.MatchSimulation
 
             return message;
         }
-
-        /// <summary>
-        /// Closes the connection. Releases all allocated resources.
-        /// </summary>
-        public void Dispose()
-        {
-            TcpClient.Close();
-        }
-
-        /// <summary>
-        /// Receives the <see cref="ActionMessage"/> asynchronously.
-        /// The task's result is null if the connection is dropped.
-        /// </summary>
-        /// <param name="step">The simulation step which a received <see cref="ActionMessage"/> must have.</param>
-        /// <returns>
-        /// The task that represents the asynchronous receive operation. The value of the task's result is null 
-        /// if the connection is dropped; otherwise, the received <see cref="ActionMessage"/>.
-        /// </returns>
-        public async Task<ActionMessage> ReceiveActionMessageAsync(int step)
-        {
-            while (true)
-            {
-                var message = await ReceiveClientMessageAsync();
-
-                if (message == null) //connection dropped
-                    return null;
-
-                var actionMessage = message as ActionMessage;
-
-                if (actionMessage == null)
-                {
-                    //Console.WriteLine("Invalid message received.");
-                    continue;
-                }
-
-                if (actionMessage.Step == step)
-                    return actionMessage;
-                else if (actionMessage.Step > step)
-                {
-                    //Console.WriteLine($"Wrong action received! Received {actionMessage.Step} instead of {step}");
-                    return null;
-                }
-                else if (actionMessage.Step < step)
-                {
-                    //Console.WriteLine($"Wrong action received! Received {actionMessage.Step} instead of {step}");
-                    return null;
-                }
-                else
-                {
-                    //Console.WriteLine($"Wrong action received! actionMessage.Step == null, expected step - {step}");
-                }
-            }
-        }
-
     }
 }

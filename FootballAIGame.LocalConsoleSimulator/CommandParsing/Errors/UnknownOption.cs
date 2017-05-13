@@ -7,20 +7,20 @@
     class UnknownOption : IParsingError
     {
         /// <summary>
-        /// Gets the error message.
-        /// </summary>
-        /// <value>
-        /// The error message.
-        /// </value>
-        public string ErrorMessage { get; }
-
-        /// <summary>
         /// Gets the unknown option.
         /// </summary>
         /// <value>
         /// The unknown option.
         /// </value>
         public string Option { get; }
+
+        /// <summary>
+        /// Gets the error message.
+        /// </summary>
+        /// <value>
+        /// The error message.
+        /// </value>
+        public string ErrorMessage { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UnknownOption"/> class.

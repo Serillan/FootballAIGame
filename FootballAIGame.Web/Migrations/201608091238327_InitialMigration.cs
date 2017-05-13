@@ -76,7 +76,7 @@ namespace FootballAIGame.Web.Migrations
                 .Index(t => t.UserId);
             
         }
-        
+
         public override void Down()
         {
             DropForeignKey("dbo.AspNetUserRoles", "UserId", "dbo.AspNetUsers");

@@ -8,7 +8,7 @@ namespace FootballAIGame.Web.Migrations
         {
             AddColumn("dbo.Players", "PlayerState", c => c.Int(nullable: false));
         }
-        
+
         public override void Down()
         {
             DropColumn("dbo.Players", "PlayerState");

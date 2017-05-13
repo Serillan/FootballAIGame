@@ -28,6 +28,5 @@ namespace FootballAIGame.Web.Controllers
         {
             return View();
         }
-
     }
 }

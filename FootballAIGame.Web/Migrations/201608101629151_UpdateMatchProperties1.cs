@@ -9,7 +9,7 @@ namespace FootballAIGame.Web.Migrations
             AlterColumn("dbo.Matches", "Player1Id", c => c.String());
             AlterColumn("dbo.Matches", "Player2Id", c => c.String());
         }
-        
+
         public override void Down()
         {
             AlterColumn("dbo.Matches", "Player2Id", c => c.Int(nullable: false));

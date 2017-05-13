@@ -29,6 +29,48 @@ namespace FootballAIGame.LocalDesktopSimulator.CustomControls
         private int _max = 100;
 
         /// <summary>
+        /// Gets or sets the value.
+        /// </summary>
+        /// <value>
+        /// The value.
+        /// </value>
+        [Category("Slider")]
+        [DefaultValue(0)]
+        public int Value    
+        {
+            get { return _value; }
+            set { _value = value; Invalidate(); }
+        }
+
+        /// <summary>
+        /// Gets or sets the minimum allowed value.
+        /// </summary>
+        /// <value>
+        /// The minimum.
+        /// </value>
+        [Category("Slider")]
+        [DefaultValue(0)]
+        public int Min
+        {
+            get { return _min; }
+            set { _min = value; Invalidate(); }
+        }
+
+        /// <summary>
+        /// Gets or sets the maximum allowed value.
+        /// </summary>
+        /// <value>
+        /// The maximum.
+        /// </value>
+        [Category("Slider")]
+        [DefaultValue(100)]
+        public int Max
+        {
+            get { return _max; }
+            set { _max = value; Invalidate(); }
+        }
+
+        /// <summary>
         /// Gets or sets a value indicating whether the dragging of the circle is happening.
         /// </summary>
         /// <value>
@@ -77,48 +119,6 @@ namespace FootballAIGame.LocalDesktopSimulator.CustomControls
         private float UsableWidth => ClientRectangle.Width - 2 * CircleRadius;
 
         /// <summary>
-        /// Gets or sets the value.
-        /// </summary>
-        /// <value>
-        /// The value.
-        /// </value>
-        [Category("Slider")]
-        [DefaultValue(0)]
-        public int Value    
-        {
-            get { return _value; }
-            set { _value = value; Invalidate(); }
-        }
-
-        /// <summary>
-        /// Gets or sets the minimum allowed value.
-        /// </summary>
-        /// <value>
-        /// The minimum.
-        /// </value>
-        [Category("Slider")]
-        [DefaultValue(0)]
-        public int Min
-        {
-            get { return _min; }
-            set { _min = value; Invalidate(); }
-        }
-
-        /// <summary>
-        /// Gets or sets the maximum allowed value.
-        /// </summary>
-        /// <value>
-        /// The maximum.
-        /// </value>
-        [Category("Slider")]
-        [DefaultValue(100)]
-        public int Max
-        {
-            get { return _max; }
-            set { _max = value; Invalidate(); }
-        }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="Slider"/> class.
         /// </summary>
         public Slider()
@@ -131,6 +131,20 @@ namespace FootballAIGame.LocalDesktopSimulator.CustomControls
             MouseDown += OnMouseDown;
             MouseUp += OnMouseUp;
             MouseMove += OnMouseMove;
+        }
+
+        /// <summary>
+        /// Occurs when this instance is redrawn.
+        /// Raises the <see cref="E:System.Windows.Forms.Control.Paint" /> event.
+        /// Draws the current progress.
+        /// </summary>
+        /// <param name="e">A <see cref="T:System.Windows.Forms.PaintEventArgs" /> that contains the event data.</param>
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            base.OnPaint(e);
+            DrawCurrentProgress(e.Graphics);
+            e.Graphics.Flush();
         }
 
         /// <summary>
@@ -171,20 +185,6 @@ namespace FootballAIGame.LocalDesktopSimulator.CustomControls
         }
 
         /// <summary>
-        /// Occurs when this instance is redrawn.
-        /// Raises the <see cref="E:System.Windows.Forms.Control.Paint" /> event.
-        /// Draws the current progress.
-        /// </summary>
-        /// <param name="e">A <see cref="T:System.Windows.Forms.PaintEventArgs" /> that contains the event data.</param>
-        protected override void OnPaint(PaintEventArgs e)
-        {
-            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-            base.OnPaint(e);
-            DrawCurrentProgress(e.Graphics);
-            e.Graphics.Flush();
-        }
-
-        /// <summary>
         /// Adjusts the value in accordance with the specified mouse position.
         /// </summary>
         /// <param name="mouseX">The mouse x-coordinate relative to this instance client area.</param>
@@ -221,6 +221,5 @@ namespace FootballAIGame.LocalDesktopSimulator.CustomControls
             graphics.FillEllipse(new SolidBrush(ForeColor), CircleCenterX - CircleRadius, 
                 CircleCenterY - CircleRadius, 2*CircleRadius, 2*CircleRadius);
         }
-
     }
 }

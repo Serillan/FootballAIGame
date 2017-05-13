@@ -35,6 +35,5 @@ namespace FootballAIGame.DbModel.Utilities
 
             return stringBuilder.ToString();
         }
-
     }
 }

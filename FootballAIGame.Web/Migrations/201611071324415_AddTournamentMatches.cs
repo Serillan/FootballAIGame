@@ -10,7 +10,7 @@ namespace FootballAIGame.Web.Migrations
             CreateIndex("dbo.Matches", "Tournament_Id");
             AddForeignKey("dbo.Matches", "Tournament_Id", "dbo.Tournaments", "Id");
         }
-        
+
         public override void Down()
         {
             DropForeignKey("dbo.Matches", "Tournament_Id", "dbo.Tournaments");

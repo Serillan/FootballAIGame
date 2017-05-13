@@ -14,12 +14,9 @@ namespace FootballAIGame.Server
     class TournamentManager
     {
         /// <summary>
-        /// Gets or sets the running tournaments.
+        /// The singleton instance.
         /// </summary>
-        /// <value>
-        /// The list of running tournaments.
-        /// </value>
-        public List<TournamentSimulator> RunningTournaments { get; set; } = new List<TournamentSimulator>();
+        private static TournamentManager _instance;
 
         /// <summary>
         /// Gets the singleton instance.
@@ -30,9 +27,12 @@ namespace FootballAIGame.Server
         public static TournamentManager Instance => _instance ?? (_instance = new TournamentManager());
 
         /// <summary>
-        /// The singleton instance.
+        /// Gets or sets the running tournaments.
         /// </summary>
-        private static TournamentManager _instance;
+        /// <value>
+        /// The list of running tournaments.
+        /// </value>
+        public List<TournamentSimulator> RunningTournaments { get; set; } = new List<TournamentSimulator>();
 
         /// <summary>
         /// Prevents a default instance of the <see cref="TournamentManager"/> class from being created.
@@ -98,6 +98,27 @@ namespace FootballAIGame.Server
         }
 
         /// <summary>
+        /// Plans the unstarted tournaments.
+        /// </summary>
+        public static void PlanUnstartedTournaments()
+        {
+            using (var context = new ApplicationDbContext())
+            {
+                var nextTournaments = context.Tournaments
+                    .Where(t => t.TournamentState == TournamentState.Unstarted)
+                    .ToList();
+
+                foreach (var nextTournament in nextTournaments)
+                {
+                    var simulator = new TournamentSimulator(nextTournament);
+                    simulator.PlanSimulation();
+                }
+
+                Console.WriteLine("Tournaments planned.");
+            }
+        }
+
+        /// <summary>
         /// Removes the specified player from a running tournament in which he currently is.
         /// If there is not such tournament, then it does nothing.
         /// </summary>
@@ -132,27 +153,6 @@ namespace FootballAIGame.Server
                 }
 
                 context.SaveChanges();
-            }
-        }
-
-        /// <summary>
-        /// Plans the unstarted tournaments.
-        /// </summary>
-        public static void PlanUnstartedTournaments()
-        {
-            using (var context = new ApplicationDbContext())
-            {
-                var nextTournaments = context.Tournaments
-                    .Where(t => t.TournamentState == TournamentState.Unstarted)
-                    .ToList();
-
-                foreach (var nextTournament in nextTournaments)
-                {
-                    var simulator = new TournamentSimulator(nextTournament);
-                    simulator.PlanSimulation();
-                }
-
-                Console.WriteLine("Tournaments planned.");
             }
         }
 

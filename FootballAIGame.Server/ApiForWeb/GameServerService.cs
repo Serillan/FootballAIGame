@@ -86,6 +86,5 @@ namespace FootballAIGame.Server.ApiForWeb
             SimulationManager.Instance.CancelMatch(playerName);
             TournamentManager.Instance.RemoveFromRunningTournament(playerName);
         }
-
     }
 }

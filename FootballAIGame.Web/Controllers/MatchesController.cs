@@ -99,6 +99,5 @@ namespace FootballAIGame.Web.Controllers
 
             return View("Watch", match);
         }
-
     }
 }

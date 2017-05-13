@@ -18,6 +18,19 @@ namespace FootballAIGame.Server
     class SimulationManager
     {
         /// <summary>
+        /// The singleton instance.
+        /// </summary>
+        private static SimulationManager _instance;
+
+        /// <summary>
+        /// Gets the singleton instance.
+        /// </summary>
+        /// <value>
+        /// The instance.
+        /// </value>
+        public static SimulationManager Instance => _instance ?? (_instance = new SimulationManager());
+
+        /// <summary>
         /// Gets or sets the list of currently running simulations.
         /// </summary>
         /// <value>
@@ -32,19 +45,6 @@ namespace FootballAIGame.Server
         /// The list of connections with which players are currently looking for a random match.
         /// </value>
         private List<ClientConnection> WantsToPlayConnections { get; set; } = new List<ClientConnection>();
-
-        /// <summary>
-        /// Gets the singleton instance.
-        /// </summary>
-        /// <value>
-        /// The instance.
-        /// </value>
-        public static SimulationManager Instance => _instance ?? (_instance = new SimulationManager());
-
-        /// <summary>
-        /// The singleton instance.
-        /// </summary>
-        private static SimulationManager _instance;
 
         /// <summary>
         /// Prevents a default instance of the <see cref="SimulationManager"/> class from being created.
@@ -67,9 +67,7 @@ namespace FootballAIGame.Server
         {
             ConnectionManager.Instance.IsVerbose = true;
 
-            var listening = ConnectionManager.Instance.StartListeningAsync(port);
-
-            await listening;
+            await ConnectionManager.Instance.StartListeningAsync(port);
         }
 
         /// <summary>
@@ -252,16 +250,6 @@ namespace FootballAIGame.Server
         }
 
         /// <summary>
-        /// Initializes this instance.
-        /// </summary>
-        private void Initialize()
-        {
-            ResetPlayers();
-
-            SetSimulationHandlers();
-        }
-
-        /// <summary>
         /// Resets players.
         /// Sets all players to idle state.
         /// </summary>
@@ -279,6 +267,59 @@ namespace FootballAIGame.Server
                 }
                 context.SaveChanges();
             }
+        }
+
+        /// <summary>
+        /// Authenticates the user asynchronously.
+        /// </summary>
+        /// <param name="message">The login message.</param>
+        /// <returns>The task that represents the asynchronous authenticate operation.
+        /// The value of the task's result is null if the client has successfully authenticated;
+        /// otherwise, an error message.</returns>
+        private static async Task<string> AuthenticateUserAsync(LoginMessage message)
+        {
+            using (var context = new ApplicationDbContext())
+            {
+                var player = await context.Players
+                    .Include(u => u.User)
+                    .FirstOrDefaultAsync(p => p.Name == message.PlayerName);
+
+                if (player == null)
+                {
+                    return "Invalid player name.";
+                }
+
+                if (message.AccessKey != player.AccessKey)
+                {
+                    return "Invalid access key.";
+                }
+
+                if (player.ActiveAIs == null)
+                    player.ActiveAIs = message.AIName;
+                else
+                {
+                    if (player.ActiveAIs.Split(';').Contains(message.AIName))
+                    {
+                        return "AI name is already being used.";
+                    }
+
+                    player.ActiveAIs += ";" + message.AIName;
+                }
+
+                await context.SaveChangesAsync();
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Initializes this instance.
+        /// </summary>
+        private void Initialize()
+        {
+            ResetPlayers();
+
+            SetSimulationHandlers();
         }
 
         /// <summary>
@@ -500,49 +541,6 @@ namespace FootballAIGame.Server
                 }
                 await context.SaveChangesAsync();
             }
-        }
-
-        /// <summary>
-        /// Authenticates the user asynchronously.
-        /// </summary>
-        /// <param name="message">The login message.</param>
-        /// <returns>The task that represents the asynchronous authenticate operation.
-        /// The value of the task's result is null if the client has successfully authenticated;
-        /// otherwise, an error message.</returns>
-        private static async Task<string> AuthenticateUserAsync(LoginMessage message)
-        {
-            using (var context = new ApplicationDbContext())
-            {
-                var player = await context.Players
-                    .Include(u => u.User)
-                    .FirstOrDefaultAsync(p => p.Name == message.PlayerName);
-
-                if (player == null)
-                {
-                    return "Invalid player name.";
-                }
-
-                if (message.AccessKey != player.AccessKey)
-                {
-                    return "Invalid access key.";
-                }
-
-                if (player.ActiveAIs == null)
-                    player.ActiveAIs = message.AIName;
-                else
-                {
-                    if (player.ActiveAIs.Split(';').Contains(message.AIName))
-                    {
-                        return "AI name is already being used.";
-                    }
-
-                    player.ActiveAIs += ";" + message.AIName;
-                }
-
-                await context.SaveChangesAsync();
-            }
-
-            return null;
         }
     }
 }

@@ -21,16 +21,6 @@ namespace FootballAIGame.Web.Controllers
         private ApplicationSignInManager _signInManager;
         private ApplicationUserManager _userManager;
 
-        public ManageController()
-        {
-        }
-
-        public ManageController(ApplicationUserManager userManager, ApplicationSignInManager signInManager)
-        {
-            UserManager = userManager;
-            SignInManager = signInManager;
-        }
-
         public ApplicationSignInManager SignInManager
         {
             get
@@ -53,6 +43,16 @@ namespace FootballAIGame.Web.Controllers
             {
                 _userManager = value;
             }
+        }
+
+        public ManageController()
+        {
+        }
+
+        public ManageController(ApplicationUserManager userManager, ApplicationSignInManager signInManager)
+        {
+            UserManager = userManager;
+            SignInManager = signInManager;
         }
 
         public async Task<ActionResult> Index(ManageMessageId? message)
@@ -118,7 +118,8 @@ namespace FootballAIGame.Web.Controllers
             base.Dispose(disposing);
         }
 
-#region Helpers
+        #region Helpers
+
         // Used for XSRF protection when adding external logins
         private const string XsrfKey = "XsrfId";
 
@@ -169,6 +170,6 @@ namespace FootballAIGame.Web.Controllers
             Error
         }
 
-#endregion
+        #endregion
     }
 }

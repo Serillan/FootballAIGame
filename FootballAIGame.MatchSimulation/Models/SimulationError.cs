@@ -44,6 +44,5 @@ namespace FootballAIGame.MatchSimulation.Models
         /// </value>
         [DataMember]
         public int? AffectedPlayerNumber { get; set; }
-
     }
 }

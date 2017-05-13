@@ -262,29 +262,6 @@ namespace FootballAIGame.Web.Controllers.Api
         }
 
         /// <summary>
-        /// Deletes the tournament.
-        /// </summary>
-        /// <param name="tournament">The tournament.</param>
-        /// <returns>OK <see cref="IHttpActionResult"/> if the action was successful; otherwise
-        /// returns a bad request with an error message.</returns>
-        private string DeleteTournament(Tournament tournament)
-        {
-            if (tournament == null)
-                return "A tournament with the specified ID doesn't exist.";
-
-            if (tournament.TournamentState == TournamentState.Running) // if it was already running
-                return "The tournament has already started and cannot be deleted anymore.";
-
-            // remove tournament matches (though there shouldn't be any!)
-            Context.Matches.RemoveRange(
-                Context.Matches.Where(m => m.TournamentId == tournament.Id));
-
-            Context.Tournaments.Remove(tournament);
-
-            return "";
-        }
-
-        /// <summary>
         /// Deletes the specified recurring tournament.
         /// </summary>
         /// <param name="id">The recurring tournament identifier.</param>
@@ -323,6 +300,29 @@ namespace FootballAIGame.Web.Controllers.Api
             Context.RecurringTournaments.Remove(reccuringTournament);
             Context.SaveChanges();
             return Ok();
+        }
+
+        /// <summary>
+        /// Deletes the tournament.
+        /// </summary>
+        /// <param name="tournament">The tournament.</param>
+        /// <returns>OK <see cref="IHttpActionResult"/> if the action was successful; otherwise
+        /// returns a bad request with an error message.</returns>
+        private string DeleteTournament(Tournament tournament)
+        {
+            if (tournament == null)
+                return "A tournament with the specified ID doesn't exist.";
+
+            if (tournament.TournamentState == TournamentState.Running) // if it was already running
+                return "The tournament has already started and cannot be deleted anymore.";
+
+            // remove tournament matches (though there shouldn't be any!)
+            Context.Matches.RemoveRange(
+                Context.Matches.Where(m => m.TournamentId == tournament.Id));
+
+            Context.Tournaments.Remove(tournament);
+
+            return "";
         }
 
         /// <summary>

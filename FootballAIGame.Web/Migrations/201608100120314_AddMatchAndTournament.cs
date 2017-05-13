@@ -32,7 +32,7 @@ namespace FootballAIGame.Web.Migrations
                 .PrimaryKey(t => t.Id);
             
         }
-        
+
         public override void Down()
         {
             DropForeignKey("dbo.Matches", "Player2_UserId", "dbo.Players");

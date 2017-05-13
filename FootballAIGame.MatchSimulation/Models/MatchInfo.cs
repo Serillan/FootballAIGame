@@ -77,7 +77,6 @@ namespace FootballAIGame.MatchSimulation.Models
             Team1Statistics = new TeamStatistics();
             Team2Statistics = new TeamStatistics();
         }
-
     }
 
     

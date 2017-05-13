@@ -19,7 +19,7 @@ namespace FootballAIGame.Web.Migrations
             
             AddColumn("dbo.AspNetUsers", "PlayerId", c => c.Int(nullable: false));
         }
-        
+
         public override void Down()
         {
             DropForeignKey("dbo.Players", "UserId", "dbo.AspNetUsers");

@@ -75,6 +75,5 @@ namespace FootballAIGame.DbModel.Models
         {
             return new ApplicationDbContext();
         }
-
     }
 }

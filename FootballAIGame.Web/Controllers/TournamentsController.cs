@@ -204,6 +204,5 @@ namespace FootballAIGame.Web.Controllers
 
             return RedirectToAction("ManageRecurring");
         }
-
     }
 }

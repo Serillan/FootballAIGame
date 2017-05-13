@@ -59,6 +59,47 @@ namespace FootballAIGame.LocalDesktopSimulator
         }
 
         /// <summary>
+        /// Gets the error message corresponding to the specified <see cref="SimulationError"/>.
+        /// </summary>
+        /// <param name="error">The simulation error.</param>
+        /// <param name="ai1">The first AI from the simulation.</param>
+        /// <param name="ai2">The second AI from the simulation.</param>
+        /// <returns>The error message corresponding to the specified error.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">The specified <paramref name="error"/> doesn't have
+        /// a corresponding error message.</exception>
+        private static string GetErrorMessage(SimulationError error, string ai1, string ai2)
+        {
+            var ai = error.Team == Team.FirstPlayer ? ai1 : ai2;
+
+            switch (error.Reason)
+            {
+                case SimulationErrorReason.TooHighSpeed:
+                    return $"{error.Time} : {ai} - Player{error.AffectedPlayerNumber} has too high speed.";
+                case SimulationErrorReason.TooHighAcceleration:
+                    return $"{error.Time} : {ai} - Player{error.AffectedPlayerNumber} has too high acceleration.";
+                case SimulationErrorReason.TooStrongKick:
+                    return $"{error.Time} : {ai} - Player{error.AffectedPlayerNumber} has made too strong kick.";
+                case SimulationErrorReason.InvalidMovementVector:
+                    return $"{error.Time} : {ai} - Player{error.AffectedPlayerNumber} has invalid movement vector set.";
+                case SimulationErrorReason.InvalidKickVector:
+                    return $"{error.Time} : {ai} - Player{error.AffectedPlayerNumber} has invalid kick vector set.";
+                case SimulationErrorReason.InvalidParameters:
+                    return $"{error.Time} : {ai} - Player{error.AffectedPlayerNumber} has invalid parameters.";
+                case SimulationErrorReason.GetParametersTimeout:
+                    return $"{error.Time} : {ai} - Get parameters request timeout.";
+                case SimulationErrorReason.GetActionTimeout:
+                    return $"{error.Time} : {ai} - Get action request timeout.";
+                case SimulationErrorReason.Disconnection:
+                    return $"{error.Time} : {ai} - Player has disconnected.";
+                case SimulationErrorReason.Cancellation:
+                    return $"{error.Time} : {ai} - Player has left the match.";
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+        }
+
+        /// <summary>
         /// Does the custom (non-designer) initialization of this instance.
         /// </summary>
         private void DoCustomInitialization()
@@ -287,47 +328,6 @@ namespace FootballAIGame.LocalDesktopSimulator
         }
 
         /// <summary>
-        /// Gets the error message corresponding to the specified <see cref="SimulationError"/>.
-        /// </summary>
-        /// <param name="error">The simulation error.</param>
-        /// <param name="ai1">The first AI from the simulation.</param>
-        /// <param name="ai2">The second AI from the simulation.</param>
-        /// <returns>The error message corresponding to the specified error.</returns>
-        /// <exception cref="ArgumentOutOfRangeException">The specified <paramref name="error"/> doesn't have
-        /// a corresponding error message.</exception>
-        private static string GetErrorMessage(SimulationError error, string ai1, string ai2)
-        {
-            var ai = error.Team == Team.FirstPlayer ? ai1 : ai2;
-
-            switch (error.Reason)
-            {
-                case SimulationErrorReason.TooHighSpeed:
-                    return $"{error.Time} : {ai} - Player{error.AffectedPlayerNumber} has too high speed.";
-                case SimulationErrorReason.TooHighAcceleration:
-                    return $"{error.Time} : {ai} - Player{error.AffectedPlayerNumber} has too high acceleration.";
-                case SimulationErrorReason.TooStrongKick:
-                    return $"{error.Time} : {ai} - Player{error.AffectedPlayerNumber} has made too strong kick.";
-                case SimulationErrorReason.InvalidMovementVector:
-                    return $"{error.Time} : {ai} - Player{error.AffectedPlayerNumber} has invalid movement vector set.";
-                case SimulationErrorReason.InvalidKickVector:
-                    return $"{error.Time} : {ai} - Player{error.AffectedPlayerNumber} has invalid kick vector set.";
-                case SimulationErrorReason.InvalidParameters:
-                    return $"{error.Time} : {ai} - Player{error.AffectedPlayerNumber} has invalid parameters.";
-                case SimulationErrorReason.GetParametersTimeout:
-                    return $"{error.Time} : {ai} - Get parameters request timeout.";
-                case SimulationErrorReason.GetActionTimeout:
-                    return $"{error.Time} : {ai} - Get action request timeout.";
-                case SimulationErrorReason.Disconnection:
-                    return $"{error.Time} : {ai} - Player has disconnected.";
-                case SimulationErrorReason.Cancellation:
-                    return $"{error.Time} : {ai} - Player has left the match.";
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-
-        }
-
-        /// <summary>
         /// Occurs when the stop match button is clicked.
         /// Stops the ongoing match simulation.
         /// </summary>
@@ -452,6 +452,5 @@ namespace FootballAIGame.LocalDesktopSimulator
         {
             PlaySlider.Value = 0;
         }
-
     }
 }

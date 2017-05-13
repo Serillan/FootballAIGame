@@ -15,6 +15,19 @@ namespace FootballAIGame.LocalSimulationBase
     public class SimulationManager
     {
         /// <summary>
+        /// The singleton instance.
+        /// </summary>
+        private static SimulationManager _instance;
+
+        /// <summary>
+        /// Gets the singleton instance.
+        /// </summary>
+        /// <value>
+        /// The instance.
+        /// </value>
+        public static SimulationManager Instance => _instance ?? (_instance = new SimulationManager());
+
+        /// <summary>
         /// Gets or sets the set of connected AIs.
         /// </summary>
         /// <value>
@@ -37,19 +50,6 @@ namespace FootballAIGame.LocalSimulationBase
         /// The <see cref="IDictionary{TKey,TValue}"/> of the task sources for the waiting commands' tasks.
         /// </value>
         private IDictionary<string, TaskCompletionSource<bool>> WaitingForAITaskSources { get; set; } = new Dictionary<string, TaskCompletionSource<bool>>();
-
-        /// <summary>
-        /// Gets the singleton instance.
-        /// </summary>
-        /// <value>
-        /// The instance.
-        /// </value>
-        public static SimulationManager Instance => _instance ?? (_instance = new SimulationManager());
-
-        /// <summary>
-        /// The singleton instance.
-        /// </summary>
-        private static SimulationManager _instance;
 
         /// <summary>
         /// Prevents a default instance of the <see cref="SimulationManager"/> class from being created.
@@ -186,6 +186,20 @@ namespace FootballAIGame.LocalSimulationBase
         }
 
         /// <summary>
+        /// Stops the simulation between the specified AIs.
+        /// </summary>
+        /// <param name="ai1">The name of the first AI.</param>
+        /// <param name="ai2">The name of the second AI.</param>
+        public void StopSimulation(string ai1, string ai2)
+        {
+            var simulation = GetRunningSimulation(ai1, ai2);
+            if (simulation == null)
+                return;
+
+            simulation.AI1CancelRequested = true;
+        }
+
+        /// <summary>
         /// Initializes this instance.
         /// </summary>
         private void Initialize()
@@ -268,20 +282,6 @@ namespace FootballAIGame.LocalSimulationBase
                     (s.AI1Communicator.PlayerName == ai1 && s.AI2Communicator.PlayerName == ai2) ||
                     (s.AI1Communicator.PlayerName == ai2 && s.AI2Communicator.PlayerName == ai1));
             }
-        }
-
-        /// <summary>
-        /// Stops the simulation between the specified AIs.
-        /// </summary>
-        /// <param name="ai1">The name of the first AI.</param>
-        /// <param name="ai2">The name of the second AI.</param>
-        public void StopSimulation(string ai1, string ai2)
-        {
-            var simulation = GetRunningSimulation(ai1, ai2);
-            if (simulation == null)
-                return;
-
-            simulation.AI1CancelRequested = true;
         }
     }
 }

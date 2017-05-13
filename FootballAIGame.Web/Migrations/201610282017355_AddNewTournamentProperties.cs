@@ -9,7 +9,7 @@ namespace FootballAIGame.Web.Migrations
             AddColumn("dbo.Tournaments", "TournamentState", c => c.Int(nullable: false));
             AddColumn("dbo.Tournaments", "MinimumNumberOfPlayers", c => c.Int(nullable: false));
         }
-        
+
         public override void Down()
         {
             DropColumn("dbo.Tournaments", "MinimumNumberOfPlayers");

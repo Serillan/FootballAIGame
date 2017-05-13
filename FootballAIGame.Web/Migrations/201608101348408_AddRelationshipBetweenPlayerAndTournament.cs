@@ -20,7 +20,7 @@ namespace FootballAIGame.Web.Migrations
                 .Index(t => t.Player_UserId);
             
         }
-        
+
         public override void Down()
         {
             DropForeignKey("dbo.TournamentPlayers", "Player_UserId", "dbo.Players");

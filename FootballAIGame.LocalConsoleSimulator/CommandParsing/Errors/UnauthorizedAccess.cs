@@ -8,20 +8,20 @@ namespace FootballAIGame.LocalConsoleSimulator.CommandParsing.Errors
     class UnauthorizedAccess : IParsingError
     {
         /// <summary>
-        /// Gets the error message.
-        /// </summary>
-        /// <value>
-        /// The error message.
-        /// </value>
-        public string ErrorMessage { get; }
-
-        /// <summary>
         /// Gets the path that caused the error.
         /// </summary>
         /// <value>
         /// The path that caused the error.
         /// </value>
         public string Path { get; }
+
+        /// <summary>
+        /// Gets the error message.
+        /// </summary>
+        /// <value>
+        /// The error message.
+        /// </value>
+        public string ErrorMessage { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UnauthorizedAccess"/> class.

@@ -77,17 +77,6 @@ namespace FootballAIGame.MatchSimulation.Models
         public Vector Kick { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="FootballPlayer"/> class.
-        /// </summary>
-        public FootballPlayer(int id)
-        {
-            Id = id;
-            Position = new Vector();
-            Movement = new Vector();
-            Kick = new Vector();
-        }
-
-        /// <summary>
         /// Gets the current speed in meters per second.
         /// </summary>
         /// <value>
@@ -114,5 +103,16 @@ namespace FootballAIGame.MatchSimulation.Models
         /// </value>
         public double MaxKickSpeed =>
             15 + KickPower * 5;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FootballPlayer"/> class.
+        /// </summary>
+        public FootballPlayer(int id)
+        {
+            Id = id;
+            Position = new Vector();
+            Movement = new Vector();
+            Kick = new Vector();
+        }
     }
 }

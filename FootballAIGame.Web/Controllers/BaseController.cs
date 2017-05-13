@@ -55,6 +55,5 @@ namespace FootballAIGame.Web.Controllers
         {
             _context?.Dispose();
         }
-
     }
 }

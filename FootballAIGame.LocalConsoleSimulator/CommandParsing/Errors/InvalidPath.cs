@@ -8,20 +8,20 @@ namespace FootballAIGame.LocalConsoleSimulator.CommandParsing.Errors
     class InvalidPath : IParsingError
     {
         /// <summary>
-        /// Gets the error message.
-        /// </summary>
-        /// <value>
-        /// The error message.
-        /// </value>
-        public string ErrorMessage { get; }
-
-        /// <summary>
         /// Gets the invalid path.
         /// </summary>
         /// <value>
         /// The invalid path.
         /// </value>
         public string Path { get; }
+
+        /// <summary>
+        /// Gets the error message.
+        /// </summary>
+        /// <value>
+        /// The error message.
+        /// </value>
+        public string ErrorMessage { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InvalidPath"/> class.

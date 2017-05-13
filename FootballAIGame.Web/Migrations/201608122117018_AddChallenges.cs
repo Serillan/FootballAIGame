@@ -21,7 +21,7 @@ namespace FootballAIGame.Web.Migrations
                 .Index(t => t.ChallengingPlayer_UserId);
             
         }
-        
+
         public override void Down()
         {
             DropForeignKey("dbo.Challenges", "ChallengingPlayer_UserId", "dbo.Players");

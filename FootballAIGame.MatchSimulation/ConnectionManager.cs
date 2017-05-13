@@ -43,6 +43,14 @@ namespace FootballAIGame.MatchSimulation
         private static ConnectionManager _instance;
 
         /// <summary>
+        /// Gets the singleton instance.
+        /// </summary>
+        /// <value>
+        /// The instance.
+        /// </value>
+        public static ConnectionManager Instance => _instance ?? (_instance = new ConnectionManager());
+
+        /// <summary>
         /// Gets or sets a value indicating whether the information about the new connections and disconnections
         /// should be written to the output.
         /// </summary>
@@ -103,15 +111,6 @@ namespace FootballAIGame.MatchSimulation
         /// The <see cref="ClientLoggedInHandler"/>.
         /// </value>
         public ClientLoggedInHandler ClientLoggedInHandler { get; set; }
-
-        /// <summary>
-        /// Gets the singleton instance.
-        /// </summary>
-        /// <value>
-        /// The instance.
-        /// </value>
-        public static ConnectionManager Instance => _instance ?? (_instance = new ConnectionManager());
-
 
 
         /// <summary>
@@ -308,6 +307,5 @@ namespace FootballAIGame.MatchSimulation
         {
             return Task.FromResult((string)null);
         }
-
     }
 }

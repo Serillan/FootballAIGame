@@ -108,6 +108,67 @@ namespace FootballAIGame.LocalConsoleSimulator.Commands
         }
 
         /// <summary>
+        /// Saves the specified match to the file specified by the path to that file.
+        /// </summary>
+        /// <param name="filePath">The save file path.</param>
+        /// <param name="match">The match to be saved.</param>
+        private static void SaveMatch(string filePath, Match match)
+        {
+            try
+            {
+                var stream = File.Create(filePath);
+                match.Save(stream);
+                stream.Close();
+            }
+            catch (Exception)
+            {
+                Console.Error.WriteLine($"Error: Couldn't save the match ({match.Ai1Name} vs {match.Ai2Name}) to " +
+                              $"file {filePath}.");
+            }
+        }
+
+        /// <summary>
+        /// Gets the error message corresponding to the specified error.
+        /// </summary>
+        /// <param name="error">The simulation error.</param>
+        /// <param name="ai1">The first AI from the simulation.</param>
+        /// <param name="ai2">The second AI from the simulation.</param>
+        /// <returns>The error message corresponding to the specified error.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">The specified <paramref name="error"/> doesn't have
+        /// a corresponding error message.</exception>
+        private static string GetErrorMessage(SimulationError error, string ai1, string ai2)
+        {
+            var ai = error.Team == Team.FirstPlayer ? ai1 : ai2;
+
+            switch (error.Reason)
+            {
+                case SimulationErrorReason.TooHighSpeed:
+                    return $"{error.Time} : {ai} - Player{error.AffectedPlayerNumber} has too high speed.";
+                case SimulationErrorReason.TooHighAcceleration:
+                    return $"{error.Time} : {ai} - Player{error.AffectedPlayerNumber} has too high acceleration.";
+                case SimulationErrorReason.TooStrongKick:
+                    return $"{error.Time} : {ai} - Player{error.AffectedPlayerNumber} has made too strong kick.";
+                case SimulationErrorReason.InvalidMovementVector:
+                    return $"{error.Time} : {ai} - Player{error.AffectedPlayerNumber} has invalid movement vector set.";
+                case SimulationErrorReason.InvalidKickVector:
+                    return $"{error.Time} : {ai} - Player{error.AffectedPlayerNumber} has invalid kick vector set.";
+                case SimulationErrorReason.InvalidParameters:
+                    return $"{error.Time} : {ai} - Player{error.AffectedPlayerNumber} has invalid parameters.";
+                case SimulationErrorReason.GetParametersTimeout:
+                    return $"{error.Time} : {ai} - Get parameters request timeout.";
+                case SimulationErrorReason.GetActionTimeout:
+                    return $"{error.Time} : {ai} - Get action request timeout.";
+                case SimulationErrorReason.Disconnection:
+                    return $"{error.Time} : {ai} - Player has disconnected.";
+                case SimulationErrorReason.Cancellation:
+                    return $"{error.Time} : {ai} - Player has left the match.";
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+        }
+
+        /// <summary>
         /// Saves the specified matches to the specified <see cref="SavingDirectory"/> and <see cref="SavingFiles"/> if they
         /// are different from null respectively.
         /// </summary>
@@ -137,26 +198,6 @@ namespace FootballAIGame.LocalConsoleSimulator.Commands
 
                     SaveMatch(file.FullName, match);
                 }
-            }
-        }
-
-        /// <summary>
-        /// Saves the specified match to the file specified by the path to that file.
-        /// </summary>
-        /// <param name="filePath">The save file path.</param>
-        /// <param name="match">The match to be saved.</param>
-        private static void SaveMatch(string filePath, Match match)
-        {
-            try
-            {
-                var stream = File.Create(filePath);
-                match.Save(stream);
-                stream.Close();
-            }
-            catch (Exception)
-            {
-                Console.Error.WriteLine($"Error: Couldn't save the match ({match.Ai1Name} vs {match.Ai2Name}) to " +
-                              $"file {filePath}.");
             }
         }
 
@@ -213,47 +254,6 @@ namespace FootballAIGame.LocalConsoleSimulator.Commands
 
 
             return string.Join(", ", messages);
-        }
-
-        /// <summary>
-        /// Gets the error message corresponding to the specified error.
-        /// </summary>
-        /// <param name="error">The simulation error.</param>
-        /// <param name="ai1">The first AI from the simulation.</param>
-        /// <param name="ai2">The second AI from the simulation.</param>
-        /// <returns>The error message corresponding to the specified error.</returns>
-        /// <exception cref="ArgumentOutOfRangeException">The specified <paramref name="error"/> doesn't have
-        /// a corresponding error message.</exception>
-        private static string GetErrorMessage(SimulationError error, string ai1, string ai2)
-        {
-            var ai = error.Team == Team.FirstPlayer ? ai1 : ai2;
-
-            switch (error.Reason)
-            {
-                case SimulationErrorReason.TooHighSpeed:
-                    return $"{error.Time} : {ai} - Player{error.AffectedPlayerNumber} has too high speed.";
-                case SimulationErrorReason.TooHighAcceleration:
-                    return $"{error.Time} : {ai} - Player{error.AffectedPlayerNumber} has too high acceleration.";
-                case SimulationErrorReason.TooStrongKick:
-                    return $"{error.Time} : {ai} - Player{error.AffectedPlayerNumber} has made too strong kick.";
-                case SimulationErrorReason.InvalidMovementVector:
-                    return $"{error.Time} : {ai} - Player{error.AffectedPlayerNumber} has invalid movement vector set.";
-                case SimulationErrorReason.InvalidKickVector:
-                    return $"{error.Time} : {ai} - Player{error.AffectedPlayerNumber} has invalid kick vector set.";
-                case SimulationErrorReason.InvalidParameters:
-                    return $"{error.Time} : {ai} - Player{error.AffectedPlayerNumber} has invalid parameters.";
-                case SimulationErrorReason.GetParametersTimeout:
-                    return $"{error.Time} : {ai} - Get parameters request timeout.";
-                case SimulationErrorReason.GetActionTimeout:
-                    return $"{error.Time} : {ai} - Get action request timeout.";
-                case SimulationErrorReason.Disconnection:
-                    return $"{error.Time} : {ai} - Player has disconnected.";
-                case SimulationErrorReason.Cancellation:
-                    return $"{error.Time} : {ai} - Player has left the match.";
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-
         }
     }
 }

@@ -14,18 +14,18 @@ namespace FootballAIGame.LocalConsoleSimulator
     static class Program
     {
         /// <summary>
+        /// The default listening port. This port is used for listening if the user
+        /// doesn't provide his own port in the program's argument.
+        /// </summary>
+        private const int DefaultListeningPort = 50030;
+
+        /// <summary>
         /// Gets a value indicating whether this application is in the verbose mode.
         /// </summary>
         /// <value>
         /// <c>true</c> if the application is in the verbose mode; otherwise, <c>false</c>.
         /// </value>
         public static bool IsVerbose { get; private set; }
-
-        /// <summary>
-        /// The default listening port. This port is used for listening if the user
-        /// doesn't provide his own port in the program's argument.
-        /// </summary>
-        private const int DefaultListeningPort = 50030;
 
         /// <summary>
         /// The entry point of the application. Starts the listening for AI connections. Starts processing
@@ -78,6 +78,5 @@ namespace FootballAIGame.LocalConsoleSimulator
             }
 
         }
-
     }
 }

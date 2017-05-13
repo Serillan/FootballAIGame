@@ -23,6 +23,11 @@ namespace FootballAIGame.Server
         private const int DefaultListeningPort = 50030;
 
         /// <summary>
+        /// Keeps handler from getting garbage collected.
+        /// </summary>
+        private static ConsoleEventDelegate _handler;
+
+        /// <summary>
         /// The entry point of the application. Starts the <see cref="GameServerService"/> and
         /// start listening for new AI connections.
         /// <para /> Also sets application closing handler.
@@ -119,19 +124,6 @@ namespace FootballAIGame.Server
         }
 
         /// <summary>
-        /// Keeps handler from getting garbage collected.
-        /// </summary>
-        private static ConsoleEventDelegate _handler;
-
-        /// <summary>
-        /// Console event handler delegate.
-        /// </summary>
-        /// <param name="eventType">Type of the event.</param>
-        /// <returns>If it returns <c>false</c>, 
-        /// the next handler function in the list of handlers for this process is used.</returns>
-        private delegate bool ConsoleEventDelegate(int eventType);
-
-        /// <summary>
         /// Regularly checks the database state asynchronously.
         /// Returns when the database isn't online anymore.
         /// </summary>
@@ -161,5 +153,12 @@ namespace FootballAIGame.Server
         [DllImport("kernel32.dll", SetLastError = true)]
         private static extern bool SetConsoleCtrlHandler(ConsoleEventDelegate handlerRoutine, bool add);
 
+        /// <summary>
+        /// Console event handler delegate.
+        /// </summary>
+        /// <param name="eventType">Type of the event.</param>
+        /// <returns>If it returns <c>false</c>, 
+        /// the next handler function in the list of handlers for this process is used.</returns>
+        private delegate bool ConsoleEventDelegate(int eventType);
     }
 }

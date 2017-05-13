@@ -56,6 +56,5 @@ namespace FootballAIGame.MatchSimulation.Messages
             parametersMessage.Players = players;
             return parametersMessage;
         }
-
     }
 }

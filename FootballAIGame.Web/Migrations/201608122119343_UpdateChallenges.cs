@@ -11,7 +11,7 @@ namespace FootballAIGame.Web.Migrations
             AddPrimaryKey("dbo.Challenges", "Id");
             DropColumn("dbo.Challenges", "ChallengingPlayerId");
         }
-        
+
         public override void Down()
         {
             AddColumn("dbo.Challenges", "ChallengingPlayerId", c => c.String(nullable: false, maxLength: 128));

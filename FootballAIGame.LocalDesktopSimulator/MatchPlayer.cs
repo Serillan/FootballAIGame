@@ -22,6 +22,23 @@ namespace FootballAIGame.LocalDesktopSimulator
         private const int DefaultUpdateFrequency = 200; // [ms]
 
         /// <summary>
+        /// Gets a value indicating whether the playback is being played.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if the playback is being played; otherwise, <c>false</c>.
+        /// </value>
+        public bool IsPlaying { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the speed of the playing. It is used to divide <see cref="DefaultUpdateFrequency"/>
+        /// to get the lower update frequency.
+        /// </summary>
+        /// <value>
+        /// The playing speed.
+        /// </value>
+        public double Speed { get; set; } = 1;
+
+        /// <summary>
         /// Gets or sets the <see cref="Match"/> whose playback is played.
         /// </summary>
         /// <value>
@@ -63,23 +80,6 @@ namespace FootballAIGame.LocalDesktopSimulator
         private Slider PlaySlider { get; set; }
 
         /// <summary>
-        /// Gets a value indicating whether the playback is being played.
-        /// </summary>
-        /// <value>
-        /// <c>true</c> if the playback is being played; otherwise, <c>false</c>.
-        /// </value>
-        public bool IsPlaying { get; private set; }
-
-        /// <summary>
-        /// Gets or sets the speed of the playing. It is used to divide <see cref="DefaultUpdateFrequency"/>
-        /// to get the lower update frequency.
-        /// </summary>
-        /// <value>
-        /// The playing speed.
-        /// </value>
-        public double Speed { get; set; } = 1;
-
-        /// <summary>
         /// Gets the update frequency in milliseconds in which the simulation steps are updated.
         /// </summary>
         /// <value>
@@ -102,6 +102,49 @@ namespace FootballAIGame.LocalDesktopSimulator
             PlaySlider = playSlider;
 
             GamePanel.Paint += GamePanelOnPaint;
+        }
+
+        /// <summary>
+        /// Loads the match.
+        /// </summary>
+        /// <param name="match">The match.</param>
+        public void LoadMatch(Match match)
+        {
+            Match = match;
+            GamePanel.Invalidate();
+        }
+
+        /// <summary>
+        /// Starts to play the playback of the <see cref="Match"/>.
+        /// </summary>
+        public void StartPlaying()
+        {
+            lock (this)
+            {
+                if (IsPlaying)
+                    return;
+
+                IsPlaying = true;
+            }
+
+            Task.Run(() => PlayMatch());
+        }
+
+        /// <summary>
+        /// Renders the current state of the loaded <see cref="Match"/> with accordance to the <see cref="PlaySlider"/> value.
+        /// </summary>
+        public void RenderCurrentState()
+        {
+            UpdateStatus(PlaySlider.Value);
+            GamePanel.Invalidate();
+        }
+
+        /// <summary>
+        /// Stops the playing of the playback.
+        /// </summary>
+        public void StopPlaying()
+        {
+            IsPlaying = false;
         }
 
         /// <summary>
@@ -132,32 +175,6 @@ namespace FootballAIGame.LocalDesktopSimulator
         }
 
         /// <summary>
-        /// Loads the match.
-        /// </summary>
-        /// <param name="match">The match.</param>
-        public void LoadMatch(Match match)
-        {
-            Match = match;
-            GamePanel.Invalidate();
-        }
-
-        /// <summary>
-        /// Starts to play the playback of the <see cref="Match"/>.
-        /// </summary>
-        public void StartPlaying()
-        {
-            lock (this)
-            {
-                if (IsPlaying)
-                    return;
-
-                IsPlaying = true;
-            }
-
-            Task.Run(() => PlayMatch());
-        }
-
-        /// <summary>
         /// Plays the playback of the loaded <see cref="Match"/>.
         /// </summary>
         private void PlayMatch()
@@ -183,15 +200,6 @@ namespace FootballAIGame.LocalDesktopSimulator
                     RenderCurrentState();
                 }));
             }
-        }
-
-        /// <summary>
-        /// Renders the current state of the loaded <see cref="Match"/> with accordance to the <see cref="PlaySlider"/> value.
-        /// </summary>
-        public void RenderCurrentState()
-        {
-            UpdateStatus(PlaySlider.Value);
-            GamePanel.Invalidate();
         }
 
         /// <summary>
@@ -345,14 +353,5 @@ namespace FootballAIGame.LocalDesktopSimulator
             graphics.DrawRectangle(pen, 110 - 16.5f, 37.5f - 20.16f, 16.5f, 2 * 20.16f);
 
         }
-
-        /// <summary>
-        /// Stops the playing of the playback.
-        /// </summary>
-        public void StopPlaying()
-        {
-            IsPlaying = false;
-        }
-
     }
 }
