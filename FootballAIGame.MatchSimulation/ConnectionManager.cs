@@ -150,6 +150,11 @@ namespace FootballAIGame.MatchSimulation
                                         $"You might already have another simulator on.");
                 return;
             }
+            catch (ArgumentOutOfRangeException)
+            {
+                Console.Error.WriteLine($"Error: The specified port {port} is out of range of valid ports.");
+                return;
+            }
 
             if (IsVerbose)
                 Console.WriteLine($"Listening has started on port {port}.");
