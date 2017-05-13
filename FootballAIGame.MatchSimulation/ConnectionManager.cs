@@ -38,11 +38,6 @@ namespace FootballAIGame.MatchSimulation
     public class ConnectionManager
     {
         /// <summary>
-        /// The port on which connection manager listens for new connections.
-        /// </summary>
-        public const int GameServerPort = 50030;
-
-        /// <summary>
         /// The singleton instance.
         /// </summary>
         private static ConnectionManager _instance;
@@ -117,13 +112,7 @@ namespace FootballAIGame.MatchSimulation
         /// </value>
         public static ConnectionManager Instance => _instance ?? (_instance = new ConnectionManager());
 
-        /// <summary>
-        /// Gets or sets the TCP listener that listens for new connections.
-        /// </summary>
-        /// <value>
-        /// The listener.
-        /// </value>
-        private TcpListener Listener { get; set; }
+
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConnectionManager"/> class. <para/>
@@ -131,7 +120,6 @@ namespace FootballAIGame.MatchSimulation
         /// </summary>
         private ConnectionManager()
         {
-            Listener = new TcpListener(IPAddress.Any, GameServerPort);
             Connections = new List<ClientConnection>();
             ActiveConnections = new List<ClientConnection>();
             AuthenticationHandler = DoDefaultAuthenticationAsync;
@@ -140,28 +128,37 @@ namespace FootballAIGame.MatchSimulation
         /// <summary>
         /// Starts the listening for new AI clients. When the client connects, he is added to
         /// the <see cref="Connections" /> and he remains there while the connection is opened.
+        /// Returns if the listening couldn't start (also writes the error message to the
+        /// standard error output).
         /// </summary>
-        /// <returns>The task that represents the asynchronous listening operation.</returns>
-        public async Task StartListeningAsync()
+        /// <param name="port">The port.</param>
+        /// <returns>
+        /// The task that represents the asynchronous listening operation.
+        /// </returns>
+        public async Task StartListeningAsync(int port)
         {
+            TcpListener listener;
+
             try
             {
-                Listener.Start();
+                listener = new TcpListener(IPAddress.Any, port);
+                listener.Start();
             }
             catch (SocketException)
             {
-                Console.Error.WriteLine("Error: The listening address is already being used.");
+                Console.Error.WriteLine($"Error: The port {port} is already being used by another process. " +
+                                        $"You might already have another simulator on.");
                 return;
             }
 
             if (IsVerbose)
-                Console.WriteLine("Listening has started.");
+                Console.WriteLine($"Listening has started on port {port}.");
 
             var checkingConnectionsTask = StartCheckingConnectionsAsync();
 
             while (true)
             {
-                var client = await Listener.AcceptTcpClientAsync();
+                var client = await listener.AcceptTcpClientAsync();
                 var connection = new ClientConnection(client);
                 lock (Connections)
                 {

@@ -129,11 +129,16 @@ namespace FootballAIGame.LocalSimulationBase
 
         /// <summary>
         /// Starts accepting AIs' connections asynchronously.
+        /// Returns if the listening couldn't start (also writes the error message to the
+        /// standard error output).
         /// </summary>
-        /// <returns>The task that represents the asynchronous operation of accepting connections.</returns>
-        public async Task StartAcceptingConnectionsAsync()
+        /// <param name="port">The port that will be used for listening.</param>
+        /// <returns>
+        /// The task that represents the asynchronous operation of accepting connections.
+        /// </returns>
+        public async Task StartAcceptingConnectionsAsync(int port)
         {
-            await ConnectionManager.Instance.StartListeningAsync();
+            await ConnectionManager.Instance.StartListeningAsync(port);
         }
 
         /// <summary>

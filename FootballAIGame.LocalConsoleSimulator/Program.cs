@@ -22,6 +22,12 @@ namespace FootballAIGame.LocalConsoleSimulator
         public static bool IsVerbose { get; private set; }
 
         /// <summary>
+        /// The default listening port. This port is used for listening if the user
+        /// doesn't provide his own port in the program's argument.
+        /// </summary>
+        private const int DefaultListeningPort = 50030;
+
+        /// <summary>
         /// The entry point of the application. Starts the listening for AI connections. Starts processing
         /// the input commands.
         /// </summary>
@@ -35,8 +41,26 @@ namespace FootballAIGame.LocalConsoleSimulator
                 ConnectionManager.Instance.IsVerbose = true;
             }
 
+            int port = DefaultListeningPort;
+
+            // the port can be specified in the first program's argument (options are ignored)
+            foreach (var arg in args)
+            {
+                if (!arg.StartsWith("-"))
+                {
+                    if (!int.TryParse(arg, out port))
+                    {
+                        Console.Error.WriteLine($"Invalid specified port: {arg}");
+                        return;
+                    }
+
+                    break;
+                }
+            }
+
+
             // start listening
-            var listeningTask = SimulationManager.Instance.StartAcceptingConnectionsAsync();
+            var listeningTask = SimulationManager.Instance.StartAcceptingConnectionsAsync(port);
 
             if (listeningTask.IsCompleted) // used address
                 return;

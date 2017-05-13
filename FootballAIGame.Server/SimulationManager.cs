@@ -56,13 +56,18 @@ namespace FootballAIGame.Server
 
         /// <summary>
         /// Starts listening for a new AI connections asynchronously.
+        /// Returns if the listening couldn't start (also writes the error message to the
+        /// standard error output).
         /// </summary>
-        /// <returns>The task that represents the asynchronous operation of accepting connections.</returns>
-        public async Task StartAcceptingConnectionsAsync()
+        /// <param name="port">The port that will be used for listening.</param>
+        /// <returns>
+        /// The task that represents the asynchronous operation of accepting connections.
+        /// </returns>
+        public async Task StartAcceptingConnectionsAsync(int port)
         {
             ConnectionManager.Instance.IsVerbose = true;
 
-            var listening = ConnectionManager.Instance.StartListeningAsync();
+            var listening = ConnectionManager.Instance.StartListeningAsync(port);
 
             await listening;
         }

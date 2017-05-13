@@ -17,16 +17,39 @@ namespace FootballAIGame.Server
     static class Program
     {
         /// <summary>
-        /// The entry point of the application. Starts the <see cref="GameServerService"/> and
-        /// start listening on port <see cref="ConnectionManager.GameServerPort"/> for new AI
-        /// connections. <para /> Also sets application closing handler.
+        /// The default listening port. This port is used for listening if the user
+        /// doesn't provide his own port in the program's argument.
         /// </summary>
-        public static void Main()
+        private const int DefaultListeningPort = 50030;
+
+        /// <summary>
+        /// The entry point of the application. Starts the <see cref="GameServerService"/> and
+        /// start listening for new AI connections.
+        /// <para /> Also sets application closing handler.
+        /// </summary>
+        public static void Main(string[] args)
         {
+            int port = DefaultListeningPort;
+
+            // the port can be specified in the first program's argument (options are ignored)
+            foreach (var arg in args)
+            {
+                if (!arg.StartsWith("-"))
+                {
+                    if (!int.TryParse(arg, out port))
+                    {
+                        Console.Error.WriteLine($"Invalid specified port: {arg}");
+                        return;
+                    }
+                    
+                    break;
+                }
+            }
+
             try
             {
                 // start listening
-                var listeningTask = SimulationManager.Instance.StartAcceptingConnectionsAsync();
+                var listeningTask = SimulationManager.Instance.StartAcceptingConnectionsAsync(port);
 
                 if (listeningTask.IsCompleted) // used address
                     return;
@@ -57,7 +80,10 @@ namespace FootballAIGame.Server
             {
                 // either there is already another server on
                 // or there is another process using the GameServerService's address
-                Console.Error.WriteLine("Error: WCF service's address is already being used.");
+                Console.Error.WriteLine("Error: WCF service's port is already being used.\n" +
+                                        "You can change the port in FootballAIGame.Server.exe.config but" +
+                                        "in that case you need to change the port in the web application as " +
+                                        "well (in Web.config file).");
             }
         }
 
