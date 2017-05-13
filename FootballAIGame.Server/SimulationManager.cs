@@ -58,11 +58,11 @@ namespace FootballAIGame.Server
         /// Starts listening for a new AI connections asynchronously.
         /// </summary>
         /// <returns>The task that represents the asynchronous operation of accepting connections.</returns>
-        public async Task StartsAcceptingConnectionsAsync()
+        public async Task StartAcceptingConnectionsAsync()
         {
             ConnectionManager.Instance.IsVerbose = true;
+
             var listening = ConnectionManager.Instance.StartListeningAsync();
-            Console.WriteLine("Listening has started.");
 
             await listening;
         }
@@ -486,7 +486,7 @@ namespace FootballAIGame.Server
                     if (player.SelectedAI == connection.AiName)
                     {
                         player.SelectedAI = "";
-                        player.PlayerState = PlayerState.Idle; // todo error message
+                        player.PlayerState = PlayerState.Idle;
                     }
 
                     if (player.ActiveAIs == "")

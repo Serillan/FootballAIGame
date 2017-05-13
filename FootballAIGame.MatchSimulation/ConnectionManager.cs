@@ -144,7 +144,18 @@ namespace FootballAIGame.MatchSimulation
         /// <returns>The task that represents the asynchronous listening operation.</returns>
         public async Task StartListeningAsync()
         {
-            Listener.Start();
+            try
+            {
+                Listener.Start();
+            }
+            catch (SocketException)
+            {
+                Console.Error.WriteLine("Error: The listening address is already being used.");
+                return;
+            }
+
+            if (IsVerbose)
+                Console.WriteLine("Listening has started.");
 
             var checkingConnectionsTask = StartCheckingConnectionsAsync();
 

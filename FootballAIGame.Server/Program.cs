@@ -25,8 +25,11 @@ namespace FootballAIGame.Server
         {
             try
             {
-                // start simulating
-                var simulatingTask = SimulationManager.Instance.StartsAcceptingConnectionsAsync();
+                // start listening
+                var listeningTask = SimulationManager.Instance.StartAcceptingConnectionsAsync();
+
+                if (listeningTask.IsCompleted) // used address
+                    return;
 
                 // start tournaments
                 TournamentManager.PlanUnstartedTournaments();
@@ -43,12 +46,18 @@ namespace FootballAIGame.Server
                 // start regular checks (every 30s) of the database
                 var databaseChecks = CheckDatabaseStateRegularlyAsync(10000);
 
-                // stay on while the database is online
-                databaseChecks.Wait();
+                // stay on while the database is online and the listening is active
+                Task.WhenAny(listeningTask, databaseChecks).Wait();
             }
             catch (Exception ex) when (ex is SqlException || ex is EntityException)
             {
                 Console.Error.WriteLine("Error: Cannot connect to the database.");
+            }
+            catch (AddressAlreadyInUseException) // WCF service address used
+            {
+                // either there is already another server on
+                // or there is another process using the GameServerService's address
+                Console.Error.WriteLine("Error: WCF service's address is already being used.");
             }
         }
 
@@ -63,8 +72,6 @@ namespace FootballAIGame.Server
 
             using (var context = new ApplicationDbContext())
             {
-                // todo check if really all that needs to be removed is specified here
-
                 var players = context.Players.ToList();
                 var challenges = context.Challenges.ToList();
 
@@ -72,7 +79,7 @@ namespace FootballAIGame.Server
                 {
                     player.SelectedAI = null;
                     player.ActiveAIs = null;
-                    player.PlayerState = PlayerState.Idle; // TODO show browser clients that error has occurred
+                    player.PlayerState = PlayerState.Idle;
                 }
 
                 context.Challenges.RemoveRange(challenges);

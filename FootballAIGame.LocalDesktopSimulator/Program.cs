@@ -17,7 +17,14 @@ namespace FootballAIGame.LocalDesktopSimulator
         [STAThread]
         private static void Main()
         {
-            Task.Run(() => SimulationManager.Instance.StartAcceptingConnectionsAsync());
+            var listeningTask = SimulationManager.Instance.StartAcceptingConnectionsAsync();
+
+            if (listeningTask.IsCompleted) // address already in use
+            {
+                MessageBox.Show(null, "The listening address is already being used.", "Error", MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+                Environment.Exit(1);
+            }
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);

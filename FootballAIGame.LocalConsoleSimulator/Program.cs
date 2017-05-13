@@ -22,7 +22,7 @@ namespace FootballAIGame.LocalConsoleSimulator
         public static bool IsVerbose { get; private set; }
 
         /// <summary>
-        /// The entry point for the application. Starts the listening for AI connections. Starts processing
+        /// The entry point of the application. Starts the listening for AI connections. Starts processing
         /// the input commands.
         /// </summary>
         /// <param name="args"> A list of command line arguments. If it contains '-v' then it starts
@@ -35,10 +35,11 @@ namespace FootballAIGame.LocalConsoleSimulator
                 ConnectionManager.Instance.IsVerbose = true;
             }
 
-            Task.Run(() => SimulationManager.Instance.StartAcceptingConnectionsAsync());
+            // start listening
+            var listeningTask = SimulationManager.Instance.StartAcceptingConnectionsAsync();
 
-            if (IsVerbose)
-                Console.WriteLine("Listening has started.");
+            if (listeningTask.IsCompleted) // used address
+                return;
 
             string line;
 

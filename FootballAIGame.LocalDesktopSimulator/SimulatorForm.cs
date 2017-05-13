@@ -50,7 +50,7 @@ namespace FootballAIGame.LocalDesktopSimulator
         private MatchPlayer MatchPlayer { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SimulatorForm"/> class.
+        /// Initializes a new instance of the <see cref="SimulatorForm" /> class.
         /// </summary>
         public SimulatorForm()
         {
@@ -195,7 +195,6 @@ namespace FootballAIGame.LocalDesktopSimulator
                 progressBarUpdateCancelleration.Cancel();
                 await progressBarUpdatingTask;
 
-                // todo prepare match for watching
                 LoadMatch(match);
             }
             catch (Exception ex) when (ex is ArgumentException || ex is InvalidOperationException)
