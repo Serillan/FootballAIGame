@@ -360,20 +360,16 @@ namespace FootballAIGame.LocalDesktopSimulator
 
             dialog.ShowDialog(this);
 
-            Stream fileStream;
-
             try
             {
-                fileStream = dialog.OpenFile();
+                var fileStream = dialog.OpenFile();
+                LoadedMatch.Save(fileStream);
+                fileStream.Close();
             }
             catch (Exception)
             {
-                return;
+                // ignore (in case of cancel, incorrect file etc.)
             }
-
-            LoadedMatch.Save(fileStream);
-
-            fileStream.Close();
         }
 
         /// <summary>

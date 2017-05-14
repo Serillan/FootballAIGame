@@ -182,17 +182,33 @@
                     }
                 };
 
-                var aiTableClickHandler = function() {
+                var aiRowClickHandler = function () {
                     $("table#ai-table").css("border", "2px solid white");
+                    $(this).toggleClass("success");
+                    
                     var nextValue = $(this).find("td").first().text();
 
-                    $("#SelectedAi").attr("value", nextValue);
+                    if ($(this).is("[data-selected]")) {
 
-                    $.ajax({
-                        url: "@Url.Action("ToggleAI", "AIs", new {HttpRoute = "Api"})/" + nextValue,
-                        method: "put"
+                        $(this).removeAttr("data-selected");
+
+                        $.ajax({
+                            url: "@Url.Action("DeselectAI", "AIs", new {HttpRoute = "Api"})",
+                            method: "put"
                     });
 
+                    } else {
+                        $(this).attr("data-selected", "");
+
+                        $.ajax({
+                            url: "@Url.Action("SelectAI", "AIs", new {HttpRoute = "Api"})/" + nextValue,
+                            method: "put"
+                        });
+
+                    }
+
+                    $(this).siblings("tr").removeAttr("data-selected");
+                    $(this).siblings("tr").removeClass("success");
                 };
 
                 $("#random")
@@ -205,8 +221,8 @@
                                     url: "@Url.Action("StartRandomMatch", "Matches", new {HttpRoute = "Api"})",
                                     method: "post",
                                     success: function() {
-                                        clearInterval(calls);
-                                        location.reload();
+                                        clearInterval(ajaxCalls);
+                                        location.reload(true);
                                     },
                                     error: function(xhr, status, error) {
                                         var json = JSON.parse(xhr.responseText);
@@ -235,7 +251,7 @@
                                 opponentName,
                             method: "post",
                             success: function() {
-                                location.reload();
+                                location.reload(true);
                             },
                             error: function(xhr, status, error) {
                                 var json = JSON.parse(xhr.responseText);
@@ -247,14 +263,14 @@
 
                 var declineChallenge = function() {
                     var button = $(this);
-                    @* button.closest("tr").remove(); possible improvement -> GetChallengersNames ajax call would need to change*@ 
+                    @* button.closest("tr").remove(); possible improvement -> GetChallengersNames ajax call would need to change*@
 
                     $.ajax({
                         url: "@Url.Action("Decline", "Challenges", new {HttpRoute = "Api"})/" +
                             $(this).attr("data-value"),
                         type: "DELETE",
                         success: function() {
-                            ajaxCalls();
+                            ajaxCallsFunction();
                             toastr.success("Challenge declined.");
                         }
                     });
@@ -281,10 +297,10 @@
                 $(document).on("click", "#challenge", processChallenge);
                 $(document).on("mousedown", ".accept-challenge", processChallenge);
                 $(document).on("mousedown", ".decline-challenge", declineChallenge);
-                $(document).on("mousedown", "table#ai-table tr.selectable-row", aiTableClickHandler);
+                $(document).on("mousedown", ".selectable-row", aiRowClickHandler);
 
                 // challenges polling
-                var ajaxCalls = function() {
+                var ajaxCallsFunction = function() {
                     $.ajax({
                         url: "@Url.Action("GetChallengersNames", "Challenges", new {HttpRoute = "Api"})",
                         success: function(response) {
@@ -303,34 +319,46 @@
                             }
 
                             $("#challengesTableBody").html(newTableBody);
-                            //$(".accept-challenge").on("click", processChallenge);
-                            //$(".decline-challenge").on("click", declineChallenge);
                         }
                     });
                     $.ajax({
                         url: "@Url.Action("GetActiveAIs", "AIs", new {HttpRoute = "Api"})",
                         success: function(response) {
+
                             var newTableBody = "";
-                            var selectedAi = $("tr[data-selected]>td").text();
-                            for (var i = 0; i < response.length; i++) {
-                                if (response[i] === selectedAi) {
+
+                            var activeAIs = response.activeAIs;
+                            var selectedAI = $("tr[data-selected]>td").text();
+
+                            for (var i = 0; i < activeAIs.length; i++) {
+
+                                if (activeAIs[i] === selectedAI) {
                                     newTableBody = newTableBody +
                                         '<tr class="selectable-row" data-selected><td>' +
-                                        response[i] +
+                                        activeAIs[i] +
                                         '</td></tr>';
                                 } else {
 
                                     newTableBody = newTableBody +
                                         '<tr class="selectable-row"><td>' +
-                                        response[i] +
+                                        activeAIs[i] +
                                         '</td></tr>';
                                 }
                             }
 
                             $("#aiTableBody").html(newTableBody);
                             $(".selectable-row[data-selected]").addClass("success");
-                            // add click handle
-                            //$(".selectable-row").click(selectableRowClickHandle);
+
+                            @* Import in the case when the selected AI relogs on the server (becomes unselected in DB).
+                               Might also happen in case when the toggle operation hasn't finished yet (after selection).
+                               We don't know which of these cases happened, so we have to do this even for 2. case.       *@
+                            if (selectedAI !== undefined && activeAIs.indexOf(selectedAI) > -1 &&
+                                response.selectedAI !== selectedAI) {
+                                $.ajax({
+                                    url: "@Url.Action("SelectAI", "AIs", new {HttpRoute = "Api"})/" + selectedAI,
+                                    method: "put"
+                                });
+                            }
                         }
                     });
                     $.ajax({
@@ -339,7 +367,7 @@
                         success: function(response) {
                             var num = parseInt(response);
                             if (!isNaN(num) && @((int) PlayerState.Idle) !== response) {
-                                clearInterval(ajaxCalls);
+                                clearInterval(ajaxCallsFunction);
                                 location.reload(true);
                             }
                         }
@@ -379,7 +407,7 @@
                         }
                     });
                 };
-                setInterval(ajaxCalls, 1000);
+                var ajaxCalls = setInterval(ajaxCallsFunction, 1000);
             });
 
     </script>

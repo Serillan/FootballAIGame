@@ -29,6 +29,21 @@ namespace FootballAIGame.Web.Controllers.Api
         }
 
         /// <summary>
+        /// Deselects the select AI if there is one.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <returns>OK <see cref="IHttpActionResult"/>.</returns>
+        [HttpPut]
+        public IHttpActionResult DeselectAI()
+        {
+            CurrentPlayer.SelectedAI = "";
+
+            Context.SaveChanges();
+
+            return Ok();
+        }
+
+        /// <summary>
         /// If the specified AI is not currently selected, select it. Otherwise
         /// deselects it.
         /// </summary>
@@ -47,15 +62,18 @@ namespace FootballAIGame.Web.Controllers.Api
         }
 
         /// <summary>
-        /// Gets the active AIs names that are connected to the game server
-        /// with the current player name.
+        /// Gets the names of the AIs that are connected to the game server
+        /// with the current player name. Also gets the selected AI name.
         /// </summary>
-        /// <returns>OK <see cref="IHttpActionResult"/> with the player's active AIs' names.</returns>
+        /// <returns>OK <see cref="IHttpActionResult"/> with the player's active AIs' names
+        /// and the selected AI name.</returns>
         [HttpGet]
         public IHttpActionResult GetActiveAIs()
         {
             var activeAIs = CurrentPlayer.ActiveAIs?.Split(';').ToList() ?? new List<string>();
-            return Ok(activeAIs);
+            var selectedAI = CurrentPlayer.SelectedAI;
+
+            return Ok(new { ActiveAIs = activeAIs, SelectedAI = selectedAI});
         }
     }
 }

@@ -31,8 +31,7 @@ namespace FootballAIGame.LocalConsoleSimulator
         /// The entry point of the application. Starts the listening for AI connections. Starts processing
         /// the input commands.
         /// </summary>
-        /// <param name="args"> A list of command line arguments. If it contains '-v' then it starts
-        /// the application in the verbose mode.</param>
+        /// <param name="args">A list of command line arguments.</param>
         private static void Main(string[] args)
         {
             if (args.Contains("-v"))

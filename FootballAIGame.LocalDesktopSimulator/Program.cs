@@ -17,9 +17,10 @@ namespace FootballAIGame.LocalDesktopSimulator
         private const int DefaultListeningPort = 50030;
 
         /// <summary>
-        /// The entry point for the application. Starts the winforms application. Starts the listening for AI
+        /// The entry point for the application. Starts the WinForms application. Starts the listening for AI
         /// connections.
         /// </summary>
+        /// <param name="args">A list of command line arguments.</param>
         [STAThread]
         private static void Main(string[] args)
         {

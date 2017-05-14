@@ -112,7 +112,6 @@ namespace FootballAIGame.MatchSimulation
         /// </value>
         public ClientLoggedInHandler ClientLoggedInHandler { get; set; }
 
-
         /// <summary>
         /// Initializes a new instance of the <see cref="ConnectionManager"/> class. <para/>
         /// Prevents a default instance of the <see cref="ConnectionManager"/> class from being created.

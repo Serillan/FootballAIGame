@@ -23,15 +23,17 @@ namespace FootballAIGame.Server
         private const int DefaultListeningPort = 50030;
 
         /// <summary>
-        /// Keeps handler from getting garbage collected.
+        /// The console event handler.
+        /// We use this field to protect the handler from getting garbage collected.
         /// </summary>
         private static ConsoleEventDelegate _handler;
 
         /// <summary>
-        /// The entry point of the application. Starts the <see cref="GameServerService"/> and
+        /// The entry point of the application. Starts the <see cref="GameServerService" /> and
         /// start listening for new AI connections.
         /// <para /> Also sets application closing handler.
         /// </summary>
+        /// <param name="args">A list of command line arguments.</param>
         public static void Main(string[] args)
         {
             int port = DefaultListeningPort;
@@ -67,11 +69,11 @@ namespace FootballAIGame.Server
                 host.Open();
                 Console.WriteLine("Services have started.");
 
-                // set console exit handler
+                // set console exit handler and put it to _handler so that it won't get garbage collected
                 _handler = ConsoleEventHandler;
                 SetConsoleCtrlHandler(_handler, true);
 
-                // start regular checks (every 30s) of the database
+                // start regular checks (every 10s) of the database
                 var databaseChecks = CheckDatabaseStateRegularlyAsync(10000);
 
                 // stay on while the database is online and the listening is active
@@ -127,8 +129,11 @@ namespace FootballAIGame.Server
         /// Regularly checks the database state asynchronously.
         /// Returns when the database isn't online anymore.
         /// </summary>
-        /// <returns>The task that represents the asynchronous regular checks.
-        /// The task is completed when the database goes offline.</returns>
+        /// <param name="checkInterval">The checks' interval in milliseconds.</param>
+        /// <returns>
+        /// The task that represents the asynchronous regular checks.
+        /// The task is completed when the database goes offline.
+        /// </returns>
         private static async Task CheckDatabaseStateRegularlyAsync(int checkInterval)
         {
             var context = new ApplicationDbContext();

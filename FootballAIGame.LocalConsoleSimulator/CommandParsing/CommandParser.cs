@@ -27,7 +27,7 @@ namespace FootballAIGame.LocalConsoleSimulator.CommandParsing
                 return new ParseResult() { Error = new NullInput() };
             }
 
-            line = line.Trim();
+            line = line.Replace("\0", "").Trim(); // arrows in mono might add null (\0)
 
             if (line.Length == 0)
                 return new ParseResult() { Error = new MissingCommand() };

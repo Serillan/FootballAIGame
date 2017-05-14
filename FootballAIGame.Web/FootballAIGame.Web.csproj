@@ -601,7 +601,6 @@
     <Content Include="Scripts\CustomScripts\clickable-row.js" />
     <Content Include="Scripts\jquery-editable-select.js" />
     <Content Include="Scripts\jquery.binarytransport.js" />
-    <Content Include="Scripts\CustomScripts\selectable-row.js" />
     <Content Include="Scripts\DataTables\autoFill.bootstrap.js" />
     <Content Include="Scripts\DataTables\autoFill.bootstrap.min.js" />
     <Content Include="Scripts\DataTables\autoFill.bootstrap4.js" />
@@ -895,6 +894,7 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <DocumentationFile>bin\FootballAIGame.Web.XML</DocumentationFile>
+    <ExcludeGeneratedDebugSymbol>true</ExcludeGeneratedDebugSymbol>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Base|AnyCPU'">
     <OutputPath>bin\</OutputPath>

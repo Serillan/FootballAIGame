@@ -31,7 +31,6 @@ namespace FootballAIGame.Web
 
             bundles.Add(new ScriptBundle("~/bundles/custom").Include(
                         "~/Scripts/CustomScripts/clickable-row.js",
-                        "~/Scripts/CustomScripts/selectable-row.js",
                         "~/Scripts/CustomScripts/initialization.js"));
 
             bundles.Add(new ScriptBundle("~/bundles/jqueryval").Include(
