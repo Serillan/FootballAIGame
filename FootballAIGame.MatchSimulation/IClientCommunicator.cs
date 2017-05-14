@@ -66,15 +66,5 @@ namespace FootballAIGame.MatchSimulation
         /// the received <see cref="IClientMessage"/>.</returns>
         Task<IClientMessage> ReceiveClientMessageAsync();
 
-        /// <summary>
-        /// Receives the <see cref="ActionMessage"/> asynchronously.
-        /// The task's result is null if the connection is dropped.
-        /// </summary>
-        /// <param name="step">The simulation step which a received <see cref="ActionMessage"/> must have.</param>
-        /// <returns>
-        /// The task that represents the asynchronous receive operation. The value of the task's result is null 
-        /// if the connection is dropped; otherwise, the received <see cref="ActionMessage"/>.
-        /// </returns>
-        Task<ActionMessage> ReceiveActionMessageAsync(int step);
     }
 }

@@ -266,39 +266,6 @@ namespace FootballAIGame.MatchSimulation
         }
 
         /// <summary>
-        /// Gets the player parameters from the specified <see cref="IClientCommunicator" /> asynchronously.
-        /// </summary>
-        /// <param name="clientCommunicator">The client communicator.</param>
-        /// <param name="cancellationToken">The cancellation token.</param>
-        /// <returns>
-        /// The task that represents the asynchronous get operation.
-        /// The value of the task's result is an array of football players
-        /// with their parameters set accordingly.
-        /// </returns>
-        private static async Task<FootballPlayer[]> GetPlayerParametersFromAIAsync(IClientCommunicator clientCommunicator, CancellationToken cancellationToken)
-        {
-            IClientMessage message;
-
-            var receiveTask = clientCommunicator.ReceiveClientMessageAsync();
-
-            await clientCommunicator.TrySendAsync("GET PARAMETERS");
-
-            while (true)
-            {
-                message = await receiveTask;
-
-                if (message is ParametersMessage)
-                    break;
-
-                cancellationToken.ThrowIfCancellationRequested();
-
-                receiveTask = clientCommunicator.ReceiveClientMessageAsync();
-            }
-
-            return ((ParametersMessage)message).Players;
-        }
-
-        /// <summary>
         /// Stops the player from going too far outside of the playing field.
         /// </summary>
         /// <param name="player">The player.</param>
@@ -477,8 +444,11 @@ namespace FootballAIGame.MatchSimulation
             var actionMessage1 = await getAction1Task;
             var actionMessage2 = await getAction2Task;
 
-            if (actionMessage1 == null || actionMessage2 == null) // disconnection
+            if (actionMessage1 == null || actionMessage2 == null)
+            {
+                // disconnection
                 return;
+            }
 
             GameState.IsKickOff = false; // reset to false, UpdateMatch might set it to true
 
@@ -571,8 +541,7 @@ namespace FootballAIGame.MatchSimulation
         {
             var getParametersCancellationSource = new CancellationTokenSource();
 
-            var communicator = team == Team.FirstPlayer ? AI1Communicator : AI2Communicator;
-            var getParameters = GetPlayerParametersFromAIAsync(communicator, getParametersCancellationSource.Token);
+            var getParameters = GetPlayerParametersFromAIAsync(team, getParametersCancellationSource.Token);
 
             var result = await Task.WhenAny(getParameters, Task.Delay(1000));
 
@@ -670,7 +639,9 @@ namespace FootballAIGame.MatchSimulation
             var getMessageResult = await getMessageTask;
 
             var receiveMessage = team == Team.FirstPlayer ? AI1ReceiveMessage : AI2ReceiveMessage;
-            if (receiveMessage.IsFaulted || !communicator.IsLoggedIn)
+            if (receiveMessage.IsFaulted || !communicator.IsLoggedIn ||
+                (getMessageResult == receiveActionMessage && !receiveActionMessage.IsFaulted && 
+                receiveActionMessage.Result == null))
             {
                 cancellationTokenSource.Cancel();
                 await logTimeTask;
@@ -807,21 +778,13 @@ namespace FootballAIGame.MatchSimulation
         /// <param name="ai2Action">The second AI's action.</param>
         private void UpdateMatch(ActionMessage ai1Action, ActionMessage ai2Action)
         {
-            try
-            {
-                UpdateBall(ai1Action, ai2Action);
+            UpdateBall(ai1Action, ai2Action);
 
-                UpdatePlayers(Team.FirstPlayer, ai1Action);
-                UpdatePlayers(Team.SecondPlayer, ai2Action);
+            UpdatePlayers(Team.FirstPlayer, ai1Action);
+            UpdatePlayers(Team.SecondPlayer, ai2Action);
 
-                ProcessOut();
-                ProcessGoal();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                Console.WriteLine("HERE");
-            }
+            ProcessOut();
+            ProcessGoal();
         }
 
         /// <summary>
@@ -888,7 +851,44 @@ namespace FootballAIGame.MatchSimulation
         }
 
         /// <summary>
-        /// Gets the AI's action asynchronously.
+        /// Gets the player parameters from the specified team asynchronously.
+        /// </summary>
+        /// <param name="team">The team.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>
+        /// The task that represents the asynchronous get operation.
+        /// The value of the task's result is an array of football players
+        /// with their parameters set accordingly.
+        /// </returns>
+        private async Task<FootballPlayer[]> GetPlayerParametersFromAIAsync(Team team, CancellationToken cancellationToken)
+        {
+            var communicator = team == Team.FirstPlayer ? AI1Communicator : AI2Communicator;
+
+            var receiveTask = communicator.ReceiveClientMessageAsync();
+
+            await communicator.TrySendAsync("GET PARAMETERS");
+
+            while (true)
+            {
+                var message = await receiveTask;
+
+                if (message == null) //connection dropped
+                    return null;
+
+                var parametersMessage = message as ParametersMessage;
+
+                if (parametersMessage != null)
+                    return parametersMessage.Players;
+
+                cancellationToken.ThrowIfCancellationRequested();
+
+                receiveTask = communicator.ReceiveClientMessageAsync();
+            }
+
+        }
+
+        /// <summary>
+        /// Gets the AI's action from the specified team asynchronously. The task's result is null if the connection is dropped.
         /// </summary>
         /// <param name="team">The AI's team.</param>
         /// <param name="step">The simulation step.</param>
@@ -898,29 +898,31 @@ namespace FootballAIGame.MatchSimulation
         /// </returns>
         private async Task<ActionMessage> GetActionFromAIAsync(Team team, int step, CancellationToken cancellationToken)
         {
-            ActionMessage message;
-
             var communicator = team == Team.FirstPlayer ? AI1Communicator : AI2Communicator;
 
-            var receiveTask = communicator.ReceiveActionMessageAsync(step);
-
+            var receiveTask = communicator.ReceiveClientMessageAsync();
 
             await communicator.TrySendAsync("GET ACTION");
             await communicator.TrySendAsync(GameState, team);
 
             while (true)
             {
-                message = await receiveTask;
+                var message = await receiveTask;
 
-                if (message != null)
-                    break;
+                if (message == null) //connection dropped
+                    return null;
+
+                var actionMessage = message as ActionMessage;
+
+                if (actionMessage?.Step == step)
+                    return actionMessage;
 
                 cancellationToken.ThrowIfCancellationRequested();
 
-                receiveTask = communicator.ReceiveActionMessageAsync(step);
+                receiveTask = communicator.ReceiveClientMessageAsync();
+
             }
 
-            return message;
         }
 
         /// <summary>

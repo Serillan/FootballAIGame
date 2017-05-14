@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Runtime.Serialization;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using FootballAIGame.MatchSimulation.Messages;
 using FootballAIGame.MatchSimulation.Models;
@@ -238,51 +240,6 @@ namespace FootballAIGame.MatchSimulation
         }
 
         /// <summary>
-        /// Receives the <see cref="ActionMessage"/> asynchronously.
-        /// The task's result is null if the connection is dropped.
-        /// </summary>
-        /// <param name="step">The simulation step which a received <see cref="ActionMessage"/> must have.</param>
-        /// <returns>
-        /// The task that represents the asynchronous receive operation. The value of the task's result is null 
-        /// if the connection is dropped; otherwise, the received <see cref="ActionMessage"/>.
-        /// </returns>
-        public async Task<ActionMessage> ReceiveActionMessageAsync(int step)
-        {
-            while (true)
-            {
-                var message = await ReceiveClientMessageAsync();
-
-                if (message == null) //connection dropped
-                    return null;
-
-                var actionMessage = message as ActionMessage;
-
-                if (actionMessage == null)
-                {
-                    //Console.WriteLine("Invalid message received.");
-                    continue;
-                }
-
-                if (actionMessage.Step == step)
-                    return actionMessage;
-                else if (actionMessage.Step > step)
-                {
-                    //Console.WriteLine($"Wrong action received! Received {actionMessage.Step} instead of {step}");
-                    return null;
-                }
-                else if (actionMessage.Step < step)
-                {
-                    //Console.WriteLine($"Wrong action received! Received {actionMessage.Step} instead of {step}");
-                    return null;
-                }
-                else
-                {
-                    //Console.WriteLine($"Wrong action received! actionMessage.Step == null, expected step - {step}");
-                }
-            }
-        }
-
-        /// <summary>
         /// Closes the connection. Releases all allocated resources.
         /// </summary>
         public void Dispose()
@@ -363,7 +320,10 @@ namespace FootballAIGame.MatchSimulation
 
             while (true) // while correct message is not received
             {
-                var firstLine = await ReadLineAsync();//await NetworkReader.ReadLineAsync();
+                var firstLine = await ReadLineAsync(); //await NetworkReader.ReadLineAsync();
+
+                if (firstLine == null)
+                    return null;
 
                 if (firstLine.Length >= 6 && firstLine.Substring(firstLine.Length - 6) == "ACTION")
                 {
@@ -403,4 +363,7 @@ namespace FootballAIGame.MatchSimulation
             return message;
         }
     }
+
+
 }
+
