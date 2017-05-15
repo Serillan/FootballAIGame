@@ -43,6 +43,7 @@ namespace FootballAIGame.DbModel.Models
         /// The maximum number of players.
         /// </value>
         [DisplayName("Maximum Number of Players")]
+        [Range(0, 100000)]
         public int MaximumNumberOfPlayers { get; set; }
 
         /// <summary>
@@ -53,6 +54,7 @@ namespace FootballAIGame.DbModel.Models
         /// The minimum number of players.
         /// </value>
         [DisplayName("Minimum Number of Players")]
+        [Range(0, 100000)]
         public int MinimumNumberOfPlayers { get; set; }
     }
 }
