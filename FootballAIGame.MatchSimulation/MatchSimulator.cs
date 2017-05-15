@@ -393,7 +393,7 @@ namespace FootballAIGame.MatchSimulation
             {
                 if (IsVerbose)
                 {
-                    Console.WriteLine("simulation exception");
+                    Console.WriteLine("Error: Simulation exception");
                     Console.WriteLine(ex.Message);
                 }
             }
@@ -408,7 +408,7 @@ namespace FootballAIGame.MatchSimulation
             if (IsVerbose)
             {
                 Console.WriteLine($"Starting simulation between {AI1Communicator.PlayerName} " +
-                                  $"and {AI2Communicator.PlayerName}");
+                                  $"and {AI2Communicator.PlayerName}.");
             }
 
             MatchInfo = new MatchInfo();
@@ -462,8 +462,11 @@ namespace FootballAIGame.MatchSimulation
         /// <param name="numberOfCompletedSteps">The number of completed steps.</param>
         private void ProcessSimulationEnd(int numberOfCompletedSteps)
         {
-            //Console.WriteLine($"Ending simulation between {Player1AiConnection.PlayerName}:{Player1AiConnection.AiName} " +
-            //                 $"and {Player2AiConnection.PlayerName}:{Player2AiConnection.AiName}");
+            if (IsVerbose)
+            {
+                Console.WriteLine($"Ending simulation between {AI1Communicator.PlayerName} " +
+                                  $"and {AI2Communicator.PlayerName}.");
+            }
 
             // average action latencies division
             MatchInfo.Team1Statistics.AverageActionLatency /= numberOfCompletedSteps;
@@ -1419,6 +1422,7 @@ namespace FootballAIGame.MatchSimulation
 
             var wasBallGoingToGoalLine1 = intersectionWithLeftGoalLine != null;
             var wasBallGoingToGoalLine2 = intersectionWithRightGoalLine != null;
+
             var wasBallGoingToGoalPost1 = intersectionWithLeftGoalLine != null
                                           && intersectionWithLeftGoalLine.Y > 75f / 2 - 7.32 &&
                                           intersectionWithLeftGoalLine.Y < 75f / 2 + 7.32;
@@ -1433,6 +1437,7 @@ namespace FootballAIGame.MatchSimulation
                     MatchInfo.Team1Statistics.Shots++;
                 else
                     MatchInfo.Team2Statistics.Shots++;
+
                 if (wasBallGoingToGoalPost1)
                 {
                     if (lastWinnerTeam == Team.FirstPlayer)
@@ -1449,7 +1454,7 @@ namespace FootballAIGame.MatchSimulation
                 else
                     MatchInfo.Team2Statistics.Shots++;
 
-                if (wasBallGoingToGoalPost1)
+                if (wasBallGoingToGoalPost2)
                 {
                     if (lastWinnerTeam == Team.FirstPlayer)
                         MatchInfo.Team1Statistics.ShotsOnTarget++;

@@ -447,6 +447,7 @@ namespace FootballAIGame.LocalDesktopSimulator
         private void RestartButtonClick(object sender, EventArgs e)
         {
             PlaySlider.Value = 0;
+            MatchPlayer.RenderCurrentState();
         }
     }
 }
