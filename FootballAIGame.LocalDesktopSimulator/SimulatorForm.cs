@@ -201,8 +201,8 @@ namespace FootballAIGame.LocalDesktopSimulator
                 return;
             }
 
-            var ai1 = AiListBox.Items[0].ToString();
-            var ai2 = AiListBox.Items[1].ToString();
+            var ai1 = AiListBox.SelectedItems[0].ToString();
+            var ai2 = AiListBox.SelectedItems[1].ToString();
 
             PlayButton.Enabled = false;
             RestartButton.Enabled = false;
