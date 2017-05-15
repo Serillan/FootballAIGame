@@ -607,12 +607,50 @@ namespace FootballAIGame.MatchSimulation
         }
 
         /// <summary>
+        /// Gets the player parameters from the specified team asynchronously. The task's result is null if the connection is dropped.
+        /// </summary>
+        /// <param name="team">The team.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>
+        /// The task that represents the asynchronous get operation.
+        /// The value of the task's result is an array of football players
+        /// with their parameters set accordingly or null if the client's connection is dropped.
+        /// </returns>
+        private async Task<FootballPlayer[]> GetPlayerParametersFromAIAsync(Team team, CancellationToken cancellationToken)
+        {
+            var communicator = team == Team.FirstPlayer ? AI1Communicator : AI2Communicator;
+
+            var receiveTask = communicator.ReceiveClientMessageAsync();
+
+            await communicator.TrySendAsync("GET PARAMETERS");
+
+            while (true)
+            {
+                var message = await receiveTask;
+
+                if (message == null) //connection dropped
+                    return null;
+
+                var parametersMessage = message as ParametersMessage;
+
+                if (parametersMessage != null)
+                    return parametersMessage.Players;
+
+                cancellationToken.ThrowIfCancellationRequested();
+
+                receiveTask = communicator.ReceiveClientMessageAsync();
+            }
+
+        }
+
+        /// <summary>
         /// Gets the AI's action asynchronously. In case of timeout, the default action is used.
         /// </summary>
         /// <param name="team">The AI's team.</param>
         /// <param name="step">The simulation step.</param>
         /// <returns>
-        /// The task that represents the asynchronous action retrieving operation.
+        /// The task that represents the asynchronous action retrieving operation. 
+        /// The value of the task's result is null if the client's connection is dropped.
         /// </returns>
         private async Task<ActionMessage> GetActionAsync(Team team, int step)
         {
@@ -685,6 +723,44 @@ namespace FootballAIGame.MatchSimulation
             }
 
             return actionMessage;
+        }
+
+        /// <summary>
+        /// Gets the AI's action from the specified team asynchronously. The task's result is null if the connection is dropped.
+        /// </summary>
+        /// <param name="team">The AI's team.</param>
+        /// <param name="step">The simulation step.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>
+        /// The task that represents the asynchronous action retrieving operation.
+        /// </returns>
+        private async Task<ActionMessage> GetActionFromAIAsync(Team team, int step, CancellationToken cancellationToken)
+        {
+            var communicator = team == Team.FirstPlayer ? AI1Communicator : AI2Communicator;
+
+            var receiveTask = communicator.ReceiveClientMessageAsync();
+
+            await communicator.TrySendAsync("GET ACTION");
+            await communicator.TrySendAsync(GameState, team);
+
+            while (true)
+            {
+                var message = await receiveTask;
+
+                if (message == null) //connection dropped
+                    return null;
+
+                var actionMessage = message as ActionMessage;
+
+                if (actionMessage?.Step == step)
+                    return actionMessage;
+
+                cancellationToken.ThrowIfCancellationRequested();
+
+                receiveTask = communicator.ReceiveClientMessageAsync();
+
+            }
+
         }
 
         /// <summary>
@@ -848,81 +924,6 @@ namespace FootballAIGame.MatchSimulation
 
             foreach (var num in currentStateData)
                 MatchInfo.MatchData.Add(num);
-        }
-
-        /// <summary>
-        /// Gets the player parameters from the specified team asynchronously.
-        /// </summary>
-        /// <param name="team">The team.</param>
-        /// <param name="cancellationToken">The cancellation token.</param>
-        /// <returns>
-        /// The task that represents the asynchronous get operation.
-        /// The value of the task's result is an array of football players
-        /// with their parameters set accordingly.
-        /// </returns>
-        private async Task<FootballPlayer[]> GetPlayerParametersFromAIAsync(Team team, CancellationToken cancellationToken)
-        {
-            var communicator = team == Team.FirstPlayer ? AI1Communicator : AI2Communicator;
-
-            var receiveTask = communicator.ReceiveClientMessageAsync();
-
-            await communicator.TrySendAsync("GET PARAMETERS");
-
-            while (true)
-            {
-                var message = await receiveTask;
-
-                if (message == null) //connection dropped
-                    return null;
-
-                var parametersMessage = message as ParametersMessage;
-
-                if (parametersMessage != null)
-                    return parametersMessage.Players;
-
-                cancellationToken.ThrowIfCancellationRequested();
-
-                receiveTask = communicator.ReceiveClientMessageAsync();
-            }
-
-        }
-
-        /// <summary>
-        /// Gets the AI's action from the specified team asynchronously. The task's result is null if the connection is dropped.
-        /// </summary>
-        /// <param name="team">The AI's team.</param>
-        /// <param name="step">The simulation step.</param>
-        /// <param name="cancellationToken">The cancellation token.</param>
-        /// <returns>
-        /// The task that represents the asynchronous action retrieving operation.
-        /// </returns>
-        private async Task<ActionMessage> GetActionFromAIAsync(Team team, int step, CancellationToken cancellationToken)
-        {
-            var communicator = team == Team.FirstPlayer ? AI1Communicator : AI2Communicator;
-
-            var receiveTask = communicator.ReceiveClientMessageAsync();
-
-            await communicator.TrySendAsync("GET ACTION");
-            await communicator.TrySendAsync(GameState, team);
-
-            while (true)
-            {
-                var message = await receiveTask;
-
-                if (message == null) //connection dropped
-                    return null;
-
-                var actionMessage = message as ActionMessage;
-
-                if (actionMessage?.Step == step)
-                    return actionMessage;
-
-                cancellationToken.ThrowIfCancellationRequested();
-
-                receiveTask = communicator.ReceiveClientMessageAsync();
-
-            }
-
         }
 
         /// <summary>
