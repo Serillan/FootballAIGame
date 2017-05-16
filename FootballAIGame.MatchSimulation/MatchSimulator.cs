@@ -198,6 +198,14 @@ namespace FootballAIGame.MatchSimulation
         private Team WhoIsOnLeft { get; set; }
 
         /// <summary>
+        /// Gets or sets the team of the AI that has disconnected.
+        /// </summary>
+        /// <value>
+        /// The disconnected <see cref="Team"/> if one of the AI's has disconnected; otherwise, null.
+        /// </value>
+        private Team? DisconnectedTeam { get; set; }
+
+        /// <summary>
         /// Gets the current match's time. 
         /// </summary>
         /// <value>
@@ -361,7 +369,7 @@ namespace FootballAIGame.MatchSimulation
                 for (var step = 0; step < NumberOfSimulationSteps / 2; step++)
                 {
                     if (AI1CancelRequested || AI2CancelRequested || !AI1Communicator.IsLoggedIn ||
-                        !AI2Communicator.IsLoggedIn)
+                        !AI2Communicator.IsLoggedIn || DisconnectedTeam != null)
                     {
                         ProcessSimulationEnd(step);
                         return;
@@ -377,7 +385,7 @@ namespace FootballAIGame.MatchSimulation
                 for (var step = NumberOfSimulationSteps / 2; step < NumberOfSimulationSteps; step++)
                 {
                     if (AI1CancelRequested || AI2CancelRequested || !AI1Communicator.IsLoggedIn ||
-                        !AI2Communicator.IsLoggedIn)
+                        !AI2Communicator.IsLoggedIn || DisconnectedTeam != null)
                     {
                         ProcessSimulationEnd(step);
                         return;
@@ -444,9 +452,14 @@ namespace FootballAIGame.MatchSimulation
             var actionMessage1 = await getAction1Task;
             var actionMessage2 = await getAction2Task;
 
-            if (actionMessage1 == null || actionMessage2 == null)
+            if (actionMessage1 == null)
             {
-                // disconnection
+                DisconnectedTeam = Team.FirstPlayer;
+                return;
+            }
+            if (actionMessage2 == null)
+            {
+                DisconnectedTeam = Team.SecondPlayer;
                 return;
             }
 
@@ -477,7 +490,7 @@ namespace FootballAIGame.MatchSimulation
                 ? Team.FirstPlayer
                 : MatchInfo.Team2Statistics.Goals > MatchInfo.Team1Statistics.Goals ? Team.SecondPlayer : (Team?)null;
 
-            if (AI1ReceiveMessage.IsFaulted || !AI1Communicator.IsLoggedIn)
+            if (AI1ReceiveMessage.IsFaulted || !AI1Communicator.IsLoggedIn || DisconnectedTeam == Team.FirstPlayer)
             {
                 MatchInfo.Winner = Team.SecondPlayer;
                 MatchInfo.Errors.Add(new SimulationError()
@@ -487,7 +500,7 @@ namespace FootballAIGame.MatchSimulation
                     Reason = SimulationErrorReason.Disconnection
                 });
             }
-            if (AI2ReceiveMessage.IsFaulted || !AI2Communicator.IsLoggedIn)
+            if (AI2ReceiveMessage.IsFaulted || !AI2Communicator.IsLoggedIn || DisconnectedTeam == Team.SecondPlayer)
             {
                 MatchInfo.Winner = Team.FirstPlayer;
                 MatchInfo.Errors.Add(new SimulationError()
@@ -681,7 +694,7 @@ namespace FootballAIGame.MatchSimulation
 
             var receiveMessage = team == Team.FirstPlayer ? AI1ReceiveMessage : AI2ReceiveMessage;
             if (receiveMessage.IsFaulted || !communicator.IsLoggedIn ||
-                (getMessageResult == receiveActionMessage && !receiveActionMessage.IsFaulted && 
+                (getMessageResult == receiveActionMessage && !receiveActionMessage.IsFaulted &&
                 receiveActionMessage.Result == null))
             {
                 cancellationTokenSource.Cancel();
