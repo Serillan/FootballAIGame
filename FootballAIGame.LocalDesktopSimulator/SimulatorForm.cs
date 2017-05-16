@@ -114,7 +114,11 @@ namespace FootballAIGame.LocalDesktopSimulator
             PlaySlider.MouseUp += PlaySliderOnMouseUp;
 
             // if someone connected before the handler was set
-            AiListBox.Items.AddRange(ConnectionManager.Instance.ActiveConnections.Select(c => c.AiName).Cast<object>().ToArray());
+            lock (ConnectionManager.Instance.ActiveConnections)
+            {
+                AiListBox.Items.AddRange(
+                    ConnectionManager.Instance.ActiveConnections.Select(c => c.AiName).Cast<object>().ToArray());
+            }
         }
 
         /// <summary>

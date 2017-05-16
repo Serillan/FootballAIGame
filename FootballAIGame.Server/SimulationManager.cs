@@ -97,7 +97,7 @@ namespace FootballAIGame.Server
         /// <param name="ai2">The player2 AI name.</param>
         /// <param name="simulationTask">The task that represents the asynchronous simulate operation.
         /// The value of the task result holds the <see cref="MatchSimulator"/> that simulated the match.</param>
-        /// <param name="tournamentId">The tournament Id. (optional)</param>
+        /// <param name="tournamentId">The tournament ID. (optional)</param>
         /// <returns>
         /// "ok" if operation was successful; otherwise, an error message.
         /// </returns>
@@ -384,7 +384,10 @@ namespace FootballAIGame.Server
 
                 await context.SaveChangesAsync();
 
-                RunningSimulations.Remove(simulator);
+                lock (RunningSimulations)
+                {
+                    RunningSimulations.Remove(simulator);
+                }
 
                 player1AiConnection.IsInMatch = false;
                 player2AiConnection.IsInMatch = false;
@@ -514,6 +517,16 @@ namespace FootballAIGame.Server
         {
             Debug.Assert(connection != null, "connection != null");
 
+            // running tournament
+            TournamentManager.Instance.RemoveFromRunningTournament(connection.PlayerName);
+
+            // looking for random match
+            lock (WantsToPlayConnections)
+            {
+                WantsToPlayConnections.Remove(connection);
+            }
+
+            // update db
             using (var context = new ApplicationDbContext())
             {
                 var player =
@@ -523,11 +536,6 @@ namespace FootballAIGame.Server
                 {
                     var newAis = player.ActiveAIs.Split(';').Where(s => s != connection.AiName);
                     player.ActiveAIs = string.Join(";", newAis);
-
-                    lock (WantsToPlayConnections)
-                    {
-                        WantsToPlayConnections.Remove(connection);
-                    }
 
                     if (player.SelectedAI == connection.AiName)
                     {

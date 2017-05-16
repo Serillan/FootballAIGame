@@ -127,25 +127,30 @@
                     $("#dots").text(dots);
                 }
 
+                function processPlayerTournamentFinish() {
+                    
+                    ajaxCallsFunctions.splice(ajaxCallsFunctions.indexOf(playerStateCall), 1);
+                    if (ajaxCallsFunctions.indexOf(matchStepCall > -1))
+                        ajaxCallsFunctions.splice(ajaxCallsFunctions.indexOf(matchStepCall), 1);
+
+                    clearInterval(animation);
+                    $("#dots").text("");
+                    $("div#progress-wrapper").html("");
+                    $("#btn").removeClass("btn-danger").addClass("btn-success").text("Home");
+                    $("#btn").off("click.leaveTournament"); // remove old handler (using namespace)
+                    $("#btn").on("click", function() {
+                        clearInterval(ajaxCalls);
+                        location.reload();
+                    });
+                }
+
                 $("#btn").on("click.leaveTournament", function() {
                     $.ajax({
                         url: "@Url.Action("LeaveTournament", "Tournaments", new {HttpRoute = "Api", id = Model.Tournament.Id})",
                         method: "put",
                         success: function() {
-                            ajaxCallsFunctions.splice(ajaxCallsFunctions.indexOf(playerStateCall), 1);
-                            if (ajaxCallsFunctions.indexOf(matchStepCall > -1))
-                                ajaxCallsFunctions.splice(ajaxCallsFunctions.indexOf(matchStepCall), 1);
-
+                            processPlayerTournamentFinish();
                             $("#state").text("You have left the tournament.");
-                            clearInterval(animation);
-                            $("#dots").text("");
-                            $("div#progress-wrapper").html("");
-                            $("#btn").removeClass("btn-danger").addClass("btn-success").text("Home");
-                            $("#btn").off("click.leaveTournament"); // remove old handler (using namespace)
-                            $("#btn").on("click", function() {
-                                clearInterval(ajaxCalls);
-                                location.reload();
-                            });
                         }
                     });
                 });
@@ -233,21 +238,12 @@
                                         url: "@Url.Action("GetTournamentPosition", "Tournaments", new {HttpRoute="Api", id = Model.Tournament.Id})",
                                         method: "get",
                                         success: function(response) {
-                                            ajaxCallsFunctions.splice(ajaxCallsFunctions.indexOf(playerStateCall), 1);
-                                            if (ajaxCallsFunctions.indexOf(matchStepCall > -1))
-                                                ajaxCallsFunctions.splice(ajaxCallsFunctions.indexOf(matchStepCall), 1);
-
-                                            // write state
                                             $("#state").text("Your final position: " + response);
-                                            clearInterval(animation);
-                                            $("#dots").text("");
-                                            $("div#progress-wrapper").html("");
-                                            $("#btn").removeClass("btn-danger").addClass("btn-success").text("Home");
-                                            $("#btn").off("click.leaveTournament"); // remove old handler (using namespace)
-                                            $("#btn").on("click", function() {
-                                                clearInterval(ajaxCalls);
-                                                location.reload();
-                                            });
+                                            processPlayerTournamentFinish();
+                                        },
+                                        error: function() { // disconnection
+                                            $("#state").text("Your AI has disconnected from the server.");
+                                            processPlayerTournamentFinish();
                                         }
                                     });
                             }

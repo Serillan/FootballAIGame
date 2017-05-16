@@ -104,20 +104,20 @@ namespace FootballAIGame.DbModel.Models
         public int ShotsOnTarget2 { get; set; }
 
         /// <summary>
-        /// Gets or sets the player1 match error log. <para />
+        /// Gets or sets the player1's error log. <para />
         /// Format: "Time - ErrorMessage;...", ';' is errors separator.
         /// </summary>
         /// <value>
-        /// The player1 match error log.
+        /// The error log of the player1.
         /// </value>
         public string Player1ErrorLog { get; set; }
 
         /// <summary>
-        /// Gets or sets the player2 match error log. <para />
+        /// Gets or sets the player2's error log. <para />
         /// Format: "Time - ErrorMessage;...", ';' is errors separator.
         /// </summary>
         /// <value>
-        /// The player1 match error log.
+        /// The error log of the player2.
         /// </value>
         public string Player2ErrorLog { get; set; }
 

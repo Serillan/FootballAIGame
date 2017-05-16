@@ -92,7 +92,8 @@ namespace FootballAIGame.Web.Controllers.Api
 
             if (tournament.TournamentState == TournamentState.Running)
             {
-                if (tournamentPlayer.Player.PlayerState == PlayerState.PlayingTournamentPlaying)
+                if (tournamentPlayer.Player.PlayerState == PlayerState.PlayingTournamentPlaying ||
+                    tournamentPlayer.Player.PlayerState == PlayerState.PlayingTournamentWaiting)
                     try
                     {
                         using (var gameServer = new GameServerServiceClient())

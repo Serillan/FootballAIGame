@@ -27,10 +27,10 @@ namespace FootballAIGame.Server
         public static TournamentManager Instance => _instance ?? (_instance = new TournamentManager());
 
         /// <summary>
-        /// Gets or sets the running tournaments.
+        /// Gets or sets the currently running tournaments.
         /// </summary>
         /// <value>
-        /// The list of running tournaments.
+        /// The <see cref="List{T}"/> of currently running tournaments.
         /// </value>
         public List<TournamentSimulator> RunningTournaments { get; set; } = new List<TournamentSimulator>();
 
@@ -125,21 +125,26 @@ namespace FootballAIGame.Server
         /// <param name="playerName">The player's name.</param>
         public void RemoveFromRunningTournament(string playerName)
         {
-            TournamentSimulator tournamentSimulator;
+            TournamentSimulator tournamentSimulator = null;
 
             lock (RunningTournaments)
             {
-                tournamentSimulator = RunningTournaments
-                    .SingleOrDefault(t => t.Players.Any(p => p.Player.Name == playerName));
+                foreach (var runningTournament in RunningTournaments)
+                {
+                    lock (runningTournament.Players)
+                    {
+                        if (runningTournament.Players.Any(p => p.Player.Name == playerName))
+                        {
+                            runningTournament.Players.RemoveAll(p => p.Player.Name == playerName);
+                            tournamentSimulator = runningTournament;
+                            break;
+                        }
+                    }
+                }
             }
 
             if (tournamentSimulator == null)
                 return;
-
-            lock (tournamentSimulator.Players)
-            {
-                tournamentSimulator.Players.RemoveAll(p => p.Player.Name == playerName);
-            }
 
             // improve position for players that have already ended
             using (var context = new ApplicationDbContext())
@@ -171,6 +176,7 @@ namespace FootballAIGame.Server
                 foreach (var runningTournament in runningTournaments)
                 {
                     runningTournament.TournamentState = TournamentState.ErrorClosed;
+
                     if (runningTournament.RecurringTournament != null)
                         PlanNextRecurring(runningTournament.RecurringTournament.Id);
                 }

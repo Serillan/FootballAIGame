@@ -87,7 +87,7 @@ namespace FootballAIGame.Server
                 if (TimeUntilStart.TotalSeconds > 0)
                     await Task.Delay(TimeUntilStart);
 
-                Console.WriteLine($"Simulation of tournament {TournamentId} is being simulated!");
+                Console.WriteLine($"Simulation of tournament {TournamentId} starts!");
                 KickInactive();
                 await SimulateAsync();
                 Console.WriteLine($"Simulation of tournament {TournamentId} ends!");
@@ -147,6 +147,7 @@ namespace FootballAIGame.Server
                             if (tournamentPlayer.Player.PlayerState == PlayerState.Idle)
                             {
                                 Players.Add(tournamentPlayer);
+                                tournamentPlayer.Player.SelectedAI = tournamentPlayer.PlayerAi; // important for disconnection
                             }
                             else
                             {
@@ -209,6 +210,11 @@ namespace FootballAIGame.Server
                 }
 
                 await SavePlayersAsync(Players);
+            }
+
+            lock (TournamentManager.Instance.RunningTournaments)
+            {
+                TournamentManager.Instance.RunningTournaments.Remove(this);
             }
 
             // set state to finished
@@ -364,7 +370,9 @@ namespace FootballAIGame.Server
                         looser.Player.Score += 4 - looserPos;
                 }
 
-                // remove all skipping players that left during round
+                // remove all players that left during round
+                advancingPlayers.RemoveAll(p => !Players.Contains(p));
+
                 // don't save those that have already left
                 fightingPlayers.RemoveAll(p => !Players.Contains(p));
             }
@@ -413,6 +421,7 @@ namespace FootballAIGame.Server
                     .Include(tp => tp.Player)
                     .Where(tp => tp.TournamentId == TournamentId)
                     .ToList();
+
                 var playersToBeRemoved = new List<TournamentPlayer>();
 
                 foreach (var tournamentPlayer in tournamentPlayers)
@@ -422,7 +431,9 @@ namespace FootballAIGame.Server
                         playersToBeRemoved.Add(tournamentPlayer);
                         continue;
                     }
+
                     var activeAis = tournamentPlayer.Player.ActiveAIs.Split(';');
+
                     if (!activeAis.Contains(tournamentPlayer.PlayerAi))
                         playersToBeRemoved.Add(tournamentPlayer);
                 }
