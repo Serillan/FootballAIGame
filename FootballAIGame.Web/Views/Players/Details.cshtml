@@ -120,8 +120,10 @@
                                 return;
                             }
 
+                            selectedAi = encodeURIComponent(selectedAi);
+
                             $.ajax({
-                                url: "@Url.Action("SelectAI", "AIs", new {HttpRoute="Api"})/" + selectedAi,
+                                url: "@Url.Action("SelectAI", "AIs", new {HttpRoute="Api"})/?id=" + selectedAi,
                                 method: "put",
                                 success: function () {
                                     $.ajax({

@@ -25,7 +25,6 @@ namespace FootballAIGame.Web.Controllers.Api
         /// <returns>OK <see cref="IHttpActionResult"/> if the action was successful; otherwise
         /// returns a bad request with an error message.</returns>
         [HttpPost]
-        [Route("api/tournaments/JoinTournament/{tournamentId}/{aiName}")]
         public IHttpActionResult JoinTournament(int tournamentId, string aiName)
         {
             var tournament = Context.Tournaments

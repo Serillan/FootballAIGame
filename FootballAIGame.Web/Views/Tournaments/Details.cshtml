@@ -91,8 +91,10 @@
                     .on("click",
                         function() {
                             var selectedAi = $("input#ai-selection").val();
+                            selectedAi = encodeURIComponent(selectedAi);
+
                             $.ajax({
-                                url: "@Url.Action("JoinTournament", "Tournaments", new {HttpRoute = "Api"})/@Model.Tournament.Id/" + selectedAi,
+                                url: "@Url.Action("JoinTournament", "Tournaments", new {HttpRoute = "Api"})/?tournamentId=" + @Model.Tournament.Id + "&aiName=" + selectedAi,
                                 method: "post",
                                 success: function() {
                                     location.reload();

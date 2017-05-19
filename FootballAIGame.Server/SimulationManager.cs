@@ -410,7 +410,7 @@ namespace FootballAIGame.Server
             var player2Name = simulator.AI2Communicator.PlayerName;
 
             var ai1Name = (simulator.AI1Communicator as ClientConnection)?.AiName;
-            var ai2Name = (simulator.AI1Communicator as ClientConnection)?.AiName;
+            var ai2Name = (simulator.AI2Communicator as ClientConnection)?.AiName;
 
             Debug.Assert(ai1Name != null, "player1AiConnection is ClientConnection");
             Debug.Assert(ai2Name != null, "player2AiConnection is ClientConnection");
